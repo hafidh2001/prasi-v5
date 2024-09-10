@@ -68,6 +68,14 @@ export const apiProxy = (api_url: string) => {
                   }
 
                   if (api_ref) {
+                    if (Object.keys(api_ref).length === 0) {
+                      const url = `${base_url}/${actionName}`;
+
+                      const result = await fetchSendApi(url, rest);
+                      resolve(result);
+                      return;
+                    }
+
                     if (actionName === "_raw") {
                       const pathname = rest[0];
                       const url = `${base_url}${pathname}`;
@@ -124,7 +132,6 @@ export const apiProxy = (api_url: string) => {
                       console.error(`API Not Found: ${actionName.toString()}`);
                     }
                   } else {
-
                     reject("Failed to load API [Proxy]: " + base_url);
                   }
                 } catch (e) {

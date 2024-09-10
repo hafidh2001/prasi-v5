@@ -1,3 +1,5 @@
+import { db } from "prasi-db/db";
+
 (global as any).g = global;
 
 g.reloadCount ??= 0;
@@ -8,3 +10,5 @@ if (process.argv[process.argv.length - 1] === "dev") {
 } else {
   g.mode = "prod";
 }
+
+g.db = db;

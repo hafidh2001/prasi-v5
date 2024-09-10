@@ -4,23 +4,26 @@ import { c } from "./utils/color";
 import { serverContext } from "./utils/server/ctx";
 import { initWS } from "./ws/init";
 
-import "./utils/init";
-import { serverApi } from "./utils/server/api";
+import { editor } from "./utils/editor";
+import { api } from "./utils/server/api";
 import { staticFile } from "./utils/static";
+
+import "./utils/init";
 
 const prod = {
   static: await staticFile("/frontend/dist"),
 };
+editor.init();
+api.init();
 
 const server = Bun.serve({
   port: 4550,
   websocket: g.mode === "dev" ? devWS : initWS,
   async fetch(request, server) {
     const ctx = serverContext(server, request);
-
     if (ctx.ws) return undefined;
 
-    const apiResponse = await serverApi(ctx);
+    const apiResponse = await api.serve(ctx);
     if (apiResponse) return apiResponse;
 
     if (g.mode === "dev") return devProxy(ctx);

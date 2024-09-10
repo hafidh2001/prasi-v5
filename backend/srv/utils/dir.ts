@@ -1,7 +1,9 @@
-import {join} from 'path'
+import { join } from "path";
 export const dir = {
-  root: (path:string) => {
-    return join(process.cwd(), path);
+  root: (path: string) => {
+    return join(process.cwd(), path.replace(/\.\./gi, ""));
   },
-  data: (path:string) => {}
-}
+  data: (path: string) => {
+    return join(process.cwd(), "..", "data", path.replace(/\.\./gi, ""));
+  },
+};

@@ -28,7 +28,21 @@ export const serverContext = (server: Server, req: Request) => {
     ws,
     url: { pathname, full: req.url },
     req,
+    params: {} as any,
+    query_params: parseQueryParams(req.url) as any,
   };
 };
 
 export type ServerCtx = ReturnType<typeof serverContext>;
+
+const parseQueryParams = (pageHref: string) => {
+  const searchParams = new URLSearchParams(
+    pageHref.substring(pageHref.indexOf("?"))
+  );
+  const result: any = {};
+  searchParams.forEach((v, k) => {
+    result[k] = v;
+  });
+
+  return result as any;
+};

@@ -1,5 +1,4 @@
 import { apiProxy } from "../../../base/load/api/api-proxy";
-import { viLoadLegacy } from "../../vi/load/load-legacy";
 import { viLoadSnapshot } from "../../vi/load/load-snapshot";
 import { apiRef, apiUrl } from "../panel/popup/api/api-utils";
 import { ESite, PG } from "./ed-global";
@@ -28,33 +27,6 @@ export const loadSite = async (p: PG, site: ESite, note: string) => {
   }
 
   if (!p.script.db && !p.script.api) {
-    if (!location.pathname.startsWith("/ed/")) {
-      await viLoadLegacy({
-        mode: p.mode,
-        site: {
-          api_url: p.site.config.api_url,
-          id: p.site.id,
-          api: {
-            get() {
-              return p.script.api;
-            },
-            set(val) {
-              p.script.api = val;
-            },
-          },
-          db: {
-            get() {
-              return p.script.db;
-            },
-            set(val) {
-              p.script.db = val;
-            },
-          },
-        },
-        render: () => {},
-      });
-    } else {
-      await viLoadSnapshot(p);
-    }
+    await viLoadSnapshot(p);
   }
 };

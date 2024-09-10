@@ -1,12 +1,8 @@
-import { compress, decompress } from "wasm-gzip";
 import { apiProxy } from "../../../base/load/api/api-proxy";
 import { loadApiProxyDef } from "../../../base/load/api/api-proxy-def";
 import { dbProxy } from "../../../base/load/db/db-proxy";
-import { w } from "../../../utils/types/general";
-import { PG } from "../../ed/logic/ed-global";
-import { treeRebuild } from "../../ed/logic/tree/build";
-import { simpleHash } from "../utils/simple-hash";
 import { loadCode } from "../../ed/logic/code-loader";
+import { PG } from "../../ed/logic/ed-global";
 
 const encoder = new TextEncoder();
 export const viLoadSnapshot = async (p: PG) => {

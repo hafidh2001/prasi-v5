@@ -1,9 +1,7 @@
 import { NodeModel } from "@minoru/react-dnd-treeview";
 import { page } from "prasi-db";
 import { deepClone } from "prasi-utils";
-import type { SAction } from "../../../../../srv/ws/sync/actions";
-import type { parseJs } from "../../../../../srv/ws/sync/editor/parser/parse-js";
-import { clientStartSync } from "../../../utils/sync/ws-client";
+import { clientStartSync } from "../../../utils/sync/client";
 import { IItem } from "../../../utils/types/item";
 import { DCode, DComp, DPage, IRoot } from "../../../utils/types/root";
 import { GenMetaP, IMeta as LogicMeta } from "../../vi/utils/types";
@@ -40,7 +38,7 @@ export type PropFieldKind =
 export type ISingleScope = {
   p: string[];
   n: string;
-  s: null | Exclude<ReturnType<typeof parseJs>, undefined>;
+  s: any;
 };
 export type IScope = Record<string, ISingleScope>;
 
@@ -204,7 +202,7 @@ export const EDGlobal = {
     item: null as null | IItem,
     loaded: {} as GenMetaP["comps"],
     list: {} as Record<string, CompListItem>,
-    group: {} as Record<string, Awaited<ReturnType<SAction["comp"]["group"]>>>,
+    group: {} as Record<string, any>,
   },
   code: {} as Record<string, { doc: null | DCode }>,
   global_prop: [] as string[],

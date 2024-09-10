@@ -9,6 +9,9 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "rou3": "^0.5.1"
+    "@paralleldrive/cuid2": "^2.2.2",
+    "msgpackr": "^1.11.0",
+    "rou3": "^0.5.1",
+    "prasi-db": "workspace:*"
   }
 }
