@@ -1,0 +1,14 @@
+{
+  "name": "prasi-srv",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "rou3": "^0.5.1"
+  }
+}

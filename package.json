@@ -1,0 +1,21 @@
+{
+  "name": "prasi",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "bun run --hot --silent backend/init/dev.ts",
+    "prep": "bun run --silent backend/init/prep.ts",
+    "prod": "bun run --silent backend/init/prod.ts"
+  },
+  "workspaces": [
+    "frontend",
+    "backend/*"
+  ],
+  "trustedDependencies": [
+    "@swc/core",
+    "msgpackr-extract"
+  ],
+  "dependencies": {
+    "moderndash": "^3.12.0"
+  }
+}
