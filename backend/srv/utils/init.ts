@@ -11,4 +11,4 @@ if (process.argv[process.argv.length - 1] === "dev") {
   g.mode = "prod";
 }
 
-g.db = db;
+g._db = db;

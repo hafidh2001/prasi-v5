@@ -10,8 +10,15 @@
   },
   "dependencies": {
     "@paralleldrive/cuid2": "^2.2.2",
+    "@swc/types": "^0.1.12",
+    "acorn-walk": "^8.3.4",
+    "dir": "^0.1.2",
+    "fs-jetpack": "^5.1.0",
+    "mime": "^4.0.4",
+    "moderndash": "^3.12.0",
     "msgpackr": "^1.11.0",
+    "prasi-db": "workspace:*",
     "rou3": "^0.5.1",
-    "prasi-db": "workspace:*"
+    "uuid": "^10.0.0"
   }
 }

@@ -5,6 +5,7 @@ import { unlinkSync } from "node:fs";
 import type { WSContext } from "../server/ctx";
 import { pack, unpack } from "msgpackr";
 import { cacheResolve } from "./cache";
+import { loadSite } from "../loader/site";
 
 type USER_ID = string;
 type CONN_ID = string;
@@ -32,10 +33,12 @@ export const editor = {
         }
       }
 
+      loadSite(site_id);
+
       return await cacheResolve({
         cached: () => editor.db.tables.site.find({ where: { site_id } })[0],
         resolve: (cached) => unpack(cached.data),
-        load: () => db.site.findFirst({ where: { id: site_id } }),
+        load: () => _db.site.findFirst({ where: { id: site_id } }),
         store: (result, cached) => {
           editor.db.tables.site.save({
             id: cached?.id,

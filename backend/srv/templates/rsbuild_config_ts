@@ -1,0 +1,24 @@
+import { defineConfig } from "@rsbuild/core";
+import { pluginReact } from "@rsbuild/plugin-react";
+
+export default defineConfig({
+  plugins: [pluginReact()],
+  // html: {
+  //   template: "./public/index.html",
+  // },
+  source: {
+    entry: {
+      index: "./index.tsx",
+    },
+  },
+  dev: {
+    hmr: false,
+    liveReload: false,
+    writeToDisk: true,
+    progressBar: false
+  },
+
+  server: {
+    strictPort: false,
+  },
+});

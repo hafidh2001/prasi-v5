@@ -67,12 +67,7 @@ export const clientStartSync = (arg: {
 const createClient = (ws: WebSocket) => ({
   site: {
     load: async (id: string) => {
-      const site = null as unknown as ESite;
-
-      const res = await _api.site_load(id);
-      console.log(res);
-
-      return site;
+      return await _api.site_load(id) as ESite;
     },
   },
   code: {
