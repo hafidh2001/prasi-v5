@@ -3,11 +3,14 @@ import { pluginReact } from "@rsbuild/plugin-react";
 
 export default defineConfig({
   plugins: [pluginReact()],
-  html: {
-    template: "./public/index.html",
+  source: {
+    entry: { index: "./main.tsx" },
   },
   output: {
-    cleanDistPath: true,
-    distPath: { root: "../../data/prasi-static" },
+    distPath: { root: "./../output" },
+  },
+  dev: {
+    writeToDisk: true,
+    progressBar: false,
   },
 });

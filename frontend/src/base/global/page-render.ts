@@ -1,6 +1,5 @@
 import { component } from "prasi-db";
-import { execGlobal } from "../../compo/page/scripting/exec-global";
-import { IItem } from "../../compo/types/item";
+import { IItem } from "../../utils/types/item";
 
 export const PageRenderGlobal = {
   usage: "editor" as "editor" | "render" | "preview",
@@ -16,6 +15,6 @@ export const PageRenderGlobal = {
   >,
   failedComp: new Set<string>(),
   page_id: "",
-  site: null as null | Parameters<typeof execGlobal>[0],
+  site: null as any,
   passPropTree: {} as { [ELEMENT_ID in string]: string },
 };

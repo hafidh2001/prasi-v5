@@ -3,7 +3,6 @@ import { IContent } from "../../../utils/types/general";
 import { IItem } from "../../../utils/types/item";
 import { ISection } from "../../../utils/types/section";
 import { base } from "./base";
-import { listenChanges } from "./live-reload/dev-live-reload";
 
 export const scanComponent = async (items: IContent[], from_root?: boolean) => {
   const comp = base.comp;
@@ -16,7 +15,6 @@ export const scanComponent = async (items: IContent[], from_root?: boolean) => {
 
   const pending = Object.keys(comp.pending);
   if (pending.length > 0) {
-    listenChanges({ type: "comp", ids: pending });
     try {
       const res = (await (
         await fetch(base.url`_prasi/comp`, {

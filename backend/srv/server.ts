@@ -1,17 +1,17 @@
 import { devProxy } from "./dev/proxy";
 import { devWS } from "./dev/ws";
 import { c } from "./utils/color";
-import { serverContext } from "./utils/server/ctx";
-import { initWS } from "./ws/init";
-
+import { dir } from "./utils/dir";
 import { editor } from "./utils/editor";
 import { api } from "./utils/server/api";
+import { serverContext } from "./utils/server/ctx";
 import { staticFile } from "./utils/static";
+import { initWS } from "./ws/init";
 
 import "./utils/init";
 
 const prod = {
-  static: await staticFile("/frontend/dist"),
+  static: await staticFile(dir.data("/prasi-static")),
 };
 editor.init();
 api.init();

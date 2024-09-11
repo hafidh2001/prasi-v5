@@ -15,7 +15,6 @@ import { detectResponsiveMode } from "./base/responsive";
 import { initBaseRoute, rebuildMeta } from "./base/route";
 import { w } from "./w";
 import { MatchedRoute } from "radix3";
-import { listenChanges } from "./base/live-reload/dev-live-reload";
 
 export const isPreview = () => {
   return (
@@ -138,8 +137,6 @@ export const Root = () => {
 
   if (page.id !== local.page_id) {
     base.init_local_effect = {};
-
-    listenChanges({ type: "page", id: page.id });
   }
 
   w.params = page.params || {};
