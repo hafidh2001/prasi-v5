@@ -139,7 +139,7 @@ export const loadSite = (site_id: string) => {
 
 export const siteLoaded = (site_id: string) => {
   if (!g.site[site_id]) return false;
-  return true;
+  return !g.site[site_id].loading;
 };
 
 export const siteLoading = (site_id: string) => {

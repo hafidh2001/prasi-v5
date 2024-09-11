@@ -5,6 +5,7 @@ import { editor } from "../editor";
 import { parseTypeDef } from "../parser/parse-type-def";
 import { compressed } from "../server/compressed";
 import type { ServerCtx } from "../server/ctx";
+import { siteLoaded, siteLoading } from "./site";
 
 export const prasiLoader = async ({
   pathname,
@@ -70,7 +71,9 @@ export const prasiLoader = async ({
       return new Response("");
     }
     case "code": {
-      if (!site.asset) await waitUntil(() => site.asset);
+      if (!site.asset) {
+        await waitUntil(() => site.asset);
+      }
 
       const res = site.asset!.serve(ctx, {
         prefix: `/prod/${site_id}/_prasi/code`,
