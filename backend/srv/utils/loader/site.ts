@@ -7,6 +7,7 @@ import { dir } from "../dir";
 import { ensureFiles } from "../editor/ensure-files";
 import { formatMessagesSync } from "esbuild";
 import { staticFile } from "../static";
+import { c } from "../color";
 
 export const loadSite = (site_id: string) => {
   g.site[site_id] ??= {
@@ -57,10 +58,16 @@ export const loadSite = (site_id: string) => {
           let ts = Date.now();
           const built = await buildFrontend(site_id);
           files = Object.keys(built.metafile.inputs);
-          Bun.write(logFile, `Build OK (${Date.now() - ts}ms)`);
+          await Bun.write(logFile, `Build OK (${Date.now() - ts}ms)`);
         } catch (e: any) {
-          Bun.write(logFile, formatMessagesSync(e.errors, { kind: "error" }));
+          const error_msg = formatMessagesSync(e.errors, { kind: "error" });
+          await Bun.write(logFile, error_msg.join("\n"));
+          console.log(
+            `${c.red}[ERR]${c.esc} FrontEnd Build ${c.blue}${site_id}${c.esc}:`,
+            error_msg.join("\n")
+          );
         }
+
         const rebuildWithTimeer = (e: any, p: any) => {
           if (!site.loading) {
             clearTimeout(site.change_timeout);
@@ -77,10 +84,14 @@ export const loadSite = (site_id: string) => {
             dir.data(`/code/${site_id}/site/build/temp`),
             dir.data(`/code/${site_id}/site/build/output`)
           );
-          site.asset = await staticFile(
-            dir.data(`/code/${site_id}/site/build/output`),
-            { index: false }
-          );
+          if (!site.asset) {
+            site.asset = await staticFile(
+              dir.data(`/code/${site_id}/site/build/output`),
+              { index: false }
+            );
+          } else {
+            await site.asset.rescan();
+          }
 
           const to_watch = files.filter(
             (path) => !path.startsWith("node_modules")

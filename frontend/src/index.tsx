@@ -34,6 +34,7 @@ const start = async () => {
 
   const el = document.getElementById("root");
 
+  console.log("mokona");
   if (el) {
     react.root = createRoot(el);
     react.root.render(<Root />);

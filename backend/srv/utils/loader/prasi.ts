@@ -72,9 +72,19 @@ export const prasiLoader = async ({
     case "code": {
       if (!site.asset) await waitUntil(() => site.asset);
 
-      return site.asset!.serve(ctx, {
+      const res = site.asset!.serve(ctx, {
         prefix: `/prod/${site_id}/_prasi/code`,
       });
+
+      if (!res) {
+        if (ctx.url.pathname.endsWith(".js")) {
+          return new Response(`setTimeout(() => { location.reload() },2000)`, {
+            headers: { "content-type": "text/javascript" },
+          });
+        }
+      }
+
+      return res;
     }
     case "compress":
       return new Response("OK");

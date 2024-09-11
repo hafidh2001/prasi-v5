@@ -28,7 +28,7 @@ Loading Site...
 
     const site = g.site[site_id];
 
-    if (site) {
+    if (site && pathname) {
       if (pathname.startsWith("_prasi")) {
         return await prasiLoader({ pathname, site_id, ctx });
       }

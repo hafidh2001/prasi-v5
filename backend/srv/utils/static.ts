@@ -1,14 +1,15 @@
 import { Glob, gzipSync, type BunFile } from "bun";
-import { existsAsync } from "fs-jetpack";
-import { join } from "path";
-import { addRoute, createRouter, findRoute } from "rou3";
-import type { ServerCtx } from "./server/ctx";
-import mime from "mime";
 import { BunSqliteKeyValue } from "bun-sqlite-key-value";
-import { dir } from "./dir";
+import { exists, existsAsync, removeAsync } from "fs-jetpack";
+import mime from "mime";
 import { readFileSync } from "node:fs";
-import { gzipAsync } from "./server/zlib";
+import { join } from "path";
+import { waitUntil } from "prasi-utils";
+import { addRoute, createRouter, findRoute } from "rou3";
+import { dir } from "./dir";
+import type { ServerCtx } from "./server/ctx";
 
+await removeAsync(dir.data(`static-cache.db`));
 const store = new BunSqliteKeyValue(dir.data(`static-cache.db`));
 
 export const staticFile = async (
@@ -23,23 +24,11 @@ export const staticFile = async (
     path: string;
   }>();
   let index = null as null | BunFile;
-  // Scans the current working directory and each of its sub-directories recursively
 
-  if (await existsAsync(path)) {
-    for await (const file of glob.scan(path)) {
-      if (file === "index.html") index = Bun.file(join(path, file));
-      addRoute(router, undefined, `/${file}`, {
-        mime: mime.getType(file),
-        path: file,
-        fullpath: join(path, file),
-      });
-
-      // if (opt.debug) {
-      //   console.log(`/${file}`, mime.getType(file));
-      // }
-    }
-  }
-  return {
+  const internal = {
+    scanning: false,
+    paths: new Set<string>(),
+    rescan: async () => {},
     serve: (ctx: ServerCtx, arg?: { prefix?: string }) => {
       let pathname = ctx.url.pathname;
       if (arg?.prefix) {
@@ -49,19 +38,26 @@ export const staticFile = async (
 
       if (opt.debug) {
         console.log(pathname, found);
-      } 
+      }
       if (found) {
         const { fullpath, mime } = found.data;
-        if (ctx.req.headers.get("accept-encoding")?.includes("gz")) {
-          let gz = store.get(`gz|${fullpath}`);
-          if (!gz) { 
-            gz = gzipSync(readFileSync(fullpath));
-            store.set(`gz|${fullpath}`, gz);
-          } 
-          
-          return new Response(gz, {
-            headers: { "content-encoding": "gzip", "content-type": mime || "" },
-          });
+        if (exists(fullpath)) {
+          if (ctx.req.headers.get("accept-encoding")?.includes("gz")) {
+            let gz = store.get(fullpath);
+            if (!gz) {
+              gz = gzipSync(readFileSync(fullpath));
+              store.set(fullpath, gz);
+            }
+
+            return new Response(gz, {
+              headers: {
+                "content-encoding": "gzip",
+                "content-type": mime || "",
+              },
+            });
+          }
+        } else {
+          store.delete(fullpath);
         }
       }
 
@@ -70,4 +66,34 @@ export const staticFile = async (
       }
     },
   };
+
+  const scan = async () => {
+    if (internal.scanning) {
+      await waitUntil(() => !internal.scanning);
+      return;
+    }
+    internal.scanning = true;
+    if (await existsAsync(path)) {
+      if (internal.paths.size > 0) {
+        store.delete([...internal.paths]);
+      }
+
+      for await (const file of glob.scan(path)) {
+        if (file === "index.html") index = Bun.file(join(path, file));
+
+        internal.paths.add(join(path, file));
+
+        addRoute(router, undefined, `/${file}`, {
+          mime: mime.getType(file),
+          path: file,
+          fullpath: join(path, file),
+        });
+      }
+    }
+    internal.scanning = false;
+  };
+  await scan();
+  internal.rescan = scan;
+
+  return internal;
 };
