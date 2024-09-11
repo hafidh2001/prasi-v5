@@ -9,7 +9,7 @@ export const ensureFiles = async (path: string, site_id: string) => {
     await dirAsync(_dir);
   }
 
-  const tdir = "/backend/srv/templates";
+  const tdir = "/backend/srv/utils/templates";
   const templates = new Glob("**").scan({
     cwd: dir.root(tdir),
   });

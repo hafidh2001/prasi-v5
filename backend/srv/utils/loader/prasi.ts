@@ -16,7 +16,7 @@ export const prasiLoader = async ({
 
   switch (action) {
     case "prisma.ext": {
-      const path = dir.root(`backend/srv/templates/typings/prisma_ext_d_ts`);
+      const path = dir.root(`backend/srv/utils/templates/typings/prisma_ext_d_ts`);
       const file = Bun.file(path);
       return new Response(file);
     }

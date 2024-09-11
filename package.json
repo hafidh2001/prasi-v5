@@ -12,7 +12,11 @@
     "backend/*"
   ],
   "trustedDependencies": [
+    "@prisma/client",
+    "@prisma/engines",
     "@swc/core",
-    "msgpackr-extract"
+    "esbuild",
+    "msgpackr-extract",
+    "prisma"
   ]
 }
