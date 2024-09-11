@@ -3,6 +3,8 @@ import { defineReact, defineWindow } from "prasi-utils";
 import { initBaseConfig } from "./base/base";
 import { Root, isPreview } from "./root";
 import { w } from "./w";
+import "../../index.css";
+
 
 (async () => {
   import("./font");
@@ -16,18 +18,21 @@ import { w } from "./w";
     };
     defineReact();
 
-    let internal_url = "/_prasi/code/internal.js";
-    if (location.pathname.startsWith("/prod")) {
-      const patharr = location.pathname.split("/");
-      internal_url = `/prod/${patharr[2]}${internal_url}`;
-    }
+    try {
+      let internal_url = "/_prasi/code/internal.js";
+      if (location.pathname.startsWith("/prod")) {
+        const patharr = location.pathname.split("/");
+        internal_url = `/prod/${patharr[2]}${internal_url}`;
+      }
 
-    const prasi_internal = await import(internal_url);
-    if (typeof prasi_internal === "object") {
-      const w = window as any;
-      if (prasi_internal.Loading) w.ContentLoading = prasi_internal.Loading;
-      if (prasi_internal.NotFound) w.ContentNotFound = prasi_internal.NotFound;
-    }
+      const prasi_internal = await import(internal_url);
+      if (typeof prasi_internal === "object") {
+        const w = window as any;
+        if (prasi_internal.Loading) w.ContentLoading = prasi_internal.Loading;
+        if (prasi_internal.NotFound)
+          w.ContentNotFound = prasi_internal.NotFound;
+      }
+    } catch (e) {}
 
     w.navigateOverride = (_href: string) => {
       if (_href && _href.startsWith("/")) {

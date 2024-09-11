@@ -11,7 +11,7 @@
     "prefix": "c-"
   },
   "aliases": {
-    "components": "@/comps/",
-    "utils": "@/utils"
+    "components": "lib/comps/",
+    "utils": "lib/utils"
   }
 }

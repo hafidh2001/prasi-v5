@@ -12,3 +12,7 @@ if (process.argv[process.argv.length - 1] === "dev") {
 }
 
 g._db = db;
+
+if (!g.site) {
+  g.site = {};
+} 

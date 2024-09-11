@@ -1,9 +1,24 @@
+import { dir } from "../dir";
+import { parse } from "node-html-parser";
 
 export const prodIndex = async (
   site_id: string,
   prasi: { page_id?: string; params?: any }
 ) => {
   let head: string[] = [];
+  const index_file = Bun.file(dir.root(`/frontend/prod/index.html`));
+  if (await index_file.exists()) {
+    const index = await index_file.text();
+    const html = parse(index);
+    head = [
+      ...html.querySelectorAll("script").map((e) => {
+        return e.toString();
+      }),
+      ...html.querySelectorAll("link").map((e) => {
+        return e.toString();
+      }),
+    ];
+  }
 
   return {
     head,
@@ -34,10 +49,6 @@ export const prodIndex = async (
           : ""
       }
     }
-  </script>
-  <script type="module">
-  import * as DATA from "/prod/bf706e40-2a3a-4148-9cdd-75d4483328d7/index.js";
-  console.log(DATA);
   </script>
 </body>
 

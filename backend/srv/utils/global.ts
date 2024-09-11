@@ -1,6 +1,7 @@
 import type { Subprocess } from "bun";
 import type { PrismaClient } from "prasi-db";
 import type { FSWatcher } from "fs";
+import type { staticFile } from "./static";
 
 type SITE_ID = string;
 export interface PrasiGlobal {
@@ -15,6 +16,7 @@ export interface PrasiGlobal {
       promises: ((site: any) => void)[];
       watcher: Record<string, FSWatcher>;
       change_timeout: any;
+      asset?: Awaited<ReturnType<typeof staticFile>>;
     }
   >;
 }

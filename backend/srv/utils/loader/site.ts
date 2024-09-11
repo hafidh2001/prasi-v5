@@ -6,11 +6,9 @@ import { buildFrontend } from "../build/frontend";
 import { dir } from "../dir";
 import { ensureFiles } from "../editor/ensure-files";
 import { formatMessagesSync } from "esbuild";
+import { staticFile } from "../static";
 
 export const loadSite = (site_id: string) => {
-  if (!g.site) {
-    g.site = {};
-  }
   g.site[site_id] ??= {
     loading: false,
     promises: [],
@@ -69,7 +67,7 @@ export const loadSite = (site_id: string) => {
             site.change_timeout = setTimeout(rebuild, 300);
           }
         };
-        
+
         if (
           !has_error &&
           (await existsAsync(dir.data(`/code/${site_id}/site/build/temp`)))
@@ -78,6 +76,10 @@ export const loadSite = (site_id: string) => {
           await moveAsync(
             dir.data(`/code/${site_id}/site/build/temp`),
             dir.data(`/code/${site_id}/site/build/output`)
+          );
+          site.asset = await staticFile(
+            dir.data(`/code/${site_id}/site/build/output`),
+            { index: false }
           );
 
           const to_watch = files.filter(
@@ -125,17 +127,11 @@ export const loadSite = (site_id: string) => {
 };
 
 export const siteLoaded = (site_id: string) => {
-  if (!g.site) {
-    g.site = {};
-  }
   if (!g.site[site_id]) return false;
   return true;
 };
 
 export const siteLoading = (site_id: string) => {
-  if (!g.site) {
-    g.site = {};
-  }
   if (!g.site[site_id]) return false;
   if (g.site[site_id].loading) return true;
   return false;

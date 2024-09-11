@@ -22,20 +22,6 @@ export default page({
         (window as any).Y = await import("yjs");
         (window as any).syncronize = (await import("y-pojo")).syncronize;
         p.render();
-
-        // const res = await _api.local_files({
-        //   mode: "list",
-        //   path: "/app",
-        //   id_site: "53f19c29-a36b-48b1-b13a-25dcdaef8ea5",
-        // });
-        // console.log(res);
-
-        // await _api.local_files({
-        //   mode: "write",
-        //   path: "/app/routes/path.tsx",
-        //   content: "haloha",
-        //   id_site: "53f19c29-a36b-48b1-b13a-25dcdaef8ea5",
-        // });
       })();
       return <Loading note="init" />;
     }

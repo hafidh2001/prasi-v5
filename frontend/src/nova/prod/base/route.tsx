@@ -50,7 +50,6 @@ export const initBaseRoute = async () => {
       }
 
       base.site = res.site;
-
       base.site.code = { mode: "vsc" };
       await injectSiteScript();
 

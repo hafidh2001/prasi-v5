@@ -3,8 +3,9 @@ import type { ServerCtx } from "../utils/server/ctx";
 export default {
   url: "/_prasi/**",
   api: async ({ url, params, req, query_params }: ServerCtx) => {
+    const path = params._;
     switch (true) {
-      case params._.startsWith("load.js"): {
+      case path.startsWith("load.js"): {
         const url = query_params["url"]
           ? JSON.stringify(query_params["url"])
           : "undefined";

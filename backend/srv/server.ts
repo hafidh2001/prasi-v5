@@ -1,18 +1,14 @@
 import { devProxy } from "./dev/proxy";
 import { devWS } from "./dev/ws";
 import { c } from "./utils/color";
-import { dir } from "./utils/dir";
 import { editor } from "./utils/editor";
 import { api } from "./utils/server/api";
 import { serverContext } from "./utils/server/ctx";
-import { staticFile } from "./utils/static";
 import { initWS } from "./ws/init";
 
 import "./utils/init";
+import { asset } from "./utils/server/asset";
 
-const prod = {
-  static: await staticFile(dir.data("/prasi-static")),
-};
 editor.init();
 api.init();
 
@@ -23,11 +19,18 @@ const server = Bun.serve({
     const ctx = serverContext(server, request);
     if (ctx.ws) return undefined;
 
+    if (ctx.url.pathname.startsWith("/static")) {
+      const res = asset.nova.serve(ctx);
+
+      if (res) return res;
+      return new Response("");
+    }
+
     const apiResponse = await api.serve(ctx);
     if (apiResponse) return apiResponse;
 
     if (g.mode === "dev") return devProxy(ctx);
-    return prod.static.serve(ctx);
+    return asset.prasi.serve(ctx);
   },
 });
 

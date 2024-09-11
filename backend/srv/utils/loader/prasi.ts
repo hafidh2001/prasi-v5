@@ -1,22 +1,30 @@
+import { waitUntil } from "prasi-utils";
 import { validate } from "uuid";
 import { dir } from "../dir";
+import { editor } from "../editor";
 import { parseTypeDef } from "../parser/parse-type-def";
-import { gzipAsync } from "../server/zlib";
-import mime from "mime";
-import { loadSite } from "./site";
+import { compressed } from "../server/compressed";
+import type { ServerCtx } from "../server/ctx";
 
 export const prasiLoader = async ({
   pathname,
   site_id,
+  ctx,
 }: {
   pathname: string;
   site_id: string;
+  ctx: ServerCtx;
 }) => {
   const action = pathname.split("/")[1];
+  const site = g.site[site_id];
+
+  const body: any = ctx.req.method === "POST" ? await ctx.req.json() : {};
 
   switch (action) {
     case "prisma.ext": {
-      const path = dir.root(`backend/srv/utils/templates/typings/prisma_ext_d_ts`);
+      const path = dir.root(
+        `backend/srv/utils/templates/typings/prisma_ext_d_ts`
+      );
       const file = Bun.file(path);
       return new Response(file);
     }
@@ -62,157 +70,71 @@ export const prasiLoader = async ({
       return new Response("");
     }
     case "code": {
-      const arr = pathname.split("/").slice(2);
-      const codepath = arr.join("/");
-      const build_path = dir.data(`code/${site_id}/site/build/${codepath}`);
-      const build_old = dir.data(`code/${site_id}/site/build-old/${codepath}`);
+      if (!site.asset) await waitUntil(() => site.asset);
 
-      try {
-        let file = Bun.file(build_path);
-
-        return new Response(
-          await gzipAsync(new Uint8Array(await file.arrayBuffer())),
-          {
-            headers: {
-              "content-encoding": "gzip",
-              "content-type": mime.getType(build_path) || "",
-            },
-          }
-        );
-      } catch (e) {
-        try {
-          let file = Bun.file(build_old);
-
-          return new Response(
-            await gzipAsync(new Uint8Array(await file.arrayBuffer())),
-            {
-              headers: {
-                "content-encoding": "gzip",
-                "content-type": mime.getType(build_path) || "",
-              },
-            }
-          );
-        } catch (e: any) {
-          return new Response(
-            `
-console.error("Failed to load index.js")
-console.error("${e.message}");
-setTimeout(() =>{
-location.reload();
-}, 1500);
-`,
-            {
-              headers: { "content-type": "application/javascript" },
-            }
-          );
-        }
-      }
+      return site.asset!.serve(ctx, {
+        prefix: `/prod/${site_id}/_prasi/code`,
+      });
     }
+    case "compress":
+      return new Response("OK");
     case "route": {
-      // if (!g.route_cache) g.route_cache = {};
-      // if (g.route_cache[site_id]) {
-      //   if (
-      //     req.headers.get("accept-encoding")?.includes("br") &&
-      //     g.route_cache[site_id].br
-      //   ) {
-      //     return new Response(g.route_cache[site_id].br, {
-      //       headers: {
-      //         "content-type": "application/json",
-      //         "content-encoding": "br",
-      //       },
-      //     });
-      //   }
+      const res = await editor.route(site_id, async () => {
+        const site = await _db.site.findFirst({
+          where: { id: site_id },
+          select: {
+            id: true,
+            name: true,
+            domain: true,
+            responsive: true,
+            config: true,
+          },
+        });
 
-      //   if (
-      //     req.headers.get("accept-encoding")?.includes("gzip") &&
-      //     g.route_cache[site_id].gzip
-      //   ) {
-      //     return new Response(g.route_cache[site_id].gzip, {
-      //       headers: {
-      //         "content-type": "application/json",
-      //         "content-encoding": "gzip",
-      //       },
-      //     });
-      //   }
-      // }
+        const layouts = await _db.page.findMany({
+          where: {
+            name: { startsWith: "layout:" },
+            is_deleted: false,
+            id_site: site_id,
+          },
+          select: {
+            id: true,
+            name: true,
+            is_default_layout: true,
+            content_tree: true,
+          },
+        });
 
-      // const site = await _db.site.findFirst({
-      //   where: { id: site_id },
-      //   select: {
-      //     id: true,
-      //     name: true,
-      //     domain: true,
-      //     responsive: true,
-      //     config: true,
-      //   },
-      // });
+        let layout = null as any;
+        for (const l of layouts) {
+          if (!layout) layout = l;
+          if (l.is_default_layout) layout = l;
+        }
 
-      // const layouts = await _db.page.findMany({
-      //   where: {
-      //     name: { startsWith: "layout:" },
-      //     is_deleted: false,
-      //     id_site: site_id,
-      //   },
-      //   select: {
-      //     id: true,
-      //     name: true,
-      //     is_default_layout: true,
-      //     content_tree: true,
-      //   },
-      // });
+        let api_url = "";
+        if (site && site.config && (site.config as any).api_url) {
+          api_url = (site.config as any).api_url;
+          delete (site as any).config;
+        }
+        const urls = await _db.page.findMany({
+          where: {
+            id_site: site_id,
+            is_default_layout: false,
+            is_deleted: false,
+          },
+          select: { url: true, id: true },
+        });
 
-      // let layout = null as any;
-      // for (const l of layouts) {
-      //   if (!layout) layout = l;
-      //   if (l.is_default_layout) layout = l;
-      // }
+        return JSON.stringify({
+          site: { ...site, api_url },
+          urls,
+          layout: layout
+            ? { id: layout.id, root: layout.content_tree }
+            : undefined,
+        });
+      });
 
-      // let api_url = "";
-      // if (site && site.config && (site.config as any).api_url) {
-      //   api_url = (site.config as any).api_url;
-      //   delete (site as any).config;
-      // }
-      // const urls = await _db.page.findMany({
-      //   where: {
-      //     id_site: site_id,
-      //     is_default_layout: false,
-      //     is_deleted: false,
-      //   },
-      //   select: { url: true, id: true },
-      // });
-
-      // if (!g.route_cache[site_id]) {
-      //   g.route_cache[site_id] = {};
-      // }
-
-      // const res = JSON.stringify({
-      //   site: { ...site, api_url },
-      //   urls,
-      //   layout: layout
-      //     ? { id: layout.id, root: layout.content_tree }
-      //     : undefined,
-      // });
-
-      // if (!g.br) {
-      //   g.br = await brotliPromise;
-      // }
-      // setTimeout(() => {
-      //   if (!g.route_cache_compressing) g.route_cache_compressing = new Set();
-      //   if (g.route_cache_compressing.has(site_id)) return;
-      //   g.route_cache_compressing.add(site_id);
-      //   g.route_cache[site_id].br = g.br.compress(encoder.encode(res));
-      //   g.route_cache_compressing.delete(site_id);
-      // }, 100);
-
-      // g.route_cache[site_id].gzip = await gzipAsync(res);
-
-      // return new Response(g.route_cache[site_id].gzip, {
-      //   headers: {
-      //     "content-type": "application/json",
-      //     "content-encoding": "gzip",
-      //   },
-      // });
-      return new Response("");
+      return compressed(ctx, res);
     }
     case "page": {
       const page_id = pathname.split("/").pop() as string;
@@ -221,55 +143,49 @@ location.reload();
           where: { id: page_id },
           select: { content_tree: true, url: true },
         });
+
         if (page) {
-          // return await responseCompressed(
-          //   req,
-          //   JSON.stringify({
-          //     id: page_id,
-          //     root: page.content_tree,
-          //     url: page.url,
-          //   }) as any
-          // );
+          return compressed(ctx, page);
         }
       }
-      return null;
+      return new Response("null", {
+        headers: { "content-type": "text/javascript" },
+      });
     }
     case "pages": {
-      // const page_ids = req.params.ids as string[];
-      // if (page_ids) {
-      //   const ids = page_ids.filter((id) => validate(id));
-      //   const pages = await _db.page.findMany({
-      //     where: { id: { in: ids } },
-      //     select: { id: true, content_tree: true, url: true },
-      //   });
-      //   if (pages) {
-      //     return await responseCompressed(
-      //       req,
-      //       JSON.stringify(
-      //         pages.map((e: any) => ({
-      //           id: e.id,
-      //           url: e.url,
-      //           root: e.content_tree,
-      //         }))
-      //       ) as any
-      //     );
-      //   }
-      // }
+      const page_ids = body.ids as string[];
+      if (page_ids) {
+        const ids = page_ids.filter((id) => validate(id));
+        const pages = await _db.page.findMany({
+          where: { id: { in: ids } },
+          select: { id: true, content_tree: true, url: true },
+        });
+        if (pages) {
+          return compressed(
+            ctx,
+            pages.map((e: any) => ({
+              id: e.id,
+              url: e.url,
+              root: e.content_tree,
+            }))
+          );
+        }
+      }
       break;
     }
     case "comp": {
-      // const ids = req.params.ids as string[];
-      // const result = {} as Record<string, any>;
-      // if (Array.isArray(ids)) {
-      //   const comps = await _db.component.findMany({
-      //     where: { id: { in: ids } },
-      //     select: { content_tree: true, id: true },
-      //   });
-      //   for (const comp of comps) {
-      //     result[comp.id] = comp.content_tree;
-      //   }
-      // }
-      // return await responseCompressed(req, JSON.stringify(result) as any);
+      const ids = body.ids as string[];
+      const result = {} as Record<string, any>;
+      if (Array.isArray(ids)) {
+        const comps = await _db.component.findMany({
+          where: { id: { in: ids } },
+          select: { content_tree: true, id: true },
+        });
+        for (const comp of comps) {
+          result[comp.id] = comp.content_tree;
+        }
+      }
+      return compressed(ctx, result);
     }
   }
   return new Response("action " + action + ": not found");

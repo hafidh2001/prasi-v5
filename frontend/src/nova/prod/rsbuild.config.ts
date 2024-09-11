@@ -7,10 +7,19 @@ export default defineConfig({
     entry: { index: "./main.tsx" },
   },
   output: {
-    distPath: { root: "./../output" },
+    cleanDistPath: true,
+    sourceMap: {
+      js: "source-map",
+    },
+    distPath: { root: "./../../../prod" },
   },
   dev: {
+    liveReload: false,
+    hmr: false,
     writeToDisk: true,
     progressBar: false,
+  },
+  server: {
+    port: 14314,
   },
 });
