@@ -1,9 +1,10 @@
+import { pageTree, PageTree } from "crdt/page-tree";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useGlobal } from "../../utils/react/use-global";
-import { jscript } from "../../utils/script/jscript";
 import { w } from "../../utils/types/general";
 import { isLocalhost } from "../../utils/ui/is-localhost";
 import { Loading } from "../../utils/ui/loading";
+import { prasiKeybinding } from "./ed-keybinds";
 import { EdLeft } from "./ed-left";
 import { EDGlobal } from "./logic/ed-global";
 import { iconVSCode } from "./ui/icons";
@@ -11,9 +12,15 @@ import { iconVSCode } from "./ui/icons";
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
 
-  const vscode_url = isLocalhost()
-    ? "http://localhost:8443?"
-    : "https://prasi-vsc.avolut.com/?tkn=prasi&";
+  prasiKeybinding(p);
+
+  if (!p.page.tree && p.page.cur && p.sync) {
+    p.page.tree = pageTree(p.sync, p.page.cur.id, {
+      loaded() {
+        p.render();
+      },
+    });
+  }
 
   if (p.status === "load-site" && p.site) {
     return (
@@ -69,13 +76,47 @@ export const EdBase = () => {
           <EdLeft />
         </Panel>
         <PanelResizeHandle />
-        <Panel></Panel>
+        <Panel>{p.page.tree && <Preview tree={p.page.tree} />}</Panel>
         <PanelResizeHandle />
         <Panel defaultSize={25}></Panel>
       </PanelGroup>
     </div>
   );
 };
+
+const Preview = ({ tree }: { tree: PageTree }) => {
+  const root = tree.watch((e) => e);
+  return (
+    <div
+      className="relative overflow-auto w-full h-full border-r"
+      onClick={async () => {
+        tree.update((e) => {
+          e.id = "MO" + Date.now();
+          return e;
+        });
+
+        console.log(await tree.history());
+      }}
+    >
+      <pre className="text-[10px] absolute inset-0">
+        {Date.now()}
+        {JSON.stringify(
+          Object.entries(root as any)
+            .map(([k, v]) => {
+              if (typeof v !== "object") return [k, v];
+            })
+            .filter((e) => e),
+          null,
+          2
+        )}
+      </pre>
+    </div>
+  );
+};
+
+const vscode_url = isLocalhost()
+  ? "http://localhost:8443?"
+  : "https://prasi-vsc.avolut.com/?tkn=prasi&";
 
 const style = css`
   .toolbar-box {

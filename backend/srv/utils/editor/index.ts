@@ -53,7 +53,21 @@ export const editor = {
       return await cacheResolve({
         cached: () => editor.db.tables.page.find({ where: { page_id } })[0],
         resolve: (cached) => unpack(cached.root),
-        load: () => _db.page.findFirst({ where: { id: page_id } }),
+        load: () =>
+          _db.page.findFirst({
+            where: { id: page_id, is_deleted: false },
+            select: {
+              id: true,
+              id_folder: true,
+              created_at: true,
+              id_layout: true,
+              id_site: true,
+              is_default_layout: true,
+              name: true,
+              url: true,
+              updated_at: true,
+            },
+          }),
         store: (result, cached) => {
           editor.db.tables.page.save({
             id: cached?.id,

@@ -16,6 +16,9 @@ export const clientStartSync = (arg: {
     const ws = new WebSocket(url);
     ws.onopen = () => {
       ws.send(pack({ action: "open", user_id: arg.user_id }));
+      setInterval(() => {
+        ws.ping();
+      }, 90 * 1000);
     };
     ws.onmessage = async ({ data }) => {
       if (data instanceof Blob) {
@@ -52,6 +55,12 @@ export const createClient = (ws: WebSocket, p: any, conn_id: string) => ({
     action: async () => {},
   },
   page: {
+    undo: (page_id: string) => {
+      ws.send(pack({ action: "undo", page_id }));
+    },
+    redo: (page_id: string) => {
+      ws.send(pack({ action: "redo", page_id }));
+    },
     load: async (id: string) => {
       return (await _api.page_load(id, { conn_id: p.user.conn_id })) as EPage;
     },

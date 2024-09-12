@@ -1,34 +1,23 @@
+import { EdPageHistory } from "crdt/page-history";
 import { useGlobal } from "../../utils/react/use-global";
-import { useLocal } from "../../utils/react/use-local";
 import { Tooltip } from "../../utils/ui/tooltip";
 import { EDGlobal } from "./logic/ed-global";
 import { EdSitePicker } from "./popup/site/site-picker";
 import { EdItemTree } from "./tree/ed-item-tree";
 import {
-  iconLog,
+  iconHistory,
   iconLogout,
-  iconModule,
-  iconRebuild,
   iconRebuildLarge,
   iconServer,
-  iconSSR,
   iconVSCode,
 } from "./ui/icons";
+import { TopBtn } from "./ui/top-btn";
 
 export const EdLeft = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
-  const local = useLocal({
-    tree: null as any,
-    timeout: null as any,
-  });
-
-  if (!local.tree) {
-    clearTimeout(local.timeout);
-    local.timeout = setTimeout(local.render, 100);
-  }
 
   return (
-    <div className={cx("flex flex-1 flex-col relative border-r")}>
+    <div className={cx("flex flex-1 flex-col relative border-r select-none")}>
       <div className="absolute inset-0 flex flex-col overflow-hidden">
         <div
           className={cx(
@@ -83,8 +72,56 @@ export const EdLeft = () => {
           </div>
         </div>
 
-        <div className="flex flex-row items-stretch border-b">Tree</div>
-        <EdItemTree />
+        <div className="flex flex-row items-stretch border-b">
+          <Tooltip content="Page History" asChild>
+            <div
+              className={cx(
+                "flex items-center",
+                p.ui.left.mode === "history" &&
+                  "border-blue-600 border-l-4 bg-blue-50 flex-1"
+              )}
+            >
+              <div
+                className={cx(
+                  "btn transition-all flex items-center justify-center cursor-pointer",
+                  p.ui.left.mode === "tree" &&
+                    "hover:bg-blue-600 hover:text-white  border-r",
+                  css`
+                    width: 25px;
+                    height: 25px;
+                  `
+                )}
+                onClick={() => {
+                  p.ui.left.mode =
+                    p.ui.left.mode === "tree" ? "history" : "tree";
+                  p.render();
+                }}
+                dangerouslySetInnerHTML={{ __html: iconHistory }}
+              />
+              {p.ui.left.mode === "history" && (
+                <>
+                  <div className="text-sm flex-1">Page History</div>
+                  <div>
+                    <TopBtn
+                      className="text-[11px] bg-white mr-1"
+                      onClick={() => {
+                        p.ui.left.mode =
+                          p.ui.left.mode === "tree" ? "history" : "tree";
+                        p.render();
+                      }}
+                    >
+                      Close
+                    </TopBtn>
+                  </div>
+                </>
+              )}
+            </div>
+          </Tooltip>
+        </div>
+        {p.ui.left.mode === "tree" && <EdItemTree />}
+        {p.ui.left.mode === "history" && p.page.tree && (
+          <EdPageHistory tree={p.page.tree} />
+        )}
       </div>
     </div>
   );

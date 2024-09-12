@@ -5,5 +5,6 @@ export const apiDefinition = [
   await import("./api/site-prod"),
   await import("./api/site-load"),
   await import("./api/page-load"),
+  await import("./api/page-history"),
   await import("./api/auth-login"),
 ];

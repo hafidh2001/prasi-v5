@@ -1,6 +1,7 @@
 import { produce, enablePatches, Patch, produceWithPatches } from "immer";
 import * as Y from "yjs";
 
+
 import { JSONArray, JSONObject, JSONValue } from "./types";
 import {
   isJSONArray,
@@ -236,7 +237,7 @@ export function bind<S extends Snapshot>(
     };
 
     if (doc) {
-      Y.transact(doc, doApplyUpdate);
+      Y.transact(doc, doApplyUpdate, 'immer');
     } else {
       doApplyUpdate();
     }

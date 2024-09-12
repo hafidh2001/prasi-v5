@@ -16,10 +16,13 @@
     "@swc/types": "^0.1.12",
     "acorn-walk": "^8.3.4",
     "bun-sqlite-key-value": "^1.10.12",
+    "prasi-frontend": "workspace:*",
     "del": "^7.1.0",
     "dir": "^0.1.2",
     "esbuild": "^0.23.1",
     "fs-jetpack": "^5.1.0",
+    "immer": "^10.1.1",
+    "lib0": "^0.2.97",
     "mime": "^4.0.4",
     "moderndash": "^3.12.0",
     "msgpackr": "^1.11.0",
@@ -27,6 +30,8 @@
     "prasi-db": "workspace:*",
     "prasi-utils": "workspace:*",
     "rou3": "^0.5.1",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "y-protocols": "^1.0.6",
+    "yjs": "^13.6.19"
   }
 }

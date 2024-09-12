@@ -50,7 +50,7 @@ export const Loading: FC<{
   }, []);
 
   const CustomLoading = w.ContentLoading;
-  console.log();
+
   return (
     <>
       {backdrop !== false && (

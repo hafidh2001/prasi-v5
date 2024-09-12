@@ -24,6 +24,7 @@ export const EDGlobal = {
     loaded: {} as Record<string, ReturnType<typeof compTree>>,
   },
   ui: {
+    left: { mode: "history" as "tree" | "history" },
     popup: {
       site: null as null | ((id_site: string) => any),
       site_form: null as null | {

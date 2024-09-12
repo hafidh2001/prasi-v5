@@ -12,9 +12,9 @@
     "@monaco-editor/react": "^4.6.0",
     "@swc/core": "^1.7.26",
     "axios": "^1.7.7",
+    "ctrl-keys": "^1.0.3",
     "idb-keyval": "^6.2.1",
     "immer": "^10.1.1",
-    "immer-yjs": "^1.1.1",
     "lodash.trim": "^4.5.1",
     "pako": "^2.1.0",
     "prasi-db": "workspace:*",
@@ -26,6 +26,8 @@
     "react-select": "^5.8.0",
     "react-virtuoso": "^4.10.4",
     "uuid": "^10.0.0",
+    "y-indexeddb": "^9.0.12",
+    "y-websocket": "^2.0.4",
     "yjs": "^13.6.19"
   },
   "devDependencies": {
