@@ -1,3 +1,0 @@
-/*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) */
-
-/*! pako 2.1.0 https://github.com/nodeca/pako @license (MIT AND Zlib) */

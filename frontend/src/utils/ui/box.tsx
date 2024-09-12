@@ -1,5 +1,5 @@
 import { FC, Fragment, ReactElement, ReactNode, isValidElement } from "react";
-import { useLocal } from "prasi-utils";
+import { useLocal } from "../react/use-local";
 import { Menu, MenuItem } from "./context-menu";
 import { Tooltip } from "./tooltip";
 

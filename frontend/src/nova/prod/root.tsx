@@ -1,20 +1,17 @@
 import { set as setkv } from "idb-keyval";
+import { MatchedRoute } from "radix3";
 import { FC, useState } from "react";
 import { validate } from "uuid";
-import { GlobalContext, useLocal } from "prasi-utils";
-import { IContent } from "../../utils/types/general";
 import { IItem } from "../../utils/types/item";
 import { IRoot } from "../../utils/types/root";
 import { DeadEnd } from "../../utils/ui/deadend";
 import { Loading } from "../../utils/ui/loading";
-import { Vi } from "../vi/vi";
 import { base } from "./base/base";
 import { scanComponent } from "./base/component";
 import { loadPage, loadUrls } from "./base/page";
 import { detectResponsiveMode } from "./base/responsive";
 import { initBaseRoute, rebuildMeta } from "./base/route";
 import { w } from "./w";
-import { MatchedRoute } from "radix3";
 
 export const isPreview = () => {
   return (

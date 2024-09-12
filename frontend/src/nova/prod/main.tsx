@@ -1,9 +1,10 @@
 import { createRoot } from "react-dom/client";
-import { defineReact, defineWindow } from "prasi-utils";
+import "../../index.css";
+import { defineReact } from "../../utils/react/define-react";
+import { defineWindow } from "../../utils/react/define-window";
 import { initBaseConfig } from "./base/base";
 import { Root, isPreview } from "./root";
 import { w } from "./w";
-import "../../index.css";
 
 
 (async () => {

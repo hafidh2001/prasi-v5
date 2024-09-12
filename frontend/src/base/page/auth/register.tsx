@@ -1,8 +1,8 @@
-import { page } from "prasi-utils";
-import { useLocal } from "prasi-utils";
-import { Loading } from "../../../utils/ui/loading";
+import { page } from "../../../utils/react/page";
+import { useLocal } from "../../../utils/react/use-local";
 import { formStyle } from "../../../utils/ui/form.style";
 import { Input } from "../../../utils/ui/form/input";
+import { Loading } from "../../../utils/ui/loading";
 
 export default page({
   url: "/register",
@@ -16,14 +16,13 @@ export default page({
         init: false,
       },
       async () => {
-        const s = await _api.session();
-
-        if (s && s.id) {
-          navigate("/ed");
-        } else {
-          form.init = true;
-          form.render();
-        }
+        // const s = await _api.session();
+        // if (s && s.id) {
+        //   navigate("/ed");
+        // } else {
+        //   form.init = true;
+        //   form.render();
+        // }
       }
     );
 
@@ -47,7 +46,7 @@ export default page({
               form.render();
               alert(s.reason);
             } else {
-              await _api.login(form.username, form.password);
+              await _api.auth_login(form.username, form.password);
               alert("Registration success!");
               navigate("/ed");
             }

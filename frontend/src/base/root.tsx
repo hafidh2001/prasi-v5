@@ -1,9 +1,10 @@
 import { createRouter } from "radix3";
 import { FC, Suspense, lazy } from "react";
-import { GlobalContext, useLocal } from "prasi-utils";
 import { w } from "../utils/types/general";
 import { Loading } from "../utils/ui/loading";
 import * as pages from "./pages";
+import { GlobalContext } from "../utils/react/use-global";
+import { useLocal } from "../utils/react/use-local";
 
 export const Root: FC<{}> = ({}) => {
   const local = useLocal(

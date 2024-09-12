@@ -1,10 +1,4 @@
-export * from "./use-local";
-export * from "./wait-until";
-export * from "./lazify";
-export * from "./use-global";
-import * as _React from "react";
-export * from "./page";
 export * from "./global";
-export * from "./define-react";
-export * from "./define-window";
-export const React = _React;
+export * from "./lazify";
+export * from "./wait-until";
+

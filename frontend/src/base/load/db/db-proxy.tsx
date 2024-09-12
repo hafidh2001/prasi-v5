@@ -1,8 +1,8 @@
 import hash_sum from "hash-sum";
+import { get, set } from "idb-keyval";
+import { pack } from "msgpackr";
 import pako, { gzip } from "pako";
 import { fetchViaProxy, getProxyUrl } from "../proxy";
-import { del, get, set } from "idb-keyval";
-import { pack } from "msgpackr";
 
 const schema_promise = {
   tables: {} as Record<string, any>,

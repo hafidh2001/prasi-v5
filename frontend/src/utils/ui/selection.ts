@@ -1,7 +1,7 @@
 /** return true if node found */
 function searchNode(
   container: Node,
-  startNode: Node,
+  startNode: null | Node,
   predicate: (node: Node) => boolean,
   excludeSibling?: boolean
 ): boolean {
@@ -9,8 +9,11 @@ function searchNode(
     return true;
   }
 
-  for (let i = 0, len = startNode.childNodes.length; i < len; i++) {
-    if (searchNode(startNode, startNode.childNodes[i], predicate, true)) {
+  for (let i = 0, len = startNode?.childNodes.length || 0; i < len; i++) {
+    if (
+      startNode &&
+      searchNode(startNode, startNode?.childNodes[i], predicate, true)
+    ) {
       return true;
     }
   }
@@ -33,7 +36,7 @@ function searchNode(
 }
 
 function createRange(container: Node, start: number, end: number): Range {
-  let startNode;
+  let startNode: undefined | Node = undefined;
   searchNode(container, container, (node) => {
     if (node.nodeType === Node.TEXT_NODE) {
       const dataLength = (node as Text).data.length;
@@ -43,12 +46,12 @@ function createRange(container: Node, start: number, end: number): Range {
       }
       start -= dataLength;
       end -= dataLength;
-      return false;
     }
+    return false;
   });
 
-  let endNode;
-  if (startNode) {
+  let endNode: undefined | Node = undefined;
+  if (typeof startNode !== "undefined") {
     searchNode(container, startNode, (node) => {
       if (node.nodeType === Node.TEXT_NODE) {
         const dataLength = (node as Text).data.length;
@@ -57,13 +60,13 @@ function createRange(container: Node, start: number, end: number): Range {
           return true;
         }
         end -= dataLength;
-        return false;
       }
+      return false;
     });
   }
 
   const range = document.createRange();
-  if (startNode) {
+  if (typeof startNode !== "undefined") {
     if (start < startNode.data.length) {
       range.setStart(startNode, start);
     } else {
@@ -140,9 +143,9 @@ export function getSelectionOffset(container: Node): [number, number] {
   let end = 0;
 
   const selection = window.getSelection();
-  for (let i = 0, len = selection.rangeCount; i < len; i++) {
-    const range = selection.getRangeAt(i);
-    if (range.intersectsNode(container)) {
+  for (let i = 0, len = selection?.rangeCount; i < len; i++) {
+    const range = selection?.getRangeAt(i);
+    if (range?.intersectsNode(container)) {
       const startNode = range.startContainer;
       searchNode(container, container, (node) => {
         if (startNode === node) {

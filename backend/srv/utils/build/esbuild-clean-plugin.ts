@@ -87,7 +87,6 @@ export class CleanPlugin {
 
     fileNames.forEach((fileName) => {
       fileName = path.resolve(outdir, fileName);
-
       console.log(`esbuild-clean-plugin: ${message} ${fileName}`);
     });
   }

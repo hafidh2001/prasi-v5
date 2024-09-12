@@ -1,55 +1,14 @@
-import { xxhash32 } from "hash-wasm";
-import { UseStore, get, set } from "idb-keyval";
-import { pack, Packr } from "msgpackr";
-import { ESite } from "../../nova/ed/logic/ed-global";
-import { w } from "../types/general";
-import { site } from "prasi-db";
-const packr = new Packr({ structuredClone: true });
-
-/** CONSTANT */
-const WS_CONFIG = {
-  debug: !!localStorage.getItem("prasi-ws-debug"),
-  reconnectTimeout: 1000,
-};
-
-w.debug = new Proxy(
-  {},
-  {
-    get(target, p, receiver) {
-      if (p === "off") {
-        WS_CONFIG.debug = false;
-        localStorage.removeItem("prasi-js-debug");
-        localStorage.removeItem("prasi-ws-debug");
-        console.clear();
-        return ["WS DEBUG: Deactivated"];
-      }
-      if (p === "on") {
-        WS_CONFIG.debug = true;
-        localStorage.setItem("prasi-ws-debug", "1");
-        console.clear();
-        return ["WS DEBUG: Activated"];
-      }
-      if (p === "js") {
-        localStorage.setItem("prasi-js-debug", "1");
-        console.clear();
-        return ["JS DEBUG: Activated"];
-      }
-    },
-  }
-) as any;
-
-const sendWs = (ws: WebSocket, msg: any) => {
-  const raw = packr.pack(msg);
-  if (WS_CONFIG.debug)
-    console.log(`%c⬆`, "color:blue", formatBytes(raw.length, 0), msg);
-  ws.send(raw);
-};
+import { pack, unpack } from "msgpackr";
+import { PG } from "../../nova/ed/logic/ed-global";
+import { EPage, ESite } from "../../nova/ed/logic/types";
 
 export const clientStartSync = (arg: {
+  p: PG;
   user_id: string;
   site_id?: string;
   page_id?: string;
 }) => {
+  arg.p.sync = undefined;
   return new Promise<ReturnType<typeof createClient>>((done) => {
     const url = new URL(location.href);
     url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
@@ -58,28 +17,43 @@ export const clientStartSync = (arg: {
     ws.onopen = () => {
       ws.send(pack({ action: "open", user_id: arg.user_id }));
     };
-    ws.onmessage = ({ data }) => {};
+    ws.onmessage = async ({ data }) => {
+      if (data instanceof Blob) {
+        const msg = unpack(new Uint8Array(await data.arrayBuffer())) as {
+          action: "connected";
+          conn_id: string;
+        };
+        if (msg.action === "connected") {
+          done(createClient(ws, arg.p, msg.conn_id));
+        }
+      }
+    };
     ws.onclose = () => {};
-    done(createClient(ws));
   });
 };
 
-const createClient = (ws: WebSocket) => ({
+export const createClient = (ws: WebSocket, p: any, conn_id: string) => ({
+  conn_id,
+  ws,
   site: {
     load: async (id: string) => {
-      return await _api.site_load(id) as ESite;
+      return (await _api.site_load(id, { conn_id: p.user.conn_id })) as ESite;
+    },
+    group: async () => {
+      return [] as {
+        id: string;
+        name: string;
+        site: ESite[];
+        org_user: { user: { id: string; username: string } }[];
+      }[];
     },
   },
   code: {
     action: async () => {},
   },
+  page: {
+    load: async (id: string) => {
+      return (await _api.page_load(id, { conn_id: p.user.conn_id })) as EPage;
+    },
+  },
 });
-
-function formatBytes(bytes: number, decimals: number) {
-  if (bytes == 0) return "0 Bytes";
-  var k = 1024,
-    dm = decimals || 2,
-    sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
-    i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-}

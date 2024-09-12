@@ -1,10 +1,8 @@
 import { set } from "idb-keyval";
-import { IContent } from "../../../utils/types/general";
 import { IItem } from "../../../utils/types/item";
-import { ISection } from "../../../utils/types/section";
 import { base } from "./base";
 
-export const scanComponent = async (items: IContent[], from_root?: boolean) => {
+export const scanComponent = async (items: IItem[], from_root?: boolean) => {
   const comp = base.comp;
 
   for (const item of items) {
@@ -41,7 +39,7 @@ export const scanComponent = async (items: IContent[], from_root?: boolean) => {
   }
 };
 
-const scanSingle = (item: IItem | ISection, from_root?: boolean) => {
+const scanSingle = (item: IItem, from_root?: boolean) => {
   const comp = base.comp;
   if (item.type === "item") {
     const comp_id = item.component?.id;

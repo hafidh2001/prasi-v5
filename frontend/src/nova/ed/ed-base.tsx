@@ -1,45 +1,21 @@
-import { useGlobal } from "prasi-utils";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { useGlobal } from "../../utils/react/use-global";
 import { jscript } from "../../utils/script/jscript";
+import { w } from "../../utils/types/general";
+import { isLocalhost } from "../../utils/ui/is-localhost";
 import { Loading } from "../../utils/ui/loading";
 import { EdLeft } from "./ed-left";
-import { EdMid } from "./ed-mid";
-import { EdRight } from "./ed-right";
 import { EDGlobal } from "./logic/ed-global";
-import { edInit } from "./logic/ed-init";
-import { edRoute } from "./logic/ed-route";
-import { edUndoManager } from "./logic/ed-undo";
-import { EdMain } from "./panel/main/main";
-import { EdPageHistoryMain } from "./panel/main/main-history";
-import { EdPane } from "./panel/main/pane-resize";
-import { EdPopApi } from "./panel/popup/api/api-server";
-import { EdPopCode } from "./panel/popup/code/code";
-import { EdPopCompGroup } from "./panel/popup/comp/comp-group";
-import { EdPopComp } from "./panel/popup/comp/comp-popup";
-import { EdPopPage } from "./panel/popup/page/page-popup";
-import { EdPopScript } from "./panel/popup/script/pop-script";
-import { EdPopSite } from "./panel/popup/site/site-popup";
-import { iconVSCode } from "./panel/popup/code/icons";
-import { isLocalhost } from "../../utils/ui/is-localhost";
-import { w } from "../../utils/types/general";
-import { edInitSync } from "./logic/ed-sync";
+import { iconVSCode } from "./ui/icons";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
-
-  w.editorRender = p.render;
-  edUndoManager(p);
-
-  if (p.status === "init") {
-    edInit(p);
-  }
-
-  edRoute(p);
 
   const vscode_url = isLocalhost()
     ? "http://localhost:8443?"
     : "https://prasi-vsc.avolut.com/?tkn=prasi&";
 
-  if (p.status === "load-site") {
+  if (p.status === "load-site" && p.site) {
     return (
       <Loading
         note={
@@ -78,8 +54,6 @@ export const EdBase = () => {
     );
   }
 
-  const Editor = jscript.editor;
-
   return (
     <div
       className={cx("flex flex-col flex-1", style)}
@@ -90,122 +64,15 @@ export const EdBase = () => {
         w.pointer_active = true;
       }}
     >
-      <div className="flex justify-between"></div>
-      <div className="flex flex-1 items-stretch">
-        {p.status === "ready" && (
-          <>
-            <EdLeft />
-            <EdPane type="left" min_size={200} />
-          </>
-        )}
-        <div className="flex flex-1 flex-col items-stretch">
-          <EdMid />
-
-          {p.page.history.id ? (
-            <EdPageHistoryMain />
-          ) : (
-            <div
-              className={cx(
-                "flex flex-1 items-stretch",
-                p.mode === "mobile" ? mobileCSS : "bg-white"
-              )}
-            >
-              {p.status !== "ready" ? (
-                <Loading note={`page-${p.status}`} />
-              ) : (
-                <>
-                  {location.search !== "?norender" ? (
-                    <EdMain />
-                  ) : (
-                    <div className="flex-1 flex items-center justify-center">
-                      Editor Render: Disabled
-                    </div>
-                  )}
-                  <EdPane type="right" min_size={240} />
-                  <EdRight />
-                </>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-      <>
-        <EdPopCode />
-        <EdPopScript />
-        <EdPopSite />
-        <EdPopApi />
-        <EdPopPage />
-        <EdPopCompGroup />
-        <EdPopComp />
-      </>
-      {Editor && !jscript.editorLoaded && (
-        <div
-          className={css`
-            display: none;
-          `}
-        >
-          <Editor
-            onMount={() => {
-              jscript.editorLoaded = true;
-              p.render();
-            }}
-          />
-        </div>
-      )}
-
-      {w.offline && (
-        <div
-          className={cx(
-            css`
-              position: fixed;
-              bottom: 20px;
-              left: 0px;
-              right: 0px;
-              z-index: 999;
-            `,
-            "flex justify-center cursor-pointer"
-          )}
-        >
-          <div className="bg-red-500 text-white px-4 py-2 rounded-full text-sm">
-            Reconnecting, changes are not saved...
-          </div>
-        </div>
-      )}
-      {w.sync_too_long && (
-        <div
-          onClick={() => {
-            w.sync_too_long = false;
-            p.render();
-          }}
-          className={cx(
-            css`
-              position: fixed;
-              bottom: 20px;
-              left: 0px;
-              right: 0px;
-              z-index: 999;
-            `,
-            "flex justify-center cursor-pointer"
-          )}
-        >
-          <div className="space-x-2 flex bg-red-100 text-red-700 px-4 py-2 rounded-full text-sm">
-            <div>Sync taking too long...</div>
-            <div
-              className={cx(
-                css`
-                  background: white;
-                `,
-                "rounded-full px-3 cursor-pointer border border-red-500"
-              )}
-              onClick={() => {
-                location.reload();
-              }}
-            >
-              Reload Page
-            </div>
-          </div>
-        </div>
-      )}
+      <PanelGroup autoSaveId="prasi-editor" direction="horizontal">
+        <Panel defaultSize={18} className="flex" minSize={15}>
+          <EdLeft />
+        </Panel>
+        <PanelResizeHandle />
+        <Panel></Panel>
+        <PanelResizeHandle />
+        <Panel defaultSize={25}></Panel>
+      </PanelGroup>
     </div>
   );
 };

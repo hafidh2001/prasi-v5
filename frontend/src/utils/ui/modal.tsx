@@ -11,7 +11,7 @@ import {
   useRole,
 } from "@floating-ui/react";
 import * as React from "react";
-import { useLocal } from "prasi-utils";
+import { useLocal } from "../react/use-local";
 
 interface ModalOptions {
   initialOpen?: boolean;

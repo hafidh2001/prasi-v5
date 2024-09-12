@@ -1,8 +1,9 @@
 import { useEffect } from "react";
-import { page, useGlobal } from "prasi-utils";
 import { EDGlobal } from "../../nova/ed/logic/ed-global";
 import { isLocalhost } from "../../utils/ui/is-localhost";
 import { Loading } from "../../utils/ui/loading";
+import { page } from "../../utils/react/page";
+import { useGlobal } from "../../utils/react/use-global";
 
 export default page({
   url: "**",

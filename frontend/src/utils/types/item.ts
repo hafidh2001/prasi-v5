@@ -1,27 +1,16 @@
-import { TypedArray, TypedMap } from "yjs-types";
-import { BasicItem, MBasicItem, MetaItem } from "./meta";
+import { BasicItem, MetaItem } from "./meta";
 import { FNAdv, FNComponent, FNLayout, FNLinkTag } from "./meta-fn";
-import { MSection } from "./section";
-import { IText, MText } from "./text";
 
 export type IItem = {
   layout?: FNLayout;
   linktag?: FNLinkTag;
   mobile?: IItem;
   adv?: FNAdv;
-  type: "item";
+  type: "item" | "section" | "text";
   component?: FNComponent;
   tree_hidden?: boolean;
-  childs: (IItem | IText)[];
+  text?: string;
+  html?: string;
+  childs: IItem[];
 } & MetaItem &
   BasicItem;
-
-export type MItem = TypedMap<
-  {
-    type: "item";
-    mobile?: MItem;
-    childs?: TypedArray<MItem | MText>;
-    tree_hidden?: boolean;
-  } & MBasicItem &
-    MetaItem
-> & { parent: TypedArray<MSection | MItem> & { parent: MSection | MItem } };

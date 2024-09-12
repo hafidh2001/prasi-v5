@@ -1,10 +1,11 @@
 import { validate } from "uuid";
-import init from "wasm-gzip";
-import { page, useGlobal, useLocal } from "prasi-utils";
 import { EdBase } from "../../nova/ed/ed-base";
 import { EDGlobal, PG } from "../../nova/ed/logic/ed-global";
-import { edInitSync, loadSession } from "../../nova/ed/logic/ed-sync";
-import { EdFormSite } from "../../nova/ed/panel/popup/site/site-form";
+import { initSync, loadSession } from "../../nova/ed/logic/ed-sync";
+import { EdFormSite } from "../../nova/ed/popup/site/site-form";
+import { page } from "../../utils/react/page";
+import { useGlobal } from "../../utils/react/use-global";
+import { useLocal } from "../../utils/react/use-local";
 import { Loading } from "../../utils/ui/loading";
 
 export default page({
@@ -16,15 +17,6 @@ export default page({
     });
 
     const w = window as any;
-    if (!w.Y) {
-      (async () => {
-        await init();
-        (window as any).Y = await import("yjs");
-        (window as any).syncronize = (await import("y-pojo")).syncronize;
-        p.render();
-      })();
-      return <Loading note="init" />;
-    }
 
     w.isEditor = true;
 
@@ -87,7 +79,7 @@ export default page({
         JSON.stringify({ page_id: params.page_id, site_id: params.site_id })
       );
 
-      if (!edInitSync(p) && !p.sync) {
+      if (!initSync(p) && !p.sync) {
         return <Loading note="connecting-ws" />;
       }
     } else {
@@ -144,8 +136,9 @@ const navSitePage = async (p: PG) => {
     },
   });
 
-  if (e && e.id && e.id_site) location.href = `/ed/${e.id_site}/${e.id}`;
-  else {
+  if (e && e.id && e.id_site) {
+    location.href = `/ed/${e.id_site}/${e.id}`;
+  } else {
     const e = await _db.page.findFirst({
       where: {
         is_deleted: false,
@@ -169,8 +162,9 @@ const navSitePage = async (p: PG) => {
       select: { id: true, id_site: true },
     });
 
-    if (e && e.id && e.id_site) location.href = `/ed/${e.id_site}/${e.id}`;
-    else {
+    if (e && e.id && e.id_site) {
+      location.href = `/ed/${e.id_site}/${e.id}`;
+    } else {
       const e = await _db.page.findFirst({
         where: {
           is_deleted: false,

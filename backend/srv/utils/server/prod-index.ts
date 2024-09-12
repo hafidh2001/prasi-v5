@@ -12,9 +12,13 @@ export const prodIndex = async (
     const html = parse(index);
     head = [
       ...html.querySelectorAll("script").map((e) => {
+        // e.setAttribute("src", `/prod/${site_id}${e.getAttribute("src")}`);
+
         return e.toString();
       }),
       ...html.querySelectorAll("link").map((e) => {
+        // e.setAttribute("href", `/prod/${site_id}${e.getAttribute("href")}`);
+
         return e.toString();
       }),
     ];

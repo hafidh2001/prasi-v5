@@ -1,18 +1,9 @@
-import type { parseJs } from "../../../../srv/ws/sync/editor/parser/parse-js";
 import {
-  FMAdv,
-  FMBackground,
-  FMBorder,
-  FMComponent,
-  FMDimension,
-  FMFont,
-  FMLayout,
-  FMPadding,
   FNBackground,
   FNBorder,
   FNDimension,
   FNFont,
-  FNPadding,
+  FNPadding
 } from "./meta-fn";
 
 export type MetaItem = {
@@ -32,19 +23,5 @@ export type BasicItem = {
   font?: FNFont;
   dim?: FNDimension;
   border?: FNBorder;
-  script?: ReturnType<typeof parseJs>;
-  script_keyed?: Record<string, ReturnType<typeof parseJs>>;
   typings?: string;
-};
-
-export type MBasicItem = {
-  padding?: FMPadding;
-  bg?: FMBackground;
-  font?: FMFont;
-  component?: FMComponent;
-  dim?: FMDimension;
-  layout?: FMLayout;
-  adv?: FMAdv;
-  border?: FMBorder;
-  script?: ReturnType<typeof parseJs>;
 };

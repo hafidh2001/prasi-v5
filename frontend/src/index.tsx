@@ -1,4 +1,3 @@
-import { defineReact, defineWindow } from "prasi-utils";
 import { Root as ReactRoot, createRoot } from "react-dom/client";
 import { apiProxy } from "./base/load/api/api-proxy";
 import { loadApiProxyDef } from "./base/load/api/api-proxy-def";
@@ -7,7 +6,10 @@ import { Root } from "./base/root";
 import { w } from "./utils/types/general";
 
 import "@fontsource/source-sans-3";
+import { StrictMode } from "react";
 import "./index.css";
+import { defineReact } from "./utils/react/define-react";
+import { defineWindow } from "./utils/react/define-window";
 
 const start = async () => {
   let react = {
@@ -34,10 +36,13 @@ const start = async () => {
 
   const el = document.getElementById("root");
 
-  console.log("mokona");
   if (el) {
     react.root = createRoot(el);
-    react.root.render(<Root />);
+    react.root.render(
+      <StrictMode>
+        <Root />
+      </StrictMode>
+    );
   }
 };
 

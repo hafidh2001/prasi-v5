@@ -9,7 +9,15 @@ import { formatMessagesSync } from "esbuild";
 import { staticFile } from "../static";
 import { c } from "../color";
 
-export const loadSite = (site_id: string) => {
+export const loadSite = (site_id: string, opt?: { force_reload?: boolean }) => {
+  if (g.site[site_id]) {
+    if (opt?.force_reload) {
+      delete g.site[site_id];
+    } else {
+      return;
+    }
+  }
+
   g.site[site_id] ??= {
     loading: false,
     promises: [],

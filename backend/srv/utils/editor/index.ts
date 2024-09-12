@@ -11,46 +11,9 @@ type USER_ID = string;
 type CONN_ID = string;
 export const editor = {
   db: null as unknown as ReturnType<typeof initCacheDb>,
-  loading: {
-    route: new Set<string>(),
-  },
+  loading: {} as Record<string, Set<string>>,
   init() {
     this.db = initCacheDb();
-  },
-  page: {
-    load(page_id: string, opt?: { conn_id?: string }) {
-      if (opt?.conn_id) {
-        const conn = editor.conn[opt.conn_id];
-        if (conn) {
-          conn.page_id = page_id;
-        }
-      }
-    },
-  },
-  async route(site_id: string, load: () => Promise<string>) {
-    const found = this.db.tables.route.find({ where: { site_id } });
-    if (found.length === 0) {
-      this.loading.route.add(site_id);
-      const data = await load();
-      this.db.tables.route.save({ site_id, data, ts: Date.now() });
-      this.loading.route.delete(site_id);
-      return data;
-    }
-
-    if (!this.loading.route.has(site_id)) {
-      this.loading.route.add(site_id);
-      load().then((data) => {
-        this.db.tables.route.save({
-          id: found[0].id,
-          site_id,
-          data,
-          ts: Date.now(),
-        });
-      });
-      this.loading.route.delete(site_id);
-    }
-
-    return found[0].data;
   },
   site: {
     async load(site_id: string, opt?: { conn_id?: string }) {
@@ -77,6 +40,72 @@ export const editor = {
         },
       });
     },
+  },
+  page: {
+    async load(page_id: string, opt?: { conn_id?: string }) {
+      if (opt?.conn_id) {
+        const conn = editor.conn[opt.conn_id];
+        if (conn) {
+          conn.page_id = page_id;
+        }
+      }
+
+      return await cacheResolve({
+        cached: () => editor.db.tables.page.find({ where: { page_id } })[0],
+        resolve: (cached) => unpack(cached.root),
+        load: () => _db.page.findFirst({ where: { id: page_id } }),
+        store: (result, cached) => {
+          editor.db.tables.page.save({
+            id: cached?.id,
+            root: pack(result),
+            page_id,
+            ts: Date.now(),
+          });
+        },
+      });
+    },
+  },
+  cache: {
+    async route(site_id: string, load: () => Promise<string>) {
+      return await editor.cache_get_set("route", site_id, load);
+    },
+    async loadjs(pathname: string, load: () => Promise<string>) {
+      return await editor.cache_get_set("loadjs", pathname, load);
+    },
+  },
+  async cache_get_set(
+    prefix: string,
+    key: string,
+    load: () => Promise<string>
+  ) {
+    if (!this.loading[prefix]) {
+      this.loading[prefix] = new Set<string>();
+    }
+
+    const found = this.db.tables.cache.find({ where: { key, prefix } });
+    if (found.length === 0) {
+      this.loading[prefix].add(key);
+      const data = await load();
+      this.db.tables.cache.save({ key, prefix, data, ts: Date.now() });
+      this.loading[prefix].delete(key);
+      return data;
+    }
+
+    if (!this.loading[prefix].has(key)) {
+      this.loading[prefix].add(key);
+      load().then((data) => {
+        this.db.tables.cache.save({
+          id: found[0].id,
+          key,
+          prefix,
+          data,
+          ts: Date.now(),
+        });
+      });
+      this.loading[prefix].delete(key);
+    }
+
+    return found[0].data;
   },
   ws: new WeakMap<ServerWebSocket<WSContext>, CONN_ID>(),
   conn: {} as Record<
@@ -129,9 +158,13 @@ const initCacheDb = () => {
           },
         },
       },
-      route: {
+      cache: {
         columns: {
-          site_id: {
+          prefix: {
+            type: "TEXT",
+            nullable: false,
+          },
+          key: {
             type: "TEXT",
             nullable: false,
           },

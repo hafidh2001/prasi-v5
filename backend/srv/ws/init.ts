@@ -1,6 +1,6 @@
 import type { WebSocketHandler } from "bun";
 import type { WSContext } from "../utils/server/ctx";
-import { unpack } from "msgpackr";
+import { pack, unpack } from "msgpackr";
 import { editor } from "../utils/editor";
 import { createId } from "@paralleldrive/cuid2";
 
@@ -19,6 +19,7 @@ export const initWS: WebSocketHandler<WSContext> = {
           editor.conn[conn_id] = { ws, user_id: msg.user_id };
           if (!editor.user[msg.user_id]) editor.user[msg.user_id] = new Set();
           editor.user[msg.user_id].add(conn_id);
+          ws.send(pack({ action: "connected", conn_id }));
         }
         break;
     }

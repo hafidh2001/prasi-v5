@@ -1,6 +1,6 @@
 import { FC, ReactNode, useEffect } from "react";
 import { Virtuoso as List, VirtuosoHandle } from "react-virtuoso";
-import { useLocal } from "prasi-utils";
+import { useLocal } from "../react/use-local";
 import { Popover } from "./popover";
 
 type DropdownItem = { label: string; value: string } | string;

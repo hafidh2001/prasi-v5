@@ -1,8 +1,8 @@
-import { page } from "prasi-utils";
-import { useLocal } from "prasi-utils";
-import { Loading } from "../../../utils/ui/loading";
+import { page } from "../../../utils/react/page";
+import { useLocal } from "../../../utils/react/use-local";
 import { formStyle } from "../../../utils/ui/form.style";
 import { Input } from "../../../utils/ui/form/input";
+import { Loading } from "../../../utils/ui/loading";
 
 export default page({
   url: "/login",
@@ -15,19 +15,27 @@ export default page({
         init: false,
       },
       async () => {
-        const s = await _api.session();
-        if (s && s.id) {
-          const rto = (window as any).redirectTo;
-          if (rto) {
-            navigate(rto);
-          } else {
-            localStorage.setItem("prasi-session", JSON.stringify(s));
-            navigate("/ed/");
+        form.init = true;
+        form.render();
+        const raw_session = localStorage.getItem("prasi-session");
+
+        try {
+          const s = JSON.parse(raw_session || "{}");
+
+          if (s && s.id) {
+            const rto = (window as any).redirectTo;
+            if (rto) {
+              navigate(rto);
+              return;
+            } else {
+              navigate("/ed/");
+              return;
+            }
           }
-        } else {
-          form.init = true;
-          form.render();
-        }
+        } catch (e) {}
+
+        form.init = true;
+        form.render();
       }
     );
 
@@ -40,13 +48,17 @@ export default page({
             e.preventDefault();
             form.submitting = true;
             form.render();
-            const s = await _api.login(form.username, form.password);
+            const s = await _api.auth_login(form.username, form.password);
 
             if (s.status === "failed") {
               form.submitting = false;
               form.render();
               alert(s.reason);
             } else {
+              localStorage.setItem(
+                "prasi-session",
+                JSON.stringify({ data: { user: s.user } })
+              );
               let rto = (window as any).redirectTo;
               if (rto) {
                 if (

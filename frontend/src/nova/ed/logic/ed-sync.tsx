@@ -20,19 +20,24 @@ export const loadSession = (p: PG) => {
   }
 };
 
-export const edInitSync = (p: PG) => {
+export const initSync = (p: PG) => {
   loadSession(p);
 
-  p.site.id = params.site_id;
-
-  if (!p.sync)
+  if (p.sync === null) {
     clientStartSync({
+      p,
       user_id: p.user.id,
       site_id: params.site_id,
       page_id: params.page_id,
-    }).then((sync) => {
+    }).then(async (sync) => {
       p.sync = sync;
+      p.status = "ready";
+      p.site = await p.sync!.site.load(params.site_id);
+      p.page.cur = await p.sync!.page.load(params.page_id);
+      console.log("🚀 Prasi Connected");
+      p.render();
     });
+  }
 
-  return true;
+  return p.status === "ready";
 };

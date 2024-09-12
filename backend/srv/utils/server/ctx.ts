@@ -13,7 +13,7 @@ export const serverContext = (server: Server, req: Request) => {
     host.base = `${url.protocol}//${url.host}`;
     host.baselen = host.base.length;
   }
-  const pathname = req.url.substring(host.baselen);
+  const pathname = req.url.substring(host.baselen).split("?").shift() || "";
 
   let ws = false;
   if (

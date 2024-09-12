@@ -1,4 +1,4 @@
-import { page } from "prasi-utils";
+import { page } from "../../../utils/react/page";
 import { Loading } from "../../../utils/ui/loading";
 
 export default page({

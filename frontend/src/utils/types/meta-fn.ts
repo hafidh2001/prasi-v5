@@ -1,13 +1,10 @@
-import { TypedMap } from "yjs-types";
-import { IItem, MItem } from "./item";
+import { IItem } from "./item";
 export type FNLayout = {
   dir: "row" | "col" | "row-reverse" | "col-reverse";
   align: FNAlign;
   gap: number | "auto";
   wrap: undefined | "flex-wrap" | "flex-nowrap";
 };
-
-export type FMLayout = TypedMap<FNLayout>;
 
 export type FNAdv = {
   flow?: string;
@@ -17,7 +14,6 @@ export type FNAdv = {
   html?: string;
 };
 
-export type FMAdv = TypedMap<FNAdv>;
 export type FNComponent = {
   id: string;
   props: Record<string, FNCompDef>;
@@ -51,20 +47,6 @@ type FNCompMeta = {
   option_mode?: "dropdown" | "button" | "checkbox";
 };
 
-export type FMCompDef = TypedMap<
-  Omit<FNCompDef, "meta" | "content"> & {
-    content: MItem;
-    meta: TypedMap<FNCompMeta>;
-  }
->;
-
-export type FMComponent = TypedMap<
-  Omit<FNComponent, "group" | "props"> & {
-    props: TypedMap<Record<string, FMCompDef>>;
-    ref_ids: TypedMap<Record<string, string>>;
-  }
->;
-
 export type FNAlign =
   | "top-left"
   | "top-center"
@@ -86,8 +68,6 @@ export type FNPadding = {
   r?: number;
 };
 
-export type FMPadding = TypedMap<FNPadding>;
-
 export type FNDimension = {
   w?: number | "fit" | "full";
   h?: number | "fit" | "full";
@@ -95,7 +75,6 @@ export type FNDimension = {
   hUnit?: "px" | "%";
   proportion?: boolean;
 };
-export type FMDimension = TypedMap<FNDimension>;
 
 export type FNBackground = {
   color?: string;
@@ -105,7 +84,6 @@ export type FNBackground = {
   pos?: "top" | "left" | "center" | "bottom" | "right";
 };
 
-export type FMBackground = TypedMap<FNBackground>;
 export type FNBorder = {
   style?: "solid" | "dash";
   stroke?: FNBorderCorner;
@@ -124,7 +102,6 @@ export type FNRounded = {
   bl?: number;
   br?: number;
 };
-export type FMBorder = TypedMap<FNBorder>;
 export type FNFont = {
   color?: string;
   size?: number;
@@ -140,11 +117,8 @@ export type FNFont = {
     | "whitespace-break-spaces";
   wordBreak?: "break-normal" | "break-words" | "break-all" | "break-keep";
 };
-export type FMFont = TypedMap<FNFont>;
-
 export type FNLinkTag = {
   tag?: string;
   link?: string;
   class?: string;
 };
-export type FMLinkTag = TypedMap<FNLinkTag>;

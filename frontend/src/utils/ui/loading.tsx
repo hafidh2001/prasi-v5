@@ -1,5 +1,5 @@
 import { FC, ReactElement, ReactNode, useEffect } from "react";
-import { useLocal } from "prasi-utils";
+import { useLocal } from "../react/use-local";
 
 const w = window as unknown as {
   loadingIcon: string;
@@ -50,7 +50,7 @@ export const Loading: FC<{
   }, []);
 
   const CustomLoading = w.ContentLoading;
-  console.log()
+  console.log();
   return (
     <>
       {backdrop !== false && (

@@ -12,12 +12,14 @@ export default defineConfig({
       js: "source-map",
     },
     distPath: { root: "./../../../prod" },
+    assetPrefix: "/nova"
   },
   dev: {
     liveReload: false,
     hmr: false,
     writeToDisk: true,
     progressBar: false,
+    assetPrefix: "/nova"
   },
   server: {
     port: 14314,

@@ -12,7 +12,7 @@ export type FBuild = (
 
 export const jscript = {
   reload: (p: PG) => {},
-  editor: null as typeof MonacoEditor | null,
+  editor: null as typeof MonacoEditor | null, 
   editorLoaded: false,
   build: null as null | FBuild,
   pending: null as null | Promise<void>,

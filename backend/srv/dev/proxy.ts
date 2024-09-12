@@ -1,3 +1,4 @@
+import { gzipSync } from "bun";
 import type { ServerCtx } from "../utils/server/ctx";
 
 const dev = {
@@ -30,7 +31,9 @@ export const devProxy = async ({ url, req, ws }: ServerCtx) => {
 
   if (res)
     return new Response(await res.arrayBuffer(), {
-      headers: { "content-type": res.headers.get("content-type") as string },
+      headers: {
+        "content-type": res.headers.get("content-type") as string,
+      },
     });
   else {
     console.error(`Failed to get: ${url.pathname}`);

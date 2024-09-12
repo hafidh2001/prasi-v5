@@ -29,16 +29,13 @@ export const staticFile = async (
     scanning: false,
     paths: new Set<string>(),
     rescan: async () => {},
-    serve: (ctx: ServerCtx, arg?: { prefix?: string }) => {
-      let pathname = ctx.url.pathname;
-      if (arg?.prefix) {
+    serve: (ctx: ServerCtx, arg?: { prefix?: string; debug?: boolean }) => {
+      let pathname = ctx.url.pathname || "";
+      if (arg?.prefix && pathname) {
         pathname = pathname.substring(arg.prefix.length);
       }
       const found = findRoute(router, undefined, pathname);
 
-      if (opt.debug) {
-        console.log(pathname, found);
-      }
       if (found) {
         const { fullpath, mime } = found.data;
         if (exists(fullpath)) {

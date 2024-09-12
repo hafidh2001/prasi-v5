@@ -23,6 +23,6 @@
   },
   "include": [
     "./src/**/*",
-    "./jsx-*.ts",
+    "./jsx-*.ts", "../../frontend/src/utils/react/use-local.ts", "../../frontend/src/utils/react/use-global.ts", "../../frontend/src/utils/react/define-react.ts", "../../frontend/src/utils/react/define-window.ts", "../../frontend/src/utils/react/page.ts",
   ]
 }
