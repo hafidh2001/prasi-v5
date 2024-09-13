@@ -6,6 +6,7 @@ import { EDGlobal, PG } from "../../logic/ed-global";
 import { useLocal } from "../../../../utils/react/use-local";
 import { active } from "../../logic/active";
 import { PNode } from "../../logic/types";
+import { IItem } from "../../../../utils/types/item";
 
 export const EdTreeSearch = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -120,7 +121,11 @@ export const doTreeSearch = (p: PG) => {
   let i = 0;
 
   let ptree = p.page.tree;
-  if (active.comp_id && p.comp.loaded[active.comp_id].tree) {
+  if (
+    active.comp_id &&
+    p.comp.loaded[active.comp_id] &&
+    p.comp.loaded[active.comp_id].tree
+  ) {
     ptree = p.comp.loaded[active.comp_id].tree;
   }
 
@@ -128,7 +133,11 @@ export const doTreeSearch = (p: PG) => {
 
   const searchInPTree = (ptree: NodeModel<PNode>[], id_component?: string) => {
     if (p.ui.tree.search.mode.Name) {
-      const found = fuzzy(ptree, "text", search);
+      const found = fuzzy(
+        ptree,
+        "data.item.name",
+        search
+      );
 
       const id_found = ptree.find((e) => e.id === search);
       let i = 0;
@@ -140,8 +149,6 @@ export const doTreeSearch = (p: PG) => {
 
       for (const row of found) {
         if (row.data) {
-          if (id_component && row.data.parent?.component)
-            row.data.parent.component.comp_id = id_component;
           tree[row.id] = { idx: i++, node: { ...row, parent: "root" } };
         }
       }
@@ -151,13 +158,17 @@ export const doTreeSearch = (p: PG) => {
       const item = row.data?.item;
 
       if (item) {
-        if (item.component?.id && !comp_searched.has(item.component.id)) {
-          comp_searched.add(item.component.id);
-          const tree = p.comp.loaded[item.component.id].tree;
-          if (tree) {
-            searchInPTree(tree, item.component.id);
-          }
-        }
+        // if (
+        //   item.component?.id &&
+        //   !comp_searched.has(item.component.id) &&
+        //   p.comp.loaded[item.component.id]
+        // ) {
+        //   comp_searched.add(item.component.id);
+        //   const tree = p.comp.loaded[item.component.id].tree;
+        //   if (tree) {
+        //     searchInPTree(tree, item.component.id);
+        //   }
+        // }
 
         const js = item.adv?.js;
         if (js) {

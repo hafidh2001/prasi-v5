@@ -16,6 +16,8 @@
     "dayjs": "^1.11.13",
     "idb-keyval": "^6.2.1",
     "immer": "^10.1.1",
+    "lodash.get": "^4.4.2",
+    "lodash.set": "^4.3.2",
     "lodash.trim": "^4.5.1",
     "pako": "^2.1.0",
     "prasi-db": "workspace:*",
@@ -35,6 +37,8 @@
   "devDependencies": {
     "@rsbuild/core": "1.0.1",
     "@rsbuild/plugin-react": "1.0.1",
+    "@types/lodash.get": "^4.4.9",
+    "@types/lodash.set": "^4.3.9",
     "@types/pako": "^2.0.3",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",

@@ -19,7 +19,7 @@ export const EdTreeNodeIndent = ({
 
   return (
     <div
-      className={cx("flex items-stretch cursor-pointer")}
+      className={cx("flex items-stretch cursor-pointer", p.ui.tree.search.value && "pl-2")}
       onClick={(e) => {
         e.stopPropagation();
 

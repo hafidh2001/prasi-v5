@@ -3,6 +3,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { useLocal } from "../../../utils/react/use-local";
 import { PageTree } from "./page-tree";
 import { useEffect } from "react";
+import { LoadingSpinner } from "../../../utils/ui/loading";
 dayjs.extend(relativeTime);
 export const EdPageHistory = ({ tree }: { tree: PageTree }) => {
   const local = useLocal(
@@ -13,7 +14,6 @@ export const EdPageHistory = ({ tree }: { tree: PageTree }) => {
       unlisten: () => {},
     },
     () => {
-      console.log("mount");
       reload();
       tree.before_update = (do_update) => {
         if (local.history && local.history.redo.length > 0) {
@@ -106,7 +106,7 @@ export const EdPageHistory = ({ tree }: { tree: PageTree }) => {
               <div
                 key={idx}
                 className={cx(
-                  "border-b text-sm px-2 py-1 items-center cursor-pointer hover:bg-blue-50 flex",
+                  "border-b bg-purple-50 text-sm px-2 py-1 items-center cursor-pointer hover:bg-blue-50 flex",
                   css`
                     .undo {
                       opacity: 0.3;
@@ -129,7 +129,7 @@ export const EdPageHistory = ({ tree }: { tree: PageTree }) => {
                 <div className="flex justify-center items-center size">
                   <div className="box">{e.size}</div>
                 </div>
-                <div className="text-xs undo border bg-purple-100 border-purple-700 text-purple-700 px-1">
+                <div className="text-xs undo border bg-white border-purple-700 text-purple-700 px-1">
                   UNDO
                 </div>
               </div>
@@ -140,66 +140,9 @@ export const EdPageHistory = ({ tree }: { tree: PageTree }) => {
 
       {local.loading && (
         <div
-          className={cx(
-            "absolute inset-0 flex items-center justify-center",
-            css`
-              svg {
-                width: 50px;
-                height: 50px;
-              }
-            `
-          )}
+          className={cx("absolute inset-0 flex items-center justify-center")}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-            <path
-              fill="#1F5FFF"
-              stroke="#1F5FFF"
-              strokeWidth="15"
-              d="M25 85H55V115H25z"
-            >
-              <animate
-                attributeName="opacity"
-                begin="-0.4"
-                calcMode="spline"
-                dur="2"
-                keySplines=".5 0 .5 1;.5 0 .5 1"
-                repeatCount="indefinite"
-                values="1;0;1;"
-              ></animate>
-            </path>
-            <path
-              fill="#1F5FFF"
-              stroke="#1F5FFF"
-              strokeWidth="15"
-              d="M85 85H115V115H85z"
-            >
-              <animate
-                attributeName="opacity"
-                begin="-0.2"
-                calcMode="spline"
-                dur="2"
-                keySplines=".5 0 .5 1;.5 0 .5 1"
-                repeatCount="indefinite"
-                values="1;0;1;"
-              ></animate>
-            </path>
-            <path
-              fill="#1F5FFF"
-              stroke="#1F5FFF"
-              strokeWidth="15"
-              d="M145 85H175V115H145z"
-            >
-              <animate
-                attributeName="opacity"
-                begin="0"
-                calcMode="spline"
-                dur="2"
-                keySplines=".5 0 .5 1;.5 0 .5 1"
-                repeatCount="indefinite"
-                values="1;0;1;"
-              ></animate>
-            </path>
-          </svg>
+          <LoadingSpinner color="blue" />
         </div>
       )}
     </div>

@@ -15,6 +15,7 @@ import { TopBtn } from "./ui/top-btn";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { DndProvider, getBackendOptions } from "@minoru/react-dnd-treeview";
 import { useRef } from "react";
+import { EdTreeSearch } from "./tree/parts/search";
 
 export const EdLeft = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -120,6 +121,7 @@ export const EdLeft = () => {
               )}
             </div>
           </Tooltip>
+          {p.ui.left.mode === "tree" && <EdTreeSearch />}
         </div>
 
         <div

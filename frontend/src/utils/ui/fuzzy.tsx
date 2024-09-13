@@ -5,7 +5,7 @@ const uf = new uFuzzy({});
 
 export const fuzzy = <T extends object>(
   array: T[],
-  field: keyof T | { pk: keyof T; search: (keyof T)[] },
+  field: string | { pk: keyof T; search: string[] },
   search: string
 ) => {
   if (typeof field === "string") {
@@ -37,7 +37,7 @@ export const fuzzy = <T extends object>(
 
 const fuzzySingle = <T extends object>(
   array: T[],
-  field: keyof T,
+  field: string,
   search: string
 ) => {
   const [idxs, info] = uf.search(

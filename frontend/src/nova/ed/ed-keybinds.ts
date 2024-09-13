@@ -23,7 +23,6 @@ export const prasiKeybinding = (p: PG) => {
         e.preventDefault();
         e.stopPropagation();
         p.page.tree.undo();
-        console.log('undo', await p.page.tree!.history());
       }
     };
     const redo = async (e: any) => {
@@ -31,8 +30,6 @@ export const prasiKeybinding = (p: PG) => {
         e.preventDefault();
         e.stopPropagation();
         p.page.tree.redo();
-
-        console.log('redo', await p.page.tree!.history());
       }
     };
     handler.add("ctrl+z", undo);
