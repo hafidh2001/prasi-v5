@@ -19,3 +19,15 @@ export type EComp = Omit<component, "content_tree"> & {
     childs: IItem[];
   };
 };
+
+export type PNode = {
+  item: IItem;
+  parent?: {
+    id: string;
+    component?: {
+      comp_id: string;
+      instance_id: string;
+      prop_name: string;
+    };
+  };
+};

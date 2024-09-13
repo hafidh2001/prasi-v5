@@ -3,7 +3,7 @@ import { useGlobal } from "../../utils/react/use-global";
 import { Tooltip } from "../../utils/ui/tooltip";
 import { EDGlobal } from "./logic/ed-global";
 import { EdSitePicker } from "./popup/site/site-picker";
-import { EdItemTree } from "./tree/ed-item-tree";
+import { EdTree } from "./tree/ed-tree";
 import {
   iconHistory,
   iconLogout,
@@ -12,10 +12,13 @@ import {
   iconVSCode,
 } from "./ui/icons";
 import { TopBtn } from "./ui/top-btn";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { DndProvider, getBackendOptions } from "@minoru/react-dnd-treeview";
+import { useRef } from "react";
 
 export const EdLeft = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
-
+  const ref_tree = useRef<HTMLDivElement>(null);
   return (
     <div className={cx("flex flex-1 flex-col relative border-r select-none")}>
       <div className="absolute inset-0 flex flex-col overflow-hidden">
@@ -118,10 +121,39 @@ export const EdLeft = () => {
             </div>
           </Tooltip>
         </div>
-        {p.ui.left.mode === "tree" && <EdItemTree />}
-        {p.ui.left.mode === "history" && p.page.tree && (
-          <EdPageHistory tree={p.page.tree} />
-        )}
+
+        <div
+          className="tree-body flex relative flex-1 overflow-y-auto overflow-x-hidden"
+          onContextMenu={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          ref={ref_tree}
+        >
+          {p.page.tree && (
+            <>
+              {p.ui.left.mode === "tree" && (
+                <>
+                  {ref_tree.current && (
+                    <DndProvider
+                      backend={HTML5Backend}
+                      options={getBackendOptions({
+                        html5: {
+                          rootElement: ref_tree.current,
+                        },
+                      })}
+                    >
+                      <EdTree tree={p.page.tree} />
+                    </DndProvider>
+                  )}
+                </>
+              )}
+              {p.ui.left.mode === "history" && (
+                <EdPageHistory tree={p.page.tree} />
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

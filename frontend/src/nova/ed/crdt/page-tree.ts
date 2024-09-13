@@ -1,9 +1,11 @@
+import { NodeModel } from "@minoru/react-dnd-treeview";
 import { useEffect, useRef, useState } from "react";
 import { WebsocketProvider } from "y-websocket";
 import { Doc } from "yjs";
 import { createClient } from "../../../utils/sync/client";
-import { EPage } from "../logic/types";
-import { bind, UpdateFn } from "./lib/immer-yjs";
+import { EPage, PNode } from "../logic/types";
+import { bind } from "./lib/immer-yjs";
+import { findNodeById, flattenTree } from "./node/flatten-tree";
 
 export type PageTree = ReturnType<typeof pageTree>;
 
@@ -23,7 +25,6 @@ export const pageTree = (
   wsurl.protocol = wsurl.protocol === "http:" ? "ws:" : "wss:";
   wsurl.pathname = "/crdt";
   const wsync = new WebsocketProvider(wsurl.toString(), `page-${page_id}`, doc);
-
   wsync.on("sync", (synced: boolean) => {
     if (synced) {
       if (!state.loaded) {
@@ -33,14 +34,24 @@ export const pageTree = (
     }
   });
 
-  return {
+  doc.on("update", (update, origin) => {
+    tree.nodes = flattenTree(immer.get().childs);
+    arg?.loaded();
+  });
+
+  const tree = {
+    nodes: {
+      models: [] as NodeModel<PNode>[],
+      array: [] as PNode[],
+      map: {} as Record<string, PNode>,
+    },
     get snapshot() {
       return immer.get();
     },
     history: async () => {
       return (await _api.page_history(page_id)) as {
-        undo: {ts: number, size: string}[];
-        redo: {ts: number, size: string}[];
+        undo: { ts: number; size: string }[];
+        redo: { ts: number; size: string }[];
         ts: number;
       };
     },
@@ -54,11 +65,31 @@ export const pageTree = (
       return immer.subscribe(fn);
     },
     before_update: null as null | ((do_update: () => void) => void),
-    update(fn: UpdateFn<EPage["content_tree"]>) {
+    update(
+      fn: (opt: {
+        tree: EPage["content_tree"];
+        flatten(): ReturnType<typeof flattenTree>;
+        findById: (id: string) => null | PNode;
+      }) => void
+    ) {
+      const _fn = (tree: EPage["content_tree"]) => {
+        fn({
+          tree,
+          flatten: () => {
+            const result = flattenTree(tree.childs);
+            return result;
+          },
+          findById: (id) => {
+            const result = findNodeById(id, tree.childs);
+            return result;
+          },
+        });
+      };
+
       if (this.before_update) {
-        this.before_update(() => immer.update(fn));
+        this.before_update(() => immer.update(_fn));
       } else {
-        immer.update(fn);
+        immer.update(_fn);
       }
     },
     view<T>(fn: (val: EPage["content_tree"]) => T) {
@@ -101,4 +132,6 @@ export const pageTree = (
       doc.destroy();
     },
   };
+
+  return tree;
 };

@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useLocal } from "../../../utils/react/use-local";
 import { PageTree } from "./page-tree";
+import { useEffect } from "react";
 dayjs.extend(relativeTime);
 export const EdPageHistory = ({ tree }: { tree: PageTree }) => {
   const local = useLocal(
@@ -9,8 +10,10 @@ export const EdPageHistory = ({ tree }: { tree: PageTree }) => {
       history: null as null | Awaited<ReturnType<typeof tree.history>>,
       loading: false,
       timeout: null as any,
+      unlisten: () => {},
     },
     () => {
+      console.log("mount");
       reload();
       tree.before_update = (do_update) => {
         if (local.history && local.history.redo.length > 0) {
@@ -21,15 +24,18 @@ export const EdPageHistory = ({ tree }: { tree: PageTree }) => {
           do_update();
         }
       };
-      const unlisten = tree.listen(() => {
+      local.unlisten = tree.listen(() => {
         reload();
       });
-      return () => {
-        unlisten();
-        tree.before_update = null;
-      };
     }
   );
+
+  useEffect(() => {
+    return () => {
+      local.unlisten();
+      tree.before_update = null;
+    };
+  }, []);
 
   const reload = async () => {
     if (!local.loading) {
