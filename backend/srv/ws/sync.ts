@@ -3,14 +3,14 @@ import { pack } from "msgpackr";
 import { editor } from "../utils/editor";
 import type { ServerWebSocket } from "bun";
 import type { WSContext } from "../utils/server/ctx";
-import { crdt_pages } from "./crdt";
+import { crdt_pages } from "./crdt/crdt";
 
 export const wsSync = (
   ws: ServerWebSocket<WSContext>,
   msg:
     | { action: "open"; user_id: string }
-    | { action: "undo"; page_id: string }
-    | { action: "redo"; page_id: string }
+    | { action: "undo"; page_id: string; count: number }
+    | { action: "redo"; page_id: string; count: number }
 ) => {
   switch (msg.action) {
     case "open":
@@ -27,7 +27,11 @@ export const wsSync = (
       {
         const page = crdt_pages[msg.page_id];
         if (page) {
-          page.undoManager.undo();
+          for (let i = 0; i < msg.count; i++) {
+            if (page.undoManager.undoStack.length > 1) {
+              page.undoManager.undo();
+            }
+          }
         }
       }
       break;
@@ -35,7 +39,9 @@ export const wsSync = (
       {
         const page = crdt_pages[msg.page_id];
         if (page) {
-          page.undoManager.redo();
+          for (let i = 0; i < msg.count; i++) {
+            page.undoManager.redo();
+          }
         }
       }
       break;

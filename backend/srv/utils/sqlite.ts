@@ -173,11 +173,16 @@ type SortOut<I, E> = Pick<
 type Or<A, TA, B, TB> = A extends TA ? true : B extends TB ? true : false;
 
 interface _TableFunctions<TT extends Tables, T extends Tables[string]> {
-  create: (cols: _Columns<TT, T>) => AddTableFx<T, _Columns<TT, T>>;
+  // create: (cols: _Columns<TT, T>) => AddTableFx<T, _Columns<TT, T>>;
   save: (
     cols: _Columns<TT, T> | ({ id: number } & Partial<_Columns<TT, T>>)
   ) => AddTableFx<T, AddColumnDefaults<_Columns<TT, T>>>[];
-  delete: (opts: Partial<_Columns<TT, T>>) => void;
+  delete: (opts: {
+    where?: Partial<_Columns<TT, T>>;
+    sort?: Partial<Record<keyof T["columns"], "asc" | "desc">>;
+    limit?: number;
+  }) => void;
+  count: (opts: { where?: Partial<_Columns<TT, T>> }) => number;
   find: <
     S extends (keyof T["columns"])[] | undefined,
     R extends Narrow<
@@ -185,6 +190,8 @@ interface _TableFunctions<TT extends Tables, T extends Tables[string]> {
     >,
   >(opts?: {
     where?: Partial<AddColumnDefaults<_Columns<TT, T>>>;
+    sort?: Partial<Record<keyof T["columns"], "asc" | "desc">>;
+    limit?: number;
     select?: S;
     resolve?: R;
   }) => AddTableFx<
@@ -350,7 +357,7 @@ export class BunORM<T extends Narrow<Tables>> {
               )
             );
     return {
-      create: (cols) => injectFx([cols])[0],
+      // create: (cols) => injectFx([cols])[0],
       save: (_cols) => {
         const cols = Object.fromEntries(
           Object.entries(_cols)
@@ -404,14 +411,37 @@ export class BunORM<T extends Narrow<Tables>> {
           )
         );
       },
-      delete: (opts) =>
-        this.db
-          .query(
-            `DELETE FROM ${table} WHERE ${Object.keys(opts)
-              .map((x, i) => `${x} = ?${i + 1}`)
-              .join(" AND ")};`
-          )
-          .run(...(Object.values(opts) as any)),
+      delete: (opts) => {
+        const sql = `DELETE FROM ${table} WHERE id IN (
+          SELECT id FROM ${table}${
+            opts.where
+              ? ` WHERE ${Object.keys(opts.where)
+                  .map((x, i) => `${x} = ?${i + 1}`)
+                  .join(" AND ")}`
+              : ""
+          }${
+            opts.sort
+              ? ` ORDER BY "${Object.keys(opts.sort)[0]}" ${Object.values(opts.sort)[0]}`
+              : ""
+          }${opts.limit ? ` LIMIT ${opts.limit}` : ""});`;
+        return this.db
+          .query(sql)
+          .run(...(Object.values(opts.where || {}) as any));
+      },
+      count: (opts) => {
+        const sql = `SELECT COUNT(*) FROM ${table}${
+          opts.where
+            ? ` WHERE ${Object.keys(opts.where)
+                .map((x, i) => `${x} = ?${i + 1}`)
+                .join(" AND ")}`
+            : ""
+        };`;
+        return (
+          this.db
+            .query(sql)
+            .all(...(Object.values(opts.where || {}) as any))[0] as any
+        )?.["COUNT(*)"] as number;
+      },
       find: (opts) =>
         resolveRelations(
           executeGetMiddleware(
@@ -433,7 +463,11 @@ export class BunORM<T extends Narrow<Tables>> {
                                 .map((x, i) => `${x} = ?${i + 1}`)
                                 .join(" AND ")}`
                             : ""
-                        };`
+                        }${
+                          opts.sort
+                            ? ` ORDER BY "${Object.keys(opts.sort)[0]}" ${Object.values(opts.sort)[0]}`
+                            : ""
+                        }${opts.limit ? ` LIMIT ${opts.limit}` : ""};`
                   )
                   .all(
                     ...((opts?.where ? Object.values(opts.where) : []) as any[])

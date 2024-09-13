@@ -17,7 +17,11 @@ export const clientStartSync = (arg: {
     ws.onopen = () => {
       ws.send(pack({ action: "open", user_id: arg.user_id }));
       setInterval(() => {
-        ws.ping();
+        if (ws.ping) {
+          ws.ping();
+        } else {
+          console.log(ws.ping);
+        }
       }, 90 * 1000);
     };
     ws.onmessage = async ({ data }) => {
@@ -55,11 +59,11 @@ export const createClient = (ws: WebSocket, p: any, conn_id: string) => ({
     action: async () => {},
   },
   page: {
-    undo: (page_id: string) => {
-      ws.send(pack({ action: "undo", page_id }));
+    undo: (page_id: string, count: number) => {
+      ws.send(pack({ action: "undo", page_id, count }));
     },
-    redo: (page_id: string) => {
-      ws.send(pack({ action: "redo", page_id }));
+    redo: (page_id: string, count: number) => {
+      ws.send(pack({ action: "redo", page_id, count }));
     },
     load: async (id: string) => {
       return (await _api.page_load(id, { conn_id: p.user.conn_id })) as EPage;

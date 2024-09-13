@@ -3,7 +3,7 @@ import { unpack } from "msgpackr";
 import { editor } from "../utils/editor";
 import type { WSContext } from "../utils/server/ctx";
 import { wsSync } from "./sync";
-import { wsCrdt, wsCrdtClose } from "./crdt";
+import { wsCrdt, wsCrdtClose } from "./crdt/crdt";
 
 export const initWS: WebSocketHandler<WSContext> = {
   message(ws, raw) {

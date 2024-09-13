@@ -94,8 +94,6 @@ const Preview = ({ tree }: { tree: PageTree }) => {
           e.id = "MO" + Date.now();
           return e;
         });
-
-        console.log(await tree.history());
       }}
     >
       <pre className="text-[10px] absolute inset-0">

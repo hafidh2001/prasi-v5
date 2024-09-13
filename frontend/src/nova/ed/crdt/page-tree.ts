@@ -3,7 +3,7 @@ import { WebsocketProvider } from "y-websocket";
 import { Doc } from "yjs";
 import { createClient } from "../../../utils/sync/client";
 import { EPage } from "../logic/types";
-import { bind } from "./lib/immer-yjs";
+import { bind, UpdateFn } from "./lib/immer-yjs";
 
 export type PageTree = ReturnType<typeof pageTree>;
 
@@ -25,9 +25,11 @@ export const pageTree = (
   const wsync = new WebsocketProvider(wsurl.toString(), `page-${page_id}`, doc);
 
   wsync.on("sync", (synced: boolean) => {
-    if (synced && !state.loaded) {
-      state.loaded = true;
-      arg?.loaded();
+    if (synced) {
+      if (!state.loaded) {
+        state.loaded = true;
+        arg?.loaded();
+      }
     }
   });
 
@@ -36,15 +38,29 @@ export const pageTree = (
       return immer.get();
     },
     history: async () => {
-      return _api.page_history(page_id);
+      return (await _api.page_history(page_id)) as {
+        undo: {ts: number, size: string}[];
+        redo: {ts: number, size: string}[];
+        ts: number;
+      };
     },
-    undo: () => {
-      sync.page.undo(page_id);
+    undo: (count = 1) => {
+      sync.page.undo(page_id, count);
     },
-    redo: () => {
-      sync.page.redo(page_id);
+    redo: (count = 1) => {
+      sync.page.redo(page_id, count);
     },
-    update: immer.update,
+    listen: (fn: () => void) => {
+      return immer.subscribe(fn);
+    },
+    before_update: null as null | ((do_update: () => void) => void),
+    update(fn: UpdateFn<EPage["content_tree"]>) {
+      if (this.before_update) {
+        this.before_update(() => immer.update(fn));
+      } else {
+        immer.update(fn);
+      }
+    },
     view<T>(fn: (val: EPage["content_tree"]) => T) {
       return fn(this.snapshot);
     },
