@@ -91,7 +91,7 @@ export const EdTreeHistory = ({ tree }: { tree: PageTree | CompTree }) => {
                 tree.redo(local.history!.redo.length - idx);
               }}
             >
-              <div className="flex-1">
+              <div className="flex-1 text-xs whitespace-nowrap">
                 {dayjs(e.ts).from(local.history!.ts)}
               </div>
               <div className="flex justify-center items-center size">
@@ -125,7 +125,7 @@ export const EdTreeHistory = ({ tree }: { tree: PageTree | CompTree }) => {
                   tree.undo(idx + 1);
                 }}
               >
-                <div className="flex-1">
+                <div className="flex-1 text-xs whitespace-nowrap">
                   {dayjs(e.ts).from(local.history!.ts)}
                 </div>
                 <div className="flex justify-center items-center size">

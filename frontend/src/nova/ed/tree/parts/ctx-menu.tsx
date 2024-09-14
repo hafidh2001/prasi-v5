@@ -19,6 +19,7 @@ import { edActionPaste } from "../action/paste";
 import { edActionWrap, edActionWrapInComp } from "../action/wrap";
 import { edActionUnwrap } from "../action/unwrap";
 import { edActionAdd } from "../action/add";
+import { Plus } from "lucide-react";
 export const EdTreeCtxMenu = ({
   raw: raw,
   event,
@@ -69,7 +70,14 @@ export const EdTreeCtxMenu = ({
   return (
     <Menu mouseEvent={event} onClose={onClose}>
       {!comp?.id && (
-        <MenuItem label="Add Item" onClick={() => edActionAdd(p, item)} />
+        <MenuItem
+          hotKey={<Plus size={12} strokeWidth={2.5} />}
+          label="Add Item"
+          onClick={() => {
+            active.item_id = item.id;
+            edActionAdd(p);
+          }}
+        />
       )}
       {type === "text" && (
         <MenuItem

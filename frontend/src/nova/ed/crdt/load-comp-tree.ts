@@ -40,13 +40,15 @@ export const internalLoadCompTree = (
   const wsync = new WebsocketProvider(wsurl.toString(), `comp-${comp_id}`, doc);
 
   doc.on("update", (update, origin) => {
-    component.nodes = flattenTree(immer.get().childs, {
+    component.nodes = flattenTree([immer.get()], {
+      comp_id,
       visit(item) {
         if (item.component?.id && opt?.on_component) {
           opt.on_component(item);
         }
       },
     });
+
     opt.on_update(immer.get());
     if (!state.loaded) {
       state.loaded = true;
@@ -93,18 +95,18 @@ export const internalLoadCompTree = (
         fn({
           tree,
           flatten: () => {
-            const result = flattenTree(tree.childs);
+            const result = flattenTree([tree], { comp_id });
             return result;
           },
           findNode: (id) => {
-            const result = findNodeById(id, tree.childs);
+            const result = findNodeById(id, [tree]);
             return result;
           },
           findParent: (id) => {
-            const result = findNodeById(id, tree.childs);
+            const result = findNodeById(id, [tree]);
 
             if (result?.parent) {
-              return findNodeById(result.parent.id, tree.childs);
+              return findNodeById(result.parent.id, [tree]);
             }
             return null;
           },

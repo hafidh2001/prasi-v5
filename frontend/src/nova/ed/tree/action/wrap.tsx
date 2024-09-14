@@ -59,7 +59,7 @@ export const edActionWrapInComp = (p: PG, item: IItem) => {
 
     const new_item: IItem = {
       id: createId(),
-      name: `Wrapped`,
+      name: `wrapped`,
       type: "item",
       childs: [item],
       component: {

@@ -1,17 +1,19 @@
 import { NodeModel, RenderParams } from "@minoru/react-dnd-treeview";
+import { getActiveTree } from "logic/active";
+import { EDGlobal } from "logic/ed-global";
 import { FC } from "react";
+import { useGlobal } from "utils/react/use-global";
+import { useLocal } from "utils/react/use-local";
+import { LoadingSpinner } from "utils/ui/loading";
 import { Tooltip } from "../../../../../utils/ui/tooltip";
 import { PNode } from "../../../logic/types";
-import { useGlobal } from "utils/react/use-global";
-import { EDGlobal } from "logic/ed-global";
-import { useLocal } from "utils/react/use-local";
-import { getActiveTree } from "logic/active";
 import { scrollTreeActiveItem } from "../scroll-tree";
+import { ComponentIcon } from "./node-indent";
 
 export const EdTreeNodeName: FC<{
   raw: NodeModel<PNode>;
   render_params: RenderParams;
-}> = ({ raw }) => {
+}> = ({ raw, render_params }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({ rename: raw.data?.item.name || "" });
   const node = raw.data;
@@ -29,7 +31,7 @@ export const EdTreeNodeName: FC<{
             )}
             autoFocus
             spellCheck={false}
-            defaultValue={local.rename}
+            value={local.rename}
             onFocus={(e) => {
               if (node.parent?.component?.is_jsx_root) {
                 p.ui.tree.rename_id = "";
@@ -46,6 +48,15 @@ export const EdTreeNodeName: FC<{
                 const n = findNode(node?.item.id);
                 if (n) {
                   n.item.name = local.rename || "";
+
+                  if (
+                    !n.item.name &&
+                    n.item.component?.id &&
+                    p.comp.loaded[n.item.component?.id].content_tree.name
+                  ) {
+                    n.item.name =
+                      p.comp.loaded[n.item.component?.id].content_tree.name;
+                  }
                 }
               });
 
@@ -60,19 +71,38 @@ export const EdTreeNodeName: FC<{
               }
             }}
             onChange={(e) => {
-              local.rename = e.target.value;
-              p.render();
+              local.rename = e.target.value
+                .toLowerCase()
+                .replace(/[^a-zA-Z0-9:]+/g, "-");
+              local.render();
             }}
           />
         ) : (
-          <Name node={node} />
+          <>
+            {p.ui.comp.creating_id === node.item.id ? (
+              <div className="flex items-center space-x-1">
+                <LoadingSpinner size={12} />
+                <div className="text-[12px]">Creating Component</div>
+              </div>
+            ) : p.ui.comp.loading_id === node.item.id ? (
+              <div className="flex items-center space-x-1">
+                <LoadingSpinner size={12} />
+                <div className="text-[12px]">Editing Component</div>
+              </div>
+            ) : (
+              <Name node={node} render_params={render_params} />
+            )}
+          </>
         )}
       </div>
     </div>
   );
 };
 
-const Name: FC<{ node: PNode }> = ({ node }) => {
+const Name: FC<{ node: PNode; render_params: RenderParams }> = ({
+  node,
+  render_params,
+}) => {
   const name = node.item.name;
 
   let comp_label = "";
@@ -127,9 +157,17 @@ const Name: FC<{ node: PNode }> = ({ node }) => {
   }
 
   return (
-    <div>
-      {name}
-      {comp_label && `: ${comp_label}`}
+    <div className="flex items-center space-x-1">
+      <div>
+        {name}
+        {comp_label && `: ${comp_label}`}
+      </div>
+
+      {node.item.component?.id && render_params.hasChild && (
+        <div className="node-text text-purple-600 mt-[1px]">
+          <ComponentIcon />
+        </div>
+      )}
     </div>
   );
 };

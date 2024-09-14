@@ -18,6 +18,7 @@ import { useRef } from "react";
 import { EdTreeSearch } from "./tree/parts/search";
 import { active } from "./logic/active";
 import { EdCompTree } from "./tree/ed-comp-tree";
+import { EdTreeTopBar } from "./tree/parts/top-bar";
 
 export const EdLeft = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -133,7 +134,7 @@ export const EdLeft = () => {
 
         <div
           className={cx(
-            "tree-body flex relative flex-1 overflow-y-auto overflow-x-hidden",
+            "tree-body flex relative flex-1 flex-col items-stretch overflow-y-auto overflow-x-hidden",
             css`
               .absolute > ul {
                 position: absolute;
@@ -151,6 +152,7 @@ export const EdLeft = () => {
             <>
               {p.ui.left.mode === "tree" && (
                 <>
+                  <EdTreeTopBar />
                   {ref_tree.current && (
                     <DndProvider
                       backend={HTML5Backend}

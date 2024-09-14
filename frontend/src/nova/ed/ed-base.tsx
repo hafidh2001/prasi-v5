@@ -9,6 +9,7 @@ import { prasiKeybinding } from "./ed-keybinds";
 import { EdLeft } from "./ed-left";
 import { EDGlobal } from "./logic/ed-global";
 import { iconVSCode } from "./ui/icons";
+import { EdPopCompGroup } from "./tree/parts/popup/comp-group";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -90,6 +91,9 @@ export const EdBase = () => {
         <PanelResizeHandle />
         <Panel defaultSize={25}></Panel>
       </PanelGroup>
+      <>
+        <EdPopCompGroup />
+      </>
     </div>
   );
 };

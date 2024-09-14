@@ -6,6 +6,7 @@ export const flattenTree = (
   items: IItem[],
   opt?: {
     visit?: (item: IItem) => void;
+    comp_id?: string;
   },
   arg?: {
     parent: IItem;
@@ -29,7 +30,7 @@ export const flattenTree = (
   for (const item of items) {
     if (opt?.visit) opt.visit(item);
 
-    if (item.component) {
+    if (item.component && opt?.comp_id !== item.component.id) {
       const props = parsePropForJsx(item);
       for (const [name, pitem] of Object.entries(props)) {
         flattenTree([pitem], opt, {

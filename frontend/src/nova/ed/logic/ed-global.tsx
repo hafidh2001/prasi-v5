@@ -26,6 +26,8 @@ export const EDGlobal = {
   ui: {
     comp: {
       editable: true,
+      creating_id: "",
+      loading_id: "",
     },
     tree: {
       rename_id: "",
@@ -68,6 +70,7 @@ export const EDGlobal = {
       comp_group: {
         mouse_event: null as null | React.MouseEvent<HTMLElement, MouseEvent>,
         on_pick(group_id: string) {},
+        on_close() {},
       },
       comp: {
         on_pick: (comp_id: string) => {},

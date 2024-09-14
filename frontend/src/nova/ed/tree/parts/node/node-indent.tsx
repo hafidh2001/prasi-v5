@@ -81,7 +81,7 @@ export const EdTreeNodeIndent = ({
           </div>
         )}
         {isComponent && !render_params.hasChild && (
-          <div className="text-purple-600 mt-[1px]">
+          <div className="node-text text-purple-600 mt-[1px]">
             <ComponentIcon />
           </div>
         )}
@@ -133,7 +133,7 @@ export const ChevronDown = () => (
     ></path>
   </svg>
 );
-const ComponentIcon = () => (
+export const ComponentIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={10}

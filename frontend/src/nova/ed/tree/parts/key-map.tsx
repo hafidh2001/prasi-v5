@@ -2,14 +2,22 @@ import { RenderParams } from "@minoru/react-dnd-treeview";
 import { getNodeById } from "crdt/node/get-node-by-id";
 import { KeyboardEvent } from "react";
 import { IItem } from "../../../../utils/types/item";
-import { active, getActiveTree } from "../../logic/active";
+import { active } from "../../logic/active";
 import { PG } from "../../logic/ed-global";
+import { edActionAdd } from "../action/add";
 import { edActionDelete } from "../action/delete";
 import { scrollTreeActiveItem } from "./scroll-tree";
 
 export const treeItemKeyMap = (p: PG, prm: RenderParams, item: IItem) => {
   return (e: KeyboardEvent) => {
     p.ui.tree.prevent_indent = true;
+
+    if (e.key === "+") {
+      active.item_id = item.id;
+      edActionAdd(p);
+      return;
+    }
+
     if (e.key === "ArrowLeft") {
       if (prm.isOpen) {
         prm.onToggle();

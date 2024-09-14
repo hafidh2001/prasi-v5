@@ -28,7 +28,8 @@ export const TopBtn = ({
   const result = (
     <div
       className={cx(
-        "flex items-center cursor-pointer space-x-1 select-none relative transition-all duration-200 ",
+        "top-btn flex items-center space-x-1 select-none relative transition-all duration-200 ",
+        disabled ? "cursor-default disabled" : "cursor-pointer ",
         style === "normal"
           ? [
               "px-2 ",

@@ -67,7 +67,7 @@ export const EdTreeAction = ({
           content={`Edit ${mode}`}
           className={cx(
             "node-action border rounded-sm text-[9px] flex w-[20px] h-[15px] items-center cursor-pointer justify-center uppercase",
-            (item.adv?.js || item.adv?.css || item.adv?.html)
+            item.adv?.js || item.adv?.css || item.adv?.html
               ? `opacity-100`
               : cx(
                   `opacity-0 action-script transition-all`,
@@ -129,6 +129,8 @@ export const EdTreeAction = ({
 
                   const comp_id = comp.id;
                   if (comp_id && p.sync) {
+                    p.ui.comp.loading_id = item.id;
+                    p.render();
                     active.instance.item_id = item.id;
                     active.comp = await loadCompTree({
                       sync: p.sync,
@@ -141,6 +143,7 @@ export const EdTreeAction = ({
                         p.render();
                       },
                     });
+                    p.ui.comp.loading_id = "";
                     p.render();
                   }
                 }}
@@ -148,30 +151,6 @@ export const EdTreeAction = ({
                 Edit
               </div>
             </Tooltip>
-          )}
-          {comp.id === active.comp?.id && (
-            <>
-              <Tooltip content="Close Component">
-                <div
-                  className="node-action flex items-center border border-slate-500 bg-white rounded-sm text-[10px] px-[2px] cursor-pointer hover:bg-purple-100 hover:border-purple-600"
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-
-                    if (active.comp) {
-                      active.item_id = active.instance.item_id || "";
-                      active.instance.comp_id = "";
-                      active.instance.item_id = "";
-                      active.comp?.destroy();
-                      active.comp = null;
-                      p.render();
-                    }
-                  }}
-                >
-                  Close
-                </div>
-              </Tooltip>
-            </>
           )}
         </>
       )}

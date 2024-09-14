@@ -47,7 +47,21 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
   return (
     <Tooltip
       placement="right"
-      content={`ID: ${node.item.id}`}
+      content={
+        <>
+          {item.component?.id &&
+            p.comp.loaded[item.component.id]?.content_tree.name && (
+              <>
+                Component:{" "}
+                <span className="font-bold underline">
+                  {p.comp.loaded[item.component.id]?.content_tree.name}
+                </span>
+                <br />
+              </>
+            )}
+          ID: {node.item.id}
+        </>
+      }
       delay={0}
       asChild
     >
@@ -93,6 +107,9 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
                     color: black;
                     background: white;
                   }
+                  .node-text {
+                    color: white;
+                  }
                   input {
                     background: white;
                     color: black;
@@ -110,6 +127,9 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
                 .node-action {
                   color: black;
                   background: white;
+                }
+                .node-text {
+                  color: white;
                 }
                 .node-indent {
                   opacity: 0;
@@ -145,7 +165,10 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
         )}
         <EdTreeNodeIndent raw={raw} render_params={render_params} />
         <EdTreeNodeName raw={raw} render_params={render_params} />
-        <EdTreeAction raw={raw} render_params={render_params} />
+        {p.ui.comp.creating_id !== item.id &&
+          p.ui.comp.loading_id !== item.id && (
+            <EdTreeAction raw={raw} render_params={render_params} />
+          )}
       </div>
     </Tooltip>
   );

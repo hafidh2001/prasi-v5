@@ -1,7 +1,7 @@
 import { DropOptions, NodeModel } from "@minoru/react-dnd-treeview";
 import { getNodeById } from "crdt/node/get-node-by-id";
 import get from "lodash.get";
-import { activateItem, getActiveTree } from "logic/active";
+import { activateItem, active, getActiveTree } from "logic/active";
 import { PG } from "logic/ed-global";
 import { PNode } from "logic/types";
 import { IItem } from "utils/types/item";
@@ -31,7 +31,7 @@ export const treeOnDrop: (
             (e) => e.id === from.item.id
           );
           fromParent.item.childs.splice(from_idx, 1);
-          
+
           to.item.childs.splice(relativeIndex, 0, from.item);
         }
       }
@@ -74,7 +74,11 @@ export const treeCanDrop = (p: PG, arg: DropOptions<PNode>) => {
         }
       }
 
-      if (to === "item" && dropTarget.data.item.component?.id) {
+      if (
+        to === "item" &&
+        dropTarget.data.item.component?.id &&
+        active.comp?.id !== dropTarget.data.item.component?.id
+      ) {
         return false;
       }
 
