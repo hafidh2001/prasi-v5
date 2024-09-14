@@ -14,11 +14,10 @@ export type EPage = Omit<page, "content_tree"> & {
   };
 };
 
-export type EComp = Omit<component, "content_tree"> & {
-  id: string,
-  content_tree: {
-    childs: IItem[];
-  };
+export type EComp = {
+  id: string;
+  content_tree: IItem;
+  id_component_group: string;
 };
 
 export type PropFieldKind =

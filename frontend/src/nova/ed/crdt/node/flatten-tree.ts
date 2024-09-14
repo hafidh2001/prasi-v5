@@ -29,7 +29,7 @@ export const flattenTree = (
     if (opt?.visit) opt.visit(item);
 
     if (item.component) {
-      const props = parseComponentProps(item);
+      const props = parsePropForJsx(item);
       for (const [name, pitem] of Object.entries(props)) {
         flattenTree([pitem], opt, {
           parent: item,
@@ -71,7 +71,7 @@ export const flattenTree = (
   return { array, map, models };
 };
 
-const parseComponentProps = (item: IItem) => {
+export const parsePropForJsx = (item: IItem) => {
   const result = {} as Record<string, IItem>;
   if (item.component)
     for (const [name, prop] of Object.entries(item.component.props)) {
@@ -104,7 +104,7 @@ export const findNodeById = (
       };
 
     if (item.component) {
-      const props = parseComponentProps(item);
+      const props = parsePropForJsx(item);
       for (const [name, pitem] of Object.entries(props)) {
         const found = findNodeById(id, [pitem], {
           parent: item,

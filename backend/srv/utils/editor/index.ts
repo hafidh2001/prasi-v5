@@ -5,6 +5,11 @@ import type { WSContext } from "../server/ctx";
 import BunORM from "../sqlite";
 import { editorPageLoad } from "./editor-page-load";
 import { editorSiteLoad } from "./editor-site-load";
+import {
+  registerCompConnections,
+  unregisterCompConnection,
+} from "./editor-comp-util";
+import { editorCompLoad, type EditorCompSingleCache } from "./editor-comp-load";
 
 type USER_ID = string;
 type CONN_ID = string;
@@ -19,11 +24,18 @@ export const editor = {
     },
   },
   comp: {
-    async load(comp_ids: string, opt?: { conn_id?: string }) {},
+    comp_ids: {} as Record<string, Set<CONN_ID>>,
+    conn_ids: {} as Record<CONN_ID, Set<string>>,
+    async load(comp_ids: string[], conn_id: string) {
+      registerCompConnections(comp_ids, conn_id);
+      return await editorCompLoad(comp_ids);
+    },
   },
   page: {
     async load(page_id: string, opt?: { conn_id?: string }) {
-      return await editorPageLoad(editor, page_id, opt);
+      if (opt?.conn_id) unregisterCompConnection(opt.conn_id);
+      const result = await editorPageLoad(editor, page_id, opt);
+      return result;
     },
   },
   ws: new WeakMap<ServerWebSocket<WSContext>, CONN_ID>(),
@@ -95,6 +107,22 @@ const initCacheDb = () => {
   } catch (e) {}
   return new BunORM(dir.data("editor-cache.db"), {
     tables: {
+      comp: {
+        columns: {
+          comp_id: {
+            type: "TEXT",
+            nullable: false,
+          },
+          data: {
+            type: "JSON",
+            nullable: false,
+          },
+          ts: {
+            type: "INTEGER",
+            nullable: false,
+          },
+        },
+      },
       page: {
         columns: {
           page_id: {

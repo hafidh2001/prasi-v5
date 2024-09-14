@@ -1,8 +1,9 @@
 import { TreeMethods } from "@minoru/react-dnd-treeview";
 import { createClient } from "../../../utils/sync/client";
-import { loadCompTree } from "../crdt/load-comp-tree";
+import { editCompTree } from "../crdt/edit-comp-tree";
 import { loadPageTree } from "../crdt/load-page-tree";
 import { EComp, EPage, ESite, PropFieldKind } from "./types";
+import { IItem } from "../../../utils/types/item";
 
 export const EDGlobal = {
   mode: "" as "desktop" | "mobile",
@@ -22,7 +23,7 @@ export const EDGlobal = {
   },
   comp: {
     pending: new Set<string>(),
-    loaded: {} as Record<string, Awaited<ReturnType<typeof loadCompTree>>>,
+    loaded: {} as Record<string, EComp>,
   },
   ui: {
     comp: {

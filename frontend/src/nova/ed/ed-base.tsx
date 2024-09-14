@@ -1,4 +1,7 @@
 import { loadPageTree, PageTree } from "crdt/load-page-tree";
+import {
+  loadPendingComponent
+} from "crdt/node/load-child-comp";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useGlobal } from "../../utils/react/use-global";
 import { w } from "../../utils/types/general";
@@ -8,7 +11,6 @@ import { prasiKeybinding } from "./ed-keybinds";
 import { EdLeft } from "./ed-left";
 import { EDGlobal } from "./logic/ed-global";
 import { iconVSCode } from "./ui/icons";
-import { loadCompTree } from "crdt/load-comp-tree";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -17,7 +19,8 @@ export const EdBase = () => {
 
   if (!p.page.tree && p.page.cur && p.sync) {
     p.page.tree = loadPageTree(p.sync, p.page.cur.id, {
-      loaded() {
+      async loaded() {
+        await loadPendingComponent(p);
         p.render();
       },
       async on_component(item) {
@@ -25,12 +28,6 @@ export const EdBase = () => {
           const comp_id = item.component.id;
           if (!p.comp.loaded[comp_id] && !p.comp.pending.has(comp_id)) {
             p.comp.pending.add(comp_id);
-            p.comp.loaded[comp_id] = await loadCompTree(
-              p.sync,
-              item.component.id
-            );
-            p.comp.pending.delete(comp_id);
-            p.render();
           }
         }
       },

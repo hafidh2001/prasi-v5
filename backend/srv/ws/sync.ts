@@ -4,6 +4,22 @@ import { editor } from "../utils/editor";
 import type { ServerWebSocket } from "bun";
 import type { WSContext } from "../utils/server/ctx";
 import { crdt_pages } from "./crdt/page";
+import { unregisterCompConnection } from "../utils/editor/editor-comp-util";
+
+export const wsSyncClose = (ws: ServerWebSocket<WSContext>) => {
+  const conn_id = editor.ws.get(ws);
+  editor.ws.delete(ws);
+  if (conn_id) {
+    const conn = editor.conn[conn_id];
+    if (conn) {
+      editor.user[conn.user_id].delete(conn_id);
+    }
+    delete editor.conn[conn_id];
+
+    unregisterCompConnection(conn_id);
+    delete editor.comp.conn_ids[conn_id];
+  }
+};
 
 export const wsSync = (
   ws: ServerWebSocket<WSContext>,

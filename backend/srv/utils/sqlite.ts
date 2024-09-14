@@ -189,7 +189,7 @@ interface _TableFunctions<TT extends Tables, T extends Tables[string]> {
       (keyof SortOut<T["columns"], { type: "REL" }>)[] | undefined
     >,
   >(opts?: {
-    where?: Partial<AddColumnDefaults<_Columns<TT, T>>>;
+    where?: string | Partial<AddColumnDefaults<_Columns<TT, T>>>;
     sort?: Partial<Record<keyof T["columns"], "asc" | "desc">>;
     limit?: number;
     select?: S;
@@ -228,9 +228,6 @@ interface _TableFunctions<TT extends Tables, T extends Tables[string]> {
         : _Columns<TT, T>
     >
   >[];
-  findBy: (
-    opts: Partial<AddColumnDefaults<_Columns<TT, T>>>
-  ) => AddTableFx<T, AddColumnDefaults<_Columns<TT, T>>>[];
 }
 
 type _Tables<T extends Tables> = {
@@ -459,9 +456,11 @@ export class BunORM<T extends Narrow<Tables>> {
                             : "*"
                         } FROM ${table}${
                           opts.where
-                            ? ` WHERE ${Object.keys(opts.where)
-                                .map((x, i) => `${x} = ?${i + 1}`)
-                                .join(" AND ")}`
+                            ? typeof opts.where === "string"
+                              ? ` WHERE ${opts.where}`
+                              : ` WHERE ${Object.keys(opts.where)
+                                  .map((x, i) => `${x} = ?${i + 1}`)
+                                  .join(" AND ")}`
                             : ""
                         }${
                           opts.sort
@@ -476,24 +475,6 @@ export class BunORM<T extends Narrow<Tables>> {
             )
           ),
           opts?.resolve || ([] as any)
-        ),
-      findBy: (opts) =>
-        injectFx(
-          parseJSON(
-            this.db
-              .query(
-                !opts
-                  ? `SELECT * FROM ${table};`
-                  : `SELECT * FROM ${table}${
-                      opts
-                        ? ` WHERE ${Object.keys(opts)
-                            .map((x, i) => `${x} = ?${i + 1}`)
-                            .join(" AND ")}`
-                        : ""
-                    };`
-              )
-              .all(...((opts ? Object.values(opts) : []) as any[])) as any[]
-          )
         ),
     };
   };

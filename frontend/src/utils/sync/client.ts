@@ -59,8 +59,8 @@ export const createClient = (ws: WebSocket, p: any, conn_id: string) => ({
     action: async () => {},
   },
   comp: {
-    load: async (id: string) => {
-      return (await _api.comp_load(id, { conn_id: p.user.conn_id })) as EComp;
+    load: async (ids: string[]) => {
+      return (await _api.comp_load(ids, p.user.conn_id)) as Record<string, EComp>;
     },
   },
   page: {
