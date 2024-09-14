@@ -52,7 +52,12 @@ export const EdTreeSearch = () => {
           }}
           type="search"
           autoComplete="new-password"
-          className={cx("flex-1 outline-none px-2 text-[13px] ")}
+          className={cx(
+            "flex-1 outline-none border-2 px-1 text-[13px]",
+            p.ui.tree.search.value
+              ? "border-blue-600 bg-blue-50"
+              : "border-transparent"
+          )}
           placeholder="Search..."
           value={p.ui.tree.search.value || ""}
           spellCheck={false}
@@ -64,7 +69,7 @@ export const EdTreeSearch = () => {
             clearTimeout(local.search_timeout);
             local.search_timeout = setTimeout(() => {
               p.render();
-            }, 300);
+            }, 100);
           }}
           onFocus={() => {
             local.focus = true;
