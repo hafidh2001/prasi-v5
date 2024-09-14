@@ -1,8 +1,19 @@
 import { CompTree } from "crdt/load-comp-tree";
 import { PG } from "./ed-global";
+import { indentTree, useTreeIndent } from "../tree/parts/use-indent";
 
 export const getActiveTree = (p: PG) => {
   return active.comp ? active.comp : p.page.tree;
+};
+
+export const activateItem = (p: PG, id: string) => {
+  setTimeout(() => {
+    active.item_id = id;
+    p.render();
+    setTimeout(() => {
+      indentTree(p);
+    }, 300);
+  });
 };
 
 export const active = {

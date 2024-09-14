@@ -70,7 +70,7 @@ export const loadPageTree = (
         flatten(): ReturnType<typeof flattenTree>;
         findNode: (id: string) => null | PNode;
         findParent: (id: string) => null | PNode;
-      }) => void
+      }) => void,
     ) {
       const _fn = (tree: EPage["content_tree"]) => {
         fn({

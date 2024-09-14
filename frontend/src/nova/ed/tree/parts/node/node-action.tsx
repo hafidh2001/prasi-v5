@@ -66,8 +66,8 @@ export const EdTreeAction = ({
         <Tooltip
           content={`Edit ${mode}`}
           className={cx(
-            "border rounded-sm text-[9px] flex w-[20px] h-[15px] items-center cursor-pointer justify-center uppercase",
-            item.adv?.js || item.adv?.css || item.adv?.html
+            "node-action border rounded-sm text-[9px] flex w-[20px] h-[15px] items-center cursor-pointer justify-center uppercase",
+            (item.adv?.js || item.adv?.css || item.adv?.html)
               ? `opacity-100`
               : cx(
                   `opacity-0 action-script transition-all`,
@@ -122,7 +122,7 @@ export const EdTreeAction = ({
           {comp.id !== active.comp?.id && p.ui.comp.editable && (
             <Tooltip content="Edit Component">
               <div
-                className="flex items-center border border-slate-500 bg-white rounded-sm text-[10px] px-[2px] cursor-pointer hover:bg-purple-100 hover:border-purple-600"
+                className="node-action flex items-center border border-slate-500 bg-white rounded-sm text-[10px] px-[2px] cursor-pointer hover:bg-purple-100 hover:border-purple-600"
                 onClick={async (e) => {
                   e.stopPropagation();
                   e.preventDefault();
@@ -153,7 +153,7 @@ export const EdTreeAction = ({
             <>
               <Tooltip content="Close Component">
                 <div
-                  className="flex items-center border border-slate-500 bg-white rounded-sm text-[10px] px-[2px] cursor-pointer hover:bg-purple-100 hover:border-purple-600"
+                  className="node-action flex items-center border border-slate-500 bg-white rounded-sm text-[10px] px-[2px] cursor-pointer hover:bg-purple-100 hover:border-purple-600"
                   onClick={async (e) => {
                     e.stopPropagation();
                     e.preventDefault();

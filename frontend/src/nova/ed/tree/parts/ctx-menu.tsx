@@ -84,18 +84,19 @@ export const EdTreeCtxMenu = ({
         />
       )}
 
-      {type === "item" && item.childs.length === 0 && (
-        <MenuItem
-          label="Convert Item → Text"
-          onClick={() => {
-            getActiveTree(p).update(({ findNode }) => {
-              const node = findNode(item.id);
-              if (node) node.item.type = "text";
-            });
-            p.render();
-          }}
-        />
-      )}
+      {type === "item" &&
+        (!item.childs || (item.childs && item.childs.length === 0)) && (
+          <MenuItem
+            label="Convert Item → Text"
+            onClick={() => {
+              getActiveTree(p).update(({ findNode }) => {
+                const node = findNode(item.id);
+                if (node) node.item.type = "text";
+              });
+              p.render();
+            }}
+          />
+        )}
       {type === "item" && comp?.id && !isActiveComponent && (
         <MenuItem
           label="Detach Component"

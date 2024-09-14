@@ -13,6 +13,10 @@ export const edActionDetach = (p: PG, item: IItem) => {
           const new_item = deepClone(
             p.comp.loaded[item.component.id].content_tree
           );
+          delete new_item.component;
+          new_item.childs = new_item.childs.filter(
+            (e) => !e.name.startsWith("jsx:")
+          );
           parent.item.childs.splice(i, 1, new_item);
           break;
         }

@@ -1,5 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import { getActiveTree } from "logic/active";
+import { activateItem, active, getActiveTree } from "logic/active";
 import { PG } from "logic/ed-global";
 import { IItem } from "utils/types/item";
 
@@ -32,4 +32,6 @@ export const edActionAdd = async (p: PG, item: IItem) => {
       }
     }
   });
+
+  activateItem(p, new_item.id);
 };

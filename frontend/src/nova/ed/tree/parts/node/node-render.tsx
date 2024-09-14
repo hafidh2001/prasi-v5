@@ -65,7 +65,19 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
           `,
 
           is_active
-            ? [(item as any).type === "section" ? "bg-blue-200" : "bg-blue-100"]
+            ? cx(
+                "bg-blue-500 text-white",
+                css`
+                  .node-action {
+                    color: black;
+                    background: white;
+                  }
+                  input {
+                    background: white;
+                    color: black;
+                  }
+                `
+              )
             : [is_component && `bg-purple-50`],
           is_hover && [
             (item as any).type === "section" ? "bg-blue-100" : "bg-blue-50",
