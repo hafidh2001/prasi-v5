@@ -4,6 +4,9 @@ import { PNode } from "../../logic/types";
 
 export const flattenTree = (
   items: IItem[],
+  opt?: {
+    visit?: (item: IItem) => void;
+  },
   arg?: {
     parent: IItem;
     array: PNode[];
@@ -23,10 +26,12 @@ export const flattenTree = (
   const map: Record<string, PNode> = arg?.map ? arg.map : {};
 
   for (const item of items) {
+    if (opt?.visit) opt.visit(item);
+
     if (item.component) {
       const props = parseComponentProps(item);
       for (const [name, pitem] of Object.entries(props)) {
-        flattenTree([pitem], {
+        flattenTree([pitem], opt, {
           parent: item,
           parent_comp: {
             prop_name: name,
@@ -54,7 +59,12 @@ export const flattenTree = (
     });
     array.push(map[item.id]);
     if (item.childs) {
-      flattenTree(item.childs, { parent: item, models: models, array, map });
+      flattenTree(item.childs, opt, {
+        parent: item,
+        models: models,
+        array,
+        map,
+      });
     }
   }
 

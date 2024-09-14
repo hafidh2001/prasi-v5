@@ -1,7 +1,7 @@
 import { editor } from "../utils/editor";
 import { compressed } from "../utils/server/compressed";
 import type { ServerCtx } from "../utils/server/ctx";
-import { crdt_pages } from "../ws/crdt/crdt";
+import { crdt_pages } from "../ws/crdt/page";
 
 export default {
   url: "/page_history",

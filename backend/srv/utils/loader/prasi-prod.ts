@@ -98,59 +98,63 @@ export const prasiLoader = async ({
     case "compress":
       return new Response("OK");
     case "route": {
-      const res = await editor.cache.route(site_id, async () => {
-        const site = await _db.site.findFirst({
-          where: { id: site_id },
-          select: {
-            id: true,
-            name: true,
-            domain: true,
-            responsive: true,
-            config: true,
-          },
-        });
+      const res = await editor.load_cached({
+        type: "route",
+        key: site_id,
+        loader: async () => {
+          const site = await _db.site.findFirst({
+            where: { id: site_id },
+            select: {
+              id: true,
+              name: true,
+              domain: true,
+              responsive: true,
+              config: true,
+            },
+          });
 
-        const layouts = await _db.page.findMany({
-          where: {
-            name: { startsWith: "layout:" },
-            is_deleted: false,
-            id_site: site_id,
-          },
-          select: {
-            id: true,
-            name: true,
-            is_default_layout: true,
-            content_tree: true,
-          },
-        });
+          const layouts = await _db.page.findMany({
+            where: {
+              name: { startsWith: "layout:" },
+              is_deleted: false,
+              id_site: site_id,
+            },
+            select: {
+              id: true,
+              name: true,
+              is_default_layout: true,
+              content_tree: true,
+            },
+          });
 
-        let layout = null as any;
-        for (const l of layouts) {
-          if (!layout) layout = l;
-          if (l.is_default_layout) layout = l;
-        }
+          let layout = null as any;
+          for (const l of layouts) {
+            if (!layout) layout = l;
+            if (l.is_default_layout) layout = l;
+          }
 
-        let api_url = "";
-        if (site && site.config && (site.config as any).api_url) {
-          api_url = (site.config as any).api_url;
-          delete (site as any).config;
-        }
-        const urls = await _db.page.findMany({
-          where: {
-            id_site: site_id,
-            is_default_layout: false,
-            is_deleted: false,
-          },
-          select: { url: true, id: true },
-        });
+          let api_url = "";
+          if (site && site.config && (site.config as any).api_url) {
+            api_url = (site.config as any).api_url;
+            delete (site as any).config;
+          }
+          const urls = await _db.page.findMany({
+            where: {
+              id_site: site_id,
+              is_default_layout: false,
+              is_deleted: false,
+            },
+            select: { url: true, id: true },
+          });
 
-        return JSON.stringify({
-          site: { ...site, api_url },
-          urls,
-          layout: layout
-            ? { id: layout.id, root: layout.content_tree }
-            : undefined,
-        });
+          return JSON.stringify({
+            site: { ...site, api_url },
+            urls,
+            layout: layout
+              ? { id: layout.id, root: layout.content_tree }
+              : undefined,
+          });
+        },
       });
 
       return compressed(ctx, res);

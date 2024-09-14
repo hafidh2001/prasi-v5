@@ -15,10 +15,19 @@ export type EPage = Omit<page, "content_tree"> & {
 };
 
 export type EComp = Omit<component, "content_tree"> & {
+  id: string,
   content_tree: {
     childs: IItem[];
   };
 };
+
+export type PropFieldKind =
+  | "onChange"
+  | "visible"
+  | "gen"
+  | "value"
+  | "option"
+  | "typings";
 
 export type PNode = {
   item: IItem;

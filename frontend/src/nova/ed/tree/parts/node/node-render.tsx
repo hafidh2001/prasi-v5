@@ -9,6 +9,8 @@ import { treeItemKeyMap } from "../key-map";
 import { EdTreeNodeIndent } from "./node-indent";
 import { EdTreeNodeName } from "./node-name";
 import { parseNodeState } from "./node-tools";
+import { EdTreeAction } from "./node-action";
+import { updateNodeById } from "crdt/node/get-node-by-id";
 
 export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -45,6 +47,7 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
         }}
         onClick={() => {
           active.item_id = item.id;
+
           p.render();
         }}
         className={cx(
@@ -78,8 +81,21 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
             className={cx("absolute left-0 bottom-0 top-0 w-[4px] bg-blue-500")}
           ></div>
         )}
+
+        {/* {local.right_click && (
+          <EdTreeCtxMenu
+            node={node}
+            prm={prm}
+            event={local.rightClick}
+            onClose={() => {
+              local.rightClick = null;
+              local.render();
+            }}
+          />
+        )} */}
         <EdTreeNodeIndent raw={raw} render_params={render_params} />
         <EdTreeNodeName raw={raw} render_params={render_params} />
+        <EdTreeAction raw={raw} render_params={render_params} />
       </div>
     </Tooltip>
   );

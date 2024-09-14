@@ -3,7 +3,7 @@ import { pack } from "msgpackr";
 import { editor } from "../utils/editor";
 import type { ServerWebSocket } from "bun";
 import type { WSContext } from "../utils/server/ctx";
-import { crdt_pages } from "./crdt/crdt";
+import { crdt_pages } from "./crdt/page";
 
 export const wsSync = (
   ws: ServerWebSocket<WSContext>,

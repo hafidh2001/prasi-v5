@@ -1,6 +1,6 @@
 import { pack, unpack } from "msgpackr";
 import { PG } from "../../nova/ed/logic/ed-global";
-import { EPage, ESite } from "../../nova/ed/logic/types";
+import { EComp, EPage, ESite } from "../../nova/ed/logic/types";
 
 export const clientStartSync = (arg: {
   p: PG;
@@ -58,6 +58,11 @@ export const createClient = (ws: WebSocket, p: any, conn_id: string) => ({
   code: {
     action: async () => {},
   },
+  comp: {
+    load: async (id: string) => {
+      return (await _api.comp_load(id, { conn_id: p.user.conn_id })) as EComp;
+    },
+  },
   page: {
     undo: (page_id: string, count: number) => {
       ws.send(pack({ action: "undo", page_id, count }));
@@ -66,7 +71,10 @@ export const createClient = (ws: WebSocket, p: any, conn_id: string) => ({
       ws.send(pack({ action: "redo", page_id, count }));
     },
     load: async (id: string) => {
-      return (await _api.page_load(id, { conn_id: p.user.conn_id })) as EPage;
+      return (await _api.page_load(id, { conn_id: p.user.conn_id })) as Omit<
+        EPage,
+        "content_tree"
+      >;
     },
   },
 });

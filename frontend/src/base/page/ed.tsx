@@ -80,7 +80,7 @@ export default page({
       );
 
       if (!initSync(p) && !p.sync) {
-        return <Loading note="connecting-ws" />;
+        return <Loading note="loading-page" />;
       }
     } else {
       if (!validate(params.site_id)) {

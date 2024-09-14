@@ -1,4 +1,4 @@
-import { pageTree, PageTree } from "crdt/page-tree";
+import { loadPageTree, PageTree } from "crdt/load-page-tree";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useGlobal } from "../../utils/react/use-global";
 import { w } from "../../utils/types/general";
@@ -8,6 +8,7 @@ import { prasiKeybinding } from "./ed-keybinds";
 import { EdLeft } from "./ed-left";
 import { EDGlobal } from "./logic/ed-global";
 import { iconVSCode } from "./ui/icons";
+import { loadCompTree } from "crdt/load-comp-tree";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -15,9 +16,23 @@ export const EdBase = () => {
   prasiKeybinding(p);
 
   if (!p.page.tree && p.page.cur && p.sync) {
-    p.page.tree = pageTree(p.sync, p.page.cur.id, {
+    p.page.tree = loadPageTree(p.sync, p.page.cur.id, {
       loaded() {
         p.render();
+      },
+      async on_component(item) {
+        if (p.sync && item.component) {
+          const comp_id = item.component.id;
+          if (!p.comp.loaded[comp_id] && !p.comp.pending.has(comp_id)) {
+            p.comp.pending.add(comp_id);
+            p.comp.loaded[comp_id] = await loadCompTree(
+              p.sync,
+              item.component.id
+            );
+            p.comp.pending.delete(comp_id);
+            p.render();
+          }
+        }
       },
     });
   }
@@ -91,19 +106,19 @@ const Preview = ({ tree }: { tree: PageTree }) => {
       className="relative overflow-auto w-full h-full border-r"
       onClick={async () => {
         tree.update((e) => {
-          e.id = "MO" + Date.now();
-          return e;
+          e.tree.id = "MO" + Date.now();
         });
       }}
     >
-      <pre className="text-[10px] absolute inset-0">
+      <pre className="text-[8px] absolute inset-0">
         {Date.now()}
         {JSON.stringify(
-          Object.entries(root as any)
-            .map(([k, v]) => {
-              if (typeof v !== "object") return [k, v];
-            })
-            .filter((e) => e),
+          root,
+          // Object.entries(root as any)
+          //   .map(([k, v]) => {
+          //     if (typeof v !== "object") return [k, v];
+          //   })
+          //   .filter((e) => e),
           null,
           2
         )}

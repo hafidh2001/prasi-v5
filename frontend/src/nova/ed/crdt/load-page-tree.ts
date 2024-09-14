@@ -6,13 +6,14 @@ import { createClient } from "../../../utils/sync/client";
 import { EPage, PNode } from "../logic/types";
 import { bind } from "./lib/immer-yjs";
 import { findNodeById, flattenTree } from "./node/flatten-tree";
+import { IItem } from "../../../utils/types/item";
 
-export type PageTree = ReturnType<typeof pageTree>;
+export type PageTree = ReturnType<typeof loadPageTree>;
 
-export const pageTree = (
+export const loadPageTree = (
   sync: ReturnType<typeof createClient>,
   page_id: string,
-  arg?: { loaded: () => void }
+  arg?: { loaded: () => void; on_component?: (item: IItem) => void }
 ) => {
   const doc = new Doc();
   const data = doc.getMap("data");
@@ -35,7 +36,13 @@ export const pageTree = (
   });
 
   doc.on("update", (update, origin) => {
-    tree.nodes = flattenTree(immer.get().childs);
+    tree.nodes = flattenTree(immer.get().childs, {
+      visit(item) {
+        if (item.component?.id && arg?.on_component) {
+          arg.on_component(item);
+        }
+      },
+    });
     arg?.loaded();
   });
 

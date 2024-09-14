@@ -3,15 +3,18 @@ import { unpack } from "msgpackr";
 import { editor } from "../utils/editor";
 import type { WSContext } from "../utils/server/ctx";
 import { wsSync } from "./sync";
-import { wsCrdt, wsCrdtClose } from "./crdt/crdt";
+import { wsPage, wsPageClose } from "./crdt/page";
+import { wsComp, wsCompClose } from "./crdt/comp";
 
 export const initWS: WebSocketHandler<WSContext> = {
   message(ws, raw) {
     const pathname = ws.data.pathname;
     if (pathname.startsWith("/sync")) {
       wsSync(ws, unpack(raw as Buffer));
-    } else if (pathname.startsWith("/crdt")) {
-      wsCrdt(ws, raw as Buffer);
+    } else if (pathname.startsWith("/crdt/page")) {
+      wsPage(ws, raw as Buffer);
+    } else if (pathname.startsWith("/crdt/comp")) {
+      wsComp(ws, raw as Buffer);
     }
   },
   open(ws) {},
@@ -27,8 +30,10 @@ export const initWS: WebSocketHandler<WSContext> = {
         }
         delete editor.conn[conn_id];
       }
-    } else if (pathname.startsWith("/crdt")) {
-      wsCrdtClose(ws);
+    } else if (pathname.startsWith("/crdt/page")) {
+      wsPageClose(ws);
+    } else if (pathname.startsWith("/crdt/comp")) {
+      wsCompClose(ws);
     }
   },
 };

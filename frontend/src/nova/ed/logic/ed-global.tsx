@@ -1,8 +1,8 @@
 import { TreeMethods } from "@minoru/react-dnd-treeview";
 import { createClient } from "../../../utils/sync/client";
-import { compTree } from "../crdt/comp-tree";
-import { pageTree } from "../crdt/page-tree";
-import { EComp, EPage, ESite } from "./types";
+import { loadCompTree } from "../crdt/load-comp-tree";
+import { loadPageTree } from "../crdt/load-page-tree";
+import { EComp, EPage, ESite, PropFieldKind } from "./types";
 
 export const EDGlobal = {
   mode: "" as "desktop" | "mobile",
@@ -18,13 +18,16 @@ export const EDGlobal = {
   site: { config: {} } as ESite,
   page: {
     cur: null as unknown as EPage,
-    tree: null as unknown as ReturnType<typeof pageTree>,
+    tree: null as unknown as ReturnType<typeof loadPageTree>,
   },
   comp: {
-    raw: {} as Record<string, EComp>,
-    loaded: {} as Record<string, ReturnType<typeof compTree>>,
+    pending: new Set<string>(),
+    loaded: {} as Record<string, Awaited<ReturnType<typeof loadCompTree>>>,
   },
   ui: {
+    comp: {
+      editable: true,
+    },
     tree: {
       rename_id: "",
       open_all: false,
@@ -51,6 +54,17 @@ export const EDGlobal = {
         name?: string;
         domain?: string;
         responsive?: string;
+      },
+      script: {
+        open: false,
+        mode: "js" as "js" | "css" | "html",
+        lastMode: "js" as "js" | "css" | "html",
+        type: "item" as "item" | "prop-master" | "prop-instance" | "comp-types",
+        prop_kind: "" as PropFieldKind,
+        prop_name: "",
+        on_close: () => {},
+        typings: { status: "ok" as "ok" | "loading" | "error", err_msg: "" },
+        wb_render: () => {},
       },
     },
     layout: {

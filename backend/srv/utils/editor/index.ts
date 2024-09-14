@@ -1,125 +1,30 @@
 import type { ServerWebSocket } from "bun";
-import { pack, unpack } from "msgpackr";
 import { unlinkSync } from "node:fs";
 import { dir } from "../dir";
-import { loadSite } from "../loader/site";
 import type { WSContext } from "../server/ctx";
 import BunORM from "../sqlite";
-import { cacheResolve } from "./cache";
+import { editorPageLoad } from "./editor-page-load";
+import { editorSiteLoad } from "./editor-site-load";
 
 type USER_ID = string;
 type CONN_ID = string;
 export const editor = {
-  db: null as unknown as ReturnType<typeof initCacheDb>,
-  loading: {} as Record<string, Set<string>>,
+  cache: null as unknown as ReturnType<typeof initCacheDb>,
   init() {
-    this.db = initCacheDb();
+    this.cache = initCacheDb();
   },
   site: {
     async load(site_id: string, opt?: { conn_id?: string }) {
-      if (opt?.conn_id) {
-        const conn = editor.conn[opt.conn_id];
-        if (conn) {
-          conn.site_id = site_id;
-        }
-      }
-
-      loadSite(site_id);
-
-      return await cacheResolve({
-        cached: () => editor.db.tables.site.find({ where: { site_id } })[0],
-        resolve: (cached) => unpack(cached.data),
-        load: () => _db.site.findFirst({ where: { id: site_id } }),
-        store: (result, cached) => {
-          editor.db.tables.site.save({
-            id: cached?.id,
-            data: pack(result),
-            site_id,
-            ts: Date.now(),
-          });
-        },
-      });
+      return await editorSiteLoad(editor, site_id, opt);
     },
+  },
+  comp: {
+    async load(comp_ids: string, opt?: { conn_id?: string }) {},
   },
   page: {
     async load(page_id: string, opt?: { conn_id?: string }) {
-      if (opt?.conn_id) {
-        const conn = editor.conn[opt.conn_id];
-        if (conn) {
-          conn.page_id = page_id;
-        }
-      }
-
-      return await cacheResolve({
-        cached: () => editor.db.tables.page.find({ where: { page_id } })[0],
-        resolve: (cached) => unpack(cached.root),
-        load: () =>
-          _db.page.findFirst({
-            where: { id: page_id, is_deleted: false },
-            select: {
-              id: true,
-              id_folder: true,
-              created_at: true,
-              id_layout: true,
-              id_site: true,
-              is_default_layout: true,
-              name: true,
-              url: true,
-              updated_at: true,
-            },
-          }),
-        store: (result, cached) => {
-          editor.db.tables.page.save({
-            id: cached?.id,
-            root: pack(result),
-            page_id,
-            ts: Date.now(),
-          });
-        },
-      });
+      return await editorPageLoad(editor, page_id, opt);
     },
-  },
-  cache: {
-    async route(site_id: string, load: () => Promise<string>) {
-      return await editor.cache_get_set("route", site_id, load);
-    },
-    async loadjs(pathname: string, load: () => Promise<string>) {
-      return await editor.cache_get_set("loadjs", pathname, load);
-    },
-  },
-  async cache_get_set(
-    prefix: string,
-    key: string,
-    load: () => Promise<string>
-  ) {
-    if (!this.loading[prefix]) {
-      this.loading[prefix] = new Set<string>();
-    }
-
-    const found = this.db.tables.cache.find({ where: { key, prefix } });
-    if (found.length === 0) {
-      this.loading[prefix].add(key);
-      const data = await load();
-      this.db.tables.cache.save({ key, prefix, data, ts: Date.now() });
-      this.loading[prefix].delete(key);
-      return data;
-    }
-
-    if (!this.loading[prefix].has(key)) {
-      this.loading[prefix].add(key);
-      load().then((data) => {
-        this.db.tables.cache.save({
-          id: found[0].id,
-          key,
-          prefix,
-          data,
-          ts: Date.now(),
-        });
-      });
-      this.loading[prefix].delete(key);
-    }
-
-    return found[0].data;
   },
   ws: new WeakMap<ServerWebSocket<WSContext>, CONN_ID>(),
   conn: {} as Record<
@@ -132,8 +37,58 @@ export const editor = {
     }
   >,
   user: {} as Record<USER_ID, Set<CONN_ID>>,
+
+  load_cached: (arg: {
+    type: "route" | "prasi-load-js";
+    key: string;
+    loader: () => Promise<any>;
+  }) => {
+    const { type, key, loader } = arg;
+    return editor.internal.cache_get_set(type, key, loader);
+  },
+
+  // #region internal
+  internal: {
+    loading: {} as Record<string, Set<string>>,
+    async cache_get_set(
+      prefix: string,
+      key: string,
+      load: () => Promise<string>
+    ) {
+      if (!editor.internal.loading[prefix]) {
+        editor.internal.loading[prefix] = new Set<string>();
+      }
+
+      const found = editor.cache.tables.cache.find({ where: { key, prefix } });
+      if (found.length === 0) {
+        editor.internal.loading[prefix].add(key);
+        const data = await load();
+        editor.cache.tables.cache.save({ key, prefix, data, ts: Date.now() });
+        editor.internal.loading[prefix].delete(key);
+        return data;
+      }
+
+      if (!editor.internal.loading[prefix].has(key)) {
+        editor.internal.loading[prefix].add(key);
+        load().then((data) => {
+          editor.cache.tables.cache.save({
+            id: found[0].id,
+            key,
+            prefix,
+            data,
+            ts: Date.now(),
+          });
+        });
+        editor.internal.loading[prefix].delete(key);
+      }
+
+      return found[0].data;
+    },
+  },
+  // #endregion
 };
 
+//#region init-cache-db
 const initCacheDb = () => {
   try {
     unlinkSync(dir.data("editor-cache.db"));
@@ -195,3 +150,4 @@ const initCacheDb = () => {
     },
   });
 };
+//#endregion
