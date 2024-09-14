@@ -2,9 +2,10 @@ import { RenderParams } from "@minoru/react-dnd-treeview";
 import { getNodeById } from "crdt/node/get-node-by-id";
 import { KeyboardEvent } from "react";
 import { IItem } from "../../../../utils/types/item";
-import { active } from "../../logic/active";
+import { active, getActiveTree } from "../../logic/active";
 import { PG } from "../../logic/ed-global";
 import { edActionDelete } from "../action/delete";
+import { scrollTreeActiveItem } from "./scroll-tree";
 
 export const treeItemKeyMap = (p: PG, prm: RenderParams, item: IItem) => {
   return (e: KeyboardEvent) => {
@@ -143,14 +144,18 @@ export const treeItemKeyMap = (p: PG, prm: RenderParams, item: IItem) => {
               `.tree-${item.id}`
             ) as HTMLInputElement;
             if (f) {
-              f.focus();
+              scrollTreeActiveItem();
             }
           });
         });
       } else {
+        const node = getNodeById(p, item.id);
+        if (node?.parent?.component?.is_jsx_root) return;
+
         p.ui.tree.rename_id = item.id;
         p.render();
       }
+
       return;
     }
 

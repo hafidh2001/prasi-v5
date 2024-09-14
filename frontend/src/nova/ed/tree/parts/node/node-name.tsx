@@ -6,6 +6,7 @@ import { useGlobal } from "utils/react/use-global";
 import { EDGlobal } from "logic/ed-global";
 import { useLocal } from "utils/react/use-local";
 import { getActiveTree } from "logic/active";
+import { scrollTreeActiveItem } from "../scroll-tree";
 
 export const EdTreeNodeName: FC<{
   raw: NodeModel<PNode>;
@@ -50,6 +51,7 @@ export const EdTreeNodeName: FC<{
 
               p.ui.tree.rename_id = "";
               p.render();
+              setTimeout(scrollTreeActiveItem);
             }}
             onKeyDown={(e) => {
               e.stopPropagation();
