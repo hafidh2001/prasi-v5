@@ -59,6 +59,9 @@ export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
 
                 return true;
               }}
+              sort={false}
+              insertDroppableFirst={false}
+              dropTargetOffset={10}
               canDrop={(_, args) => {
                 if (!args.dragSource?.data?.item) return false;
                 return treeCanDrop(p, args);

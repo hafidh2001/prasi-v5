@@ -25,14 +25,14 @@ export const treeOnDrop: (
       const fromParent = findParent(dragSourceId);
       const to = findNode(dropTargetId);
 
-      if (from && to && fromParent) {
+      if (from && to && fromParent && typeof relativeIndex === "number") {
         if (to.item.childs) {
-          to.item.childs.splice(0, 0, from.item);
-
-          const idx = fromParent.item.childs.findIndex(
+          const from_idx = fromParent.item.childs.findIndex(
             (e) => e.id === from.item.id
           );
-          fromParent.item.childs.splice(idx, 1);
+          fromParent.item.childs.splice(from_idx, 1);
+          
+          to.item.childs.splice(relativeIndex, 0, from.item);
         }
       }
     });
