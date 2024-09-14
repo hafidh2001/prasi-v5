@@ -1,4 +1,4 @@
-import { EdPageHistory } from "crdt/page-history";
+import { EdTreeHistory } from "crdt/tree-history";
 import { useGlobal } from "../../utils/react/use-global";
 import { Tooltip } from "../../utils/ui/tooltip";
 import { EDGlobal } from "./logic/ed-global";
@@ -79,7 +79,10 @@ export const EdLeft = () => {
         </div>
 
         <div className="flex flex-row items-stretch border-b">
-          <Tooltip content="Page History" asChild>
+          <Tooltip
+            content={active.comp ? "Component History" : "Page History"}
+            asChild
+          >
             <div
               className={cx(
                 "flex items-center",
@@ -106,7 +109,9 @@ export const EdLeft = () => {
               />
               {p.ui.left.mode === "history" && (
                 <>
-                  <div className="text-sm flex-1">Page History</div>
+                  <div className="text-sm flex-1">
+                    {active.comp ? "Component History" : "Page History"}
+                  </div>
                   <div>
                     <TopBtn
                       className="text-[11px] bg-white mr-1"
@@ -127,7 +132,15 @@ export const EdLeft = () => {
         </div>
 
         <div
-          className="tree-body flex relative flex-1 overflow-y-auto overflow-x-hidden"
+          className={cx(
+            "tree-body flex relative flex-1 overflow-y-auto overflow-x-hidden",
+            css`
+              .absolute > ul {
+                position: absolute;
+                inset: 0;
+              }
+            `
+          )}
           onContextMenu={(e) => {
             e.stopPropagation();
             e.preventDefault();
@@ -157,7 +170,7 @@ export const EdLeft = () => {
                 </>
               )}
               {p.ui.left.mode === "history" && (
-                <EdPageHistory tree={p.page.tree} />
+                <EdTreeHistory tree={active.comp ? active.comp : p.page.tree} />
               )}
             </>
           )}

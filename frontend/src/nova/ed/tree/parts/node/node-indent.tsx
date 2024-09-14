@@ -19,7 +19,7 @@ export const EdTreeNodeIndent = ({
 
   return (
     <div
-      className={cx("flex items-stretch cursor-pointer", p.ui.tree.search.value && "pl-2")}
+      className={cx("node-indent-root flex items-stretch cursor-pointer", p.ui.tree.search.value && "pl-2")}
       onClick={(e) => {
         e.stopPropagation();
 
@@ -55,7 +55,7 @@ export const EdTreeNodeIndent = ({
             <div
               key={n}
               className={cx(
-                "border-l  mr-[4px] border-opacity-30",
+                "border-l node-indent mr-[4px] border-opacity-30",
                 n === 0 && "border-l-blue-300",
                 n === 1 && "border-l-slate-200",
                 n === 2 && "border-l-slate-300",

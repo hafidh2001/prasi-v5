@@ -5,13 +5,12 @@ import { Tooltip } from "../../../../../utils/ui/tooltip";
 import { active } from "../../../logic/active";
 import { EDGlobal } from "../../../logic/ed-global";
 import { PNode } from "../../../logic/types";
+import { EdTreeCtxMenu } from "../ctx-menu";
 import { treeItemKeyMap } from "../key-map";
+import { EdTreeAction } from "./node-action";
 import { EdTreeNodeIndent } from "./node-indent";
 import { EdTreeNodeName } from "./node-name";
 import { parseNodeState } from "./node-tools";
-import { EdTreeAction } from "./node-action";
-import { updateNodeById } from "crdt/node/get-node-by-id";
-import { EdTreeCtxMenu } from "../ctx-menu";
 
 export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -81,7 +80,24 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
             : [is_component && `bg-purple-50`],
           is_hover && [
             (item as any).type === "section" ? "bg-blue-100" : "bg-blue-50",
-          ]
+          ],
+          render_params.isDropTarget &&
+            cx(
+              "bg-blue-700 text-white",
+              css`
+                .node-action {
+                  color: black;
+                  background: white;
+                }
+                .node-indent-root {
+                  opacity: 0;
+                }
+                input {
+                  background: white;
+                  color: black;
+                }
+              `
+            )
         )}
       >
         {is_hover && (item as any).type !== "section" && (

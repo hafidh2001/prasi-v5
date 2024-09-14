@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { PG } from "./logic/ed-global";
 import keys from "ctrl-keys";
+import { active } from "logic/active";
 
 export const prasiKeybinding = (p: PG) => {
   useEffect(() => {
@@ -22,14 +23,18 @@ export const prasiKeybinding = (p: PG) => {
       if (!isWriteable() && p.page.tree) {
         e.preventDefault();
         e.stopPropagation();
-        p.page.tree.undo();
+
+        if (active.comp) active.comp.undo();
+        else p.page.tree.undo();
       }
     };
     const redo = async (e: any) => {
       if (!isWriteable() && p.page.tree) {
         e.preventDefault();
         e.stopPropagation();
-        p.page.tree.redo();
+
+        if (active.comp) active.comp.redo();
+        else p.page.tree.redo();
       }
     };
     handler.add("ctrl+z", undo);

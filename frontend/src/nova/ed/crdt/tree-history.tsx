@@ -4,8 +4,10 @@ import { useLocal } from "../../../utils/react/use-local";
 import { PageTree } from "./load-page-tree";
 import { useEffect } from "react";
 import { LoadingSpinner } from "../../../utils/ui/loading";
+import { CompTree } from "./load-comp-tree";
 dayjs.extend(relativeTime);
-export const EdPageHistory = ({ tree }: { tree: PageTree }) => {
+
+export const EdTreeHistory = ({ tree }: { tree: PageTree | CompTree }) => {
   const local = useLocal(
     {
       history: null as null | Awaited<ReturnType<typeof tree.history>>,

@@ -64,9 +64,7 @@ export const wsSync = (
 
         if (undoManager) {
           for (let i = 0; i < msg.count; i++) {
-            if (undoManager.redoStack.length > 1) {
-              undoManager.redo();
-            }
+            undoManager.redo();
           }
         }
       }

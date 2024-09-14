@@ -1,14 +1,15 @@
 import { Tree as DNDTree } from "@minoru/react-dnd-treeview";
+import { PageTree } from "crdt/load-page-tree";
 import { FC } from "react";
 import { useGlobal } from "../../../utils/react/use-global";
 import { ErrorBox } from "../../vi/lib/error-box";
 import { EDGlobal } from "../logic/ed-global";
 import { PNode } from "../logic/types";
-import { treeOnDrop } from "./parts/on-drop";
+import { DragPreview, Placeholder } from "./parts/drag-preview";
 import { nodeRender } from "./parts/node/node-render";
-import { useTreeIndent } from "./parts/use-indent";
+import { treeCanDrop, treeOnDrop } from "./parts/on-drop";
 import { doTreeSearch } from "./parts/search";
-import { PageTree } from "crdt/load-page-tree";
+import { useTreeIndent } from "./parts/use-indent";
 
 export const EdPageTree: FC<{ tree: PageTree }> = ({ tree }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -27,13 +28,30 @@ export const EdPageTree: FC<{ tree: PageTree }> = ({ tree }) => {
       <div className="absolute inset-0">
         <ErrorBox>
           <TypedTree
-            onDrop={treeOnDrop}
             tree={models}
             ref={(ref) => {
               p.ui.tree.ref = ref;
             }}
             rootId={"root"}
             render={nodeRender}
+            canDrag={(node) => {
+              if (node) {
+                if (node.data?.parent?.component?.is_jsx_root) {
+                  return false;
+                }
+              }
+
+              return true;
+            }}
+            canDrop={(_, args) => {
+              if (!args.dragSource?.data?.item) return false;
+              return treeCanDrop(p, args);
+            }}
+            onDrop={(tree, options) => treeOnDrop(p, tree, options)}
+            dragPreviewRender={DragPreview}
+            placeholderRender={(node, params) => (
+              <Placeholder node={node} params={params} />
+            )}
           />
         </ErrorBox>
       </div>

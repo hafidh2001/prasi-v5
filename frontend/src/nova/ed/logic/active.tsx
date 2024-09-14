@@ -12,7 +12,7 @@ export const activateItem = (p: PG, id: string) => {
     p.render();
     setTimeout(() => {
       indentTree(p);
-    }, 300);
+    }, 50);
   });
 };
 

@@ -8,9 +8,10 @@ import { useGlobal } from "utils/react/use-global";
 import { ErrorBox } from "../../vi/lib/error-box";
 import { TopBtn } from "../ui/top-btn";
 import { nodeRender } from "./parts/node/node-render";
-import { treeOnDrop } from "./parts/on-drop";
+import { treeCanDrop, treeOnDrop } from "./parts/on-drop";
 import { doTreeSearch } from "./parts/search";
 import { useTreeIndent } from "./parts/use-indent";
+import { DragPreview, Placeholder } from "./parts/drag-preview";
 
 export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -32,7 +33,7 @@ export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
           className="text-[11px] bg-white"
           onClick={() => {
             active.comp?.destroy();
-            active.comp = null; 
+            active.comp = null;
             p.render();
           }}
         >
@@ -43,13 +44,30 @@ export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
         <div className="absolute inset-0">
           <ErrorBox>
             <TypedTree
-              onDrop={treeOnDrop}
               tree={models}
               ref={(ref) => {
                 p.ui.tree.ref = ref;
               }}
               rootId={"root"}
               render={nodeRender}
+              canDrag={(node) => {
+                if (node) {
+                  if (node.data?.parent?.component?.is_jsx_root) {
+                    return false;
+                  }
+                }
+
+                return true;
+              }}
+              canDrop={(_, args) => {
+                if (!args.dragSource?.data?.item) return false;
+                return treeCanDrop(p, args);
+              }}
+              onDrop={(tree, options) => treeOnDrop(p, tree, options)}
+              dragPreviewRender={DragPreview}
+              placeholderRender={(node, params) => (
+                <Placeholder node={node} params={params} />
+              )}
             />
           </ErrorBox>
         </div>
