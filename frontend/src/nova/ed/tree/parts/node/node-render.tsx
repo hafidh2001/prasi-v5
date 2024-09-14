@@ -11,10 +11,31 @@ import { EdTreeAction } from "./node-action";
 import { EdTreeNodeIndent } from "./node-indent";
 import { EdTreeNodeName } from "./node-name";
 import { parseNodeState } from "./node-tools";
+import { useEffect } from "react";
 
 export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
   const p = useGlobal(EDGlobal, "EDITOR");
-  const local = useLocal({ right_click: null as any });
+  const local = useLocal({
+    right_click: null as any,
+    expand_timeout: null as any,
+  });
+
+  useEffect(() => {
+    if (render_params.isDropTarget && raw.data?.item?.id) {
+      clearTimeout(local.expand_timeout);
+      local.expand_timeout = setTimeout(() => {
+        const open = JSON.parse(
+          localStorage.getItem("prasi-tree-open") || "{}"
+        );
+        const should_open = open[active.comp?.id || p.page.cur?.id || ""] || [];
+        if (p.ui.tree.ref) {
+          p.ui.tree.ref.open([...should_open, raw.data?.item?.id]);
+          p.render();
+        }
+      }, 500);
+    }
+  }, [render_params.isDropTarget]);
+
   if (!raw.data) return <></>;
 
   const node = raw.data;
@@ -84,13 +105,13 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
           ],
           render_params.isDropTarget &&
             cx(
-              "bg-blue-700 text-white",
+              "bg-blue-400 text-white",
               css`
                 .node-action {
                   color: black;
                   background: white;
                 }
-                .node-indent-root {
+                .node-indent {
                   opacity: 0;
                 }
                 input {

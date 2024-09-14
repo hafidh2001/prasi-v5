@@ -25,7 +25,7 @@ export const Placeholder: FC<{
   return (
     <div
       className={cx(
-        "flex items-center bg-blue-50",
+        "flex items-center bg-blue-50 bg-opacity-50",
         css`
           height: 10px;
           z-index: 99;
