@@ -1,8 +1,9 @@
+import { active, getActiveTree } from "logic/active";
 import { IItem } from "../../../../utils/types/item";
 import { PG } from "../../logic/ed-global";
 
 export const edActionDelete = async (p: PG, item: IItem) => {
-  p.page.tree.update(({ findById }) => {
+  getActiveTree(p).update(({ findById }) => {
     const node = findById(item.id);
     if (node?.parent) {
       const parent = findById(node.parent.id);
@@ -16,7 +17,7 @@ export const edActionDelete = async (p: PG, item: IItem) => {
 };
 
 export const edActionDeleteById = async (p: PG, id: string) => {
-  p.page.tree.update(({ findById }) => {
+  getActiveTree(p).update(({ findById }) => {
     const node = findById(id);
     if (node?.parent) {
       const parent = findById(node.parent.id);

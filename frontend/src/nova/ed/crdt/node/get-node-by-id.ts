@@ -1,21 +1,16 @@
 import { active } from "../../logic/active";
 import { PG } from "../../logic/ed-global";
-import { EPage, PNode } from "../../logic/types";
+import { EBaseComp, EPage, PNode } from "../../logic/types";
 import { flattenTree } from "./flatten-tree";
 
 export const getNodeById = (p: PG, id: string) => {
-  if (active.comp_id) {
-    if (
-      p.comp.loaded[active.comp_id] &&
-      p.comp.loaded[active.comp_id].nodes.map
-    ) {
-      const meta = p.comp.loaded[active.comp_id].nodes.map[id];
+  if (active.comp?.id) {
+    if (active.comp.nodes.map) {
+      const meta = active.comp.nodes.map[id];
       if (meta) {
         return meta;
-      } else if (p.comp.loaded[active.comp_id].nodes.map) {
-        for (const v of Object.values(
-          p.comp.loaded[active.comp_id].nodes.map
-        )) {
+      } else if (active.comp.nodes.map) {
+        for (const v of Object.values(active.comp.nodes.map)) {
           if (v.item.id === id) return v;
         }
       }
@@ -32,24 +27,18 @@ export const updateNodeById = (
     node: PNode;
     nodes: ReturnType<typeof flattenTree>;
     page_tree?: EPage["content_tree"];
+    comp_tree?: EBaseComp["content_tree"];
   }) => void
 ) => {
-  if (active.comp_id) {
-    // if (
-    //   p.comp.loaded[active.comp_id] &&
-    //   p.comp.loaded[active.comp_id].nodes.map
-    // ) {
-    //   const meta = p.comp.loaded[active.comp_id].nodes.map[id];
-    //   if (meta) {
-    //     return meta;
-    //   } else if (p.comp.loaded[active.comp_id].nodes.map) {
-    //     for (const v of Object.values(
-    //       p.comp.loaded[active.comp_id].nodes.map
-    //     )) {
-    //       if (v.item.id === id) return v;
-    //     }
-    //   }
-    // }
+  if (active.comp?.id) {
+    active.comp.update((val) => {
+      const node = val.findById(id);
+
+      if (node) {
+        const nodes = val.flatten();
+        updateFn({ nodes, node, comp_tree: val.tree });
+      }
+    });
   } else {
     p.page.tree.update((val) => {
       const node = val.findById(id);

@@ -1,5 +1,4 @@
 import { Tree as DNDTree } from "@minoru/react-dnd-treeview";
-import { PageTree } from "crdt/page-tree";
 import { FC } from "react";
 import { useGlobal } from "../../../utils/react/use-global";
 import { ErrorBox } from "../../vi/lib/error-box";
@@ -9,8 +8,9 @@ import { treeOnDrop } from "./parts/on-drop";
 import { nodeRender } from "./parts/node/node-render";
 import { useTreeIndent } from "./parts/use-indent";
 import { doTreeSearch } from "./parts/search";
+import { PageTree } from "crdt/load-page-tree";
 
-export const EdTree: FC<{ tree: PageTree }> = ({ tree }) => {
+export const EdPageTree: FC<{ tree: PageTree }> = ({ tree }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
 
   useTreeIndent(p);

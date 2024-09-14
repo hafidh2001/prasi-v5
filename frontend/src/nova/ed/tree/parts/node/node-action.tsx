@@ -5,7 +5,8 @@ import { PNode } from "../../../logic/types";
 import { active } from "../../../logic/active";
 import { getNodeById, updateNodeById } from "crdt/node/get-node-by-id";
 import { Tooltip } from "../../../../../utils/ui/tooltip";
-import { findNodeById } from "crdt/node/flatten-tree";
+import { loadCompTree } from "crdt/load-comp-tree";
+import { waitUntil } from "prasi-utils";
 export const EdTreeAction = ({
   raw,
   render_params,
@@ -28,7 +29,7 @@ export const EdTreeAction = ({
 
   let child_jsx_has_script = false;
   const child_id = item.component?.props?.child?.content?.id;
-  if (child_id && active.comp_id !== item.component?.id) {
+  if (child_id && active.comp?.id !== item.component?.id) {
     const meta = getNodeById(p, child_id);
     const item = meta?.item;
     child_jsx_has_script = true;
@@ -60,7 +61,7 @@ export const EdTreeAction = ({
       )}
 
       {(!comp.editable ||
-        (comp.editable && comp.id === active.comp_id) ||
+        (comp.editable && comp.id === active.comp?.id) ||
         child_jsx_has_script) && (
         <Tooltip
           content={`Edit ${mode}`}
@@ -118,20 +119,28 @@ export const EdTreeAction = ({
 
       {comp.editable && (
         <>
-          {comp.id !== active.comp_id && p.ui.comp.editable && (
+          {comp.id !== active.comp?.id && p.ui.comp.editable && (
             <Tooltip content="Edit Component">
               <div
                 className="flex items-center border border-slate-500 bg-white rounded-sm text-[10px] px-[2px] cursor-pointer hover:bg-purple-100 hover:border-purple-600"
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.stopPropagation();
                   e.preventDefault();
 
                   const comp_id = comp.id;
-                  if (comp_id) {
+                  if (comp_id && p.sync) {
                     active.instance.item_id = item.id;
-                    active.instance.comp_id = active.comp_id;
-
-                    active.comp_id = comp_id || "";
+                    active.comp = await loadCompTree({
+                      sync: p.sync,
+                      id: comp.id,
+                      async on_update(ctree) {
+                        if (!p.comp.loaded[comp.id]) {
+                          await waitUntil(() => !p.comp.pending.has(comp.id));
+                        }
+                        p.comp.loaded[comp.id].content_tree = ctree;
+                        p.render();
+                      },
+                    });
                     p.render();
                   }
                 }}
@@ -140,20 +149,21 @@ export const EdTreeAction = ({
               </div>
             </Tooltip>
           )}
-          {comp.id === active.comp_id && (
+          {comp.id === active.comp?.id && (
             <>
               <Tooltip content="Close Component">
                 <div
                   className="flex items-center border border-slate-500 bg-white rounded-sm text-[10px] px-[2px] cursor-pointer hover:bg-purple-100 hover:border-purple-600"
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.stopPropagation();
                     e.preventDefault();
 
-                    if (active.comp_id) {
-                      active.comp_id = active.instance.comp_id || "";
+                    if (active.comp) {
                       active.item_id = active.instance.item_id || "";
                       active.instance.comp_id = "";
                       active.instance.item_id = "";
+                      active.comp?.destroy();
+                      active.comp = null;
                       p.render();
                     }
                   }}

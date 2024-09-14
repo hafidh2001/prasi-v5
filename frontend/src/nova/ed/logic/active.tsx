@@ -1,7 +1,22 @@
+import { CompTree } from "crdt/load-comp-tree";
+import { PG } from "./ed-global";
+
+export const getActiveTree = (p: PG) => {
+  return active.comp ? active.comp : p.page.tree;
+};
+
 export const active = {
   item_id: "",
-  comp_id: "",
+  comp: null as null | CompTree,
   hover: { id: "", tree: false },
+  script_nav: {
+    list: [] as {
+      item_id: string;
+      comp_id?: string;
+      instance?: { item_id: string; comp_id?: string };
+    }[],
+    idx: -1,
+  },
   instance: {
     get comp_id() {
       if (target.instance_comp_id === false) {

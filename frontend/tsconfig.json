@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "paths": {
-      "crdt/*": [
-        "./src/nova/ed/crdt/*"
-      ],
+      "crdt/*": ["./src/nova/ed/crdt/*"],
+      "utils/*": ["./src/utils/*"],
+      "logic/*": ["./src/nova/ed/logic/*"]
     },
     "target": "ES2020",
     "lib": ["DOM", "ES2020"],
@@ -16,7 +16,7 @@
     "resolveJsonModule": true,
     "moduleResolution": "bundler",
     "useDefineForClassFields": true,
-    "allowImportingTsExtensions": true,
+    "allowImportingTsExtensions": true
   },
   "include": ["src"]
 }

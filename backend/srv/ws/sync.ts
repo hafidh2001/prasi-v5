@@ -5,6 +5,8 @@ import type { ServerWebSocket } from "bun";
 import type { WSContext } from "../utils/server/ctx";
 import { crdt_pages } from "./crdt/page";
 import { unregisterCompConnection } from "../utils/editor/editor-comp-util";
+import { crdt_comps } from "./crdt/shared";
+import type { UndoManager } from "yjs";
 
 export const wsSyncClose = (ws: ServerWebSocket<WSContext>) => {
   const conn_id = editor.ws.get(ws);
@@ -25,8 +27,8 @@ export const wsSync = (
   ws: ServerWebSocket<WSContext>,
   msg:
     | { action: "open"; user_id: string }
-    | { action: "undo"; page_id: string; count: number }
-    | { action: "redo"; page_id: string; count: number }
+    | { action: "undo"; page_id?: string; comp_id?: string; count: number }
+    | { action: "redo"; page_id?: string; comp_id?: string; count: number }
 ) => {
   switch (msg.action) {
     case "open":
@@ -41,11 +43,14 @@ export const wsSync = (
       break;
     case "undo":
       {
-        const page = crdt_pages[msg.page_id];
-        if (page) {
+        let undoManager = undefined as undefined | UndoManager;
+        if (msg.comp_id) undoManager = crdt_comps[msg.comp_id]?.undoManager;
+        if (msg.page_id) undoManager = crdt_pages[msg.page_id]?.undoManager;
+
+        if (undoManager) {
           for (let i = 0; i < msg.count; i++) {
-            if (page.undoManager.undoStack.length > 1) {
-              page.undoManager.undo();
+            if (undoManager.undoStack.length > 1) {
+              undoManager.undo();
             }
           }
         }
@@ -53,10 +58,15 @@ export const wsSync = (
       break;
     case "redo":
       {
-        const page = crdt_pages[msg.page_id];
-        if (page) {
+        let undoManager = undefined as undefined | UndoManager;
+        if (msg.comp_id) undoManager = crdt_comps[msg.comp_id]?.undoManager;
+        if (msg.page_id) undoManager = crdt_pages[msg.page_id]?.undoManager;
+
+        if (undoManager) {
           for (let i = 0; i < msg.count; i++) {
-            page.undoManager.redo();
+            if (undoManager.redoStack.length > 1) {
+              undoManager.redo();
+            }
           }
         }
       }

@@ -1,12 +1,11 @@
 import { NodeModel } from "@minoru/react-dnd-treeview";
 import { useEffect } from "react";
-import { fuzzy } from "../../../../utils/ui/fuzzy";
 import { useGlobal } from "../../../../utils/react/use-global";
-import { EDGlobal, PG } from "../../logic/ed-global";
 import { useLocal } from "../../../../utils/react/use-local";
+import { fuzzy } from "../../../../utils/ui/fuzzy";
 import { active } from "../../logic/active";
+import { EDGlobal, PG } from "../../logic/ed-global";
 import { PNode } from "../../logic/types";
-import { IItem } from "../../../../utils/types/item";
 
 export const EdTreeSearch = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -120,24 +119,16 @@ export const doTreeSearch = (p: PG) => {
   const search = p.ui.tree.search.value.toLowerCase();
   let i = 0;
 
-  let ptree = p.page.tree;
-  if (
-    active.comp_id &&
-    p.comp.loaded[active.comp_id] &&
-    p.comp.loaded[active.comp_id].tree
-  ) {
-    ptree = p.comp.loaded[active.comp_id].tree;
+  let ptree = p.page.tree.nodes.models;
+  if (active.comp) {
+    ptree = active.comp.nodes.models;
   }
 
   const comp_searched = new Set<string>();
 
   const searchInPTree = (ptree: NodeModel<PNode>[], id_component?: string) => {
     if (p.ui.tree.search.mode.Name) {
-      const found = fuzzy(
-        ptree,
-        "data.item.name",
-        search
-      );
+      const found = fuzzy(ptree, "data.item.name", search);
 
       const id_found = ptree.find((e) => e.id === search);
       let i = 0;
@@ -205,7 +196,7 @@ export const doTreeSearch = (p: PG) => {
     }
   };
 
-  if (ptree?.nodes.models) searchInPTree(ptree.nodes.models);
+  if (ptree) searchInPTree(ptree);
 
   return Object.values(tree)
     .sort((a, b) => a.idx - b.idx)

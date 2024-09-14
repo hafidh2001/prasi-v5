@@ -1,10 +1,12 @@
 import type { OnMount } from "@monaco-editor/react";
+import { loadCompTree } from "crdt/load-comp-tree";
 import trim from "lodash.trim";
 import {
   MonacoJsxSyntaxHighlight,
   getWorker,
 } from "monaco-jsx-syntax-highlight-v2";
-import { PG, active } from "../../nova/ed/logic/ed-global";
+import { active } from "../../nova/ed/logic/active";
+import { PG } from "../../nova/ed/logic/ed-global";
 import { jscript } from "./jscript";
 
 export type MonacoEditor = Parameters<OnMount>[0];
@@ -53,8 +55,8 @@ export const jsMount = async (editor: MonacoEditor, monaco: Monaco, p?: PG) => {
 
   if (p) {
     monaco.editor.registerEditorOpener({
-      openCodeEditor(source, r, _sel) {
-        if (p) {
+      async openCodeEditor(source, r, _sel) {
+        if (p && p.sync) {
           if (r.scheme === "file" && r.path) {
             const args = r.path.split("_");
             if (args.length === 3) {
@@ -64,18 +66,27 @@ export const jsMount = async (editor: MonacoEditor, monaco: Monaco, p?: PG) => {
                   active.script_nav.list.length = active.script_nav.idx;
                 active.script_nav.list.push({
                   item_id: active.item_id,
-                  comp_id: active.comp_id,
+                  comp_id: active.comp?.id,
                   instance: active.instance,
                 });
                 active.script_nav.idx = active.script_nav.idx + 1;
 
                 if (loc.meta.item.component?.id && loc.meta.instances) {
-                  active.comp_id = loc.meta.item.component?.id;
+                  const comp_id = loc.meta.parent.comp_id;
+                  active.comp = await loadCompTree({
+                    sync: p.sync,
+                    id: comp_id,
+                    on_update(ctree) {
+                      p.comp.loaded[comp_id].content_tree = ctree;
+                      p.render();
+                    },
+                  });
+
                   active.instance = {
                     comp_id: loc.meta.item.component?.id,
                     item_id: loc.meta.item.id,
                   };
-                  const item_id = p.comp.list[active.comp_id].tree.find(
+                  const item_id = p.comp.loaded[active.comp?.id].tree.find(
                     (e) => e.parent === "root"
                   )?.id;
                   if (item_id) {
@@ -86,9 +97,18 @@ export const jsMount = async (editor: MonacoEditor, monaco: Monaco, p?: PG) => {
                   loc.meta.parent.comp_id &&
                   loc.meta.item.originalId
                 ) {
-                  active.comp_id = loc.meta.parent.comp_id;
+                  const comp_id = loc.meta.parent.comp_id;
+                  active.comp = await loadCompTree({
+                    sync: p.sync,
+                    id: comp_id,
+                    on_update(ctree) {
+                      p.comp.loaded[comp_id].content_tree = ctree;
+                      p.render();
+                    },
+                  });
+
                   active.instance = {
-                    comp_id: active.comp_id,
+                    comp_id: active.comp?.id,
                     item_id: loc.meta.parent.instance_id,
                   };
                   active.item_id = loc.meta.item.originalId;
@@ -221,16 +241,16 @@ export const extractLoc = (args: string[], p: PG) => {
   const [_id, var_name, _type] = args;
   const id = _id.substring(1);
   const type = _type.replace(".tsx", "");
-  let meta = p.page.meta[id];
+  // let meta = p.page.meta[id];
 
-  if (active.comp_id) {
-    meta = p.comp.list[active.comp_id].meta[id];
-  }
+  // if (active.comp?.id) {
+  //   meta = p.comp.list[active.comp?.id].meta[id];
+  // }
 
   return {
     id,
     var_name,
     type,
-    meta,
+    meta: null as any,
   };
 };

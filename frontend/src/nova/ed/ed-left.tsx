@@ -3,7 +3,7 @@ import { useGlobal } from "../../utils/react/use-global";
 import { Tooltip } from "../../utils/ui/tooltip";
 import { EDGlobal } from "./logic/ed-global";
 import { EdSitePicker } from "./popup/site/site-picker";
-import { EdTree } from "./tree/ed-tree";
+import { EdPageTree } from "./tree/ed-page-tree";
 import {
   iconHistory,
   iconLogout,
@@ -16,6 +16,8 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { DndProvider, getBackendOptions } from "@minoru/react-dnd-treeview";
 import { useRef } from "react";
 import { EdTreeSearch } from "./tree/parts/search";
+import { active } from "./logic/active";
+import { EdCompTree } from "./tree/ed-comp-tree";
 
 export const EdLeft = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -145,7 +147,11 @@ export const EdLeft = () => {
                         },
                       })}
                     >
-                      <EdTree tree={p.page.tree} />
+                      {active.comp ? (
+                        <EdCompTree tree={active.comp} />
+                      ) : (
+                        <EdPageTree tree={p.page.tree} />
+                      )}
                     </DndProvider>
                   )}
                 </>

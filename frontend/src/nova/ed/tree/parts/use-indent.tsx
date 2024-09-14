@@ -23,7 +23,7 @@ export const useTreeIndent = (p: PG) => {
     p.ui.tree.expanded = open;
 
     let should_open = new Set<string>(
-      open[active.comp_id || p.page.cur?.id || ""] || []
+      open[active.comp?.id || p.page.cur?.id || ""] || []
     );
 
     if (should_open.size > 0 && p.ui.tree.ref) {
@@ -32,5 +32,5 @@ export const useTreeIndent = (p: PG) => {
     }
 
     scrollTreeActiveItem();
-  }, [p.page.tree, active.comp_id, active.item_id, p.ui.tree.open_all]);
+  }, [p.page.tree, active.comp?.id, active.item_id, p.ui.tree.open_all]);
 };

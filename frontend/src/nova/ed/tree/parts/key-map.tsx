@@ -160,16 +160,17 @@ export const treeItemKeyMap = (p: PG, prm: RenderParams, item: IItem) => {
 
       if (
         item.type === "item" &&
-        item.component?.id === active.comp_id &&
-        active.comp_id
+        item.component?.id === active.comp?.id &&
+        active.comp?.id
       ) {
         return;
       }
 
       const meta = getNodeById(p, item.id);
-      const pmeta = active.comp_id
-        ? p.comp.loaded[active.comp_id].nodes.map
+      const pmeta = active.comp?.id
+        ? active.comp.nodes.map
         : p.page.tree.nodes.map;
+
       if (meta && meta.parent?.id) {
         const parent = pmeta[meta.parent.id];
         parent?.item.childs?.forEach((e) => {

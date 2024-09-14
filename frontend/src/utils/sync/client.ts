@@ -1,6 +1,6 @@
 import { pack, unpack } from "msgpackr";
 import { PG } from "../../nova/ed/logic/ed-global";
-import { EComp, EPage, ESite } from "../../nova/ed/logic/types";
+import { EBaseComp, EPage, ESite } from "../../nova/ed/logic/types";
 
 export const clientStartSync = (arg: {
   p: PG;
@@ -17,11 +17,7 @@ export const clientStartSync = (arg: {
     ws.onopen = () => {
       ws.send(pack({ action: "open", user_id: arg.user_id }));
       setInterval(() => {
-        if (ws.ping) {
-          ws.ping();
-        } else {
-          console.log(ws.ping);
-        }
+        ws.send(pack({ action: "ping" }));
       }, 90 * 1000);
     };
     ws.onmessage = async ({ data }) => {
@@ -59,8 +55,17 @@ export const createClient = (ws: WebSocket, p: any, conn_id: string) => ({
     action: async () => {},
   },
   comp: {
+    undo: (comp_id: string, count: number) => {
+      ws.send(pack({ action: "undo", comp_id, count }));
+    },
+    redo: (comp_id: string, count: number) => {
+      ws.send(pack({ action: "redo", comp_id, count }));
+    },
     load: async (ids: string[]) => {
-      return (await _api.comp_load(ids, p.user.conn_id)) as Record<string, EComp>;
+      return (await _api.comp_load(ids, p.user.conn_id)) as Record<
+        string,
+        EBaseComp
+      >;
     },
   },
   page: {
