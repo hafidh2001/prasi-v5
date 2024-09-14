@@ -1,14 +1,16 @@
 import { NodeModel, RenderParams } from "@minoru/react-dnd-treeview";
 import { getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
+import { RectangleEllipsis } from "lucide-react";
 import { FC } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { LoadingSpinner } from "utils/ui/loading";
-import { Tooltip } from "../../../../../utils/ui/tooltip";
 import { PNode } from "../../../logic/types";
 import { scrollTreeActiveItem } from "../scroll-tree";
 import { ComponentIcon } from "./node-indent";
+import capitalize from "lodash.capitalize";
+import startCase from "lodash.startcase";
 
 export const EdTreeNodeName: FC<{
   raw: NodeModel<PNode>;
@@ -72,8 +74,11 @@ export const EdTreeNodeName: FC<{
             }}
             onChange={(e) => {
               local.rename = e.target.value
-                .toLowerCase()
-                .replace(/[^a-zA-Z0-9:]+/g, "-");
+                .replace(/[^a-zA-Z0-9:]+/g, " ")
+                .split(" ")
+                .map((e) => (e[0] || "").toUpperCase() + e.slice(1))
+                .join(" ");
+
               local.render();
             }}
           />
@@ -123,12 +128,7 @@ const Name: FC<{ node: PNode; render_params: RenderParams }> = ({
   if (node.parent?.component?.is_jsx_root) {
     return (
       <div className={cx("flex items-center space-x-1 pr-1")}>
-        <Tooltip
-          content={`Type: JSX Prop`}
-          className="flex bg-white text-purple-500 border border-purple-400 items-center justify-center font-mono text-[6px] px-[2px]"
-        >
-          P
-        </Tooltip>
+        <RectangleEllipsis size={12} className="node-text text-purple-500" />
         <div className="flex-1 relative self-stretch">
           <div className="absolute inset-0 flex items-center">
             <div className="truncate text-ellipsis">
@@ -158,16 +158,19 @@ const Name: FC<{ node: PNode; render_params: RenderParams }> = ({
 
   return (
     <div className="flex items-center space-x-1">
-      <div>
-        {name}
-        {comp_label && `: ${comp_label}`}
-      </div>
-
       {node.item.component?.id && render_params.hasChild && (
         <div className="node-text text-purple-600 mt-[1px]">
           <ComponentIcon />
         </div>
       )}
+      <div>
+        {name
+          .replace(/[^a-zA-Z0-9:]+/g, " ")
+          .split(" ")
+          .map((e) => (e[0] || "").toUpperCase() + e.slice(1))
+          .join(" ")}
+        {comp_label && `: ${comp_label}`}
+      </div>
     </div>
   );
 };

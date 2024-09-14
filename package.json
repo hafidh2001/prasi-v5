@@ -18,10 +18,5 @@
     "esbuild",
     "msgpackr-extract",
     "prisma"
-  ],
-  "dependencies": {
-    "@leeoniya/ufuzzy": "^1.0.14",
-    "lodash.get": "^4.4.2",
-    "lodash.set": "^4.3.2"
-  }
+  ]
 }

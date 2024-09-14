@@ -61,7 +61,7 @@ export const flattenTree = (
       data: map[item.id],
     });
     array.push(map[item.id]);
-    if (item.childs) {
+    if (item.childs && !item.component?.id) {
       flattenTree(item.childs, opt, {
         parent: item,
         models: models,
