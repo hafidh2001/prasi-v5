@@ -13,7 +13,7 @@ export const edActionAdd = async (p: PG) => {
   getActiveTree(p).update(({ findNode, tree }) => {
     if (active.item_id) {
       const node = findNode(active.item_id);
-      if (node) {
+      if (node?.item.id === active.item_id) {
         if (
           node.item.type === "text" ||
           (node.item.type === "item" &&

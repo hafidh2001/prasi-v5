@@ -1,6 +1,7 @@
 import { NodeModel } from "@minoru/react-dnd-treeview";
 import { IItem } from "../../../../utils/types/item";
 import { PNode } from "../../logic/types";
+import { active } from "logic/active";
 
 export const flattenTree = (
   items: IItem[],
@@ -61,7 +62,11 @@ export const flattenTree = (
       data: map[item.id],
     });
     array.push(map[item.id]);
-    if (item.childs && !item.component?.id) {
+    if (
+      item.childs &&
+      (!item.component?.id ||
+        (item.component.id && opt?.comp_id === item.component.id))
+    ) {
       flattenTree(item.childs, opt, {
         parent: item,
         models: models,

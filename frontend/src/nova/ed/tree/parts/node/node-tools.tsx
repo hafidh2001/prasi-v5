@@ -14,7 +14,8 @@ export const parseNodeState = ({ item }: { item: IItem }) => {
     if (active.hover.id === item.id) {
       is_hover = true;
     }
-    is_component = !!item.component?.id;
+    is_component =
+      !!item.component?.id && active.comp?.id !== item.component.id;
   }
 
   return { is_active, is_component, is_hover };
