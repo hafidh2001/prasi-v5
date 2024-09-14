@@ -11,6 +11,7 @@ import { EdTreeNodeName } from "./node-name";
 import { parseNodeState } from "./node-tools";
 import { EdTreeAction } from "./node-action";
 import { updateNodeById } from "crdt/node/get-node-by-id";
+import { EdTreeCtxMenu } from "../ctx-menu";
 
 export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -82,17 +83,16 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
           ></div>
         )}
 
-        {/* {local.right_click && (
+        {local.right_click && (
           <EdTreeCtxMenu
-            node={node}
-            prm={prm}
-            event={local.rightClick}
+            raw={raw}
+            event={local.right_click}
             onClose={() => {
-              local.rightClick = null;
+              local.right_click = null;
               local.render();
             }}
           />
-        )} */}
+        )}
         <EdTreeNodeIndent raw={raw} render_params={render_params} />
         <EdTreeNodeName raw={raw} render_params={render_params} />
         <EdTreeAction raw={raw} render_params={render_params} />

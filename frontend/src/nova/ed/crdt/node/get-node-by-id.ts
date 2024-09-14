@@ -32,7 +32,7 @@ export const updateNodeById = (
 ) => {
   if (active.comp?.id) {
     active.comp.update((val) => {
-      const node = val.findById(id);
+      const node = val.findNode(id);
 
       if (node) {
         const nodes = val.flatten();
@@ -41,7 +41,7 @@ export const updateNodeById = (
     });
   } else {
     p.page.tree.update((val) => {
-      const node = val.findById(id);
+      const node = val.findNode(id);
 
       if (node) {
         const nodes = val.flatten();

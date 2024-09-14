@@ -85,7 +85,8 @@ export const internalLoadCompTree = (
       fn: (opt: {
         tree: EBaseComp["content_tree"];
         flatten(): ReturnType<typeof flattenTree>;
-        findById: (id: string) => null | PNode;
+        findNode: (id: string) => null | PNode;
+        findParent: (id: string) => null | PNode;
       }) => void
     ) {
       const _fn = (tree: EBaseComp["content_tree"]) => {
@@ -95,9 +96,17 @@ export const internalLoadCompTree = (
             const result = flattenTree(tree.childs);
             return result;
           },
-          findById: (id) => {
+          findNode: (id) => {
             const result = findNodeById(id, tree.childs);
             return result;
+          },
+          findParent: (id) => {
+            const result = findNodeById(id, tree.childs);
+
+            if (result?.parent) {
+              return findNodeById(result.parent.id, tree.childs);
+            }
+            return null;
           },
         });
       };

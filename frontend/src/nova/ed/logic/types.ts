@@ -40,6 +40,7 @@ export type PNode = {
   parent?: {
     id: string;
     component?: {
+      is_jsx_root?: boolean;
       comp_id: string;
       instance_id: string;
       prop_name: string;

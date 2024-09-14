@@ -87,7 +87,7 @@ export const loadPendingComponent = async (p: PG) => {
   }
 };
 
-const decorateEComp = (comp: EBaseComp): EComp => {
+export const decorateEComp = (comp: EBaseComp): EComp => {
   const out: EComp = {
     ...comp,
     tree: {

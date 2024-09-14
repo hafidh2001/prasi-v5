@@ -14,6 +14,7 @@ export const flattenTree = (
     map: Record<string, PNode>;
     parent_comp?: {
       prop_name: string;
+      is_jsx_root: boolean;
       comp_id: string;
       instance_id: string;
     };
@@ -34,6 +35,7 @@ export const flattenTree = (
         flattenTree([pitem], opt, {
           parent: item,
           parent_comp: {
+            is_jsx_root: true,
             prop_name: name,
             instance_id: item.id,
             comp_id: item.component.id,
@@ -62,6 +64,9 @@ export const flattenTree = (
       flattenTree(item.childs, opt, {
         parent: item,
         models: models,
+        parent_comp: arg?.parent_comp
+          ? { ...arg?.parent_comp, is_jsx_root: false }
+          : undefined,
         array,
         map,
       });

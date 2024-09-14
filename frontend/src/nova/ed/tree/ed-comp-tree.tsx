@@ -32,7 +32,7 @@ export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
           className="text-[11px] bg-white"
           onClick={() => {
             active.comp?.destroy();
-            active.comp = null;
+            active.comp = null; 
             p.render();
           }}
         >

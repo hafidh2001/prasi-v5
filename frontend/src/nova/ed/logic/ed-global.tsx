@@ -65,6 +65,13 @@ export const EDGlobal = {
         typings: { status: "ok" as "ok" | "loading" | "error", err_msg: "" },
         wb_render: () => {},
       },
+      comp_group: {
+        mouse_event: null as null | React.MouseEvent<HTMLElement, MouseEvent>,
+        on_pick(group_id: string) {},
+      },
+      comp: {
+        on_pick: (comp_id: string) => {},
+      },
     },
     layout: {
       left: 250,
