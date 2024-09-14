@@ -19,6 +19,7 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
 
   const node = raw.data;
   const item = node.item;
+  if (!item) return <></>;
 
   const { is_active, is_component, is_hover } = parseNodeState({ item });
 
