@@ -20,19 +20,33 @@ export const treeOnDrop: (
     typeof dragSourceId === "string" &&
     typeof dropTargetId === "string"
   ) {
-    getActiveTree(p).update(({ findNode, findParent }) => {
+    getActiveTree(p).update(({ findNode, findParent, tree }) => {
       const from = findNode(dragSourceId);
-      const fromParent = findParent(dragSourceId);
+      const from_parent = findParent(dragSourceId);
       const to = findNode(dropTargetId);
 
-      if (from && to && fromParent && typeof relativeIndex === "number") {
-        if (to.item.childs) {
-          const from_idx = fromParent.item.childs.findIndex(
-            (e) => e.id === from.item.id
-          );
-          fromParent.item.childs.splice(from_idx, 1);
+      if (from && typeof relativeIndex === "number") {
+        let to_childs = null as null | IItem[];
+        let from_childs = null as null | IItem[];
 
-          to.item.childs.splice(relativeIndex, 0, from.item);
+        if (from_parent) {
+          from_childs = from_parent.item.childs;
+        }
+
+        if (to) {
+          if (to.item.childs) {
+            to_childs = to.item.childs;
+          }
+        } else if (from.item.type === "section") {
+          to_childs = tree.childs;
+          from_childs = tree.childs;
+        }
+
+        if (to_childs && from_childs) {
+          const from_idx = from_childs.findIndex((e) => e.id === from.item.id);
+          from_childs.splice(from_idx, 1);
+
+          to_childs.splice(relativeIndex, 0, from.item);
         }
       }
     });
