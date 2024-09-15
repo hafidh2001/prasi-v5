@@ -24,6 +24,9 @@ export const EDGlobal = {
     pending: new Set<string>(),
     loaded: {} as Record<string, EComp>,
   },
+  script: {
+    do_edit: async (newval: string, all?: boolean) => {},
+  },
   ui: {
     comp: {
       editable: true,
@@ -68,6 +71,7 @@ export const EDGlobal = {
         on_close: () => {},
         typings: { status: "ok" as "ok" | "loading" | "error", err_msg: "" },
         wb_render: () => {},
+        ref: null as any,
       },
       comp_group: {
         mouse_event: null as null | React.MouseEvent<HTMLElement, MouseEvent>,

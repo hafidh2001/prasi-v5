@@ -7,6 +7,7 @@ export type FNLayout = {
 };
 
 export type FNAdv = {
+  scriptMode?: "script" | "flow";
   flow?: string;
   js?: string;
   jsBuilt?: string;

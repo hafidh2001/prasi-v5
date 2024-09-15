@@ -53,7 +53,7 @@ export const useLocal = <T extends object>(
           return;
         }
 
-        if (Date.now() - local.lastRender < 300) {
+        if (Date.now() - local.lastRender < 500) {
           local.lastRenderCount++;
         } else {
           local.lastRenderCount = 0;

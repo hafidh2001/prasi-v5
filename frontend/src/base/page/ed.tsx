@@ -7,6 +7,7 @@ import { page } from "../../utils/react/page";
 import { useGlobal } from "../../utils/react/use-global";
 import { useLocal } from "../../utils/react/use-local";
 import { Loading } from "../../utils/ui/loading";
+import { jscript } from "utils/script/jscript";
 
 export default page({
   url: "/ed/:site_id/:page_id",
@@ -15,6 +16,8 @@ export default page({
     const local = useLocal({
       new_site: false,
     });
+
+    jscript.init(local.render);
 
     const w = window as any;
 

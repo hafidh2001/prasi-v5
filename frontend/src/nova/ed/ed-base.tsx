@@ -1,5 +1,6 @@
 import { loadPageTree, PageTree } from "crdt/load-page-tree";
 import { loadPendingComponent } from "crdt/node/load-child-comp";
+import { EdPopItemScript } from "popup/script/item-script";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useGlobal } from "../../utils/react/use-global";
 import { w } from "../../utils/types/general";
@@ -95,6 +96,7 @@ export const EdBase = () => {
       <>
         <EdPopCompGroup />
         <EdPopCompPicker />
+        <EdPopItemScript />
       </>
     </div>
   );
