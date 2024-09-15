@@ -6,7 +6,7 @@ import { IItem } from "utils/types/item";
 export const edActionAdd = async (p: PG, item?: IItem) => {
   const new_item: IItem = item || {
     id: createId(),
-    name: `new-item`,
+    name: `New Item`,
     type: "item",
     childs: [],
   };

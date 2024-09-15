@@ -132,13 +132,20 @@ export const EdTreeAction = ({
                     p.ui.comp.loading_id = item.id;
                     p.render();
                     active.instance.item_id = item.id;
+
+                    if (active.comp) {
+                      p.ui.comp.last_edit_ids.push(active.comp.id);
+                      active.comp.destroy();
+                    }
+
                     active.comp = await loadCompTree({
                       sync: p.sync,
                       id: comp.id,
                       async on_update(ctree) {
                         if (!p.comp.loaded[comp.id]) {
-                          await waitUntil(() => !p.comp.pending.has(comp.id));
+                          await waitUntil(() => p.comp.loaded[comp.id]);
                         }
+
                         p.comp.loaded[comp.id].content_tree = ctree;
                         p.render();
                       },

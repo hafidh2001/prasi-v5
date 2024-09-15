@@ -1,5 +1,5 @@
 import { Tree as DNDTree } from "@minoru/react-dnd-treeview";
-import { CompTree } from "crdt/load-comp-tree";
+import { CompTree, loadCompTree } from "crdt/load-comp-tree";
 import { active } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import { PNode } from "logic/types";
@@ -12,6 +12,7 @@ import { treeCanDrop, treeOnDrop } from "./parts/on-drop";
 import { doTreeSearch } from "./parts/search";
 import { useTreeIndent } from "./parts/use-indent";
 import { DragPreview, Placeholder } from "./parts/drag-preview";
+import { waitUntil } from "prasi-utils";
 
 export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -31,10 +32,32 @@ export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
         <div className="flex flex-1 items-center">Component Edit</div>
         <TopBtn
           className="text-[11px] bg-white"
-          onClick={() => {
-            active.comp?.destroy();
-            active.comp = null;
-            p.render();
+          onClick={async () => {
+            if (active.comp) {
+              active.comp.destroy();
+              active.comp = null;
+              if (p.ui.comp.last_edit_ids.length > 0 && p.sync) {
+                const id = p.ui.comp.last_edit_ids.pop();
+                if (id) {
+                  active.comp = await loadCompTree({
+                    sync: p.sync,
+                    id: id,
+                    async on_update(ctree) {
+                      if (!p.comp.loaded[id]) {
+                        await waitUntil(() => p.comp.loaded[id]);
+                      }
+
+                      p.comp.loaded[id].content_tree = ctree;
+                      p.render();
+                    },
+                  });
+                  p.ui.comp.loading_id = "";
+                  p.render();
+                }
+              }
+
+              p.render();
+            }
           }}
         >
           Close

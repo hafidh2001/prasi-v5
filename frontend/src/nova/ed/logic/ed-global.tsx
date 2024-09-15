@@ -29,6 +29,7 @@ export const EDGlobal = {
       editable: true,
       creating_id: "",
       loading_id: "",
+      last_edit_ids: [] as string[],
     },
     tree: {
       rename_id: "",

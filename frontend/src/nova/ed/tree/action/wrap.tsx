@@ -15,7 +15,7 @@ export const edActionWrap = (p: PG, item: IItem) => {
         if (child.id === item.id) {
           const new_item: IItem = {
             id: createId(),
-            name: `wrapped`,
+            name: `Wrapped`,
             type: "item",
             childs: [item],
           };
@@ -59,7 +59,7 @@ export const edActionWrapInComp = (p: PG, item: IItem) => {
 
     const new_item: IItem = {
       id: createId(),
-      name: `wrapped`,
+      name: `Wrapped`,
       type: "item",
       childs: [item],
       component: {

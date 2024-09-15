@@ -28,7 +28,7 @@ export const indentTree = (p: PG) => {
   p.ui.tree.expanded = open;
 
   let should_open = new Set<string>(
-    open[active.comp?.id || p.page.cur?.id || ""] || []
+    open[(active.comp ? `comp-${active.comp.id}` : p.page.cur?.id) || ""] || []
   );
 
   if (active.item_id) {

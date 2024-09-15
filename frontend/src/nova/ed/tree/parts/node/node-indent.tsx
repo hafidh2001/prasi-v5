@@ -3,6 +3,7 @@ import { PNode } from "../../../logic/types";
 import { useGlobal } from "../../../../../utils/react/use-global";
 import { EDGlobal } from "../../../logic/ed-global";
 import { IItem } from "../../../../../utils/types/item";
+import { active } from "logic/active";
 export const DEPTH_WIDTH = 5;
 
 export const EdTreeNodeIndent = ({
@@ -19,21 +20,23 @@ export const EdTreeNodeIndent = ({
 
   return (
     <div
-      className={cx("node-indent-root flex items-stretch cursor-pointer", p.ui.tree.search.value && "pl-2")}
+      className={cx(
+        "node-indent-root flex items-stretch cursor-pointer",
+        p.ui.tree.search.value && "pl-2"
+      )}
       onClick={(e) => {
         e.stopPropagation();
 
         if (item && item.type !== "text") {
-          if (!p.ui.tree.expanded[p.page.cur.id]) {
-            p.ui.tree.expanded[p.page.cur.id] = [];
+          const id = active.comp ? `comp-${active.comp.id}` : p.page.cur.id;
+          if (!p.ui.tree.expanded[id]) {
+            p.ui.tree.expanded[id] = [];
           }
-          const open = p.ui.tree.expanded[p.page.cur.id];
+          const open = p.ui.tree.expanded[id];
           if (!render_params.isOpen) {
             open.push(item.id);
           } else {
-            p.ui.tree.expanded[p.page.cur.id] = open.filter(
-              (e) => e !== item.id
-            );
+            p.ui.tree.expanded[id] = open.filter((e) => e !== item.id);
           }
 
           localStorage.setItem(
