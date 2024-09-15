@@ -1,18 +1,16 @@
+import { getNodeById } from "crdt/node/get-node-by-id";
 import { active, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
-import { useEffect } from "react";
+import { Code, GitFork } from "lucide-react";
+import { FC, ReactNode, useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
-import { EdScriptSnippet } from "./snippet";
 import { EdPropGen } from "./prop-gen";
-import { Tooltip } from "utils/ui/tooltip";
-import { Loading } from "utils/ui/loading";
-import { EdMonaco } from "../monaco";
-import { IItem } from "utils/types/item";
-import { getNodeById } from "crdt/node/get-node-by-id";
-import { Code, GitFork } from "lucide-react";
+import { EdScriptSnippet } from "./snippet";
 
-export const EdScriptWorkbench = () => {
+export const EdScriptWorkbench: FC<{
+  children: (arg: { mode: "script" | "flow" }) => ReactNode;
+}> = ({ children }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({ active_id: "" });
   p.ui.popup.script.wb_render = local.render;
@@ -109,8 +107,8 @@ export const EdScriptWorkbench = () => {
                                 : "border-orange-700",
                               css`
                                 .script-mode {
-                                  padding-top:1px;
-                                  padding-bottom:2px;
+                                  padding-top: 1px;
+                                  padding-bottom: 2px;
                                 }
                               `
                             )}
@@ -172,13 +170,7 @@ export const EdScriptWorkbench = () => {
           </div>
         </div>
 
-        <div className="relative flex flex-1">
-          {local.active_id === active.item_id ? (
-            <EdMonaco />
-          ) : (
-            <Loading backdrop={false} note={"opening script"} />
-          )}
-        </div>
+        {children({ mode: script_mode })}
       </div>
     </div>
   );

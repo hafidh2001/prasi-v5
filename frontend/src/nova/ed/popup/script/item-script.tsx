@@ -3,6 +3,7 @@ import { useGlobal } from "utils/react/use-global";
 import { jscript } from "utils/script/jscript";
 import { Loading } from "utils/ui/loading";
 import { Modal } from "utils/ui/modal";
+import { PrasiFlow } from "./flow/prasi-flow";
 import { EdScriptWorkbench } from "./parts/workbench";
 
 export const EdPopItemScript = () => {
@@ -29,10 +30,16 @@ export const EdPopItemScript = () => {
             popup.ref = ref;
           }
         }}
-        className={cx("absolute inset-[5%] bg-white flex")}
+        className={cx("absolute inset-[5%] bg-white flex flex-col")}
       >
         {!jscript.editor && <Loading note={"js-editor"} backdrop={false} />}
-        {jscript.editor && <EdScriptWorkbench />}
+        {jscript.editor && (
+          <>
+            <EdScriptWorkbench>
+              {({ mode }) => (mode === "flow" ? <PrasiFlow /> : <></>)}
+            </EdScriptWorkbench>
+          </>
+        )}
       </div>
     </Modal>
   );
