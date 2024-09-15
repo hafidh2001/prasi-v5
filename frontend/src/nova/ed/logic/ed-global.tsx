@@ -2,7 +2,7 @@ import { NodeModel, TreeMethods } from "@minoru/react-dnd-treeview";
 import { loadPageTree } from "../crdt/load-page-tree";
 import { EBaseComp, EComp, EPage, ESite, PropFieldKind } from "./types";
 import { createClient } from "utils/sync/client";
-import { CompPickerNode } from "../tree/parts/popup/comp-picker/render-picker-node";
+import { CompPickerNode } from "../popup/comp/comp-picker/render-picker-node";
 
 export const EDGlobal = {
   mode: "" as "desktop" | "mobile",

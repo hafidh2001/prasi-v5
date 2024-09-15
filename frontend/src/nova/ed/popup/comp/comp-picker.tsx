@@ -4,19 +4,15 @@ import {
   TreeMethods,
   getBackendOptions,
 } from "@minoru/react-dnd-treeview";
+import { EDGlobal } from "logic/ed-global";
 import { useEffect } from "react";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
-import { Loading } from "../../../../../utils/ui/loading";
-import { Modal } from "../../../../../utils/ui/modal";
-import { EDGlobal } from "../../../logic/ed-global";
-import {
-  CompPickerNode,
-  compRenderPickerNode,
-} from "./comp-picker/render-picker-node";
+import { Loading } from "utils/ui/loading";
+import { Modal } from "utils/ui/modal";
+import { CompPickerNode, compRenderPickerNode } from "./comp-picker/render-picker-node";
 import { compPickerToNodes } from "./comp-picker/to-nodes";
-import { fuzzy } from "utils/ui/fuzzy";
 
 const ID_PRASI_UI = "13143272-d4e3-4301-b790-2b3fd3e524e6";
 
@@ -73,8 +69,14 @@ export const EdPopCompPicker = () => {
   let nodes =
     local.tab === "Components"
       ? popup.data.nodes.filter((e) => {
-          if (popup.search.value && e.data?.type === "comp" && !e.data.name.toLowerCase().includes(popup.search.value.toLowerCase())) {
-            return false
+          if (
+            popup.search.value &&
+            e.data?.type === "comp" &&
+            !e.data.name
+              .toLowerCase()
+              .includes(popup.search.value.toLowerCase())
+          ) {
+            return false;
           }
           if (e.data?.type === "folder" && e.data.name === "__TRASH__")
             return false;
@@ -85,7 +87,6 @@ export const EdPopCompPicker = () => {
             return true;
           return false;
         });
-
 
   // const has_prasi_ui = !!tree.find(
   //   (e) => e.data?.type === "folder" && e.data?.id === ID_PRASI_UI
@@ -256,13 +257,13 @@ export const EdPopCompPicker = () => {
                           }
                         `,
                         css`
-                              > .tree-root > .listitem > .container {
-                                display: flex;
-                                flex-direction: row;
-                                flex-wrap: wrap;
-                                position: relative;
-                              }
-                            `
+                          > .tree-root > .listitem > .container {
+                            display: flex;
+                            flex-direction: row;
+                            flex-wrap: wrap;
+                            position: relative;
+                          }
+                        `
                       )}
                     >
                       {popup.picker_ref && popup.status === "ready" && (

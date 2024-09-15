@@ -1,10 +1,10 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useLocal } from "../../../utils/react/use-local";
-import { PageTree } from "./load-page-tree";
 import { useEffect } from "react";
+import { useLocal } from "../../../utils/react/use-local";
 import { LoadingSpinner } from "../../../utils/ui/loading";
 import { CompTree } from "./load-comp-tree";
+import { PageTree } from "./load-page-tree";
 dayjs.extend(relativeTime);
 
 export const EdTreeHistory = ({ tree }: { tree: PageTree | CompTree }) => {

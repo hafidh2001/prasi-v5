@@ -3,7 +3,8 @@
     "paths": {
       "crdt/*": ["./src/nova/ed/crdt/*"],
       "utils/*": ["./src/utils/*"],
-      "logic/*": ["./src/nova/ed/logic/*"]
+      "logic/*": ["./src/nova/ed/logic/*"],
+      "popup/*": ["./src/nova/ed/popup/*"]
     },
     "target": "ES2020",
     "lib": ["DOM", "ES2020"],

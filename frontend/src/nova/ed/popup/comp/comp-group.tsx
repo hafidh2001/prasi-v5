@@ -1,9 +1,9 @@
 import { component_group } from "prasi-db";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
-import { Menu, MenuItem } from "../../../../../utils/ui/context-menu";
-import { Loading } from "../../../../../utils/ui/loading";
-import { EDGlobal } from "../../../logic/ed-global";
+import { Menu, MenuItem } from "../../../../utils/ui/context-menu";
+import { Loading } from "../../../../utils/ui/loading";
+import { EDGlobal } from "../../logic/ed-global";
 
 export const EdPopCompGroup = () => {
   const p = useGlobal(EDGlobal, "EDITOR");

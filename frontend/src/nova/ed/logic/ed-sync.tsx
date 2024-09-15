@@ -1,6 +1,7 @@
 import { clientStartSync } from "../../../utils/sync/client";
 import { Loading } from "../../../utils/ui/loading";
 import { PG } from "./ed-global";
+import { EPage } from "./types";
 
 export const loadSession = (p: PG) => {
   const session = JSON.parse(
@@ -33,7 +34,7 @@ export const initSync = (p: PG) => {
       p.sync = sync;
       p.status = "ready";
       p.site = await p.sync!.site.load(params.site_id);
-      p.page.cur = await p.sync!.page.load(params.page_id);
+      p.page.cur = await p.sync!.page.load(params.page_id) as EPage; 
       console.log("🚀 Prasi Connected");
       p.render();
     });

@@ -8,9 +8,9 @@ import { Loading } from "../../utils/ui/loading";
 import { prasiKeybinding } from "./ed-keybinds";
 import { EdLeft } from "./ed-left";
 import { EDGlobal } from "./logic/ed-global";
+import { EdPopCompGroup } from "./popup/comp/comp-group";
+import { EdPopCompPicker } from "./popup/comp/comp-picker";
 import { iconVSCode } from "./ui/icons";
-import { EdPopCompGroup } from "./tree/parts/popup/comp-group";
-import { EdPopCompPicker } from "./tree/parts/popup/comp-picker";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
