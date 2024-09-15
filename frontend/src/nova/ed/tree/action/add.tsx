@@ -3,8 +3,8 @@ import { activateItem, active, getActiveTree } from "logic/active";
 import { PG } from "logic/ed-global";
 import { IItem } from "utils/types/item";
 
-export const edActionAdd = async (p: PG) => {
-  const new_item: IItem = {
+export const edActionAdd = async (p: PG, item?: IItem) => {
+  const new_item: IItem = item || {
     id: createId(),
     name: `new-item`,
     type: "item",

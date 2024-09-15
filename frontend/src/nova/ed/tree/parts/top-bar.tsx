@@ -1,32 +1,85 @@
+import { EDGlobal } from "logic/ed-global";
 import { Lock, Pencil, Plus } from "lucide-react";
+import { useGlobal } from "utils/react/use-global";
+import { IItem } from "utils/types/item";
 import { TopBtn } from "../../ui/top-btn";
 import { edActionAdd } from "../action/add";
-import { active } from "logic/active";
-import { useGlobal } from "utils/react/use-global";
-import { EDGlobal } from "logic/ed-global";
-import { getNodeById } from "crdt/node/get-node-by-id";
+import { ComponentIcon, ItemIcon } from "./node/node-indent";
+import { createId } from "@paralleldrive/cuid2";
+import { decorateEComp } from "crdt/node/load-child-comp";
+
 export const EdTreeTopBar = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
   return (
     <div className="p-1 border-b flex items-stretch justify-between text-xs bg-slate-100">
       <div
-        className={cx(css`
-          .top-btn {
-            padding-left: 6px;
-            background: white;
-            &:hover {
-              background: #3c82f6;
+        className={cx(
+          "flex items-stretch",
+          css`
+            .top-btn {
+              background: white;
+              font-size: 11px;
+              padding: 0 4px;
+              &:hover {
+                background: #3c82f6;
+              }
             }
-          }
-        `)}
+          `
+        )}
       >
+        <div className="px-1 bg-white text-slate-400 flex items-center border border-r-0 border-slate-300">
+          <Plus size={11} />
+        </div>
         <TopBtn
+          className={cx(
+            "rounded-none border-x-0",
+            css`
+              border-left: 1px solid #ececeb;
+            `
+          )}
           onClick={() => {
             edActionAdd(p);
           }}
         >
-          <Plus size={11} />
-          <div>Add</div>
+          <ItemIcon />
+          <div>ITEM</div>
+        </TopBtn>
+
+        <TopBtn
+          className={cx(
+            "rounded-l-none border-l-0",
+            css`
+              border-left: 1px solid #ececeb;
+              padding-right: 6px !important;
+            `
+          )}
+          onClick={() => {
+            p.ui.popup.comp.on_pick = async (comp_id) => {
+              if (p.sync) {
+                if (!p.comp.loaded[comp_id]) {
+                  const comps = await p.sync.comp.load([comp_id]);
+                  for (const comp of Object.values(comps)) {
+                    p.comp.loaded[comp.id] = decorateEComp(comp);
+                  }
+                }
+                const comp = p.comp.loaded[comp_id];
+                if (comp) {
+                  const new_item: IItem = {
+                    id: createId(),
+                    name: comp.content_tree.name,
+                    type: "item",
+                    component: { id: comp_id, props: {} },
+                    childs: [],
+                  };
+                  edActionAdd(p, new_item);
+                }
+              }
+            };
+            p.render();
+          }}
+        >
+          <ComponentIcon />
+          <div>COMP</div>
         </TopBtn>
       </div>
       <div

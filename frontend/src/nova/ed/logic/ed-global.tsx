@@ -1,7 +1,8 @@
-import { TreeMethods } from "@minoru/react-dnd-treeview";
+import { NodeModel, TreeMethods } from "@minoru/react-dnd-treeview";
 import { loadPageTree } from "../crdt/load-page-tree";
-import { EComp, EPage, ESite, PropFieldKind } from "./types";
+import { EBaseComp, EComp, EPage, ESite, PropFieldKind } from "./types";
 import { createClient } from "utils/sync/client";
+import { CompPickerNode } from "../tree/parts/popup/comp-picker/render-picker-node";
 
 export const EDGlobal = {
   mode: "" as "desktop" | "mobile",
@@ -73,7 +74,21 @@ export const EDGlobal = {
         on_close() {},
       },
       comp: {
-        on_pick: (comp_id: string) => {},
+        search: { value: "" },
+        on_pick: null as null | ((comp_id: string) => void),
+        render: () => {},
+        picker_ref: null as null | HTMLDivElement,
+        status: "loading" as "loading" | "ready",
+        should_import: false,
+        data: {
+          comps: [] as {
+            id: string;
+            name: string;
+            id_component_group: string | null;
+          }[],
+          groups: [] as { id: string; name: string }[],
+          nodes: [] as NodeModel<CompPickerNode>[],
+        },
       },
     },
     layout: {

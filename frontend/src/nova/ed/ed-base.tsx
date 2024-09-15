@@ -10,6 +10,7 @@ import { EdLeft } from "./ed-left";
 import { EDGlobal } from "./logic/ed-global";
 import { iconVSCode } from "./ui/icons";
 import { EdPopCompGroup } from "./tree/parts/popup/comp-group";
+import { EdPopCompPicker } from "./tree/parts/popup/comp-picker";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -83,7 +84,7 @@ export const EdBase = () => {
       }}
     >
       <PanelGroup autoSaveId="prasi-editor" direction="horizontal">
-        <Panel defaultSize={18} className="flex" minSize={15}>
+        <Panel defaultSize={18} className="flex min-w-[240px]">
           <EdLeft />
         </Panel>
         <PanelResizeHandle />
@@ -93,6 +94,7 @@ export const EdBase = () => {
       </PanelGroup>
       <>
         <EdPopCompGroup />
+        <EdPopCompPicker />
       </>
     </div>
   );
