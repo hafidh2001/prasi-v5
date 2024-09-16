@@ -24,7 +24,7 @@ export type PFNode = Record<string, any> & {
   unused_branches?: PFNodeBranch[];
 };
 
-export type PF = {
+export type PFlow = {
   name: string;
   path?: string;
   nodes: Record<PFNodeID, PFNode>;

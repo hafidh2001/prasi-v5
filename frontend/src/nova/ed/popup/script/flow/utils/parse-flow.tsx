@@ -1,7 +1,7 @@
-import { PF } from "../runtime/types";
+import { PFlow } from "../runtime/types";
 import { parseNodes } from "./parse-node";
 
-export const parseFlow = (pf: PF) => {
+export const parseFlow = (pf: PFlow) => {
   const parsed = { nodes: [], edges: [] };
 
   const existing = new Set<string>();

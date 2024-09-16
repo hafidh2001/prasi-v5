@@ -1,4 +1,4 @@
-import { PF, PFNode, PFNodeID, PFNodeBranch } from "../runtime/types";
+import { PFlow, PFNode, PFNodeID, PFNodeBranch } from "../runtime/types";
 
 export const findFlow = ({
   id,
@@ -6,7 +6,7 @@ export const findFlow = ({
   from,
 }: {
   id: string;
-  pf: PF;
+  pf: PFlow;
   from?: string;
 }) => {
   let result = {

@@ -115,7 +115,7 @@ export const EdScriptWorkbench: FC<{
                           >
                             <div
                               className={cx(
-                                "script-mode flex items-center space-x-1 px-2 rounded-sm",
+                                "script-mode flex items-center space-x-1 px-2 rounded-[3px]",
                                 script_mode === "flow"
                                   ? "bg-purple-700 text-white"
                                   : ""
@@ -135,7 +135,7 @@ export const EdScriptWorkbench: FC<{
                             </div>
                             <div
                               className={cx(
-                                "script-mode flex items-center space-x-1 px-2 rounded-sm",
+                                "script-mode flex items-center space-x-1 px-2 rounded-[3px]",
                                 script_mode === "script"
                                   ? "bg-orange-700 text-white"
                                   : ""

@@ -17,7 +17,7 @@ import { LayoutDashboard } from "lucide-react";
 import { useEffect } from "react";
 import { useLocal } from "utils/react/use-local";
 import { sampleFlow } from "./runtime/test/fixture";
-import { PF, PFNodeID } from "./runtime/types";
+import { PFlow, PFNodeID } from "./runtime/types";
 import { findFlow, loopPFNode } from "./utils/find-node";
 import { fg } from "./utils/flow-global";
 import { getLayoutedElements } from "./utils/node-layout";
@@ -28,7 +28,7 @@ import { savePF } from "./utils/save-pf";
 
 export function PrasiFlowEditor() {
   const local = useLocal({
-    pf: null as null | PF,
+    pf: null as null | PFlow,
     reactflow: null as null | ReactFlowInstance<Node, Edge>,
     save_timeout: null as any,
     nodeTypes: {
@@ -50,7 +50,7 @@ export function PrasiFlowEditor() {
 
   useEffect(() => {
     const temp = localStorage.getItem("pf-local");
-    let pf = null as null | PF;
+    let pf = null as null | PFlow;
     let relayout = false;
     if (temp) {
       pf = JSON.parse(temp);
@@ -139,7 +139,7 @@ export function PrasiFlowEditor() {
     }
   };
 
-  const connectTo = (pf: PF, from: string, to: string, flow: PFNodeID[]) => {
+  const connectTo = (pf: PFlow, from: string, to: string, flow: PFNodeID[]) => {
     const idx = flow.findIndex((id) => id === from);
     const found = idx >= 0;
 

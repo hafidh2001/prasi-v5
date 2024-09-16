@@ -1,5 +1,5 @@
 import { allNodeDefinitions } from "./nodes";
-import { PF, PFNode, PFNodeDefinition, PFRuntime, PFNodeBranch } from "./types";
+import { PFlow, PFNode, PFNodeDefinition, PFRuntime, PFNodeBranch } from "./types";
 
 type RunFlowOpt = {
   vars?: Record<string, any>;
@@ -8,7 +8,7 @@ type RunFlowOpt = {
   after_node?: (arg: { visited: PFRunVisited[]; node: PFNode }) => void;
   before_node?: (arg: { visited: PFRunVisited[]; node: PFNode }) => void;
 };
-export const runFlow = async (pf: PF, opt?: RunFlowOpt) => {
+export const runFlow = async (pf: PFlow, opt?: RunFlowOpt) => {
   const main_flow_id = Object.keys(pf.flow).find(
     (id) => pf.nodes[id].type === "start"
   );
@@ -33,7 +33,7 @@ type PFRunVisited = {
   error: any;
 };
 
-const flowRuntime = async (pf: PF, runtime: PFRuntime, opt?: RunFlowOpt) => {
+const flowRuntime = async (pf: PFlow, runtime: PFRuntime, opt?: RunFlowOpt) => {
   const visited: PFRunVisited[] = [];
   const vars = { ...opt?.vars };
   for (const current of runtime.nodes) {
@@ -53,7 +53,7 @@ const flowRuntime = async (pf: PF, runtime: PFRuntime, opt?: RunFlowOpt) => {
 };
 
 const runSingleNode = async (arg: {
-  pf: PF;
+  pf: PFlow;
   current: PFNode;
   branch?: PFNodeBranch;
   visited: PFRunVisited[];

@@ -1,7 +1,7 @@
 import { createIds, createManyNodes } from "../lib/create-node";
-import { PF } from "../types";
+import { PFlow } from "../types";
 
-export const sampleFlow: () => PF = () => {
+export const sampleFlow: () => PFlow = () => {
   const [a, b, c, d, e, f, g, h, i, j] = createIds(10);
 
   const nodes = createManyNodes({

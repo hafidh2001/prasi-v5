@@ -33,7 +33,12 @@ export const PrasiFlowProp = () => {
             <>
               <div className="text-xs">Please Select Node</div>
               <div className="text-xs italic">&mdash; Or &mdash;</div>
-              <div className="text-xs">Shift Drag to multi-select</div>
+              <div className="text-xs">
+                <span className="text-[10px] rounded-sm font-mono border border-slate-300 px-[5px] py-[1px]">
+                  Shift
+                </span>{" "}
+                Drag to multi-select
+              </div>
             </>
           ) : (
             <div
