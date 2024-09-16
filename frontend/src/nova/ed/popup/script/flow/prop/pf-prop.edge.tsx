@@ -1,16 +1,17 @@
 import { Edge } from "@xyflow/react";
 import { FC } from "react";
 import { fg } from "../utils/flow-global";
-import { PFNodeBranch } from "../runtime/types";
+import { PFlow, PFNodeBranch } from "../runtime/types";
 import { savePF } from "../utils/save-pf";
 import { Split } from "lucide-react";
 import { useLocal } from "utils/react/use-local";
 
-export const PFPropEdge: FC<{ edge: Edge }> = ({ edge }) => {
-  const pf = fg.pf!;
+export const PFPropEdge: FC<{ edge: Edge; pflow: PFlow }> = ({
+  edge,
+  pflow,
+}) => {
   const local = useLocal({ selected: null as null | PFNodeBranch });
-
-  const node = pf.nodes[edge.source];
+  const node = pflow.nodes[edge.source];
   if (!node) return <></>;
 
   return (
@@ -40,7 +41,7 @@ export const PFPropEdge: FC<{ edge: Edge }> = ({ edge }) => {
                       local.selected.flow = e.flow;
                       e.flow = temp;
                       if (fg.prop) fg.prop.selection.loading = true;
-                      savePF(pf);
+                      savePF(pflow);
                       fg.reload(false);
                     }
                   }}

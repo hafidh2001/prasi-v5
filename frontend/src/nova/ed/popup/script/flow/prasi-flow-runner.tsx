@@ -7,11 +7,12 @@ import { runFlow } from "./runtime/runner";
 import { fg } from "./utils/flow-global";
 import { useLocal } from "utils/react/use-local";
 import { Tooltip } from "utils/ui/tooltip";
+import { PFlow } from "./runtime/types";
 
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
 
-export const PrasiFlowRunner = () => {
+export const PrasiFlowRunner = ({ pflow }: { pflow: PFlow }) => {
   const local = useLocal({
     start: 0,
     status: "idle" as "idle" | "running",
@@ -54,13 +55,13 @@ export const PrasiFlowRunner = () => {
               )}
               onClick={async () => {
                 if (local.status === "running") return;
-                if (fg.pf) {
+                if (pflow) {
                   local.status = "running";
                   local.start = Date.now();
                   fg.run = null;
                   local.render();
 
-                  fg.run = await runFlow(fg.pf, {
+                  fg.run = await runFlow(pflow, {
                     capture_console: true,
                     delay: local.delay,
                     before_node({ node }) {

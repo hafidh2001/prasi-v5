@@ -1,19 +1,26 @@
 import { getNodeById } from "crdt/node/get-node-by-id";
 import { active, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
-import { Code, GitFork } from "lucide-react";
+import {
+  Code,
+  GitFork,
+  PanelLeftOpen,
+  PictureInPicture2,
+  X,
+} from "lucide-react";
 import { FC, ReactNode, useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
-import { EdPropGen } from "./prop-gen";
 import { EdScriptSnippet } from "./snippet";
+import { Tooltip } from "utils/ui/tooltip";
 
 export const EdScriptWorkbench: FC<{
   children: (arg: { mode: "script" | "flow" }) => ReactNode;
 }> = ({ children }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({ active_id: "" });
-  p.ui.popup.script.wb_render = local.render;
+  const popup = p.ui.popup.script;
+  popup.wb_render = local.render;
 
   const node = getNodeById(p, active.item_id);
   const item = node?.item;
@@ -34,9 +41,7 @@ export const EdScriptWorkbench: FC<{
     canBack: active.script_nav.list.length > 0,
   };
 
-  const is_error =
-    p.ui.popup.script.typings.status === "error" &&
-    p.ui.popup.script.mode === "js";
+  const is_error = popup.typings.status === "error" && popup.mode === "js";
 
   let script_mode = "flow" as "flow" | "script";
   if (!item?.adv?.scriptMode && item?.adv?.js) {
@@ -55,11 +60,9 @@ export const EdScriptWorkbench: FC<{
           )}
         >
           <div className={cx("flex items-stretch")}>
-            {p.ui.popup.script.type === "prop-master" && <CompTitleMaster />}
-            {p.ui.popup.script.type === "prop-instance" && (
-              <CompTitleInstance />
-            )}
-            {p.ui.popup.script.type === "item" && (
+            {popup.type === "prop-master" && <CompTitleMaster />}
+            {popup.type === "prop-instance" && <CompTitleInstance />}
+            {popup.type === "item" && (
               <>
                 <div className="flex p-2 space-x-1">
                   {[
@@ -76,7 +79,7 @@ export const EdScriptWorkbench: FC<{
                             border: 1px solid ${e.color};
                           `,
                           "uppercase text-white text-[12px] cursor-pointer flex items-center justify-center transition-all hover:opacity-100 w-[40px] text-center",
-                          p.ui.popup.script.lastMode === e.type
+                          popup.last_mode === e.type
                             ? css`
                                 background: ${e.color};
                                 color: white;
@@ -84,8 +87,8 @@ export const EdScriptWorkbench: FC<{
                             : "opacity-30"
                         )}
                         onClick={() => {
-                          p.ui.popup.script.mode = e.type as any;
-                          p.ui.popup.script.lastMode = e.type as any;
+                          popup.mode = e.type as any;
+                          popup.last_mode = e.type as any;
                           p.render();
                         }}
                       >
@@ -94,9 +97,9 @@ export const EdScriptWorkbench: FC<{
                     );
                   })}
                 </div>
-                {p.ui.popup.script.mode === "js" && (
+                {popup.mode === "js" && (
                   <>
-                    {p.ui.popup.script.type === "item" && (
+                    {popup.type === "item" && (
                       <>
                         <div className="border-l flex items-center pl-2 p-1 text-xs">
                           <div
@@ -165,8 +168,44 @@ export const EdScriptWorkbench: FC<{
               </>
             )}
           </div>
-          <div className="flex items-stretch text-xs pr-2">
-            {p.ui.popup.script.type === "prop-instance" && <EdPropGen />}
+          <div className="flex items-stretch text-xs">
+            {!popup.paned && (
+              <Tooltip content="Switch to Panned Mode" asChild>
+                <div
+                  onClick={() => {
+                    localStorage.setItem("prasi-popup-script-mode", "paned");
+                    popup.paned = true;
+                    p.render();
+                  }}
+                  className="flex items-center justify-center px-2 cursor-pointer hover:text-blue-600"
+                >
+                  <PanelLeftOpen size={13} />
+                </div>
+              </Tooltip>
+            )}
+            {popup.paned && (
+              <Tooltip content="Switch to Popup Mode" asChild>
+                <div
+                  onClick={() => {
+                    localStorage.setItem("prasi-popup-script-mode", "popup");
+                    popup.paned = false;
+                    p.render();
+                  }}
+                  className="flex items-center justify-center px-2 cursor-pointer hover:text-blue-600"
+                >
+                  <PictureInPicture2 size={13} />
+                </div>
+              </Tooltip>
+            )}
+            <div
+              onClick={() => {
+                popup.open = false;
+                p.render();
+              }}
+              className="flex items-center justify-center px-1 pr-2 cursor-pointer hover:text-red-600"
+            >
+              <X size={13} />
+            </div>
           </div>
         </div>
 
@@ -182,6 +221,7 @@ const CompTitleInstance = () => {
   const node = getNodeById(p, active.item_id);
   const item = node?.item;
 
+  const popup = p.ui.popup.script;
   if (item && item.component?.id) {
     const props = item.component.props;
     return (
@@ -191,9 +231,9 @@ const CompTitleInstance = () => {
         </div>
         <div>{item.name}</div>
         <ArrowRight />
-        <div>{p.ui.popup.script.prop_name}</div>
+        <div>{popup.prop_name}</div>
         <ArrowRight />
-        <div>{p.ui.popup.script.prop_kind}</div>
+        <div>{popup.prop_kind}</div>
       </div>
     );
   }

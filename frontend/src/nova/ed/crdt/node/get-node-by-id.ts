@@ -20,6 +20,15 @@ export const getNodeById = (p: PG, id: string) => {
   }
 };
 
+export const getActiveNode = (p: PG) => {
+  return getNodeById(p, active.item_id);
+};
+
+export const getActiveTree = (p: PG) => {
+  if (active.comp) return active.comp;
+  return p.page.tree;
+};
+
 export const updateNodeById = (
   p: PG,
   id: string,

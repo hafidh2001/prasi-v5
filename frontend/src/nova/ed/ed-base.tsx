@@ -12,6 +12,7 @@ import { EDGlobal } from "./logic/ed-global";
 import { EdPopCompGroup } from "./popup/comp/comp-group";
 import { EdPopCompPicker } from "./popup/comp/comp-picker";
 import { iconVSCode } from "./ui/icons";
+import { EdTopBar } from "./ed-topbar";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -74,6 +75,7 @@ export const EdBase = () => {
     );
   }
 
+  const script = p.ui.popup.script;
   return (
     <div
       className={cx("flex flex-col flex-1", style)}
@@ -84,19 +86,29 @@ export const EdBase = () => {
         w.pointer_active = true;
       }}
     >
-      <PanelGroup autoSaveId="prasi-editor" direction="horizontal">
+      <PanelGroup autoSaveId="prasi-editor-left" direction="horizontal">
         <Panel defaultSize={18} className="flex min-w-[240px]">
           <EdLeft />
         </Panel>
         <PanelResizeHandle />
-        <Panel>{p.page.tree && <Preview tree={p.page.tree} />}</Panel>
-        <PanelResizeHandle />
-        <Panel defaultSize={25}></Panel>
+        <Panel className="flex flex-col">
+          <EdTopBar />
+
+          {script.paned && script.open ? (
+            <EdPopItemScript />
+          ) : (
+            <PanelGroup autoSaveId="prasi-editor-right" direction="horizontal">
+              <Panel>{p.page.tree && <Preview tree={p.page.tree} />}</Panel>
+              <PanelResizeHandle />
+              <Panel defaultSize={25}></Panel>
+            </PanelGroup>
+          )}
+        </Panel>
       </PanelGroup>
       <>
         <EdPopCompGroup />
         <EdPopCompPicker />
-        <EdPopItemScript />
+        {!script.paned && script.open && <EdPopItemScript />}
       </>
     </div>
   );
@@ -113,7 +125,7 @@ const Preview = ({ tree }: { tree: PageTree }) => {
         });
       }}
     >
-      <pre className="text-[8px] absolute inset-0">
+      <pre className="text-[8px]  p-2 absolute inset-0">
         {Date.now()}
         {JSON.stringify(
           root,

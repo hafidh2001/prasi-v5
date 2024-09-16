@@ -16,7 +16,6 @@ import "@xyflow/react/dist/style.css";
 import { LayoutDashboard } from "lucide-react";
 import { useEffect } from "react";
 import { useLocal } from "utils/react/use-local";
-import { sampleFlow } from "./runtime/test/fixture";
 import { PFlow, PFNodeID } from "./runtime/types";
 import { findFlow, loopPFNode } from "./utils/find-node";
 import { fg } from "./utils/flow-global";
@@ -26,16 +25,16 @@ import { RenderEdge } from "./utils/render-edge";
 import { RenderNode } from "./utils/render-node";
 import { savePF } from "./utils/save-pf";
 
-export function PrasiFlowEditor() {
+export function PrasiFlowEditor({ pflow }: { pflow: PFlow }) {
   const local = useLocal({
-    pf: null as null | PFlow,
+    pflow: null as null | PFlow,
     reactflow: null as null | ReactFlowInstance<Node, Edge>,
     save_timeout: null as any,
     nodeTypes: {
-      default: RenderNode,
+      default: RenderNode.bind(pflow),
     },
     edgeTypes: {
-      default: RenderEdge,
+      default: RenderEdge.bind(pflow),
     },
     action: {
       resetSelectedElements: () => {},
@@ -49,38 +48,27 @@ export function PrasiFlowEditor() {
   const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[]);
 
   useEffect(() => {
-    const temp = localStorage.getItem("pf-local");
-    let pf = null as null | PFlow;
-    let relayout = false;
-    if (temp) {
-      pf = JSON.parse(temp);
+    const is_first = local.pflow === null;
+    const parsed = parseFlow(pflow);
+    local.pflow = pflow;
+
+    if (is_first) {
+      relayoutNodes({ nodes: parsed.nodes, edges: parsed.edges });
     } else {
-      pf = sampleFlow();
-      relayout = true;
+      setNodes(parsed.nodes);
+      setEdges(parsed.edges);
     }
 
-    if (pf) {
-      local.pf = pf;
-      const parsed = parseFlow(pf);
+    savePF(local.pflow);
 
-      if (relayout) {
-        relayoutNodes({ nodes: parsed.nodes, edges: parsed.edges });
-      } else {
-        setNodes(parsed.nodes);
-        setEdges(parsed.edges);
+    const ival = setInterval(() => {
+      const ref = local.reactflow;
+      if (ref) {
+        ref.fitView();
+        clearInterval(ival);
       }
-
-      savePF(local.pf);
-
-      const ival = setInterval(() => {
-        const ref = local.reactflow;
-        if (ref) {
-          ref.fitView();
-          clearInterval(ival);
-        }
-      }, 10);
-    }
-  }, []);
+    }, 10);
+  }, [pflow]);
 
   const relayoutNodes = (arg?: { nodes: Node[]; edges: Edge[] }) => {
     const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
@@ -92,15 +80,15 @@ export function PrasiFlowEditor() {
     setNodes([...layoutedNodes]);
     setEdges([...layoutedEdges]);
 
-    if (local.pf) {
+    if (local.pflow) {
       for (const n of layoutedNodes) {
-        const node = local.pf.nodes[n.id];
+        const node = local.pflow.nodes[n.id];
         if (node) {
           node.position = n.position;
         }
       }
 
-      savePF(local.pf);
+      savePF(local.pflow);
     }
 
     const ref = local.reactflow;
@@ -112,31 +100,21 @@ export function PrasiFlowEditor() {
   };
 
   fg.reload = (relayout?: boolean) => {
-    if (fg.pf) {
-      const selection = { ...fg.prop?.selection };
+    const selection = { ...fg.prop?.selection };
+    const parsed = parseFlow(pflow);
 
-      const parsed = parseFlow(fg.pf);
-
-      if (relayout) {
-        relayoutNodes(parsed);
-      } else {
-        setNodes(parsed.nodes);
-        setEdges(parsed.edges);
-      }
-
-      setTimeout(() => {
-        fg.main?.action.resetSelectedElements();
-
-        fg.main?.action.addSelectedEdges(
-          selection.edges?.map((e) => e.id) || []
-        );
-
-        fg.main?.action.addSelectedNodes(
-          selection.nodes?.map((e) => e.id) || []
-        );
-
-      });
+    if (relayout) {
+      relayoutNodes(parsed);
+    } else {
+      setNodes(parsed.nodes);
+      setEdges(parsed.edges);
     }
+
+    setTimeout(() => {
+      fg.main?.action.resetSelectedElements();
+      fg.main?.action.addSelectedEdges(selection.edges?.map((e) => e.id) || []);
+      fg.main?.action.addSelectedNodes(selection.nodes?.map((e) => e.id) || []);
+    });
   };
 
   const connectTo = (pf: PFlow, from: string, to: string, flow: PFNodeID[]) => {
@@ -164,7 +142,7 @@ export function PrasiFlowEditor() {
     const parsed = parseFlow(pf);
     setNodes(parsed.nodes);
     setEdges(parsed.edges);
-    savePF(local.pf);
+    savePF(local.pflow);
 
     if (to) {
       setTimeout(() => {
@@ -174,7 +152,6 @@ export function PrasiFlowEditor() {
     }
   };
 
-  fg.pf = local.pf;
   return (
     <div
       className={cx(
@@ -236,7 +213,7 @@ export function PrasiFlowEditor() {
           }
         }}
         onNodesChange={(changes) => {
-          const pf = local.pf;
+          const pf = local.pflow;
           let should_save = false;
           if (pf) {
             let select_id = "";
@@ -352,7 +329,7 @@ export function PrasiFlowEditor() {
           return true;
         }}
         onEdgesChange={(changes) => {
-          const pf = local.pf;
+          const pf = local.pflow;
           if (pf) {
             if (
               changes.length === 2 &&
@@ -419,7 +396,7 @@ export function PrasiFlowEditor() {
                         }
                       );
                       if (should_break) {
-                        savePF(local.pf);
+                        savePF(local.pflow);
                         setTimeout(() => {
                           fg.reload();
                         }, 100);
@@ -437,7 +414,7 @@ export function PrasiFlowEditor() {
         nodes={nodes}
         edges={edges}
         onConnectEnd={(_, state) => {
-          const pf = local.pf;
+          const pf = local.pflow;
           if (!pf) return;
 
           let from_id = "";

@@ -55,8 +55,8 @@ export const parseNodes = (
     };
     y++;
 
-    const branching = (allNodeDefinitions as any)[inode.type]?.branching;
-    if (branching) {
+    const on_init = (allNodeDefinitions as any)[inode.type]?.on_init;
+    if (on_init) {
       if (!inode.branches) {
         if (inode.unused_branches) {
           inode.branches = inode.unused_branches;
@@ -70,7 +70,7 @@ export const parseNodes = (
           inode.branches = [];
         }
       }
-      branching({ node: inode, flow, nodes });
+      on_init({ node: inode, flow, nodes });
     } else {
       if (inode.branches) {
         const non_empty_flow =

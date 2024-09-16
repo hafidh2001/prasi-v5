@@ -11,6 +11,7 @@ export type PFNodeBranch = {
 };
 
 export type PFNodePosition = { x: number; y: number };
+export type PFNodeSize = { w?: number; h?: number };
 
 export type PFNodeType = keyof typeof allNodeDefinitions;
 
@@ -21,10 +22,12 @@ export type PFNode = Record<string, any> & {
   vars?: Record<string, any>;
   branches?: PFNodeBranch[];
   position?: PFNodePosition;
+  size?: PFNodeSize;
   unused_branches?: PFNodeBranch[];
 };
 
 export type PFlow = {
+  id: string;
   name: string;
   path?: string;
   nodes: Record<PFNodeID, PFNode>;
@@ -47,7 +50,9 @@ export type PFNodeDefinition<F extends Record<string, PFField>> = {
   className?: string;
   vars?: Record<string, any>;
   icon: string;
-  branching?: (arg: {
+  on_before_connect?: (arg: { node: PFNode }) => void;
+  on_after_connect?: (arg: { from: PFNode; to: PFNode }) => void;
+  on_init?: (arg: {
     node: PFNode;
     flow: PFNodeID[];
     nodes: Record<string, PFNode>;

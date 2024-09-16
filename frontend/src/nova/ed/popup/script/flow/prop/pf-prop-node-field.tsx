@@ -1,9 +1,8 @@
-
 import { ChevronDown, Trash2 } from "lucide-react";
 import { FC, useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { useLocal } from "utils/react/use-local";
-import { PFField, PFNode } from "../runtime/types";
+import { PFField, PFlow, PFNode } from "../runtime/types";
 import { lockFocus, restoreFocus } from "../utils/caret-pos";
 import { fg } from "../utils/flow-global";
 import { savePF } from "../utils/save-pf";
@@ -20,13 +19,14 @@ export const PFPropNodeField: FC<{
   node: PFNode;
   name: string;
   value: any;
-}> = ({ field, node, name, value }) => {
+  pflow: PFlow;
+}> = ({ field, node, name, value, pflow }) => {
   const label = field.label || name;
   const ref = useRef<HTMLTextAreaElement>(null);
 
   const save = () => {
     fg.prop?.render();
-    savePF(fg.pf);
+    savePF(pflow);
   };
 
   const local = useLocal(
@@ -280,6 +280,7 @@ export const PFPropNodeField: FC<{
                           .map(([key, field]) => {
                             return (
                               <PFPropNodeField
+                                pflow={pflow}
                                 key={key}
                                 field={field}
                                 name={key}

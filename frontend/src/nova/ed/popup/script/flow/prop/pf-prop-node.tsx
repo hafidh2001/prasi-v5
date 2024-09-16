@@ -1,11 +1,14 @@
 import { FC } from "react";
-import { PFField, PFNode } from "../runtime/types";
+import { PFField, PFlow, PFNode } from "../runtime/types";
 import { fg } from "../utils/flow-global";
 import { getNodeFields } from "../utils/get-node-fields";
 import { savePF } from "../utils/save-pf";
 import { PFPropNodeField } from "./pf-prop-node-field";
 
-export const PFPropNode: FC<{ node: PFNode }> = ({ node }) => {
+export const PFPropNode: FC<{ node: PFNode; pflow: PFlow }> = ({
+  node,
+  pflow,
+}) => {
   const field = getNodeFields(node);
 
   const def = field?.definition;
@@ -23,7 +26,7 @@ export const PFPropNode: FC<{ node: PFNode }> = ({ node }) => {
         }}
         placeholder={"Node Name"}
         onBlur={() => {
-          const pf = fg.pf;
+          const pf = pflow;
           fg.reload();
           savePF(pf);
           fg.main?.render();
@@ -41,6 +44,7 @@ export const PFPropNode: FC<{ node: PFNode }> = ({ node }) => {
         .map(([key, item]) => {
           return (
             <PFPropNodeField
+              pflow={pflow}
               key={key}
               field={item}
               name={key}

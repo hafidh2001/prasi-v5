@@ -1,16 +1,29 @@
-import { Handle, Node, Position, useConnection, useStore } from "@xyflow/react";
-import { Move } from "lucide-react";
+import {
+  Handle,
+  Node,
+  NodeResizer,
+  Position,
+  useConnection,
+  useStore,
+} from "@xyflow/react";
+import { Check, Maximize2, Move } from "lucide-react";
 import { Fragment, useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
+import { Combobox } from "utils/shadcn/comps/ui/combobox";
+import { Tooltip } from "utils/ui/tooltip";
 import { allNodeDefinitions } from "../runtime/nodes";
-import { PFNodeDefinition } from "../runtime/types";
+import { PFlow, PFNodeDefinition } from "../runtime/types";
 import { fg } from "./flow-global";
 import { savePF } from "./save-pf";
-import { Combobox } from "utils/shadcn/comps/ui/combobox";
-export const RenderNode = (arg: {
-  id: string;
-  data: { label: string; type: string };
-}) => {
+
+export const RenderNode = function (
+  this: PFlow,
+  arg: {
+    id: string;
+    data: { label: string; type: string };
+  }
+) {
+  const pflow = this;
   const { data, id } = arg;
   const connection = useConnection<Node>();
   const isTarget = connection.inProgress && connection.fromNode.id !== id;
@@ -34,8 +47,7 @@ export const RenderNode = (arg: {
     fg.pointer_to = connection.to;
   }
 
-  const pf = fg.pf;
-  const node = pf?.nodes[id];
+  const node = pflow.nodes[id];
   const def: PFNodeDefinition<any> = node
     ? (allNodeDefinitions as any)[node.type]
     : undefined;
@@ -47,6 +59,15 @@ export const RenderNode = (arg: {
       className={cx(
         "border border-slate-600 rounded-sm",
         def?.className,
+        !node?.name && "items-center justify-center flex",
+        node?.size?.w &&
+          css`
+            width: ${node.size.w}px;
+          `,
+        node?.size?.h &&
+          css`
+            height: ${node.size.h}px;
+          `,
         css`
           .source-edge svg,
           .node-move,
@@ -75,7 +96,7 @@ export const RenderNode = (arg: {
 
         fg.node_running.includes(arg.id) &&
           (fg.node_running[fg.node_running.length - 1] === id ||
-          !fg.pf!.nodes[arg.id].branches
+          !pflow!.nodes[arg.id].branches
             ? css`
                 color: white;
                 background: #419625 !important;
@@ -106,6 +127,19 @@ export const RenderNode = (arg: {
         }
       }}
     >
+      {node && fg.resizing.has(node.id) && (
+        <NodeResizer
+          onResize={(e, p) => {
+            if (node) {
+              node.size = { w: p.width, h: p.height };
+            }
+          }}
+          onResizeEnd={() => {
+            savePF(pflow);
+          }}
+        />
+      )}
+
       <div className="node-id transition-all absolute top-[-15px] left-0 text-[8px] pointer-events-none">
         {id}
       </div>
@@ -142,6 +176,62 @@ export const RenderNode = (arg: {
           <Move size={14} />
         </div>
       </div>
+      {node && (
+        <Tooltip
+          content={!fg.resizing.has(node.id) ? "Resize Node" : "Done Resizing"}
+          className={cx(
+            "node-move transition-all",
+            css`
+              position: absolute;
+              padding-left: 5px;
+            `,
+            node.name
+              ? css`
+                  top: 33px;
+                  right: -30px;
+                `
+              : css`
+                  top: 3px;
+                  right: -60px;
+                `
+          )}
+          onClick={() => {
+            if (node) {
+              if (fg.resizing.has(node.id)) {
+                fg.resizing.delete(node.id);
+              } else {
+                fg.resizing.add(node.id);
+              }
+              fg.render();
+            }
+          }}
+        >
+          <div
+            className={cx(
+              "flex items-center justify-center cursor-pointer",
+              css`
+                width: 25px;
+                height: 25px;
+                border: 1px dashed black;
+                border-radius: 5px;
+                &:hover {
+                  border: 1px solid blue;
+                  background: blue;
+                  svg {
+                    color: white;
+                  }
+                }
+              `
+            )}
+          >
+            {fg.resizing.has(node.id) ? (
+              <Check size={14} />
+            ) : (
+              <Maximize2 size={14} />
+            )}
+          </div>
+        </Tooltip>
+      )}
       <Handle
         type="source"
         position={Position.Bottom}
@@ -197,6 +287,43 @@ export const RenderNode = (arg: {
             data.type !== "start" ? "min-w-[137px] " : "min-w-[65px] "
           )}
         >
+          {node.name && data.type !== "start" && (
+            <div
+              className={cx(
+                "flex items-center py-1 px-2 border-b border-t-slate-500"
+              )}
+            >
+              <TextareaAutosize
+                value={node.name}
+                spellCheck={false}
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                }}
+                rows={1}
+                ref={ref_name}
+                onChange={(e) => {
+                  if (node) {
+                    const value = e.currentTarget.value;
+                    node.name = value;
+                    fg.main?.render();
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (
+                    !e.currentTarget.value &&
+                    (e.key === "Backspace" || e.key === "Delete")
+                  ) {
+                    delete pflow?.nodes[id];
+                    savePF(pflow);
+                    fg.reload();
+                  }
+                }}
+                className={cx(
+                  "flex flex-1 bg-transparent min-w-0 w-0 outline-none resize-none text-[15px] items-center flex-col"
+                )}
+              ></TextareaAutosize>
+            </div>
+          )}
           <div
             className={cx(
               "line-type flex items-center ",
@@ -256,7 +383,7 @@ export const RenderNode = (arg: {
               defaultValue={data.type}
               onChange={(value) => {
                 data.type = value;
-                const pf = fg.pf;
+                const pf = pflow;
                 if (pf) {
                   const node = pf.nodes[id];
                   node.type = value;
@@ -281,7 +408,9 @@ export const RenderNode = (arg: {
                 <div
                   className={cx(
                     "flex",
-                    node.type !== "start" ? "absolute z-10 items-stretch" : "item-center w-full"
+                    node.type !== "start"
+                      ? "absolute z-10 items-stretch"
+                      : "item-center w-full"
                   )}
                   onClick={(e) => {
                     if (node.type !== "start") {
@@ -322,43 +451,6 @@ export const RenderNode = (arg: {
               )}
             </Combobox>
           </div>
-          {node.name && data.type !== "start" && (
-            <div
-              className={cx(
-                "flex items-center py-1 px-2 border-t border-t-slate-500"
-              )}
-            >
-              <TextareaAutosize
-                value={node.name}
-                spellCheck={false}
-                onPointerDown={(e) => {
-                  e.stopPropagation();
-                }}
-                rows={1}
-                ref={ref_name}
-                onChange={(e) => {
-                  if (node) {
-                    const value = e.currentTarget.value;
-                    node.name = value;
-                    fg.main?.render();
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (
-                    !e.currentTarget.value &&
-                    (e.key === "Backspace" || e.key === "Delete")
-                  ) {
-                    delete fg.pf?.nodes[id];
-                    savePF(fg.pf);
-                    fg.reload();
-                  }
-                }}
-                className={cx(
-                  "flex flex-1 bg-transparent min-w-0 w-0 outline-none resize-none text-[15px] items-center flex-col"
-                )}
-              ></TextareaAutosize>
-            </div>
-          )}
         </div>
       )}
     </div>

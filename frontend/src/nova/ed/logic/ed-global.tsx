@@ -3,6 +3,7 @@ import { loadPageTree } from "../crdt/load-page-tree";
 import { EBaseComp, EComp, EPage, ESite, PropFieldKind } from "./types";
 import { createClient } from "utils/sync/client";
 import { CompPickerNode } from "../popup/comp/comp-picker/render-picker-node";
+import { PFlow } from "popup/script/flow/runtime/types";
 
 export const EDGlobal = {
   mode: "" as "desktop" | "mobile",
@@ -26,6 +27,9 @@ export const EDGlobal = {
   },
   script: {
     do_edit: async (newval: string, all?: boolean) => {},
+    flow: {
+      current: null as null | PFlow,
+    },
   },
   ui: {
     comp: {
@@ -63,8 +67,9 @@ export const EDGlobal = {
       },
       script: {
         open: false,
+        paned: localStorage.getItem("prasi-popup-script-mode") === "paned",
         mode: "js" as "js" | "css" | "html",
-        lastMode: "js" as "js" | "css" | "html",
+        last_mode: "js" as "js" | "css" | "html",
         type: "item" as "item" | "prop-master" | "prop-instance" | "comp-types",
         prop_kind: "" as PropFieldKind,
         prop_name: "",

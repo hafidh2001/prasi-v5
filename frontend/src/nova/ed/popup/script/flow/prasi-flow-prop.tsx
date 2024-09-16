@@ -2,8 +2,9 @@ import { useLocal } from "utils/react/use-local";
 import { PFPropNode } from "./prop/pf-prop-node";
 import { PFPropEdge } from "./prop/pf-prop.edge";
 import { fg, PrasiFlowPropLocal } from "./utils/flow-global";
+import { PFlow } from "./runtime/types";
 
-export const PrasiFlowProp = () => {
+export const PrasiFlowProp = ({ pflow }: { pflow: PFlow }) => {
   const local = useLocal({
     selection: {
       nodes: [],
@@ -15,7 +16,7 @@ export const PrasiFlowProp = () => {
 
   const sel = local.selection;
   const rf_node = local.selection.nodes[0];
-  const pf_node = rf_node ? fg.pf?.nodes[rf_node.id] : undefined;
+  const pf_node = rf_node ? pflow.nodes[rf_node.id] : undefined;
 
   if (sel.loading) {
     sel.loading = false;
@@ -63,11 +64,11 @@ export const PrasiFlowProp = () => {
         <>
           {sel.edges.length === 1 && (
             <>
-              <PFPropEdge edge={sel.edges[0]} />
+              <PFPropEdge edge={sel.edges[0]} pflow={pflow} />
             </>
           )}
           {sel.nodes.length === 1 && (
-            <>{pf_node && <PFPropNode node={pf_node} />}</>
+            <>{pf_node && <PFPropNode pflow={pflow} node={pf_node} />}</>
           )}
         </>
       )}

@@ -7,22 +7,26 @@ import {
   getBezierPath,
   useReactFlow,
 } from "@xyflow/react";
-import { PFNode, PFNodeBranch } from "../runtime/types";
+import { PFlow, PFNode, PFNodeBranch } from "../runtime/types";
 import { findFlow } from "./find-node";
 import { fg } from "./flow-global";
 import { savePF } from "./save-pf";
 
-export const RenderEdge = ({
-  id,
-  sourceX,
-  sourceY,
-  targetX,
-  targetY,
-  sourcePosition,
-  targetPosition,
-  style = {},
-  markerEnd,
-}: EdgeComponentProps) => {
+export const RenderEdge = function (
+  this: PFlow,
+  {
+    id,
+    sourceX,
+    sourceY,
+    targetX,
+    targetY,
+    sourcePosition,
+    targetPosition,
+    style = {},
+    markerEnd,
+  }: EdgeComponentProps
+) {
+  const pflow = this;
   const { getEdge } = useReactFlow();
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -84,7 +88,7 @@ export const RenderEdge = ({
             e.preventDefault();
             if (id) {
               const edge = getEdge(id);
-              const pf = fg.pf;
+              const pf = pflow;
               if (edge && pf) {
                 const node = pf.nodes[edge.source];
                 let from = null as null | { flow: string[]; idx: number };

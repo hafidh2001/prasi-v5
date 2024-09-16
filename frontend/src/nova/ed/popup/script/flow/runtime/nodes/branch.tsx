@@ -3,7 +3,10 @@ import { defineNode } from "../lib/define-node";
 
 export const nodeBranch = defineNode({
   type: "branch",
-  branching({ node }) {
+  on_before_connect: ({ node }) => {
+    console.log("before connect", node);
+  },
+  on_init({ node }) {
     if (!node.branches) {
       node.branches = [];
     }

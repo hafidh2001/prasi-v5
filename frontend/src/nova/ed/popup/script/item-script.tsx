@@ -13,6 +13,32 @@ export const EdPopItemScript = () => {
 
   if (!popup.open) return null;
 
+  const content = (
+    <>
+      {!jscript.editor && <Loading note={"js-editor"} backdrop={false} />}
+      {jscript.editor && (
+        <>
+          <EdScriptWorkbench>
+            {({ mode }) => (
+              <>
+                {popup.mode === "js" && (
+                  <>{mode === "flow" ? <PrasiFlow /> : <></>}</>
+                )}
+              </>
+            )}
+          </EdScriptWorkbench>
+        </>
+      )}
+    </>
+  );
+
+  if (popup.paned)
+    return (
+      <div className="w-full h-full bg-white flex flex-col flex-1">
+        {content}
+      </div>
+    );
+
   return (
     <Modal
       open
@@ -32,14 +58,7 @@ export const EdPopItemScript = () => {
         }}
         className={cx("absolute inset-[5%] bg-white flex flex-col")}
       >
-        {!jscript.editor && <Loading note={"js-editor"} backdrop={false} />}
-        {jscript.editor && (
-          <>
-            <EdScriptWorkbench>
-              {({ mode }) => (mode === "flow" ? <PrasiFlow /> : <></>)}
-            </EdScriptWorkbench>
-          </>
-        )}
+        {content}
       </div>
     </Modal>
   );
