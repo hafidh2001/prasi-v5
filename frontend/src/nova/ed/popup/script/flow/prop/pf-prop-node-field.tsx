@@ -60,7 +60,7 @@ export const PFPropNodeField: FC<{
           field.className
         )}
       >
-        <Tooltip content={label} placement="left">
+        <Tooltip content={label} placement="left" asChild>
           <div
             className={cx(
               " px-1 flex items-center",

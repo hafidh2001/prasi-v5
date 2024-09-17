@@ -14,12 +14,14 @@ export const clientStartSync = (arg: {
     url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
     url.pathname = "/sync";
     const ws = new WebSocket(url);
+
     ws.onopen = () => {
       ws.send(pack({ action: "open", user_id: arg.user_id }));
       setInterval(() => {
         ws.send(pack({ action: "ping" }));
       }, 90 * 1000);
     };
+    
     ws.onmessage = async ({ data }) => {
       if (data instanceof Blob) {
         const msg = unpack(new Uint8Array(await data.arrayBuffer())) as {
@@ -33,6 +35,12 @@ export const clientStartSync = (arg: {
     };
     ws.onclose = () => {};
   });
+};
+
+const send = (ws: WebSocket, msg: any) => {
+  if (ws.readyState === ws.OPEN) {
+    ws.send(pack(msg));
+  }
 };
 
 export const createClient = (ws: WebSocket, p: any, conn_id: string) => ({
@@ -56,10 +64,10 @@ export const createClient = (ws: WebSocket, p: any, conn_id: string) => ({
   },
   comp: {
     undo: (comp_id: string, count: number) => {
-      ws.send(pack({ action: "undo", comp_id, count }));
+      send(ws, { action: "undo", comp_id, count });
     },
     redo: (comp_id: string, count: number) => {
-      ws.send(pack({ action: "redo", comp_id, count }));
+      send(ws, { action: "redo", comp_id, count });
     },
     load: async (ids: string[]) => {
       return (await _api.comp_load(ids, p.user.conn_id)) as Record<
@@ -70,10 +78,10 @@ export const createClient = (ws: WebSocket, p: any, conn_id: string) => ({
   },
   page: {
     undo: (page_id: string, count: number) => {
-      ws.send(pack({ action: "undo", page_id, count }));
+      send(ws, { action: "undo", page_id, count });
     },
     redo: (page_id: string, count: number) => {
-      ws.send(pack({ action: "redo", page_id, count }));
+      send(ws, { action: "redo", page_id, count });
     },
     load: async (id: string) => {
       return (await _api.page_load(id, { conn_id: p.user.conn_id })) as Omit<

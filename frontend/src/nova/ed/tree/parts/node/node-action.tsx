@@ -1,13 +1,13 @@
 import { NodeModel, RenderParams } from "@minoru/react-dnd-treeview";
+import { loadCompTree } from "crdt/load-comp-tree";
+import { getNodeById, updateNodeById } from "crdt/node/get-node-by-id";
+import { Scroll } from "lucide-react";
+import { waitUntil } from "prasi-utils";
 import { useGlobal } from "../../../../../utils/react/use-global";
+import { Tooltip } from "../../../../../utils/ui/tooltip";
+import { active } from "../../../logic/active";
 import { EDGlobal } from "../../../logic/ed-global";
 import { PNode } from "../../../logic/types";
-import { active } from "../../../logic/active";
-import { getNodeById, updateNodeById } from "crdt/node/get-node-by-id";
-import { Tooltip } from "../../../../../utils/ui/tooltip";
-import { loadCompTree } from "crdt/load-comp-tree";
-import { waitUntil } from "prasi-utils";
-import { GitFork, Scroll } from "lucide-react";
 export const EdTreeAction = ({
   raw,
   render_params,

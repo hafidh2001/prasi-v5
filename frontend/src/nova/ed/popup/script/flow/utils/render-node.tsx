@@ -157,7 +157,7 @@ export const RenderNode = function (
       >
         <div
           className={cx(
-            "flex items-center justify-center cursor-pointer",
+            "flex items-center justify-center cursor-hand",
             css`
               width: 25px;
               height: 25px;
@@ -327,7 +327,7 @@ export const RenderNode = function (
           <div
             className={cx(
               "line-type flex items-center ",
-              !node.name && "justify-center pr-2",
+              !node.name && node.type !== "start" && "justify-center pr-2",
               css`
                 svg {
                   width: 14px;

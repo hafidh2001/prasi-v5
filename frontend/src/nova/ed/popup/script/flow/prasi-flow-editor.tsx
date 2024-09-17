@@ -16,7 +16,8 @@ import "@xyflow/react/dist/style.css";
 import { LayoutDashboard } from "lucide-react";
 import { useEffect } from "react";
 import { useLocal } from "utils/react/use-local";
-import { PFlow, PFNodeID } from "./runtime/types";
+import { allNodeDefinitions } from "./runtime/nodes";
+import { PFlow, PFNode, PFNodeDefinition, PFNodeID } from "./runtime/types";
 import { findFlow, loopPFNode } from "./utils/find-node";
 import { fg } from "./utils/flow-global";
 import { getLayoutedElements } from "./utils/node-layout";
@@ -422,6 +423,19 @@ export function PrasiFlowEditor({ pflow }: { pflow: PFlow }) {
           const from = state.fromNode;
           if (from) from_id = from.id;
 
+          const on_before_connect = (arg: {
+            node: PFNode;
+            is_new: boolean;
+          }) => {
+            const def = (allNodeDefinitions as any)[
+              arg.node.type
+            ] as PFNodeDefinition<any>;
+            if (def && def.on_before_connect) {
+              def.on_before_connect(arg);
+            }
+          };
+          const on_after_connect = (arg: { from: PFNode; to: PFNode }) => {};
+
           if (state.isValid) {
             const to = state.toNode;
             if (to) to_id = to.id;
@@ -433,6 +447,8 @@ export function PrasiFlowEditor({ pflow }: { pflow: PFlow }) {
               const found = edges.find((e) => e.source === from_id);
               const f = findFlow({ id: from_id, pf: pf });
 
+              const from_node = pflow.nodes[from_id];
+              on_before_connect({ node: from_node, is_new: true });
               if (found) {
                 const new_node = {
                   type: "code",
@@ -450,6 +466,7 @@ export function PrasiFlowEditor({ pflow }: { pflow: PFlow }) {
                     pf.flow[new_flow[0]] = new_flow;
                   }
                 }
+                on_after_connect({ from: from_node, to: new_node });
               } else {
                 if (f.idx >= 0 && from) {
                   const position = fg.pointer_to || {
@@ -465,13 +482,14 @@ export function PrasiFlowEditor({ pflow }: { pflow: PFlow }) {
                   };
                   pf.nodes[new_node.id] = new_node;
 
-                  const from_node = pf.nodes[from.id];
                   if (from_node.branches) {
                     const branch = from_node.branches[0];
                     if (branch) branch.flow.push(new_node.id);
                   } else {
                     f.flow.push(new_node.id);
                   }
+                  on_after_connect({ from: from_node, to: new_node });
+
                   savePF(pf);
                   fg.reload();
 
@@ -507,6 +525,8 @@ export function PrasiFlowEditor({ pflow }: { pflow: PFlow }) {
               const from_node = pf.nodes[from_id];
 
               if (from_node) {
+                on_before_connect({ node: from_node, is_new: false });
+
                 if (from_node.branches) {
                   let picked_branches = from_node.branches?.find(
                     (e) => e.flow.length === 0
@@ -523,12 +543,17 @@ export function PrasiFlowEditor({ pflow }: { pflow: PFlow }) {
 
                   if (picked_branches) {
                     connectTo(pf, from_id, to_id, picked_branches.flow);
+                    const to_node = pf.nodes[to_id];
+                    on_after_connect({ from: from_node, to: to_node });
                   }
                 } else {
                   const found = findFlow({ id: from_node.id, pf });
 
                   if (found && found.flow[found.idx + 1] !== to_id) {
                     connectTo(pf, from_id, to_id, found.flow);
+
+                    const to_node = pf.nodes[to_id];
+                    on_after_connect({ from: from_node, to: to_node });
                   }
                 }
                 fg.reload();

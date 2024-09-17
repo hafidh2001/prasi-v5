@@ -44,7 +44,7 @@ export const PrasiFlowRunner = ({ pflow }: { pflow: PFlow }) => {
     >
       <div className="border-b select-none h-[40px] text-sm px-2 flex justify-between items-stretch space-x-1">
         <div className="flex items-center space-x-[5px]">
-          <Tooltip content={"Run Flow"}>
+          <Tooltip content={"Run Flow"} asChild>
             <div
               className={cx(
                 "btn",
@@ -101,7 +101,7 @@ export const PrasiFlowRunner = ({ pflow }: { pflow: PFlow }) => {
             </div>
           </Tooltip>
 
-          <Tooltip content={"Clear Log"}>
+          <Tooltip content={"Clear Log"} asChild>
             <div
               className="btn"
               onClick={() => {
@@ -144,7 +144,7 @@ export const PrasiFlowRunner = ({ pflow }: { pflow: PFlow }) => {
             />
             <div className="px-1 flex items-center"> ms</div>
           </label>
-          {/* <Tooltip content={"Debug Flow - Step by Step"}>
+          {/* <Tooltip content={"Debug Flow - Step by Step"} asChild>
             <div className="btn">
               <BugPlay />
             </div>

@@ -1,10 +1,31 @@
 import { codeExec } from "../lib/code-exec";
 import { defineNode } from "../lib/define-node";
+import { PFNodeBranch } from "../types";
+
+type Condition = { condition: string; name: string };
 
 export const nodeBranch = defineNode({
   type: "branch",
-  on_before_connect: ({ node }) => {
-    console.log("before connect", node);
+  on_before_connect: ({ node, is_new }) => {
+    if (!node.conditions) node.conditions = [];
+    if (!node.branches) node.branches = [];
+
+    const branches = node.branches as PFNodeBranch[];
+    const conditions = node.conditions as Condition[];
+
+    if (conditions.length === branches.length) {
+      let empty_branch_len = branches.filter(
+        (e) => !e.flow || (e.flow && e.flow.length === 0)
+      ).length;
+
+      if (empty_branch_len === 0 || conditions.length === 0) {
+        const name = "Condition " + (conditions.length + 1);
+        conditions.push({ condition: "", name });
+        branches.push({ flow: [], idx: conditions.length - 1, name });
+      }
+    }
+
+    console.log("before connect", node, conditions, is_new);
   },
   on_init({ node }) {
     if (!node.branches) {
@@ -14,7 +35,7 @@ export const nodeBranch = defineNode({
       let i = 0;
 
       for (const [i, c] of Object.entries(
-        (node.conditions || []) as { condition: string; name: string }[]
+        (node.conditions || []) as Condition[]
       )) {
         const idx = i as unknown as number;
         if (node.branches[idx]) {
