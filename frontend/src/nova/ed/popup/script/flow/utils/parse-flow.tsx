@@ -1,11 +1,15 @@
+import { Edge, Node } from "@xyflow/react";
 import { PFlow } from "../runtime/types";
 import { parseNodes } from "./parse-node";
 
-export const parseFlow = (pf: PFlow) => {
+export const parseFlow = (
+  pf: PFlow,
+  current: { nodes: Node[]; edges: Edge[] }
+) => {
   const parsed = { nodes: [], edges: [] };
 
   const existing = new Set<string>();
-  
+
   if (pf.flow) {
     for (const id of Object.keys(pf.flow)) {
       existing.add(id);
@@ -21,6 +25,7 @@ export const parseFlow = (pf: PFlow) => {
     if (flows.length > 0) {
       for (const flow of flows) {
         parseNodes(pf.nodes, flow, {
+          current,
           existing: {
             rf_edges: parsed.edges,
             rf_nodes: parsed.nodes,

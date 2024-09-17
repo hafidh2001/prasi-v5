@@ -40,9 +40,19 @@ export const PFPropEdge: FC<{ edge: Edge; pflow: PFlow }> = ({
                       const temp = local.selected.flow;
                       local.selected.flow = e.flow;
                       e.flow = temp;
-                      if (fg.prop) fg.prop.selection.loading = true;
-                      savePF("Change Branch", pflow);
+                      if (fg.prop) {
+                        fg.prop.selection.loading = true;
+                      }
                       fg.reload(false);
+                      fg.main?.action.resetSelectedElements();
+                      fg.main?.action.addSelectedEdges([edge.id]);
+                      savePF("Change Branch", pflow, {
+                        then() {
+                          if (fg.prop) fg.prop.selection.loading = false;
+                          fg.main?.action.resetSelectedElements();
+                          fg.main?.action.addSelectedEdges([edge.id]);
+                        },
+                      });
                     }
                   }}
                 >

@@ -68,10 +68,12 @@ export const PrasiFlow = function () {
                     if (node && node.item.adv && sflow.current) {
                       node.item.adv.flow = deepClone(sflow.current);
                     }
+
+                    if (then) setTimeout(then, 100);
                   }
                 );
                 fg.update.action = "";
-              }, 300);
+              }, 100);
             };
 
             let should_reset = false;

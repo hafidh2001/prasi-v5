@@ -61,6 +61,7 @@ export const RenderNode = function (
   return (
     <div
       tabIndex={0}
+      id={`pf-${node.id}`}
       onKeyDown={(e) => {
         if (e.key.length === 1) {
           const input: HTMLInputElement | null = document.querySelector(

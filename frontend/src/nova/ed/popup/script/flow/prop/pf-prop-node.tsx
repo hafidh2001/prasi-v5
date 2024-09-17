@@ -27,15 +27,11 @@ export const PFPropNode: FC<{ node: PFNode; pflow: PFlow }> = ({
         }}
         placeholder={"Node Name"}
         onBlur={() => {
-          const pf = pflow;
-          fg.reload();
-          savePF("Update " + node.name, pf);
-          fg.main?.render();
-
           setTimeout(() => {
-            fg.main?.action.resetSelectedElements();
-            fg.main?.action.addSelectedNodes([node.id]);
-          });
+            const pf = pflow;
+            fg.reload(false);
+            savePF("Update " + node.name, pf);
+          }, 300);
         }}
       />
       <div className="text-xs text-slate-400 p-1 border-b">ID: {node.id}</div>

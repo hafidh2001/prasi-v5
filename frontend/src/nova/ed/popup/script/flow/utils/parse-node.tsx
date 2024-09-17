@@ -7,6 +7,10 @@ export const parseNodes = (
   nodes: Record<PFNodeID, PFNode>,
   flow: PFNodeID[],
   opt?: {
+    current?: {
+      nodes: Node[];
+      edges: Edge[];
+    };
     existing?: {
       rf_nodes: Node[];
       rf_edges: Edge[];
@@ -37,7 +41,7 @@ export const parseNodes = (
   let y = 0;
 
   for (const inode of flow_nodes) {
-    const node: Node = {
+    const new_node: Node = {
       id: inode.id,
       type: "default",
       className: inode.type,
@@ -52,6 +56,15 @@ export const parseNodes = (
         y: ((existing?.y || 0) + y) * 100,
       },
     };
+
+    const node = opt?.current?.nodes.find((e) => inode.id === e.id) || new_node;
+    if (new_node !== node) {
+      for (const [k, v] of Object.entries(new_node)) {
+        (node as any)[k] = v;
+      }
+    } else {
+    }
+
     y++;
 
     const on_init = (allNodeDefinitions as any)[inode.type]?.on_init;
@@ -72,7 +85,7 @@ export const parseNodes = (
       }
       on_init({ node: inode, flow, nodes });
     }
-    
+
     // else {
     //   if (inode.branches) {
     //     const non_empty_flow =
@@ -117,6 +130,7 @@ export const parseNodes = (
             animated: true,
           });
           parseNodes(nodes, branch.flow, {
+            current: opt?.current,
             existing: {
               rf_nodes,
               rf_edges,

@@ -10,6 +10,7 @@ export const PrasiFlowProp = ({ pflow }: { pflow: PFlow }) => {
       nodes: [],
       edges: [],
       loading: false,
+      selectAll() {},
     },
   } as PrasiFlowPropLocal);
   fg.prop = local;
@@ -19,7 +20,6 @@ export const PrasiFlowProp = ({ pflow }: { pflow: PFlow }) => {
   const pf_node = rf_node ? pflow.nodes[rf_node.id] : undefined;
 
   if (sel.loading) {
-    sel.loading = false;
     return null;
   }
   return (

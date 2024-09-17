@@ -75,6 +75,7 @@ export function PrasiFlowEditor({
       );
     } catch (e) {}
     local.viewport = viewport;
+
     fg.reload(should_relayout);
 
     if (!local.viewport) {
@@ -138,7 +139,7 @@ export function PrasiFlowEditor({
     });
     local.pflow = pflow;
     const selection = { ...fg.prop?.selection };
-    const parsed = parseFlow(pflow);
+    const parsed = parseFlow(pflow, { edges, nodes });
 
     if (relayout) {
       relayoutNodes(parsed);
@@ -151,6 +152,13 @@ export function PrasiFlowEditor({
       fg.main?.action.resetSelectedElements();
       fg.main?.action.addSelectedEdges(selection.edges?.map((e) => e.id) || []);
       fg.main?.action.addSelectedNodes(selection.nodes?.map((e) => e.id) || []);
+
+      setTimeout(() => {
+        const input = document.querySelector(
+          `#prasi-flow-node-name`
+        ) as HTMLInputElement;
+        if (input) input.focus();
+      }, 100);
     });
   };
 
@@ -176,7 +184,7 @@ export function PrasiFlowEditor({
       flow.push(to);
     }
 
-    const parsed = parseFlow(pf);
+    const parsed = parseFlow(pf, { edges, nodes });
     setNodes(parsed.nodes);
     setEdges(parsed.edges);
     savePF("Connect Node", local.pflow);
@@ -353,7 +361,7 @@ export function PrasiFlowEditor({
               }
             }
             if (should_save) {
-              if (Object.keys(pflow.flow).length === 0) {
+              if (Object.keys(pflow.nodes).length === 0) {
                 savePF(action_name || "Clear Flow", pf);
                 resetDefault(false);
               } else {
