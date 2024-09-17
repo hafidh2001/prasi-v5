@@ -50,7 +50,11 @@ export type PFNodeDefinition<F extends Record<string, PFField>> = {
   className?: string;
   vars?: Record<string, any>;
   icon: string;
-  on_before_connect?: (arg: { node: PFNode; is_new: boolean }) => void;
+  on_before_connect?: (arg: {
+    node: PFNode;
+    is_new: boolean;
+    pflow: PFlow;
+  }) => void;
   on_after_connect?: (arg: { from: PFNode; to: PFNode }) => void;
   on_init?: (arg: {
     node: PFNode;

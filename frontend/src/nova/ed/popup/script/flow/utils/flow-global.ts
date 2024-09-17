@@ -7,6 +7,7 @@ export type PrasiFlowPropLocal = {
     nodes: Node[];
     edges: Edge[];
     loading: boolean;
+    selectAll: () => void;
   };
 };
 

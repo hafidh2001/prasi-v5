@@ -2,8 +2,24 @@ import { defineNode } from "../lib/define-node";
 
 export const nodeStart = defineNode({
   type: "start",
-  process: ({ next }) => {
+  process: async ({ node, next, processBranch }) => {
+    const branches: Promise<void>[] = [];
+    if (node.current.branches) {
+      for (const branch of node.current.branches) {
+        branches.push(processBranch(branch));
+      }
+    }
+    await Promise.all(branches);
     next();
+  },
+  on_before_connect({ node, is_new, pflow }) {
+    if (is_new) {
+      if (!node.branches) {
+        node.branches = [];
+        pflow.flow[node.id] = [node.id];
+      }
+      node.branches.push({ flow: [] });
+    }
   },
   className: css`
     border: 1px soild green;

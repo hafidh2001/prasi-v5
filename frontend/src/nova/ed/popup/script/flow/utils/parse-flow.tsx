@@ -5,6 +5,7 @@ export const parseFlow = (pf: PFlow) => {
   const parsed = { nodes: [], edges: [] };
 
   const existing = new Set<string>();
+  
   if (pf.flow) {
     for (const id of Object.keys(pf.flow)) {
       existing.add(id);

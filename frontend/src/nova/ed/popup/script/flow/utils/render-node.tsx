@@ -60,6 +60,17 @@ export const RenderNode = function (
 
   return (
     <div
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key.length === 1) {
+          const input: HTMLInputElement | null = document.querySelector(
+            "#prasi-flow-node-name"
+          );
+          if (input) {
+            input.focus();
+          }
+        }
+      }}
       ref={ref_node}
       className={cx(
         "border border-slate-600 rounded-sm",

@@ -41,7 +41,6 @@ export const parseNodes = (
       id: inode.id,
       type: "default",
       className: inode.type,
-      deletable: inode.type !== "start",
       sourcePosition: Position.Bottom,
       targetPosition: Position.Top,
       data: {
@@ -56,6 +55,7 @@ export const parseNodes = (
     y++;
 
     const on_init = (allNodeDefinitions as any)[inode.type]?.on_init;
+
     if (on_init) {
       if (!inode.branches) {
         if (inode.unused_branches) {
@@ -71,24 +71,26 @@ export const parseNodes = (
         }
       }
       on_init({ node: inode, flow, nodes });
-    } else {
-      if (inode.branches) {
-        const non_empty_flow =
-          inode.branches.find((e) => e.flow.length > 0)?.flow || [];
-        inode.unused_branches = inode.branches;
-        delete inode.branches;
-        const fidx = flow_mapped.findIndex((e) => e.id === inode.id);
-        const idx = flow.findIndex((id) => id === inode.id);
-        let i = 1;
-        for (const id of non_empty_flow) {
-          if (id !== inode.id) {
-            flow.splice(idx + i, 0, id);
-            flow_mapped.splice(fidx + i, 0, nodes[id]);
-            i++;
-          }
-        }
-      }
     }
+    
+    // else {
+    //   if (inode.branches) {
+    //     const non_empty_flow =
+    //       inode.branches.find((e) => e.flow.length > 0)?.flow || [];
+    //     inode.unused_branches = inode.branches;
+    //     delete inode.branches;
+    //     const fidx = flow_mapped.findIndex((e) => e.id === inode.id);
+    //     const idx = flow.findIndex((id) => id === inode.id);
+    //     let i = 1;
+    //     for (const id of non_empty_flow) {
+    //       if (id !== inode.id) {
+    //         flow.splice(idx + i, 0, id);
+    //         flow_mapped.splice(fidx + i, 0, nodes[id]);
+    //         i++;
+    //       }
+    //     }
+    //   }
+    // }
 
     if (inode.branches) {
       let i = 0;
@@ -149,4 +151,20 @@ export const parseNodes = (
   }
 
   return { nodes: rf_nodes, edges: rf_edges };
+};
+
+export const pfnodeToRFNode = (pfnode: PFNode) => {
+  const node: Node = {
+    id: pfnode.id,
+    type: "default",
+    className: pfnode.type,
+    sourcePosition: Position.Bottom,
+    targetPosition: Position.Top,
+    data: {
+      type: pfnode.type,
+      label: pfnode.type === "start" ? "Start" : pfnode.name,
+    },
+    position: pfnode.position || { x: 0, y: 0 },
+  };
+  return node;
 };

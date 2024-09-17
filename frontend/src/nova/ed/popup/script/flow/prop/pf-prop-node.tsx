@@ -19,6 +19,7 @@ export const PFPropNode: FC<{ node: PFNode; pflow: PFlow }> = ({
         type="text"
         spellCheck={false}
         value={node.name || ""}
+        id={"prasi-flow-node-name"}
         className={cx("px-1 pt-3 pb-2 text-lg outline-none border-b ")}
         onChange={(e) => {
           node.name = e.currentTarget.value;

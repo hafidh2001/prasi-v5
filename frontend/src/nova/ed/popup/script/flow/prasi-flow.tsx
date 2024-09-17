@@ -10,7 +10,7 @@ import { PrasiFlowRunner } from "./prasi-flow-runner";
 import { fg } from "./utils/flow-global";
 import { initAdv } from "./utils/prasi/init-adv";
 import { defaultFlow } from "./utils/prasi/default-flow";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 export const PrasiFlow = function () {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -20,6 +20,25 @@ export const PrasiFlow = function () {
   const popup = p.ui.popup.script;
   const node = getActiveNode(p);
   const prasi = fg.prasi;
+
+  const resetDefault = useCallback(
+    (relayout: boolean) => {
+      setTimeout(() => {
+        if (node) {
+          sflow.current = defaultFlow(
+            "item",
+            `item-${node.item.id}`,
+            node.item.id
+          );
+          localStorage.removeItem(`prasi-flow-vp-${`item-${node.item.id}`}`);
+          sflow.should_relayout = relayout;
+
+          local.render();
+        }
+      });
+    },
+    [node?.item.id]
+  );
 
   useEffect(() => {
     const tree = getActiveTree(p);
@@ -55,16 +74,20 @@ export const PrasiFlow = function () {
               }, 300);
             };
 
+            let should_reset = false;
             if (!node.item.adv?.flow) {
               if (!sflow.current || sflow.current.id !== node.item.id) {
-                sflow.current = null;
-                setTimeout(() => {
-                  sflow.current = defaultFlow("item", node.item.id);
-                  sflow.should_relayout = true;
-                  local.render();
-                });
+                should_reset = true;
               }
+            } else if (Object.keys(node.item.adv.flow.flow).length === 0) {
+              should_reset = true;
             }
+
+            if (should_reset) {
+              sflow.current = null;
+              resetDefault(true);
+            }
+
             if (node.item.adv?.flow) {
               sflow.current = deepClone(node.item.adv.flow);
             }
@@ -90,6 +113,7 @@ export const PrasiFlow = function () {
           <PanelGroup direction="vertical">
             <Panel>
               <PrasiFlowEditor
+                resetDefault={resetDefault}
                 pflow={sflow.current}
                 should_relayout={sflow.should_relayout}
                 ts={sflow.ts}

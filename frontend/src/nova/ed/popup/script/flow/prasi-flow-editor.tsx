@@ -11,6 +11,7 @@ import {
   useEdgesState,
   useNodesState,
   useStore,
+  Viewport,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { LayoutDashboard } from "lucide-react";
@@ -25,16 +26,18 @@ import { parseFlow } from "./utils/parse-flow";
 import { RenderEdge } from "./utils/render-edge";
 import { RenderNode } from "./utils/render-node";
 import { savePF } from "./utils/save-pf";
-import { waitUntil } from "prasi-utils";
+import { pfnodeToRFNode } from "./utils/parse-node";
 
 export function PrasiFlowEditor({
   pflow,
   should_relayout,
   ts,
+  resetDefault,
 }: {
   pflow: PFlow;
   should_relayout: boolean;
   ts: number;
+  resetDefault: (relayout: boolean) => void;
 }) {
   const local = useLocal({
     pflow: null as null | PFlow,
@@ -46,6 +49,7 @@ export function PrasiFlowEditor({
         pflow,
       }),
     },
+    viewport: undefined as undefined | Viewport,
     edgeTypes: {
       default: RenderEdge.bind({
         pflow,
@@ -63,9 +67,17 @@ export function PrasiFlowEditor({
   const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[]);
 
   useEffect(() => {
-    let fitview = !local.pflow;
+    let viewport = undefined as undefined | Viewport;
+
+    try {
+      viewport = JSON.parse(
+        localStorage.getItem(`prasi-flow-vp-${pflow.name}`) || "undefined"
+      );
+    } catch (e) {}
+    local.viewport = viewport;
     fg.reload(should_relayout);
-    if (fitview) {
+
+    if (!local.viewport) {
       const ival = setInterval(() => {
         const ref = local.reactflow;
         if (ref) {
@@ -139,16 +151,6 @@ export function PrasiFlowEditor({
       fg.main?.action.resetSelectedElements();
       fg.main?.action.addSelectedEdges(selection.edges?.map((e) => e.id) || []);
       fg.main?.action.addSelectedNodes(selection.nodes?.map((e) => e.id) || []);
-
-      if (relayout) {
-        const ival = setInterval(() => {
-          const ref = local.reactflow;
-          if (ref) {
-            ref.fitView();
-            clearInterval(ival);
-          }
-        }, 10);
-      }
     });
   };
 
@@ -234,13 +236,20 @@ export function PrasiFlowEditor({
           }
         `
       )}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "a" && (e.metaKey || e.ctrlKey)) {
+          e.stopPropagation();
+          e.preventDefault();
+          fg.prop?.selection.selectAll();
+        }
+      }}
     >
       <ReactFlow
         maxZoom={1.1}
         onInit={(ref) => {
           local.reactflow = ref;
         }}
-        fitView
         nodeTypes={local.nodeTypes}
         edgeTypes={local.edgeTypes}
         onSelectionChange={(changes) => {
@@ -248,6 +257,11 @@ export function PrasiFlowEditor({
             fg.prop.selection = {
               ...changes,
               loading: fg.prop.selection.loading,
+              selectAll() {
+                fg.main?.action.resetSelectedElements();
+                fg.main?.action.addSelectedEdges(edges?.map((e) => e.id) || []);
+                fg.main?.action.addSelectedNodes(nodes?.map((e) => e.id) || []);
+              },
             };
             fg.prop.render();
           }
@@ -309,6 +323,7 @@ export function PrasiFlowEditor({
                       );
                       if (empty_branch) {
                         if (target_id) {
+                          empty_branch.flow.push(from.id);
                           empty_branch.flow.push(target_id);
                         }
                       }
@@ -338,17 +353,22 @@ export function PrasiFlowEditor({
               }
             }
             if (should_save) {
-              savePF(action_name || "Update Node", pf, {
-                then: () => {
-                  if (select_id) {
-                    fg.reload();
-                    setTimeout(() => {
-                      fg.main?.action.resetSelectedElements();
-                      fg.main?.action.addSelectedNodes([select_id]);
-                    }, 200);
-                  }
-                },
-              });
+              if (Object.keys(pflow.flow).length === 0) {
+                savePF(action_name || "Clear Flow", pf);
+                resetDefault(false);
+              } else {
+                savePF(action_name || "Update Node", pf, {
+                  then: () => {
+                    if (select_id) {
+                      fg.reload();
+                      setTimeout(() => {
+                        fg.main?.action.resetSelectedElements();
+                        fg.main?.action.addSelectedNodes([select_id]);
+                      }, 200);
+                    }
+                  },
+                });
+              }
             }
           }
           return onNodesChange(changes);
@@ -463,8 +483,8 @@ export function PrasiFlowEditor({
 
           let from_id = "";
           let to_id = "";
-          const from = state.fromNode;
-          if (from) from_id = from.id;
+          const from_rf = state.fromNode;
+          if (from_rf) from_id = from_rf.id;
 
           const on_before_connect = (arg: {
             node: PFNode;
@@ -474,7 +494,7 @@ export function PrasiFlowEditor({
               arg.node.type
             ] as PFNodeDefinition<any>;
             if (def && def.on_before_connect) {
-              def.on_before_connect(arg);
+              def.on_before_connect({ ...arg, pflow });
             }
           };
           const on_after_connect = (arg: { from: PFNode; to: PFNode }) => {};
@@ -487,64 +507,52 @@ export function PrasiFlowEditor({
               to_id = fg.pointer_up_id;
               fg.pointer_up_id = "";
             } else {
-              const found = edges.find((e) => e.source === from_id);
-              const f = findFlow({ id: from_id, pf: pf });
+              const from = pf.nodes[from_id];
+              on_before_connect({ node: from, is_new: true });
 
-              const from_node = pflow.nodes[from_id];
-              on_before_connect({ node: from_node, is_new: true });
-              if (found) {
-                const new_node = {
+              if (from_rf) {
+                const position = fg.pointer_to || {
+                  x: from_rf.position.x,
+                  y: from_rf.position.y + 100,
+                };
+                position.x -= 70;
+                fg.pointer_to = null;
+
+                const to_node = {
                   type: "code",
                   id: createId(),
-                  position: fg.pointer_to as any,
+                  position,
                 };
-                pf.nodes[new_node.id] = new_node;
-                to_id = new_node.id;
-                if (f) {
-                  const new_flow = f.flow.splice(
-                    f.idx + 1,
-                    f.flow.length - f.idx - 1
+                pf.nodes[to_node.id] = to_node;
+
+                if (from.branches) {
+                  const empty_branch = from.branches.find(
+                    (e) => e.flow.length === 0
                   );
-                  if (new_flow.length > 0) {
-                    pf.flow[new_flow[0]] = new_flow;
-                  }
-                }
-                on_after_connect({ from: from_node, to: new_node });
-              } else {
-                if (f.idx >= 0 && from) {
-                  const position = fg.pointer_to || {
-                    x: from.position.x,
-                    y: from.position.y + 100,
-                  };
-                  position.x -= 70;
-                  fg.pointer_to = null;
-                  const new_node = {
-                    type: "code",
-                    id: createId(),
-                    position,
-                  };
-                  pf.nodes[new_node.id] = new_node;
-
-                  if (from_node.branches) {
-                    const branch = from_node.branches[0];
-                    if (branch) branch.flow.push(new_node.id);
-                  } else {
-                    f.flow.push(new_node.id);
-                  }
-                  on_after_connect({ from: from_node, to: new_node });
-
-                  savePF("Create Node", pf, {
-                    then() {
+                  if (empty_branch) {
+                    if (to_node) {
+                      empty_branch.flow.push(from.id);
+                      empty_branch.flow.push(to_node.id);
                       fg.reload();
+                    }
+                  }
+                  savePF("Create Node", pf);
+                } else {
+                  const f = findFlow({ id: from_id, pf: pf });
+                  if (f) {
+                    f.flow.push(to_node.id);
+                    fg.reload();
 
-                      setTimeout(() => {
-                        fg.main?.action.resetSelectedElements();
-                        fg.main?.action.addSelectedNodes([new_node.id]);
-                      });
-                    },
-                  });
-                  return;
+                    savePF("Create Node", pf);
+                  }
                 }
+
+                setTimeout(() => {
+                  fg.main?.action.resetSelectedElements();
+                  fg.main?.action.addSelectedNodes([to_node.id]);
+                }, 200);
+
+                return;
               }
             }
           }
@@ -606,6 +614,15 @@ export function PrasiFlowEditor({
               }
             }
           }
+        }}
+        viewport={local.viewport}
+        onViewportChange={(e) => {
+          localStorage.setItem(
+            `prasi-flow-vp-${pflow.name}`,
+            JSON.stringify(e)
+          );
+          local.viewport = e;
+          local.render();
         }}
       >
         <Selection />
