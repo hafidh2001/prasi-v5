@@ -117,7 +117,7 @@ export const PrasiFlowRunner = ({ pflow }: { pflow: PFlow }) => {
 
           <label className="border text-xs flex items-stretch rounded-sm">
             <div className="bg-slate-100 px-2 flex items-center rounded-l-sm">
-              Delay
+              Simulate Delay
             </div>
             <input
               type="text"

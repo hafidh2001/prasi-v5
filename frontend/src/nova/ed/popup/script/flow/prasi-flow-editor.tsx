@@ -25,6 +25,7 @@ import { parseFlow } from "./utils/parse-flow";
 import { RenderEdge } from "./utils/render-edge";
 import { RenderNode } from "./utils/render-node";
 import { savePF } from "./utils/save-pf";
+import { waitUntil } from "prasi-utils";
 
 export function PrasiFlowEditor({
   pflow,
@@ -62,7 +63,17 @@ export function PrasiFlowEditor({
   const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[]);
 
   useEffect(() => {
+    let fitview = !local.pflow;
     fg.reload(should_relayout);
+    if (fitview) {
+      const ival = setInterval(() => {
+        const ref = local.reactflow;
+        if (ref) {
+          ref.fitView();
+          clearInterval(ival);
+        }
+      }, 10);
+    }
   }, [pflow, should_relayout]);
 
   const relayoutNodes = (arg?: { nodes: Node[]; edges: Edge[] }) => {
