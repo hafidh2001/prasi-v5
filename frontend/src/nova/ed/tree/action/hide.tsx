@@ -7,7 +7,7 @@ export const edActionHide = (
   item: IItem,
   mode = "toggle" as "toggle" | "switch"
 ) => {
-  getActiveTree(p).update(({ findNode }) => {
+  getActiveTree(p).update("Toggle item hidden", ({ findNode }) => {
     const node = findNode(item.id);
     if (node) {
       if (!node.item.hidden) node.item.hidden = "all";

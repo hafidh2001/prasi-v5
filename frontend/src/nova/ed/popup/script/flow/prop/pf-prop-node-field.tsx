@@ -26,7 +26,7 @@ export const PFPropNodeField: FC<{
 
   const save = () => {
     fg.prop?.render();
-    savePF(pflow);
+    savePF("Update " + name, pflow);
   };
 
   const local = useLocal(
@@ -200,7 +200,7 @@ export const PFPropNodeField: FC<{
           <div className="flex-1 border-l justify-center items-center flex">
             <div
               className={cx(
-                "border px-2 text-[11px] mx-[2px] cursor-pointer hover:bg-blue-600 hover:border-blue-600 hover:text-white"
+                "border border-slate-500 px-2 text-[11px] mx-[2px] cursor-pointer hover:bg-blue-600 hover:border-blue-600 hover:text-white"
               )}
               onClick={() => {}}
             >

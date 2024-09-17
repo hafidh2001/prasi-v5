@@ -13,7 +13,7 @@ import { fg } from "./flow-global";
 import { savePF } from "./save-pf";
 
 export const RenderEdge = function (
-  this: PFlow,
+  this: { pflow: PFlow },
   {
     id,
     sourceX,
@@ -26,7 +26,7 @@ export const RenderEdge = function (
     markerEnd,
   }: EdgeComponentProps
 ) {
-  const pflow = this;
+  const { pflow } = this;
   const { getEdge } = useReactFlow();
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -125,7 +125,7 @@ export const RenderEdge = function (
                   };
                   pf.nodes[pf_node.id] = pf_node;
                   from.flow.splice(from.idx + 1, 0, pf_node.id);
-                  savePF(pf);
+                  savePF("Create Node", pf);
 
                   fg.reload();
 

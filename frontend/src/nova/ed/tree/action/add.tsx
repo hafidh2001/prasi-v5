@@ -10,7 +10,7 @@ export const edActionAdd = async (p: PG, item?: IItem) => {
     type: "item",
     childs: [],
   };
-  getActiveTree(p).update(({ findNode, tree }) => {
+  getActiveTree(p).update("Add item", ({ findNode, tree }) => {
     if (active.item_id) {
       const node = findNode(active.item_id);
       if (node?.item.id === active.item_id) {

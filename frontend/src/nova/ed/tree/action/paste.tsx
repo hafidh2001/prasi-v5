@@ -7,7 +7,7 @@ export const edActionPaste = async (p: PG, item: IItem) => {
   const res = await navigator.clipboard.readText();
   if (typeof res === "string" && res.startsWith("prasi-clipboard:")) {
     const clip = JSON.parse(res.substring("prasi-clipboard:".length)) as IItem;
-    getActiveTree(p).update(({ findNode, tree }) => {
+    getActiveTree(p).update("Paste item", ({ findNode, tree }) => {
       if (clip.type === "section") {
         const new_item = fillID(clip);
         tree.childs.push(new_item);

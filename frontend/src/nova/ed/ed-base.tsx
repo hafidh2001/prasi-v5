@@ -13,6 +13,8 @@ import { EdPopCompGroup } from "./popup/comp/comp-group";
 import { EdPopCompPicker } from "./popup/comp/comp-picker";
 import { iconVSCode } from "./ui/icons";
 import { EdTopBar } from "./ed-topbar";
+import { fg } from "popup/script/flow/utils/flow-global";
+import { getActiveNode } from "crdt/node/get-node-by-id";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -23,6 +25,7 @@ export const EdBase = () => {
     p.page.tree = loadPageTree(p.sync, p.page.cur.id, {
       async loaded() {
         await loadPendingComponent(p);
+        fg.prasi.updated_outside = true;
         p.render();
       },
       async on_component(item) {
@@ -115,12 +118,13 @@ export const EdBase = () => {
 };
 
 const Preview = ({ tree }: { tree: PageTree }) => {
+  const p = useGlobal(EDGlobal, "EDITOR");
   const root = tree.watch((e) => e);
   return (
     <div
       className="relative overflow-auto w-full h-full border-r"
       onClick={async () => {
-        tree.update((e) => {
+        tree.update("AMO", (e) => {
           e.tree.id = "MO" + Date.now();
         });
       }}
@@ -128,7 +132,7 @@ const Preview = ({ tree }: { tree: PageTree }) => {
       <pre className="text-[8px]  p-2 absolute inset-0">
         {Date.now()}
         {JSON.stringify(
-          root,
+          getActiveNode(p)?.item,
           // Object.entries(root as any)
           //   .map(([k, v]) => {
           //     if (typeof v !== "object") return [k, v];

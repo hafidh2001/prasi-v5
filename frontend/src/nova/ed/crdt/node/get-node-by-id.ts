@@ -32,6 +32,7 @@ export const getActiveTree = (p: PG) => {
 export const updateNodeById = (
   p: PG,
   id: string,
+  action_name: string,
   updateFn: (arg: {
     node: PNode;
     nodes: ReturnType<typeof flattenTree>;
@@ -40,7 +41,7 @@ export const updateNodeById = (
   }) => void
 ) => {
   if (active.comp?.id) {
-    active.comp.update((val) => {
+    active.comp.update(action_name, (val) => {
       const node = val.findNode(id);
 
       if (node) {
@@ -49,7 +50,7 @@ export const updateNodeById = (
       }
     });
   } else {
-    p.page.tree.update((val) => {
+    p.page.tree.update(action_name, (val) => {
       const node = val.findNode(id);
 
       if (node) {

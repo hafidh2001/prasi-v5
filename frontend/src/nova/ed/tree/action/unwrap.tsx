@@ -3,7 +3,7 @@ import { PG } from "logic/ed-global";
 import { IItem } from "utils/types/item";
 
 export const edActionUnwrap = (p: PG, item: IItem) => {
-  getActiveTree(p).update(({ findParent }) => {
+  getActiveTree(p).update("Unwrap item", ({ findParent }) => {
     const parent = findParent(item.id);
     if (parent) {
       let i = 0;

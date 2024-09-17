@@ -55,7 +55,6 @@ export const EdTreeHistory = ({ tree }: { tree: PageTree | CompTree }) => {
         "relative overflow-auto flex-1",
         css`
           .size {
-            font-size: 11px;
             .box {
               margin-right: 10px;
               padding: 0px 5px;
@@ -66,6 +65,12 @@ export const EdTreeHistory = ({ tree }: { tree: PageTree | CompTree }) => {
             width: 40px;
             text-align: center;
           }
+          .history-name {
+            font-size: 13px;
+          }
+          .history-info {
+            font-size: 9px;
+          }
         `
       )}
     >
@@ -75,7 +80,7 @@ export const EdTreeHistory = ({ tree }: { tree: PageTree | CompTree }) => {
             <div
               key={idx}
               className={cx(
-                "border-b text-sm px-2 py-1 items-center cursor-pointer hover:bg-blue-50 flex",
+                "border-b  px-2 py-1 items-center cursor-pointer hover:bg-blue-50 flex",
                 css`
                   .redo {
                     opacity: 0.3;
@@ -91,52 +96,69 @@ export const EdTreeHistory = ({ tree }: { tree: PageTree | CompTree }) => {
                 tree.redo(local.history!.redo.length - idx);
               }}
             >
-              <div className="flex-1 text-xs whitespace-nowrap">
-                {dayjs(e.ts).from(local.history!.ts)}
-              </div>
-              <div className="flex justify-center items-center size">
-                <div className="box">{e.size}</div>
-              </div>
-              <div className="text-xs redo border bg-green-100 border-green-700 text-green-700 px-1">
-                REDO
+              <div className="flex flex-col flex-1">
+                <div className="history-name">
+                  {local.history?.history[e.id]}
+                </div>
+                <div className="flex items-center history-info">
+                  <div className="flex-1  whitespace-nowrap">
+                    {dayjs(e.ts).from(local.history!.ts)}
+                  </div>
+                  <div className="flex justify-center items-center size">
+                    <div className="box">{e.size}</div>
+                  </div>
+                  <div className=" redo border bg-green-100 border-green-700 text-green-700 px-1">
+                    REDO
+                  </div>
+                </div>
               </div>
             </div>
           ))}
-          {local.history.undo?.map((e, idx) => {
-            if (idx === (local.history?.undo || []).length - 1) return null;
-            return (
-              <div
-                key={idx}
-                className={cx(
-                  "border-b bg-purple-50 text-sm px-2 py-1 items-center cursor-pointer hover:bg-blue-50 flex",
-                  css`
-                    .undo {
-                      opacity: 0.3;
-                    }
-                    &:hover {
+          {local.history.undo
+            .slice()
+            .reverse()
+            .map((e, idx) => {
+              if (idx === (local.history?.undo || []).length - 1) return null;
+              return (
+                <div
+                  key={idx}
+                  className={cx(
+                    "border-b bg-purple-50  px-2 py-1 items-center cursor-pointer hover:bg-blue-50 flex",
+                    css`
                       .undo {
-                        opacity: 1;
-                        background: white;
+                        opacity: 0.3;
                       }
-                    }
-                  `
-                )}
-                onClick={() => {
-                  tree.undo(idx + 1);
-                }}
-              >
-                <div className="flex-1 text-xs whitespace-nowrap">
-                  {dayjs(e.ts).from(local.history!.ts)}
+                      &:hover {
+                        .undo {
+                          opacity: 1;
+                          background: white;
+                        }
+                      }
+                    `
+                  )}
+                  onClick={() => {
+                    tree.undo(idx + 1);
+                  }}
+                >
+                  <div className="flex flex-col flex-1">
+                    <div className="history-name">
+                      {local.history?.history[e.id]}
+                    </div>
+                    <div className="flex items-center history-info">
+                      <div className="flex-1  whitespace-nowrap">
+                        {dayjs(e.ts).from(local.history!.ts)}
+                      </div>
+                      <div className="flex justify-center items-center size">
+                        <div className="box">{e.size}</div>
+                      </div>
+                      <div className=" undo border bg-white border-purple-700 text-purple-700 px-1">
+                        UNDO
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-center items-center size">
-                  <div className="box">{e.size}</div>
-                </div>
-                <div className="text-xs undo border bg-white border-purple-700 text-purple-700 px-1">
-                  UNDO
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
       )}
 

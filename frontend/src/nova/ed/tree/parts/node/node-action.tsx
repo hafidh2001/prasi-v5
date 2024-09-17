@@ -51,7 +51,7 @@ export const EdTreeAction = ({
             onClick={(e) => {
               e.stopPropagation();
 
-              updateNodeById(p, item.id, ({ node }) => {
+              updateNodeById(p, item.id, "Hide item", ({ node }) => {
                 node.item.hidden = false;
               });
             }}
@@ -89,26 +89,31 @@ export const EdTreeAction = ({
               `bg-blue-400 text-white border-blue-400 hover:border-blue-500 hover:bg-blue-300`
           )}
           onClick={(e) => {
-            if (
-              item.component?.props?.child?.content?.id &&
-              child_jsx_has_script
-            ) {
-              e.stopPropagation();
-              e.preventDefault();
+            if (p.ui.popup.script.open) {
+              p.ui.popup.script.open = false;
+              p.render();
+            } else {
+              if (
+                item.component?.props?.child?.content?.id &&
+                child_jsx_has_script
+              ) {
+                e.stopPropagation();
+                e.preventDefault();
 
-              active.item_id = item.component.props.child.content.id;
+                active.item_id = item.component.props.child.content.id;
+                p.ui.popup.script.open = true;
+                p.ui.popup.script.type = "item";
+                p.ui.popup.script.mode = (mode || "js") as any;
+                p.render();
+
+                return;
+              }
+
               p.ui.popup.script.open = true;
               p.ui.popup.script.type = "item";
               p.ui.popup.script.mode = (mode || "js") as any;
               p.render();
-
-              return;
             }
-
-            p.ui.popup.script.open = true;
-            p.ui.popup.script.type = "item";
-            p.ui.popup.script.mode = (mode || "js") as any;
-            p.render();
           }}
         >
           {item.adv?.scriptMode !== "flow" ? (

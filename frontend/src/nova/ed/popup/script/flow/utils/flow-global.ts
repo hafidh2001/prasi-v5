@@ -13,7 +13,11 @@ export type PrasiFlowPropLocal = {
 const fg_default = {
   pointer_up_id: "",
   pointer_to: null as null | { x: number; y: number },
-  // @ts-ignore
+  update: {
+    action: "",
+    timeout: null as any,
+    execute: (then?: () => void) => {},
+  },
   reload: (relayout?: boolean) => {},
   main: null as null | {
     pflow: null | PFlow;
@@ -34,6 +38,11 @@ const fg_default = {
         render: () => void;
       }),
   render() {},
+  prasi: {
+    item_id: "",
+    skip_init_update: false,
+    updated_outside: false,
+  },
 };
 const w = window as unknown as {
   prasi_flow_global: typeof fg_default;

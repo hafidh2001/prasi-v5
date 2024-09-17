@@ -30,6 +30,7 @@ export const editor = {
       registerCompConnections(comp_ids, conn_id);
       return await editorCompLoad(comp_ids);
     },
+    pending_action: {} as Record<CONN_ID, string[]>,
   },
   page: {
     async load(page_id: string, opt?: { conn_id?: string }) {
@@ -37,6 +38,7 @@ export const editor = {
       const result = await editorPageLoad(editor, page_id, opt);
       return result;
     },
+    pending_action: {} as Record<CONN_ID, string[]>,
   },
   ws: new WeakMap<ServerWebSocket<WSContext>, CONN_ID>(),
   conn: {} as Record<

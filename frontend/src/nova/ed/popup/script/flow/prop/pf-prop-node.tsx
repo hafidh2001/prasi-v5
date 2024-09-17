@@ -28,7 +28,7 @@ export const PFPropNode: FC<{ node: PFNode; pflow: PFlow }> = ({
         onBlur={() => {
           const pf = pflow;
           fg.reload();
-          savePF(pf);
+          savePF("Update " + node.name, pf);
           fg.main?.render();
 
           setTimeout(() => {

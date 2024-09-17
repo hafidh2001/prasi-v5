@@ -24,8 +24,6 @@ export const nodeBranch = defineNode({
         branches.push({ flow: [], idx: conditions.length - 1, name });
       }
     }
-
-    console.log("before connect", node, conditions, is_new);
   },
   on_init({ node }) {
     if (!node.branches) {

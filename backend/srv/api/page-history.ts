@@ -12,18 +12,26 @@ export default {
     if (page) {
       return compressed(ctx, {
         undo: page.undoManager.undoStack.map((e) => {
-          return { ts: (e as any).ts, size: formatBytes(JSON.stringify(e).length) };
+          return {
+            ts: (e as any).ts,
+            id: (e as any).id,
+            size: formatBytes(JSON.stringify(e).length),
+          };
         }),
         redo: page.undoManager.redoStack.map((e) => {
-          return { ts: (e as any).ts, size: formatBytes(JSON.stringify(e).length) };
+          return {
+            ts: (e as any).ts,
+            id: (e as any).id,
+            size: formatBytes(JSON.stringify(e).length),
+          };
         }),
+        history: page.actionHistory,
         ts: Date.now(),
       });
     }
-    return compressed(ctx, ["123123"]);
+    return compressed(ctx, ["-"]);
   },
 };
-
 
 function formatBytes(bytes: number, decimals?: number) {
   if (bytes == 0) return "0 B";

@@ -83,7 +83,7 @@ export const EdTreeCtxMenu = ({
         <MenuItem
           label="Convert Text → Item"
           onClick={() => {
-            getActiveTree(p).update(({ findNode }) => {
+            getActiveTree(p).update("Convert Text → Item", ({ findNode }) => {
               const node = findNode(item.id);
               if (node) node.item.type = "item";
             });
@@ -97,7 +97,7 @@ export const EdTreeCtxMenu = ({
           <MenuItem
             label="Convert Item → Text"
             onClick={() => {
-              getActiveTree(p).update(({ findNode }) => {
+              getActiveTree(p).update("Convert Item → Text", ({ findNode }) => {
                 const node = findNode(item.id);
                 if (node) node.item.type = "text";
               });

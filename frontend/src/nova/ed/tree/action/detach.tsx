@@ -4,7 +4,7 @@ import { deepClone } from "utils/react/use-global";
 import { IItem } from "utils/types/item";
 
 export const edActionDetach = (p: PG, item: IItem) => {
-  getActiveTree(p).update(({ findParent }) => {
+  getActiveTree(p).update("Detach component", ({ findParent }) => {
     const parent = findParent(item.id);
     if (parent) {
       let i = 0;

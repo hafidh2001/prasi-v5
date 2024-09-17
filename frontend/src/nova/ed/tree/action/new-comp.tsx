@@ -28,7 +28,7 @@ export const edActionNewComp = (
           select: { id: true },
         });
 
-        getActiveTree(p).update(({ findNode }) => {
+        getActiveTree(p).update("New Component", ({ findNode }) => {
           const node = findNode(item.id);
           if (node) {
             node.item.component = { id: comp.id, props: {} };

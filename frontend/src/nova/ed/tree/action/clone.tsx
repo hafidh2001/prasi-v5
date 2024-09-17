@@ -5,7 +5,7 @@ import { deepClone } from "utils/react/use-global";
 import { IItem } from "utils/types/item";
 
 export const edActionClone = (p: PG, item: IItem) => {
-  getActiveTree(p).update(({ findNode, tree }) => {
+  getActiveTree(p).update("Clone item", ({ findNode, tree }) => {
     const node = findNode(item.id);
     if (node) {
       if (node.parent) {

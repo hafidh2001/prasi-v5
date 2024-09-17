@@ -11,6 +11,7 @@ import { dir } from "../../utils/dir";
 import type { WSContext } from "../../utils/server/ctx";
 import BunORM from "../../utils/sqlite";
 import { crdt_comps } from "./shared";
+import { editor } from "../../utils/editor";
 
 await dirAsync(dir.data(`/crdt`));
 const internal = {
@@ -19,6 +20,7 @@ const internal = {
       comp_updates: {
         columns: {
           comp_id: { type: "TEXT" },
+          action: { type: "TEXT" },
           update: { type: "BLOB" },
           ts: { type: "INTEGER" },
         },
@@ -67,7 +69,12 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
     } else {
       immer.update(() => db_comp?.content_tree);
       const update = encodeStateAsUpdate(doc);
-      internal.db.tables.comp_updates.save({ comp_id, update, ts: Date.now() });
+      internal.db.tables.comp_updates.save({
+        action: "init",
+        comp_id,
+        update,
+        ts: Date.now(),
+      });
       undoManager = new UndoManager(data);
     }
     undoManager.captureTimeout = 200;
@@ -115,13 +122,17 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
 
           if (undoManager.redoing) {
             internal.db.tables.comp_updates.save({
+              action: "Redo",
               comp_id,
               update: encodeStateAsUpdate(doc),
               ts: Date.now(),
             });
           }
         } else {
+          const action_name =
+            editor.comp.pending_action[comp_id]?.shift() || "";
           internal.db.tables.comp_updates.save({
+            action: action_name,
             comp_id,
             update,
             ts: Date.now(),

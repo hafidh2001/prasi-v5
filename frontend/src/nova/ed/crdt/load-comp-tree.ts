@@ -1,12 +1,13 @@
 import { NodeModel } from "@minoru/react-dnd-treeview";
-import { EBaseComp, EComp, PNode } from "logic/types";
+import { EBaseComp, EComp, PNode, SyncUndoItem } from "logic/types";
+import { fg } from "popup/script/flow/utils/flow-global";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "utils/sync/client";
+import { IItem } from "utils/types/item";
 import { WebsocketProvider } from "y-websocket";
 import { Doc } from "yjs";
 import { bind } from "./lib/immer-yjs";
 import { findNodeById, flattenTree } from "./node/flatten-tree";
-import { useEffect, useRef, useState } from "react";
-import { IItem } from "utils/types/item";
 
 export type CompTree = ReturnType<typeof internalLoadCompTree>;
 
@@ -49,6 +50,7 @@ export const internalLoadCompTree = (
       },
     });
 
+    fg.prasi.updated_outside = true;
     opt.on_update(immer.get());
     if (!state.loaded) {
       state.loaded = true;
@@ -68,8 +70,9 @@ export const internalLoadCompTree = (
     },
     history: async () => {
       return (await _api.comp_history(comp_id)) as {
-        undo: { ts: number; size: string }[];
-        redo: { ts: number; size: string }[];
+        undo: SyncUndoItem[];
+        redo: SyncUndoItem[];
+        history: Record<number, string>;
         ts: number;
       };
     },
@@ -84,6 +87,7 @@ export const internalLoadCompTree = (
     },
     before_update: null as null | ((do_update: () => void) => void),
     update(
+      action_name: string,
       fn: (opt: {
         tree: EBaseComp["content_tree"];
         flatten(): ReturnType<typeof flattenTree>;
@@ -92,6 +96,8 @@ export const internalLoadCompTree = (
       }) => void
     ) {
       const _fn = (tree: EBaseComp["content_tree"]) => {
+        sync.comp.pending_action(comp_id, action_name);
+
         fn({
           tree,
           flatten: () => {

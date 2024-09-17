@@ -6,13 +6,13 @@ import { dir } from "../../utils/dir";
 import type { WSContext } from "../../utils/server/ctx";
 import BunORM from "../../utils/sqlite";
 
-
 const createPageDb = (site_id: string) => {
   return new BunORM(dir.data(`/crdt/site/${site_id}/page.db`), {
     tables: {
       page_updates: {
         columns: {
           page_id: { type: "TEXT" },
+          action: { type: "TEXT" },
           update: { type: "BLOB" },
           ts: { type: "INTEGER" },
         },
@@ -28,7 +28,6 @@ export const createSiteCrdt = async (site_id: string) => {
     page: createPageDb(site_id),
   };
 };
-
 
 export const crdt_comps = {} as Record<
   string,

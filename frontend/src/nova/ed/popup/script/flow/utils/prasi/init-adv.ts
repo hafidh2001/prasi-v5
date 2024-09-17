@@ -7,11 +7,11 @@ const creating = {
 };
 
 export const initAdv = (node?: PNode, tree?: PageTree | CompTree) => {
-  if (node?.item.adv && tree) {
-    if (!creating.ids.has(node.item.id)) {
+  if (node && tree) {
+    if (!creating.ids.has(node.item.id) && !node?.item.adv) {
       creating.ids.add(node.item.id);
 
-      tree.update(({ findNode }) => {
+      tree.update("Init item script", ({ findNode }) => {
         const n = findNode(node.item.id);
         if (n) {
           if (!n.item.adv) {
@@ -19,6 +19,9 @@ export const initAdv = (node?: PNode, tree?: PageTree | CompTree) => {
           }
         }
       });
+      setTimeout(() => {
+        creating.ids.delete(node.item.id);
+      }, 300);
     }
   }
 };

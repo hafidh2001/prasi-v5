@@ -6,6 +6,7 @@ import {
   GitFork,
   PanelLeftOpen,
   PictureInPicture2,
+  ScrollText,
   X,
 } from "lucide-react";
 import { FC, ReactNode, useEffect } from "react";
@@ -50,6 +51,17 @@ export const EdScriptWorkbench: FC<{
   if (item?.adv?.scriptMode) {
     script_mode = item.adv.scriptMode;
   }
+
+  if (node && node.item.component?.id) {
+    return (
+      <div className="flex items-center text-sm text-center flex-col justify-center flex-1">
+        <ScrollText className="mb-2" />
+        Please access component
+        <br /> props to edit script.
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-1 items-stretch">
       <div className="flex flex-1 flex-col ">
@@ -124,13 +136,16 @@ export const EdScriptWorkbench: FC<{
                                   : ""
                               )}
                               onClick={() => {
-                                getActiveTree(p).update(({ findNode }) => {
-                                  const node = findNode(active.item_id);
-                                  if (node) {
-                                    if (!node.item.adv) node.item.adv = {};
-                                    node.item.adv.scriptMode = "flow";
+                                getActiveTree(p).update(
+                                  "Switch item js to flow",
+                                  ({ findNode }) => {
+                                    const node = findNode(active.item_id);
+                                    if (node) {
+                                      if (!node.item.adv) node.item.adv = {};
+                                      node.item.adv.scriptMode = "flow";
+                                    }
                                   }
-                                });
+                                );
                               }}
                             >
                               <GitFork size={12} rotate={40} />
@@ -144,13 +159,16 @@ export const EdScriptWorkbench: FC<{
                                   : ""
                               )}
                               onClick={() => {
-                                getActiveTree(p).update(({ findNode }) => {
-                                  const node = findNode(active.item_id);
-                                  if (node) {
-                                    if (!node.item.adv) node.item.adv = {};
-                                    node.item.adv.scriptMode = "script";
+                                getActiveTree(p).update(
+                                  "Switch item js to script",
+                                  ({ findNode }) => {
+                                    const node = findNode(active.item_id);
+                                    if (node) {
+                                      if (!node.item.adv) node.item.adv = {};
+                                      node.item.adv.scriptMode = "script";
+                                    }
                                   }
-                                });
+                                );
                               }}
                             >
                               <Code size={12} />

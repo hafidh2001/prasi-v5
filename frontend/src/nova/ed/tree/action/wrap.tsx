@@ -7,7 +7,7 @@ import { deepClone } from "utils/react/use-global";
 import { IItem } from "utils/types/item";
 
 export const edActionWrap = (p: PG, item: IItem) => {
-  getActiveTree(p).update(({ findParent }) => {
+  getActiveTree(p).update("Wrap item", ({ findParent }) => {
     const parent = findParent(item.id);
     if (parent) {
       let i = 0;
@@ -75,7 +75,7 @@ export const edActionWrapInComp = (p: PG, item: IItem) => {
     };
 
     if (new_item) {
-      getActiveTree(p).update(({ findParent }) => {
+      getActiveTree(p).update("Wrap item in component", ({ findParent }) => {
         const parent = findParent(item.id);
         if (parent) {
           let i = 0;

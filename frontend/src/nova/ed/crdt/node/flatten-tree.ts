@@ -1,7 +1,6 @@
 import { NodeModel } from "@minoru/react-dnd-treeview";
 import { IItem } from "../../../../utils/types/item";
 import { PNode } from "../../logic/types";
-import { active } from "logic/active";
 
 export const flattenTree = (
   items: IItem[],

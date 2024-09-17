@@ -5,6 +5,7 @@ import { Loading } from "utils/ui/loading";
 import { Modal } from "utils/ui/modal";
 import { PrasiFlow } from "./flow/prasi-flow";
 import { EdScriptWorkbench } from "./parts/workbench";
+import { useEffect } from "react";
 
 export const EdPopItemScript = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -12,6 +13,17 @@ export const EdPopItemScript = () => {
   const popup = p.ui.popup.script;
 
   if (!popup.open) return null;
+
+  useEffect(() => {
+    if (!jscript.editor) {
+      const ival = setInterval(() => {
+        if (jscript.editor) {
+          p.render();
+          clearInterval(ival);
+        }
+      }, 100);
+    }
+  }, [jscript.editor]);
 
   const content = (
     <>

@@ -1,6 +1,8 @@
 import { page, site } from "prasi-db";
 import { IItem } from "../../../utils/types/item";
 
+export type SyncUndoItem = { id: number; ts: number; size: string };
+
 export type ESite = Omit<site, "config"> & { config: { api_url: string } };
 
 export type EPage = Omit<page, "content_tree"> & {

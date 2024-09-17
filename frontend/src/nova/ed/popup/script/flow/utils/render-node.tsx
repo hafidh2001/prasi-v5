@@ -7,7 +7,7 @@ import {
   useStore,
 } from "@xyflow/react";
 import { Check, Maximize2, Move } from "lucide-react";
-import { Fragment, useRef } from "react";
+import { Fragment, useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { Combobox } from "utils/shadcn/comps/ui/combobox";
 import { Tooltip } from "utils/ui/tooltip";
@@ -17,13 +17,13 @@ import { fg } from "./flow-global";
 import { savePF } from "./save-pf";
 
 export const RenderNode = function (
-  this: PFlow,
+  this: { pflow: PFlow },
   arg: {
     id: string;
     data: { label: string; type: string };
   }
 ) {
-  const pflow = this;
+  const { pflow } = this;
   const { data, id } = arg;
   const connection = useConnection<Node>();
   const isTarget = connection.inProgress && connection.fromNode.id !== id;
@@ -53,6 +53,11 @@ export const RenderNode = function (
     : undefined;
 
   const left = data.type === "start" ? 38 : 74;
+
+  if (!node) {
+    return null;
+  }
+
   return (
     <div
       ref={ref_node}
@@ -135,7 +140,7 @@ export const RenderNode = function (
             }
           }}
           onResizeEnd={() => {
-            savePF(pflow);
+            savePF("Resize Node", pflow);
           }}
         />
       )}
@@ -314,7 +319,7 @@ export const RenderNode = function (
                     (e.key === "Backspace" || e.key === "Delete")
                   ) {
                     delete pflow?.nodes[id];
-                    savePF(pflow);
+                    savePF("Rename Node", pflow);
                     fg.reload();
                   }
                 }}
@@ -391,7 +396,7 @@ export const RenderNode = function (
 
                   setTimeout(() => {
                     fg.reload();
-                    savePF(pf);
+                    savePF("Change Type", pf);
                     setTimeout(() => {
                       selection.add([id]);
                     });

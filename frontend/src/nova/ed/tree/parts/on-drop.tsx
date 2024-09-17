@@ -20,7 +20,7 @@ export const treeOnDrop: (
     typeof dragSourceId === "string" &&
     typeof dropTargetId === "string"
   ) {
-    getActiveTree(p).update(({ findNode, findParent, tree }) => {
+    getActiveTree(p).update("Move item", ({ findNode, findParent, tree }) => {
       const from = findNode(dragSourceId);
       const from_parent = findParent(dragSourceId);
       const to = findNode(dropTargetId);

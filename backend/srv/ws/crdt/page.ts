@@ -10,13 +10,17 @@ import { applyUpdate, Doc, encodeStateAsUpdate, UndoManager } from "yjs";
 import { dir } from "../../utils/dir";
 import type { WSContext } from "../../utils/server/ctx";
 import { crdt_site, createSiteCrdt } from "./shared";
+import { editor } from "../../utils/editor";
+import { waitUntil } from "prasi-utils";
 
+const crdt_loading = new Set<string>();
 export const crdt_pages = {} as Record<
   string,
   {
     doc: Doc;
     awareness: Awareness;
     undoManager: UndoManager;
+    actionHistory: Record<number, string>;
     timeout: any;
     ws: Set<ServerWebSocket<WSContext>>;
   }
@@ -38,99 +42,156 @@ export const wsPageClose = (ws: ServerWebSocket<WSContext>) => {
 export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
   const page_id = ws.data.pathname.substring(`/crdt/page-`.length);
   if (!crdt_pages[page_id]) {
-    const db_page = await _db.page.findFirst({
-      where: { id: page_id },
-      select: { content_tree: true, id_site: true },
-    });
-    if (!db_page) return;
-
-    const site_id = db_page!.id_site;
-    if (site_id && !crdt_site[site_id]) {
-      await dirAsync(dir.data(`/crdt`));
-      crdt_site[site_id] = await createSiteCrdt(site_id);
-    }
-    const site = crdt_site[site_id];
-
-    const doc = new Doc();
-    const data = doc.getMap("data");
-    const immer = bind<any>(data);
-
-    let undoManager: UndoManager | undefined;
-    const updates = site.page.tables.page_updates.find({
-      where: { page_id },
-      sort: { ts: "asc" },
-    });
-    if (updates.length > 0) {
-      undoManager = new UndoManager(data, { captureTimeout: 0 });
-
-      for (const d of updates) {
-        applyUpdate(doc, d.update);
-      }
+    if (crdt_loading.has(page_id)) {
+      await waitUntil(() => crdt_pages[page_id]);
+      crdt_loading.delete(page_id);
     } else {
-      immer.update(() => db_page?.content_tree);
-      const update = encodeStateAsUpdate(doc);
-      site.page.tables.page_updates.save({ page_id, update, ts: Date.now() });
-      undoManager = new UndoManager(data);
-    }
-    undoManager.captureTimeout = 200;
-
-    if (undoManager) {
-      const awareness = new Awareness(doc);
-      awareness.setLocalState(null);
-
-      undoManager.on("stack-item-added", (opt) => {
-        (opt.stackItem as any).ts = Date.now();
+      crdt_loading.add(page_id);
+      const db_page = await _db.page.findFirst({
+        where: { id: page_id },
+        select: { content_tree: true, id_site: true },
       });
+      if (!db_page) return;
 
-      crdt_pages[page_id] = {
-        undoManager,
-        doc,
-        awareness,
-        timeout: null,
-        ws: new Set(),
-      };
-    }
+      const site_id = db_page!.id_site;
+      if (site_id && !crdt_site[site_id]) {
+        await dirAsync(dir.data(`/crdt`));
+        crdt_site[site_id] = await createSiteCrdt(site_id);
+      }
+      const site = crdt_site[site_id];
 
-    doc.on("update", (update, origin) => {
-      const page = crdt_pages[page_id];
-      if (page) {
-        const encoder = encoding.createEncoder();
-        encoding.writeVarUint(encoder, MessageType.Sync);
-        syncProtocol.writeUpdate(encoder, update);
-        const message = encoding.toUint8Array(encoder);
-        page.ws.forEach((w) => w.send(message));
+      const doc = new Doc();
+      const data = doc.getMap("data");
+      const immer = bind<any>(data);
 
-        if (origin === undoManager) {
-          if (undoManager.undoing) {
-            const count = site.page.tables.page_updates.count({
-              where: { page_id },
-            });
+      const actionHistory = {} as Record<number, string>;
+      let undoManager: UndoManager | undefined;
+      const updates = site.page.tables.page_updates.find({
+        where: { page_id },
+        sort: { ts: "asc" },
+      });
+      if (updates.length > 0) {
+        undoManager = new UndoManager(data, { captureTimeout: 0 });
+        const pending_ids: number[] = [];
 
-            if (count > 1) {
-              site.page.tables.page_updates.delete({
-                where: { page_id },
-                sort: { ts: "desc" },
-                limit: 1,
-              });
+        undoManager.on("stack-item-added", (opt) => {
+          const stack = opt.stackItem as any;
+          stack.id = pending_ids.pop();
+        });
+
+        for (const d of updates) {
+          pending_ids.push(d.id);
+          actionHistory[d.id] = d.action;
+          applyUpdate(doc, d.update);
+        }
+      } else {
+        immer.update(() => db_page?.content_tree);
+        const update = encodeStateAsUpdate(doc);
+        site.page.tables.page_updates.save({
+          action: "init",
+          page_id,
+          update,
+          ts: Date.now(),
+        });
+        undoManager = new UndoManager(data);
+      }
+      undoManager.captureTimeout = 200;
+
+      if (undoManager) {
+        const awareness = new Awareness(doc);
+        awareness.setLocalState(null);
+
+        undoManager.on("stack-item-popped", (opt) => {
+          const stack = opt.stackItem as unknown as { id: number; ts: number };
+          if (opt.type === "undo" && undoManager.redoStack.length > 0) {
+            const last = undoManager.redoStack[
+              undoManager.redoStack.length - 1
+            ] as unknown as { id: number; ts: number };
+            if (last && stack) {
+              last.id = stack.id;
+              last.ts = stack.ts;
+            }
+          } else {
+            const last = undoManager.undoStack[
+              undoManager.undoStack.length - 1
+            ] as unknown as { id: number; ts: number };
+            if (last && stack) {
+              last.id = stack.id;
+              last.ts = stack.ts;
             }
           }
-
-          if (undoManager.redoing) {
-            site.page.tables.page_updates.save({
-              page_id,
-              update: encodeStateAsUpdate(doc),
-              ts: Date.now(),
-            });
+        });
+        undoManager.on("stack-item-added", (opt) => {
+          if (opt.type === "undo") {
+            if (undoManager.redoStack.length === 0) {
+              (opt.stackItem as any).ts = Date.now();
+            } else {
+            }
           }
-        } else {
-          site.page.tables.page_updates.save({
-            page_id,
-            update,
-            ts: Date.now(),
-          });
-        }
+        });
+
+        crdt_pages[page_id] = {
+          undoManager,
+          doc,
+          awareness,
+          actionHistory,
+          timeout: null,
+          ws: new Set(),
+        };
       }
-    });
+
+      doc.on("update", (update, origin) => {
+        const page = crdt_pages[page_id];
+        if (page) {
+          const encoder = encoding.createEncoder();
+          encoding.writeVarUint(encoder, MessageType.Sync);
+          syncProtocol.writeUpdate(encoder, update);
+          const message = encoding.toUint8Array(encoder);
+          page.ws.forEach((w) => w.send(message));
+          const ts = Date.now();
+
+          if (origin === undoManager) {
+            if (undoManager.undoing) {
+              const count = site.page.tables.page_updates.count({
+                where: { page_id },
+              });
+
+              if (count > 1) {
+                site.page.tables.page_updates.delete({
+                  where: { page_id },
+                  sort: { ts: "desc" },
+                  limit: 1,
+                });
+              }
+            }
+
+            if (undoManager.redoing) {
+              site.page.tables.page_updates.save({
+                action: "Redo",
+                page_id,
+                update: encodeStateAsUpdate(doc),
+                ts,
+              });
+            }
+          } else {
+            const action_name =
+              editor.page.pending_action[page_id]?.shift() || "";
+
+            const res = site.page.tables.page_updates.save({
+              action: action_name,
+              page_id,
+              update,
+              ts,
+            });
+            (
+              undoManager.undoStack[undoManager.undoStack.length - 1] as any
+            ).id = res[0].id;
+
+            actionHistory[res[0].id] = action_name;
+          }
+        }
+      });
+    }
   }
 
   const { doc, awareness, ws: page_ws } = crdt_pages[page_id];

@@ -27,6 +27,12 @@ export const wsSync = (
   ws: ServerWebSocket<WSContext>,
   msg:
     | { action: "open"; user_id: string }
+    | {
+        action: "pending_action";
+        comp_id?: string;
+        page_id?: string;
+        action_name: string;
+      }
     | { action: "undo"; page_id?: string; comp_id?: string; count: number }
     | { action: "redo"; page_id?: string; comp_id?: string; count: number }
 ) => {
@@ -39,6 +45,24 @@ export const wsSync = (
         if (!editor.user[msg.user_id]) editor.user[msg.user_id] = new Set();
         editor.user[msg.user_id].add(conn_id);
         ws.send(pack({ action: "connected", conn_id }));
+      }
+      break;
+    case "pending_action":
+      {
+        const conn_id = editor.ws.get(ws);
+        if (conn_id) {
+          if (msg.page_id) {
+            if (!editor.page.pending_action[msg.page_id]) {
+              editor.page.pending_action[msg.page_id] = [];
+            }
+            editor.page.pending_action[msg.page_id].push(msg.action_name);
+          } else if (msg.comp_id) {
+            if (!editor.comp.pending_action[msg.comp_id]) {
+              editor.comp.pending_action[msg.comp_id] = [];
+            }
+            editor.comp.pending_action[msg.comp_id].push(msg.action_name);
+          }
+        }
       }
       break;
     case "undo":

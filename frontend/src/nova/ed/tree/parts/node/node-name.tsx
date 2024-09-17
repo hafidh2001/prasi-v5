@@ -46,7 +46,7 @@ export const EdTreeNodeName: FC<{
               if (node.parent?.component?.is_jsx_root) {
                 return;
               }
-              getActiveTree(p).update(({ findNode }) => {
+              getActiveTree(p).update("Rename item", ({ findNode }) => {
                 const n = findNode(node?.item.id);
                 if (n) {
                   n.item.name = local.rename || "";

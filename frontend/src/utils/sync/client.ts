@@ -21,7 +21,7 @@ export const clientStartSync = (arg: {
         ws.send(pack({ action: "ping" }));
       }, 90 * 1000);
     };
-    
+
     ws.onmessage = async ({ data }) => {
       if (data instanceof Blob) {
         const msg = unpack(new Uint8Array(await data.arrayBuffer())) as {
@@ -75,6 +75,9 @@ export const createClient = (ws: WebSocket, p: any, conn_id: string) => ({
         EBaseComp
       >;
     },
+    pending_action: (comp_id: string, action_name: string) => {
+      send(ws, { action: "pending_action", comp_id, action_name });
+    },
   },
   page: {
     undo: (page_id: string, count: number) => {
@@ -88,6 +91,9 @@ export const createClient = (ws: WebSocket, p: any, conn_id: string) => ({
         EPage,
         "content_tree"
       >;
+    },
+    pending_action: (page_id: string, action_name: string) => {
+      send(ws, { action: "pending_action", page_id, action_name });
     },
   },
 });

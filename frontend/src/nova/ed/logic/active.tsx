@@ -17,7 +17,12 @@ export const activateItem = (p: PG, id: string) => {
 };
 
 export const active = {
-  item_id: "",
+  get item_id() {
+    return localStorage.getItem("prasi-active-item-id") || "";
+  },
+  set item_id(value: string) {
+    localStorage.setItem("prasi-active-item-id", value);
+  },
   comp: null as null | CompTree,
   hover: { id: "", tree: false },
   script_nav: {

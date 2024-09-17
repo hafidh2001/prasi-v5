@@ -29,6 +29,8 @@ export const EDGlobal = {
     do_edit: async (newval: string, all?: boolean) => {},
     flow: {
       current: null as null | PFlow,
+      should_relayout: false,
+      ts: 0,
     },
   },
   ui: {
@@ -66,7 +68,15 @@ export const EDGlobal = {
         responsive?: string;
       },
       script: {
-        open: false,
+        get open() {
+          return localStorage.getItem("prasi-popup-script-open") === "true";
+        },
+        set open(value) {
+          localStorage.setItem(
+            "prasi-popup-script-open",
+            JSON.stringify(value)
+          );
+        },
         paned: localStorage.getItem("prasi-popup-script-mode") === "paned",
         mode: "js" as "js" | "css" | "html",
         last_mode: "js" as "js" | "css" | "html",

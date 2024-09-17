@@ -1,4 +1,5 @@
 import { NodeRender } from "@minoru/react-dnd-treeview";
+import { useEffect } from "react";
 import { useGlobal } from "../../../../../utils/react/use-global";
 import { useLocal } from "../../../../../utils/react/use-local";
 import { Tooltip } from "../../../../../utils/ui/tooltip";
@@ -11,7 +12,6 @@ import { EdTreeAction } from "./node-action";
 import { EdTreeNodeIndent } from "./node-indent";
 import { EdTreeNodeName } from "./node-name";
 import { parseNodeState } from "./node-tools";
-import { useEffect } from "react";
 
 export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -36,11 +36,15 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
     }
   }, [render_params.isDropTarget]);
 
-  if (!raw.data) return <></>;
+  if (!raw.data) {
+    return <></>;
+  }
 
   const node = raw.data;
   const item = node.item;
-  if (!item) return <></>;
+  if (!item) {
+    return <></>;
+  }
 
   const { is_active, is_component, is_hover } = parseNodeState({ item });
 

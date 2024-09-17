@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { WebsocketProvider } from "y-websocket";
 import { Doc } from "yjs";
 import { createClient } from "../../../utils/sync/client";
-import { EPage, PNode } from "../logic/types";
+import { EPage, PNode, SyncUndoItem } from "../logic/types";
 import { bind } from "./lib/immer-yjs";
 import { findNodeById, flattenTree } from "./node/flatten-tree";
 import { IItem } from "../../../utils/types/item";
@@ -49,8 +49,9 @@ export const loadPageTree = (
     },
     history: async () => {
       return (await _api.page_history(page_id)) as {
-        undo: { ts: number; size: string }[];
-        redo: { ts: number; size: string }[];
+        undo: SyncUndoItem[];
+        redo: SyncUndoItem[];
+        history: Record<number, string>;
         ts: number;
       };
     },
@@ -65,14 +66,16 @@ export const loadPageTree = (
     },
     before_update: null as null | ((do_update: () => void) => void),
     update(
+      action_name: string,
       fn: (opt: {
         tree: EPage["content_tree"];
         flatten(): ReturnType<typeof flattenTree>;
         findNode: (id: string) => null | PNode;
         findParent: (id: string) => null | PNode;
-      }) => void,
+      }) => void
     ) {
       const _fn = (tree: EPage["content_tree"]) => {
+        sync.page.pending_action(page_id, action_name);
         fn({
           tree,
           flatten: () => {

@@ -41,7 +41,7 @@ export const PFPropEdge: FC<{ edge: Edge; pflow: PFlow }> = ({
                       local.selected.flow = e.flow;
                       e.flow = temp;
                       if (fg.prop) fg.prop.selection.loading = true;
-                      savePF(pflow);
+                      savePF("Change Branch", pflow);
                       fg.reload(false);
                     }
                   }}
