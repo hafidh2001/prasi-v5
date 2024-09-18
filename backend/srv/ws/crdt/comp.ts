@@ -12,7 +12,9 @@ import type { WSContext } from "../../utils/server/ctx";
 import BunORM from "../../utils/sqlite";
 import { crdt_comps } from "./shared";
 import { editor } from "../../utils/editor";
+import { waitUntil } from "prasi-utils";
 
+const crdt_loading = new Set<string>();
 await dirAsync(dir.data(`/crdt`));
 const internal = {
   db: new BunORM(dir.data(`/crdt/comp.db`), {
@@ -45,101 +47,153 @@ export const wsCompClose = (ws: ServerWebSocket<WSContext>) => {
 export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
   const comp_id = ws.data.pathname.substring(`/crdt/comp-`.length);
   if (!crdt_comps[comp_id]) {
-    const db_comp = await _db.component.findFirst({
-      where: { id: comp_id },
-      select: { content_tree: true, name: true, component_group: true },
-    });
-    if (!db_comp) return;
-
-    const doc = new Doc();
-    const data = doc.getMap("data");
-    const immer = bind<any>(data);
-
-    let undoManager: UndoManager | undefined;
-    const updates = internal.db.tables.comp_updates.find({
-      where: { comp_id },
-      sort: { ts: "asc" },
-    });
-    if (updates.length > 0) {
-      undoManager = new UndoManager(data, { captureTimeout: 0 });
-
-      for (const d of updates) {
-        applyUpdate(doc, d.update);
-      }
+    if (crdt_loading.has(comp_id)) {
+      await waitUntil(() => crdt_comps[comp_id]);
+      crdt_loading.delete(comp_id);
     } else {
-      immer.update(() => db_comp?.content_tree);
-      const update = encodeStateAsUpdate(doc);
-      internal.db.tables.comp_updates.save({
-        action: "init",
-        comp_id,
-        update,
-        ts: Date.now(),
+      const db_comp = await _db.component.findFirst({
+        where: { id: comp_id },
+        select: { content_tree: true, name: true, component_group: true },
       });
-      undoManager = new UndoManager(data);
-    }
-    undoManager.captureTimeout = 200;
+      if (!db_comp) return;
 
-    if (undoManager) {
-      const awareness = new Awareness(doc);
-      awareness.setLocalState(null);
+      const doc = new Doc();
+      const data = doc.getMap("data");
+      const immer = bind<any>(data);
 
-      undoManager.on("stack-item-added", (opt) => {
-        (opt.stackItem as any).ts = Date.now();
+      const actionHistory = {} as Record<number, string>;
+      let undoManager: UndoManager | undefined;
+      const updates = internal.db.tables.comp_updates.find({
+        where: { comp_id },
+        sort: { ts: "asc" },
       });
+      if (updates.length > 0) {
+        undoManager = new UndoManager(data, { captureTimeout: 0 });
+        const pending_ids: number[] = [];
 
-      crdt_comps[comp_id] = {
-        undoManager,
-        doc,
-        awareness,
-        timeout: null,
-        ws: new Set(),
-      };
-    }
+        undoManager.on("stack-item-added", (opt) => {
+          const stack = opt.stackItem as any;
+          stack.id = pending_ids.pop();
+        });
 
-    doc.on("update", (update, origin) => {
-      const comp = crdt_comps[comp_id];
-      if (comp) {
-        const encoder = encoding.createEncoder();
-        encoding.writeVarUint(encoder, MessageType.Sync);
-        syncProtocol.writeUpdate(encoder, update);
-        const message = encoding.toUint8Array(encoder);
-        comp.ws.forEach((w) => w.send(message));
+        for (const d of updates) {
+          pending_ids.push(d.id);
+          actionHistory[d.id] = d.action;
+          applyUpdate(doc, d.update);
+        }
+      } else {
+        immer.update(() => db_comp?.content_tree);
+        const update = encodeStateAsUpdate(doc);
+        internal.db.tables.comp_updates.save({
+          action: "init",
+          comp_id,
+          update,
+          ts: Date.now(),
+        });
+        undoManager = new UndoManager(data);
+      }
+      undoManager.captureTimeout = 200;
 
-        if (origin === undoManager) {
-          if (undoManager.undoing) {
-            const count = internal.db.tables.comp_updates.count({
-              where: { comp_id },
-            });
+      if (undoManager) {
+        const awareness = new Awareness(doc);
+        awareness.setLocalState(null);
 
-            if (count > 1) {
-              internal.db.tables.comp_updates.delete({
-                where: { comp_id },
-                sort: { ts: "desc" },
-                limit: 1,
-              });
+        undoManager.on("stack-item-popped", (opt) => {
+          const stack = opt.stackItem as unknown as { id: number; ts: number };
+          if (opt.type === "undo" && undoManager.redoStack.length > 0) {
+            const last = undoManager.redoStack[
+              undoManager.redoStack.length - 1
+            ] as unknown as { id: number; ts: number };
+            if (last && stack) {
+              last.id = stack.id;
+              last.ts = stack.ts;
+            }
+          } else {
+            const last = undoManager.undoStack[
+              undoManager.undoStack.length - 1
+            ] as unknown as { id: number; ts: number };
+            if (last && stack) {
+              last.id = stack.id;
+              last.ts = stack.ts;
             }
           }
+        });
+        undoManager.on("stack-item-added", (opt) => {
+          if (opt.type === "undo") {
+            if (undoManager.redoStack.length === 0) {
+              const action = editor.comp.pending_action[comp_id]?.pop() || "";
+              editor.comp.timeout_action[comp_id] = setTimeout(() => {
+                editor.comp.pending_action[comp_id] = [];
+              }, 1000);
+              const stack = opt.stackItem as any;
+              stack.ts = Date.now();
+              stack.action = action;
+            } else {
+            }
+          }
+        });
 
-          if (undoManager.redoing) {
-            internal.db.tables.comp_updates.save({
-              action: "Redo",
+        crdt_comps[comp_id] = {
+          undoManager,
+          doc,
+          awareness,
+          actionHistory,
+          timeout: null,
+          ws: new Set(),
+        };
+      }
+
+      doc.on("update", (update, origin) => {
+        const comp = crdt_comps[comp_id];
+        if (comp) {
+          const encoder = encoding.createEncoder();
+          encoding.writeVarUint(encoder, MessageType.Sync);
+          syncProtocol.writeUpdate(encoder, update);
+          const message = encoding.toUint8Array(encoder);
+          comp.ws.forEach((w) => w.send(message));
+
+          if (origin === undoManager) {
+            if (undoManager.undoing) {
+              const count = internal.db.tables.comp_updates.count({
+                where: { comp_id },
+              });
+
+              if (count > 1) {
+                internal.db.tables.comp_updates.delete({
+                  where: { comp_id },
+                  sort: { ts: "desc" },
+                  limit: 1,
+                });
+              }
+            }
+
+            if (undoManager.redoing) {
+              internal.db.tables.comp_updates.save({
+                action: "Redo",
+                comp_id,
+                update: encodeStateAsUpdate(doc),
+                ts: Date.now(),
+              });
+            }
+          } else {
+            const stack = undoManager.undoStack[
+              undoManager.undoStack.length - 1
+            ] as unknown as { id: number; action: string };
+            const action_name = stack.action || "";
+
+            const res = internal.db.tables.comp_updates.save({
+              action: action_name,
               comp_id,
-              update: encodeStateAsUpdate(doc),
+              update,
               ts: Date.now(),
             });
+
+            stack.id = res[0].id;
+            actionHistory[res[0].id] = action_name;
           }
-        } else {
-          const action_name =
-            editor.comp.pending_action[comp_id]?.shift() || "";
-          internal.db.tables.comp_updates.save({
-            action: action_name,
-            comp_id,
-            update,
-            ts: Date.now(),
-          });
         }
-      }
-    });
+      });
+    }
   }
 
   const { doc, awareness, ws: comp_ws } = crdt_comps[comp_id];

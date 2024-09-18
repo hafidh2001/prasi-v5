@@ -30,7 +30,6 @@ export const EDGlobal = {
     flow: {
       current: null as null | PFlow,
       should_relayout: false,
-      ts: 0,
     },
   },
   ui: {

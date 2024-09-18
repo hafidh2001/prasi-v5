@@ -3,9 +3,8 @@ import { pack } from "msgpackr";
 import { editor } from "../utils/editor";
 import type { ServerWebSocket } from "bun";
 import type { WSContext } from "../utils/server/ctx";
-import { crdt_pages } from "./crdt/page";
 import { unregisterCompConnection } from "../utils/editor/editor-comp-util";
-import { crdt_comps } from "./crdt/shared";
+import { crdt_comps, crdt_pages } from "./crdt/shared";
 import type { UndoManager } from "yjs";
 
 export const wsSyncClose = (ws: ServerWebSocket<WSContext>) => {
@@ -55,11 +54,13 @@ export const wsSync = (
             if (!editor.page.pending_action[msg.page_id]) {
               editor.page.pending_action[msg.page_id] = [];
             }
+            clearTimeout(editor.page.timeout_action[msg.page_id]);
             editor.page.pending_action[msg.page_id].push(msg.action_name);
           } else if (msg.comp_id) {
             if (!editor.comp.pending_action[msg.comp_id]) {
               editor.comp.pending_action[msg.comp_id] = [];
             }
+            clearTimeout(editor.comp.timeout_action[msg.comp_id]);
             editor.comp.pending_action[msg.comp_id].push(msg.action_name);
           }
         }

@@ -7,13 +7,13 @@ import {
   getBezierPath,
   useReactFlow,
 } from "@xyflow/react";
-import { PFlow, PFNode, PFNodeBranch } from "../runtime/types";
+import { PFlow, PFNode, PFNodeBranch, RPFlow } from "../runtime/types";
 import { findFlow } from "./find-node";
 import { fg } from "./flow-global";
 import { savePF } from "./save-pf";
 
 export const RenderEdge = function (
-  this: { pflow: PFlow },
+  this: { pflow: RPFlow },
   {
     id,
     sourceX,

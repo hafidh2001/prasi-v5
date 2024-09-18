@@ -29,12 +29,25 @@ export const createSiteCrdt = async (site_id: string) => {
   };
 };
 
+export const crdt_pages = {} as Record<
+  string,
+  {
+    doc: Doc;
+    awareness: Awareness;
+    undoManager: UndoManager;
+    actionHistory: Record<number, string>;
+    timeout: any;
+    ws: Set<ServerWebSocket<WSContext>>;
+  }
+>;
+
 export const crdt_comps = {} as Record<
   string,
   {
     doc: Doc;
     awareness: Awareness;
     undoManager: UndoManager;
+    actionHistory: Record<number, string>;
     timeout: any;
     ws: Set<ServerWebSocket<WSContext>>;
   }

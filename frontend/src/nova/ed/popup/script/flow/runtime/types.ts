@@ -14,6 +14,11 @@ export type PFNodePosition = { x: number; y: number };
 export type PFNodeSize = { w?: number; h?: number };
 
 export type PFNodeType = keyof typeof allNodeDefinitions;
+export type DeepReadonly<T> = T extends Function
+  ? T
+  : T extends object
+    ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
+    : T;
 
 export type PFNode = Record<string, any> & {
   id: string;
@@ -25,6 +30,8 @@ export type PFNode = Record<string, any> & {
   size?: PFNodeSize;
   unused_branches?: PFNodeBranch[];
 };
+
+export type RPFlow = DeepReadonly<PFlow>;
 
 export type PFlow = {
   id: string;

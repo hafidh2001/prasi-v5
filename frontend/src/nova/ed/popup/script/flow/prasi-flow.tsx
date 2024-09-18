@@ -1,5 +1,5 @@
 import { getActiveNode } from "crdt/node/get-node-by-id";
-import { getActiveTree } from "logic/active";
+import { active, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { deepClone, useGlobal } from "utils/react/use-global";
@@ -11,6 +11,7 @@ import { fg } from "./utils/flow-global";
 import { initAdv } from "./utils/prasi/init-adv";
 import { defaultFlow } from "./utils/prasi/default-flow";
 import { useCallback, useEffect } from "react";
+import { RPFlow } from "./runtime/types";
 
 export const PrasiFlow = function () {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -43,63 +44,46 @@ export const PrasiFlow = function () {
   useEffect(() => {
     const tree = getActiveTree(p);
 
+    if (!node) {
+      popup.open = false;
+      p.render();
+      return;
+    }
+
     if (node && tree) {
       if (popup.prop_name === "" && popup.mode === "js") {
         if (node.item.id !== prasi.item_id) {
-          if (sflow.current !== null && sflow.current.id !== node.item.id) {
-            sflow.current = null;
-            local.render();
-          } else {
-            initAdv(node, tree);
-            prasi.item_id = node.item.id;
-            fg.update.execute = (then) => {
-              if (prasi.skip_init_update) {
-                prasi.skip_init_update = false;
-                return;
-              }
-              clearTimeout(fg.update.timeout);
-              fg.update.timeout = setTimeout(() => {
-                getActiveTree(p).update(
-                  fg.update.action
-                    ? "Item Flow: " + fg.update.action
-                    : "Item Flow: Update",
-                  ({ findNode }) => {
-                    const node = findNode(prasi.item_id);
-                    if (node && node.item.adv && sflow.current) {
-                      node.item.adv.flow = deepClone(sflow.current);
-                    }
+          initAdv(node, tree);
+          prasi.item_id = node.item.id;
+          fg.update = (action_name: string, fn) => {
+            clearTimeout(fg.update_timeout);
+            fg.update_timeout = setTimeout(() => {
+              tree.update(action_name, ({ findNode }) => {
+                const node = findNode(active.item_id);
+                if (node && node.item.adv && node.item.adv.flow) {
+                  fn({ pflow: node.item.adv.flow });
+                }
+              });
+            }, 300);
+            return node.item.adv?.flow as RPFlow;
+          };
 
-                    if (then) setTimeout(then, 100);
-                  }
+          if (!node.item.adv?.flow) {
+            tree.update("Add Prasi Flow", ({ findNode }) => {
+              const node = findNode(active.item_id);
+              if (node && node.item.adv) {
+                node.item.adv.flow = defaultFlow(
+                  "item",
+                  `item-${node.item.id}`,
+                  node.item.id
                 );
-                fg.update.action = "";
-              }, 100);
-            };
-
-            let should_reset = false;
-            if (!node.item.adv?.flow) {
-              if (!sflow.current || sflow.current.id !== node.item.id) {
-                should_reset = true;
               }
-            } else if (Object.keys(node.item.adv.flow.flow).length === 0) {
-              should_reset = true;
-            }
-
-            if (should_reset) {
-              sflow.current = null;
-              resetDefault(true);
-            }
-
-            if (node.item.adv?.flow) {
-              sflow.current = deepClone(node.item.adv.flow);
-            }
+            });
           }
         }
 
-        if (prasi.updated_outside && node.item.adv?.flow && sflow.current) {
-          prasi.updated_outside = false;
-          sflow.current = deepClone(node.item.adv.flow);
-          sflow.ts = Date.now();
+        if (node.item.adv?.flow) {
+          sflow.current = node.item.adv.flow;
           local.render();
         }
       }
@@ -118,7 +102,6 @@ export const PrasiFlow = function () {
                 resetDefault={resetDefault}
                 pflow={sflow.current}
                 should_relayout={sflow.should_relayout}
-                ts={sflow.ts}
               />
             </Panel>
 

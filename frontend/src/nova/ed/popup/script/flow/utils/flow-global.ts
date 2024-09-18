@@ -1,6 +1,6 @@
 import { Edge, Node, ReactFlowInstance } from "@xyflow/react";
 import { PFRunResult } from "../runtime/runner";
-import { PFlow, PFNode } from "../runtime/types";
+import { PFlow, PFNode, RPFlow } from "../runtime/types";
 
 export type PrasiFlowPropLocal = {
   selection: {
@@ -14,14 +14,11 @@ export type PrasiFlowPropLocal = {
 const fg_default = {
   pointer_up_id: "",
   pointer_to: null as null | { x: number; y: number },
-  update: {
-    action: "",
-    timeout: null as any,
-    execute: (then?: () => void) => {},
+  update(action_name: string, fn: (arg: { pflow: PFlow }) => void) {
+    return null as unknown as RPFlow;
   },
-  reload: (relayout?: boolean) => {},
+  update_timeout: null as any,
   main: null as null | {
-    pflow: null | PFlow;
     reactflow: null | ReactFlowInstance<Node, Edge>;
     render: () => void;
     action: {

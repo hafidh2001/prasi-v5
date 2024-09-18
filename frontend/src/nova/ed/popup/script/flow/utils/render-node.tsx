@@ -7,17 +7,17 @@ import {
   useStore,
 } from "@xyflow/react";
 import { Check, Maximize2, Move } from "lucide-react";
-import { Fragment, useRef, useState } from "react";
+import { Fragment, useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { Combobox } from "utils/shadcn/comps/ui/combobox";
 import { Tooltip } from "utils/ui/tooltip";
 import { allNodeDefinitions } from "../runtime/nodes";
-import { PFlow, PFNodeDefinition } from "../runtime/types";
+import { PFNodeDefinition, RPFlow } from "../runtime/types";
 import { fg } from "./flow-global";
 import { savePF } from "./save-pf";
 
 export const RenderNode = function (
-  this: { pflow: PFlow },
+  this: { pflow: RPFlow },
   arg: {
     id: string;
     data: { label: string; type: string };
@@ -26,7 +26,6 @@ export const RenderNode = function (
   const { pflow } = this;
   const { data, id } = arg;
   const connection = useConnection<Node>();
-  const isTarget = connection.inProgress && connection.fromNode.id !== id;
   const ref_name = useRef<HTMLTextAreaElement>(null);
   const ref_node = useRef<HTMLDivElement>(null);
 

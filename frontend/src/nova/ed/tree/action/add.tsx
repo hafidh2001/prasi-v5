@@ -11,8 +11,8 @@ export const edActionAdd = async (p: PG, item?: IItem) => {
     childs: [],
   };
   getActiveTree(p).update("Add item", ({ findNode, tree }) => {
-    if (active.item_id) {
-      const node = findNode(active.item_id);
+    const node = findNode(active.item_id);
+    if (node) {
       if (node?.item.id === active.item_id) {
         if (
           node.item.type === "text" ||
@@ -38,7 +38,7 @@ export const edActionAdd = async (p: PG, item?: IItem) => {
         }
       }
     } else {
-      tree.childs.push({ ...new_item, type: "section", name: "section" });
+      tree.childs.push({ ...new_item, type: "section", name: "Section" });
     }
   });
 

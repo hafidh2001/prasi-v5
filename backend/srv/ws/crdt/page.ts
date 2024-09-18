@@ -3,28 +3,17 @@ import { dirAsync } from "fs-jetpack";
 import * as decoding from "lib0/decoding";
 import * as encoding from "lib0/encoding";
 import { bind } from "prasi-frontend/src/nova/ed/crdt/lib/immer-yjs";
+import { waitUntil } from "prasi-utils";
 import { applyAwarenessUpdate, Awareness } from "y-protocols/awareness.js";
 import * as syncProtocol from "y-protocols/sync.js";
 import { readSyncMessage } from "y-protocols/sync.js";
 import { applyUpdate, Doc, encodeStateAsUpdate, UndoManager } from "yjs";
 import { dir } from "../../utils/dir";
-import type { WSContext } from "../../utils/server/ctx";
-import { crdt_site, createSiteCrdt } from "./shared";
 import { editor } from "../../utils/editor";
-import { waitUntil } from "prasi-utils";
+import type { WSContext } from "../../utils/server/ctx";
+import { crdt_pages, crdt_site, createSiteCrdt } from "./shared";
 
 const crdt_loading = new Set<string>();
-export const crdt_pages = {} as Record<
-  string,
-  {
-    doc: Doc;
-    awareness: Awareness;
-    undoManager: UndoManager;
-    actionHistory: Record<number, string>;
-    timeout: any;
-    ws: Set<ServerWebSocket<WSContext>>;
-  }
->;
 
 enum MessageType {
   Sync = 0,
@@ -124,7 +113,13 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
         undoManager.on("stack-item-added", (opt) => {
           if (opt.type === "undo") {
             if (undoManager.redoStack.length === 0) {
-              (opt.stackItem as any).ts = Date.now();
+              const action = editor.page.pending_action[page_id]?.pop() || "";
+              editor.page.timeout_action[page_id] = setTimeout(() => {
+                editor.page.pending_action[page_id] = [];
+              }, 1000);
+              const stack = opt.stackItem as any;
+              stack.ts = Date.now();
+              stack.action = action;
             } else {
             }
           }
@@ -174,8 +169,10 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
               });
             }
           } else {
-            const action_name =
-              editor.page.pending_action[page_id]?.shift() || "";
+            const stack = undoManager.undoStack[
+              undoManager.undoStack.length - 1
+            ] as unknown as { id: number; action: string };
+            const action_name = stack.action || "";
 
             const res = site.page.tables.page_updates.save({
               action: action_name,
@@ -183,10 +180,8 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
               update,
               ts,
             });
-            (
-              undoManager.undoStack[undoManager.undoStack.length - 1] as any
-            ).id = res[0].id;
 
+            stack.id = res[0].id;
             actionHistory[res[0].id] = action_name;
           }
         }

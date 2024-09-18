@@ -1,4 +1,4 @@
-import { getNodeById } from "crdt/node/get-node-by-id";
+import { getActiveNode, getNodeById } from "crdt/node/get-node-by-id";
 import { active, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import {
@@ -7,6 +7,7 @@ import {
   PanelLeftOpen,
   PictureInPicture2,
   ScrollText,
+  Trash,
   X,
 } from "lucide-react";
 import { FC, ReactNode, useEffect } from "react";
@@ -14,6 +15,7 @@ import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { EdScriptSnippet } from "./snippet";
 import { Tooltip } from "utils/ui/tooltip";
+import { TopBtn } from "../../../ui/top-btn";
 
 export const EdScriptWorkbench: FC<{
   children: (arg: { mode: "script" | "flow" }) => ReactNode;
@@ -178,7 +180,31 @@ export const EdScriptWorkbench: FC<{
                         </div>
 
                         {script_mode !== "flow" && <EdScriptSnippet />}
-                        {script_mode === "flow" && <></>}
+                        {script_mode === "flow" && (
+                          <div className="flex items-center pl-2 border-l ml-1">
+                            <Tooltip
+                              content="Reset Flow"
+                              onClick={() => {
+                                if (confirm("Reset Flow ?")) {
+                                  getActiveTree(p).update(
+                                    "Reset Item Flow",
+                                    ({ findNode }) => {
+                                      const n = findNode(active.item_id);
+                                      if (n && n.item.adv) {
+                                        delete n.item.adv.flow;
+                                        delete n.item.adv.scriptMode;
+                                      }
+                                    }
+                                  );
+                                }
+                              }}
+                            >
+                              <TopBtn className="h-[23px] rounded-sm">
+                                <Trash size={12} />
+                              </TopBtn>
+                            </Tooltip>
+                          </div>
+                        )}
                       </>
                     )}
                   </>
