@@ -17,13 +17,12 @@ import { fg } from "./flow-global";
 import { savePF } from "./save-pf";
 
 export const RenderNode = function (
-  this: { pflow: RPFlow },
   arg: {
     id: string;
     data: { label: string; type: string };
   }
 ) {
-  const { pflow } = this;
+  const pflow = fg.pflow;
   const { data, id } = arg;
   const connection = useConnection<Node>();
   const ref_name = useRef<HTMLTextAreaElement>(null);
@@ -147,11 +146,11 @@ export const RenderNode = function (
         <NodeResizer
           onResize={(e, p) => {
             if (node) {
-              node.size = { w: p.width, h: p.height };
+              // node.size = { w: p.width, h: p.height };
             }
           }}
           onResizeEnd={() => {
-            savePF("Resize Node", pflow);
+            // savePF("Resize Node", pflow);
           }}
         />
       )}

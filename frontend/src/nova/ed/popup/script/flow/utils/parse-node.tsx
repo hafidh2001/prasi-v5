@@ -79,32 +79,54 @@ export const parseNodes = (
       for (const branch of inode.branches) {
         if (branch.flow.length > 0) {
           const edge_id = `${node.id}-${branch.flow[0]}`;
+
           if (rf_edges.find((e) => e.id === edge_id)) {
             break;
           }
 
           if (node.id === branch.flow[0]) {
-            continue;
-          }
+            const flow = branch.flow.slice(1);
 
-          rf_edges.push({
-            id: edge_id,
-            source: node.id,
-            target: branch.flow[0],
-            type: EdgeType,
-            data: { branch },
-            animated: true,
-          });
-          parseNodes(nodes, branch.flow, {
-            current: opt?.current,
-            existing: {
-              rf_nodes,
-              rf_edges,
-              x: i++ - 0.5,
-              y: by,
-              next_flow: flow_nodes.slice(y),
-            },
-          });
+            rf_edges.push({
+              id: edge_id,
+              source: node.id,
+              target: flow[0],
+              type: EdgeType,
+              data: { branch },
+              animated: true,
+            });
+
+            parseNodes(nodes, flow, {
+              current: opt?.current,
+              existing: {
+                rf_nodes,
+                rf_edges,
+                x: i++ - 0.5,
+                y: by,
+                next_flow: flow_nodes.slice(y),
+              },
+            });
+          } else {
+            rf_edges.push({
+              id: edge_id,
+              source: node.id,
+              target: branch.flow[0],
+              type: EdgeType,
+              data: { branch },
+              animated: true,
+            });
+
+            parseNodes(nodes, branch.flow, {
+              current: opt?.current,
+              existing: {
+                rf_nodes,
+                rf_edges,
+                x: i++ - 0.5,
+                y: by,
+                next_flow: flow_nodes.slice(y),
+              },
+            });
+          }
         }
       }
     }

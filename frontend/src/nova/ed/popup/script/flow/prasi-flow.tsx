@@ -12,6 +12,7 @@ import { initAdv } from "./utils/prasi/init-adv";
 import { defaultFlow } from "./utils/prasi/default-flow";
 import { useCallback, useEffect } from "react";
 import { RPFlow } from "./runtime/types";
+import { findNodeById } from "crdt/node/flatten-tree";
 
 export const PrasiFlow = function () {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -55,16 +56,34 @@ export const PrasiFlow = function () {
         if (node.item.id !== prasi.item_id) {
           initAdv(node, tree);
           prasi.item_id = node.item.id;
-          fg.update = (action_name: string, fn) => {
+          fg.update = (
+            action_name: string,
+            fn,
+            next?: (arg: { pflow: RPFlow }) => void
+          ) => {
             clearTimeout(fg.update_timeout);
             fg.update_timeout = setTimeout(() => {
+              if (next) {
+                const unwatch = tree.subscribe(() => {
+                  unwatch();
+                  const node = findNodeById(
+                    active.item_id,
+                    tree.snapshot.childs
+                  );
+                  if (node) {
+                    if (node && node.item.adv && node.item.adv.flow) {
+                      next({ pflow: node.item.adv.flow });
+                    }
+                  }
+                });
+              }
               tree.update(action_name, ({ findNode }) => {
                 const node = findNode(active.item_id);
                 if (node && node.item.adv && node.item.adv.flow) {
                   fn({ pflow: node.item.adv.flow });
                 }
               });
-            }, 300);
+            }, 50);
             return node.item.adv?.flow as RPFlow;
           };
 

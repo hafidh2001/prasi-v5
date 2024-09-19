@@ -1,16 +1,131 @@
-import { PFlow, PFNode, PFNodeID, PFNodeBranch } from "../runtime/types";
+import { current } from "immer";
+import {
+  DeepReadonly,
+  PFlow,
+  PFNode,
+  PFNodeBranch,
+  PFNodeID,
+  RPFlow,
+} from "../runtime/types";
 
-export const findFlow = ({
+export const immutableFindFlow = ({
   id,
-  pf,
+  pflow,
   from,
 }: {
   id: string;
-  pf: PFlow;
+  pflow: RPFlow;
   from?: string;
 }) => {
   let result = {
-    flow: [] as PFNodeID[],
+    flow: [] as Readonly<PFNodeID[]>,
+    idx: -1,
+    branch: undefined as void | DeepReadonly<PFNodeBranch>,
+  };
+  for (const flow of Object.values(pflow.flow)) {
+    if (
+      !immutableFindPFNode(
+        pflow.nodes,
+        flow,
+        ({ flow, idx, parent, branch }) => {
+          if (flow[idx] === id) {
+            if (from) {
+              if (from === parent?.id || from === id) {
+                result = { flow, idx, branch };
+                return false;
+              }
+            } else {
+              result = { flow, idx, branch };
+              return false;
+            }
+          }
+
+          return true;
+        }
+      )
+    ) {
+      break;
+    }
+  }
+  return result;
+};
+
+export const immutableFindPFNode = (
+  nodes: DeepReadonly<Record<string, PFNode>>,
+  flow: Readonly<PFNodeID[]>,
+  fn: (arg: {
+    flow: Readonly<PFNodeID[]>;
+    idx: number;
+    parent?: DeepReadonly<PFNode>;
+    branch?: DeepReadonly<PFNodeBranch>;
+    is_invalid: boolean;
+  }) => boolean,
+  visited = new Set<string>(),
+  arg?: {
+    parent?: DeepReadonly<PFNode>;
+    branch?: DeepReadonly<PFNodeBranch>;
+  }
+) => {
+  let idx = 0;
+  for (const id of flow) {
+    if (
+      !fn({
+        flow,
+        idx,
+        parent: arg?.parent,
+        branch: arg?.branch,
+        is_invalid: false,
+      })
+    ) {
+      return false;
+    }
+    const node = nodes[id];
+    if (!node) {
+      fn({
+        flow,
+        idx,
+        parent: arg?.parent,
+        branch: arg?.branch,
+        is_invalid: true,
+      });
+      continue;
+    }
+    if (visited.has(node.id)) {
+      continue;
+    } else {
+      visited.add(node.id);
+    }
+
+    if (node && node.branches) {
+      for (const branch of node.branches) {
+        if (branch.flow.length > 0) {
+          if (
+            !immutableFindPFNode(nodes, branch.flow, fn, visited, {
+              parent: node,
+              branch,
+            })
+          ) {
+            return false;
+          }
+        }
+      }
+    }
+    idx++;
+  }
+  return true;
+};
+
+export const findFlow = ({
+  id,
+  pflow: pf,
+  from,
+}: {
+  id: string;
+  pflow: PFlow;
+  from?: string;
+}) => {
+  let result = {
+    flow: null as null | PFNodeID[],
     idx: -1,
     branch: undefined as void | PFNodeBranch,
   };
@@ -53,17 +168,22 @@ export const loopPFNode = (
 ) => {
   let idx = 0;
   for (const id of flow) {
-    if (
-      !fn({
-        flow,
-        idx,
-        parent: arg?.parent,
-        branch: arg?.branch,
-        is_invalid: false,
-      })
-    ) {
+    if (idx === 0 && arg?.parent?.id === flow[0]) {
+      idx++;
+      continue;
+    }
+
+    const continue_loop = fn({
+      flow,
+      idx,
+      parent: arg?.parent,
+      branch: arg?.branch,
+      is_invalid: false,
+    });
+    if (!continue_loop) {
       return false;
     }
+
     const node = nodes[id];
     if (!node) {
       fn({

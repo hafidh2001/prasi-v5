@@ -12,9 +12,14 @@ export type PrasiFlowPropLocal = {
 };
 
 const fg_default = {
+  pflow: null as unknown as RPFlow,
   pointer_up_id: "",
   pointer_to: null as null | { x: number; y: number },
-  update(action_name: string, fn: (arg: { pflow: PFlow }) => void) {
+  update(
+    action_name: string,
+    fn: (arg: { pflow: PFlow }) => void,
+    next?: (arg: { pflow: RPFlow }) => void
+  ) {
     return null as unknown as RPFlow;
   },
   update_timeout: null as any,
@@ -41,6 +46,7 @@ const fg_default = {
     skip_init_update: false,
     updated_outside: false,
   },
+  refreshFlow(pflow: RPFlow) {},
 };
 const w = window as unknown as {
   prasi_flow_global: typeof fg_default;

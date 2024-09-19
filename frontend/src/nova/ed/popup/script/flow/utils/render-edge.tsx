@@ -13,7 +13,6 @@ import { fg } from "./flow-global";
 import { savePF } from "./save-pf";
 
 export const RenderEdge = function (
-  this: { pflow: RPFlow },
   {
     id,
     sourceX,
@@ -26,7 +25,7 @@ export const RenderEdge = function (
     markerEnd,
   }: EdgeComponentProps
 ) {
-  const { pflow } = this;
+  const pflow = fg.pflow;
   const { getEdge } = useReactFlow();
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -101,7 +100,7 @@ export const RenderEdge = function (
                     }
                   }
                 } else {
-                  from = findFlow({ id: edge.source, pf });
+                  from = findFlow({ id: edge.source, pflow: pf });
                 }
 
                 const source = pf.nodes[edge.source];

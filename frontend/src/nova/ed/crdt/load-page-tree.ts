@@ -106,6 +106,9 @@ export const loadPageTree = (
     view<T>(fn: (val: EPage["content_tree"]) => T) {
       return fn(this.snapshot);
     },
+    subscribe(fn: any) {
+      return immer.subscribe(fn);
+    },
     watch<T>(fn?: (val: EPage["content_tree"]) => T) {
       if (fn) {
         const ref = useRef<T>(fn(this.snapshot));

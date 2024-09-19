@@ -58,9 +58,9 @@ export type PFNodeDefinition<F extends Record<string, PFField>> = {
   vars?: Record<string, any>;
   icon: string;
   on_before_connect?: (arg: {
-    node: PFNode;
+    node: DeepReadonly<PFNode>;
     is_new: boolean;
-    pflow: PFlow;
+    pflow: RPFlow;
   }) => void;
   on_after_connect?: (arg: { from: PFNode; to: PFNode }) => void;
   on_init?: (arg: {

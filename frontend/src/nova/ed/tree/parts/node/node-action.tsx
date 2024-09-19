@@ -24,7 +24,7 @@ export const EdTreeAction = ({
   };
 
   let mode = "";
-  if (item.adv?.js) mode = "js";
+  if (item.adv?.js || item.adv?.flow) mode = "js";
   if (!mode && item.adv?.css) mode = "css";
   if (!mode && item.adv?.html) mode = "html";
 
@@ -68,7 +68,7 @@ export const EdTreeAction = ({
           content={`Edit ${mode}`}
           className={cx(
             "node-action border rounded-sm text-[9px] flex w-[20px] h-[15px] items-center cursor-pointer justify-center uppercase",
-            item.adv?.js || item.adv?.css || item.adv?.html
+            item.adv?.flow || item.adv?.js || item.adv?.css || item.adv?.html
               ? `opacity-100`
               : cx(
                   `opacity-0 action-script transition-all`,
@@ -78,11 +78,17 @@ export const EdTreeAction = ({
                     }
                   `
                 ),
-            !(item.adv?.js || item.adv?.css || item.adv?.html) &&
+            !(
+              item.adv?.flow ||
+              item.adv?.js ||
+              item.adv?.css ||
+              item.adv?.html
+            ) &&
               `bg-orange-100  border-orange-200 hover:border-orange-500 hover:text-orange-900 hover:bg-orange-300`,
-            mode === "js" && item.adv?.scriptMode === "flow"
-              ? `bg-purple-200 border-purple-300 hover:border-purple-500 hover:text-purple-900 hover:bg-purple-300`
-              : `bg-orange-100 border-orange-200 hover:border-orange-500 hover:text-orange-900 hover:bg-orange-300`,
+            mode === "js" &&
+              (item.adv?.scriptMode === "flow"
+                ? `bg-purple-200 border-purple-300 hover:border-purple-500 hover:text-purple-900 hover:bg-purple-300`
+                : `bg-orange-100 border-orange-200 hover:border-orange-500 hover:text-orange-900 hover:bg-orange-300`),
             mode === "css" &&
               `bg-green-100  border-green-200 hover:border-green-500 hover:text-green-900 hover:bg-green-300`,
             mode === "html" &&

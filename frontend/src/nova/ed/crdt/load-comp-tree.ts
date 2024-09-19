@@ -128,6 +128,9 @@ export const internalLoadCompTree = (
     view<T>(fn: (val: EBaseComp["content_tree"]) => T) {
       return fn(this.snapshot);
     },
+    subscribe(fn: any) {
+      return immer.subscribe(fn);
+    },
     watch<T>(fn?: (val: EBaseComp["content_tree"]) => T) {
       if (fn) {
         const ref = useRef<T>(fn(this.snapshot));
