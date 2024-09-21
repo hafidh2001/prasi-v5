@@ -1,4 +1,4 @@
-import { PNode } from "crdt/node/flatten";
+import { PNode } from "logic/types";
 import { useErrorBoundary, withErrorBoundary } from "react-use-error-boundary";
 import { useLocal } from "../../../utils/react/use-local";
 

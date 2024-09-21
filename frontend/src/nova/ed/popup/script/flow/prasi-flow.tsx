@@ -1,20 +1,20 @@
+import { findNodeById } from "crdt/node/flatten-tree";
 import { getActiveNode } from "crdt/node/get-node-by-id";
 import { active, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
+import { useCallback, useEffect } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import { deepClone, useGlobal } from "utils/react/use-global";
+import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { PrasiFlowEditor } from "./prasi-flow-editor";
 import { PrasiFlowProp } from "./prasi-flow-prop";
 import { PrasiFlowRunner } from "./prasi-flow-runner";
-import { fg } from "./utils/flow-global";
-import { initAdv } from "./utils/prasi/init-adv";
-import { defaultFlow } from "./utils/prasi/default-flow";
-import { useCallback, useEffect } from "react";
 import { RPFlow } from "./runtime/types";
-import { findNodeById } from "crdt/node/flatten-tree";
+import { fg } from "./utils/flow-global";
+import { defaultFlow } from "./utils/prasi/default-flow";
+import { initAdv } from "./utils/prasi/init-adv";
 
-export const PrasiFlow = function () {
+export const EdPrasiFlow = function () {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({});
   fg.render = local.render;
@@ -27,14 +27,19 @@ export const PrasiFlow = function () {
     (relayout: boolean) => {
       setTimeout(() => {
         if (node) {
-          sflow.current = defaultFlow(
-            "item",
-            `item-${node.item.id}`,
-            node.item.id
-          );
+          fg.update("Flow Reset", ({ pflow }) => {
+            console.log("asdas");
+            const new_flow = defaultFlow(
+              "item",
+              `item-${node.item.id}`,
+              node.item.id
+            );
+            for (const [k, v] of Object.entries(new_flow)) {
+              (pflow as any)[k] = v;
+            }
+          });
           localStorage.removeItem(`prasi-flow-vp-${`item-${node.item.id}`}`);
           sflow.should_relayout = relayout;
-
           local.render();
         }
       });
@@ -44,12 +49,6 @@ export const PrasiFlow = function () {
 
   useEffect(() => {
     const tree = getActiveTree(p);
-
-    if (!node) {
-      popup.open = false;
-      p.render();
-      return;
-    }
 
     if (node && tree) {
       if (popup.prop_name === "" && popup.mode === "js") {
@@ -79,25 +78,38 @@ export const PrasiFlow = function () {
               }
               tree.update(action_name, ({ findNode }) => {
                 const node = findNode(active.item_id);
-                if (node && node.item.adv && node.item.adv.flow) {
-                  fn({ pflow: node.item.adv.flow });
+
+                if (node) {
+                  if (!node.item.adv) {
+                    node.item.adv = {};
+                  }
+
+                  if (!node.item.adv?.flow) {
+                    node.item.adv.flow = defaultFlow(
+                      "item",
+                      `item-${node.item.id}`,
+                      node.item.id
+                    );
+                  }
+
+                  if (node.item.adv?.flow) {
+                    fn({ pflow: node.item.adv.flow });
+                  }
                 }
               });
             }, 50);
             return node.item.adv?.flow as RPFlow;
           };
 
-          if (!node.item.adv?.flow) {
-            tree.update("Add Prasi Flow", ({ findNode }) => {
-              const node = findNode(active.item_id);
-              if (node && node.item.adv) {
-                node.item.adv.flow = defaultFlow(
-                  "item",
-                  `item-${node.item.id}`,
-                  node.item.id
-                );
-              }
-            });
+          if (
+            !node.item.adv?.flow ||
+            (node.item.adv?.flow &&
+              !Object.values(node.item.adv.flow.nodes).find(
+                (e) => e.type === "start"
+              ))
+          ) {
+            resetDefault(true);
+            return;
           }
         }
 

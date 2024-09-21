@@ -93,9 +93,16 @@ export const internalLoadCompTree = (
         flatten(): ReturnType<typeof flattenTree>;
         findNode: (id: string) => null | PNode;
         findParent: (id: string) => null | PNode;
-      }) => void
+      }) => void,
+      done?: () => void
     ) {
       const _fn = (tree: EBaseComp["content_tree"]) => {
+        if (done) {
+          const unwatch = immer.subscribe(() => {
+            unwatch();
+            done();
+          });
+        }
         sync.comp.pending_action(comp_id, action_name);
 
         fn({

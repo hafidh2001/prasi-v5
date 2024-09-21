@@ -6,8 +6,17 @@ export default defineConfig({
   html: {
     template: "./public/index.html",
   },
+  source: {
+    entry: {
+      index: "./src/index.tsx",
+    },
+  },
+  dev: {
+    progressBar: false,
+  },
   output: {
     cleanDistPath: true,
     distPath: { root: "../../data/prasi-static" },
+    filename: { js: `[name].bundle.js` },
   },
 });

@@ -5,12 +5,18 @@ import { editor } from "./utils/editor";
 import { api } from "./utils/server/api";
 import { serverContext } from "./utils/server/ctx";
 import { initWS } from "./ws/init";
-
+import { watch } from "fs";
 import "./utils/init";
 import { asset } from "./utils/server/asset";
+import { dir } from "./utils/dir";
 
 editor.init();
 api.init();
+if (g.mode === "dev") {
+  watch(dir.root(`/frontend/prod`), (e, c) => {
+    asset.nova.rescan();
+  });
+}
 
 const server = Bun.serve({
   port: 4550,

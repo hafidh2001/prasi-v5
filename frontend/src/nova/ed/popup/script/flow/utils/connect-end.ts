@@ -1,20 +1,17 @@
+import { createId } from "@paralleldrive/cuid2";
 import { Edge, FinalConnectionState } from "@xyflow/react";
 import { InternalNodeBase } from "@xyflow/system";
 import { allNodeDefinitions } from "../runtime/nodes";
 import {
-  DeepReadonly,
   PFlow,
   PFNode,
   PFNodeDefinition,
   PFNodeID,
   RPFlow,
 } from "../runtime/types";
-import { createId } from "@paralleldrive/cuid2";
-import { fg } from "./flow-global";
 import { findFlow, immutableFindFlow } from "./find-node";
+import { fg } from "./flow-global";
 import { current } from "immer";
-import { parseNodes } from "./parse-node";
-import { parseFlow } from "./parse-flow";
 
 export const pflowConnectEnd = ({
   state,
@@ -76,6 +73,8 @@ export const pflowConnectEnd = ({
               const empty_branch = from.branches.find(
                 (e) => e.flow.length === 0
               );
+              console.log(empty_branch, to_node);
+
               if (empty_branch) {
                 if (to_node) {
                   empty_branch.flow.push(from.id);

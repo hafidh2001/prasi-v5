@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "crdt/*": ["../../../src/nova/ed/crdt/*"],
+      "utils/*": ["../../../src/utils/*"],
+      "logic/*": ["../../../src/nova/ed/logic/*"],
+      "base/*": ["../../../src/base/*"],
+      "popup/*": ["../../../src/nova/ed/popup/*"],
+      "prod/*": ["../../../src/nova/prod/*"]
+    },
+    "target": "ES2020",
+    "lib": ["DOM", "ES2020"],
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "bundler",
+    "useDefineForClassFields": true,
+    "allowImportingTsExtensions": true
+  },
+  "include": ["../../../src"]
+}

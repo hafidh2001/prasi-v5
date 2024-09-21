@@ -78,15 +78,13 @@ export const parseNodes = (
       let by = y;
       for (const branch of inode.branches) {
         if (branch.flow.length > 0) {
-          const edge_id = `${node.id}-${branch.flow[0]}`;
-
-          if (rf_edges.find((e) => e.id === edge_id)) {
-            break;
-          }
-
           if (node.id === branch.flow[0]) {
             const flow = branch.flow.slice(1);
+            const edge_id = `${node.id}-${flow[0]}`;
 
+            if (rf_edges.find((e) => e.id === edge_id)) {
+              break;
+            }
             rf_edges.push({
               id: edge_id,
               source: node.id,
@@ -107,6 +105,10 @@ export const parseNodes = (
               },
             });
           } else {
+            const edge_id = `${node.id}-${branch.flow[0]}`;
+            if (rf_edges.find((e) => e.id === edge_id)) {
+              break;
+            }
             rf_edges.push({
               id: edge_id,
               source: node.id,

@@ -16,6 +16,7 @@
     "@prisma/engines",
     "@swc/core",
     "esbuild",
+    "leveldown",
     "msgpackr-extract",
     "prisma"
   ]

@@ -1,10 +1,8 @@
+import { w } from "prod/root/prasi-window";
 import { RadixRouter } from "radix3";
 import { IItem } from "../../../utils/types/item";
 import { IRoot } from "../../../utils/types/root";
 import { PG } from "../../ed/logic/ed-global";
-import { IMeta } from "../../vi/utils/types";
-
-const w = window as any;
 
 export const base = {
   root: null as unknown as URL,
@@ -53,7 +51,6 @@ export const base = {
   layout: {
     id: "",
     root: null as null | IRoot,
-    meta: null as null | Record<string, IMeta>,
   },
   cache: {
     urls: new Set<string>(),
@@ -62,14 +59,12 @@ export const base = {
     id: "",
     url: "",
     root: null as null | IRoot,
-    meta: null as null | Record<string, IMeta>,
     cache: {} as Record<
       string,
       {
         id: string;
         url: string;
         root: IRoot;
-        meta: Record<string, IMeta>;
       }
     >,
   },

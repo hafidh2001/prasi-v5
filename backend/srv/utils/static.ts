@@ -18,23 +18,26 @@ export const staticFile = async (
 ) => {
   const glob = new Glob("**");
 
-  const router = createRouter<{
-    mime: string | null;
-    fullpath: string;
-    path: string;
-  }>();
   let index = null as null | BunFile;
 
   const internal = {
+    rescan_timeout: null as any,
+    router: createRouter<{
+      mime: string | null;
+      fullpath: string;
+      path: string;
+    }>(),
+  };
+  const static_file = {
     scanning: false,
     paths: new Set<string>(),
-    rescan: async () => {},
+    rescan() {}, // rescan will be overwritten below.
     serve: (ctx: ServerCtx, arg?: { prefix?: string; debug?: boolean }) => {
       let pathname = ctx.url.pathname || "";
       if (arg?.prefix && pathname) {
         pathname = pathname.substring(arg.prefix.length);
       }
-      const found = findRoute(router, undefined, pathname);
+      const found = findRoute(internal.router, undefined, pathname);
 
       if (found) {
         const { fullpath, mime } = found.data;
@@ -65,32 +68,38 @@ export const staticFile = async (
   };
 
   const scan = async () => {
-    if (internal.scanning) {
-      await waitUntil(() => !internal.scanning);
+    if (static_file.scanning) {
+      await waitUntil(() => !static_file.scanning);
       return;
     }
-    internal.scanning = true;
+    static_file.scanning = true;
     if (await existsAsync(path)) {
-      if (internal.paths.size > 0) {
-        store.delete([...internal.paths]);
+      if (static_file.paths.size > 0) {
+        store.delete([...static_file.paths]);
       }
 
       for await (const file of glob.scan(path)) {
         if (file === "index.html") index = Bun.file(join(path, file));
 
-        internal.paths.add(join(path, file));
+        static_file.paths.add(join(path, file));
 
-        addRoute(router, undefined, `/${file}`, {
+        addRoute(internal.router, undefined, `/${file}`, {
           mime: mime.getType(file),
           path: file,
           fullpath: join(path, file),
         });
       }
     }
-    internal.scanning = false;
+    static_file.scanning = false;
   };
   await scan();
-  internal.rescan = scan;
 
-  return internal;
+  static_file.rescan = () => {
+    clearTimeout(internal.rescan_timeout);
+    internal.rescan_timeout = setTimeout(() => {
+      scan();
+    }, 300);
+  };
+
+  return static_file;
 };

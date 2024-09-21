@@ -116,12 +116,14 @@ const runSingleNode = async (arg: {
               run_visit.tstamp = Date.now();
 
               for (const id of branch.flow) {
-                const current = pf.nodes[id];
-                if (!current) break;
+                if (current.id == id) continue;
+
+                const new_current = pf.nodes[id];
+                if (!new_current) break;
                 if (
                   !(await runSingleNode({
                     pf,
-                    current,
+                    current: new_current,
                     visited,
                     vars,
                     opt,
@@ -163,11 +165,15 @@ const runSingleNode = async (arg: {
 
     if (execute_node) {
       for (const id of execute_node.flow) {
-        const current = pf.nodes[id];
-        if (current) {
+        if (id === current.id) {
+          continue;
+        }
+
+        const new_current = pf.nodes[id];
+        if (new_current) {
           await runSingleNode({
             pf,
-            current,
+            current: new_current,
             branch: execute_node,
             visited,
             vars,

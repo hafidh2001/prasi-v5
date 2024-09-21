@@ -16,7 +16,7 @@ import "@xyflow/react/dist/style.css";
 import { LayoutDashboard } from "lucide-react";
 import { useEffect } from "react";
 import { useLocal } from "utils/react/use-local";
-import { PFNodeID, RPFlow } from "./runtime/types";
+import { RPFlow } from "./runtime/types";
 import { pflowConnectEnd } from "./utils/connect-end";
 import { pflowEdgeChanges } from "./utils/edge-changes";
 import { fg } from "./utils/flow-global";
@@ -30,6 +30,7 @@ import { restoreViewport } from "./utils/restore-viewport";
 export function PrasiFlowEditor({
   pflow,
   should_relayout,
+  resetDefault,
 }: {
   pflow: RPFlow;
   should_relayout: boolean;
@@ -62,24 +63,20 @@ export function PrasiFlowEditor({
     const parsed = parseFlow(pflow, { nodes, edges });
     setNodes(parsed.nodes);
     setEdges(parsed.edges);
-    console.log(parsed);
   };
 
   useEffect(() => {
-    if (!fg.pflow) {
-      fg.pflow = pflow;
-      const parsed = parseFlow(pflow, { nodes: [], edges: [] });
-      setNodes(parsed.nodes);
-      setEdges(parsed.edges);
-      console.log(parsed)
-      restoreViewport({ pflow, local });
-      const sel = fg.prop?.selection;
-      if (sel) {
-        fg.main?.action.addSelectedEdges(sel.edges?.map((e) => e.id) || []);
-        fg.main?.action.addSelectedNodes(sel.nodes?.map((e) => e.id) || []);
-      }
+    fg.pflow = pflow;
+    const parsed = parseFlow(pflow, { nodes: [], edges: [] });
+    setNodes(parsed.nodes);
+    setEdges(parsed.edges);
+    restoreViewport({ pflow, local });
+    const sel = fg.prop?.selection;
+    if (sel) {
+      fg.main?.action.addSelectedEdges(sel.edges?.map((e) => e.id) || []);
+      fg.main?.action.addSelectedNodes(sel.nodes?.map((e) => e.id) || []);
     }
-  }, [pflow, should_relayout]);
+  }, [pflow]);
 
   const relayoutNodes = (arg?: { nodes: Node[]; edges: Edge[] }) => {
     try {
@@ -204,7 +201,7 @@ export function PrasiFlowEditor({
                   }
                 });
               } else if (c.type === "remove") {
-                removeNode({ c, edges });
+                removeNode({ c, edges, resetDefault });
               }
             }
           }

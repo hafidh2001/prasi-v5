@@ -4,7 +4,7 @@ import { pluginReact } from "@rsbuild/plugin-react";
 export default defineConfig({
   plugins: [pluginReact()],
   source: {
-    entry: { index: "./main.tsx" },
+    entry: { index: "./root/main.tsx" },
   },
   output: {
     cleanDistPath: true,
@@ -12,14 +12,15 @@ export default defineConfig({
       js: "source-map",
     },
     distPath: { root: "./../../../prod" },
-    assetPrefix: "/nova"
+    assetPrefix: "/nova",
   },
   dev: {
     liveReload: false,
     hmr: false,
     writeToDisk: true,
     progressBar: false,
-    assetPrefix: "/nova"
+    assetPrefix: "/nova",
+    lazyCompilation: true,
   },
   server: {
     port: 14314,

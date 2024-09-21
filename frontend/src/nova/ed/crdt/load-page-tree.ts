@@ -72,9 +72,17 @@ export const loadPageTree = (
         flatten(): ReturnType<typeof flattenTree>;
         findNode: (id: string) => null | PNode;
         findParent: (id: string) => null | PNode;
-      }) => void
+      }) => void,
+      done?: () => void
     ) {
       const _fn = (tree: EPage["content_tree"]) => {
+        if (done) {
+          const unwatch = immer.subscribe(() => {
+            unwatch();
+            done();
+          });
+        }
+
         sync.page.pending_action(page_id, action_name);
         fn({
           tree,

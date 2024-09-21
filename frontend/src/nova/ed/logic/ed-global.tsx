@@ -68,7 +68,8 @@ export const EDGlobal = {
       },
       script: {
         get open() {
-          return localStorage.getItem("prasi-popup-script-open") === "true";
+          const lvar = localStorage.getItem("prasi-popup-script-open");
+          return lvar === "true";
         },
         set open(value) {
           localStorage.setItem(
