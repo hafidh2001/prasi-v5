@@ -6,7 +6,8 @@
       "base/*": ["./src/base/*"],
       "logic/*": ["./src/nova/ed/logic/*"],
       "popup/*": ["./src/nova/ed/popup/*"],
-      "prod/*": ["./src/nova/prod/*"]
+      "prod/*": ["./src/nova/prod/*"],
+      "vi/*": ["./src/nova/vi/*"]
     },
     "target": "ES2020",
     "lib": ["DOM", "ES2020"],

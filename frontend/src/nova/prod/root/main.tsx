@@ -1,18 +1,19 @@
-import { createRoot } from "react-dom/client";
-import "../../../index.css";
-import { PrasiRoot, isPreview } from "../react/root";
-import { defineWindow } from "utils/react/define-window";
-import { defineReact } from "utils/react/define-react";
-import { w } from "./prasi-window";
-import { initBaseConfig } from "prod/loader/base";
-import { StoreProvider } from "../../../utils/react/define-store";
 import { StrictMode } from "react";
-import { rawProd } from "./use-prod";
+import { createRoot } from "react-dom/client";
+import { defineReact } from "utils/react/define-react";
+import { defineWindow } from "utils/react/define-window";
+import "../../../index.css";
+import { StoreProvider } from "../../../utils/react/define-store";
+import { base } from "../loader/base";
+import { PrasiEntry, isPreview } from "../react/entry";
+import { w } from "./window";
+import { rawProd } from "../react/store";
 
 (async () => {
   import("./font");
   const div = document.getElementById("root");
-  initBaseConfig();
+
+  base.init();
   if (div) {
     await defineWindow(false);
 
@@ -57,7 +58,6 @@ import { rawProd } from "./use-prod";
           }
         }
       }
-      console.log(_href)
       return _href;
     };
 
@@ -68,7 +68,7 @@ import { rawProd } from "./use-prod";
     react.root.render(
       <StrictMode>
         <StoreProvider>
-          <PrasiRoot />
+          <PrasiEntry />
         </StoreProvider>
       </StrictMode>
     );

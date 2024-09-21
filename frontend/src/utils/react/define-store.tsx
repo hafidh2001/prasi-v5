@@ -71,12 +71,7 @@ export const defineStore = function <
     const selection = selector({
       ref,
       state,
-      action: createAction(
-        internal.current,
-        ref,
-        ctx[init.name].state,
-        init.action
-      ),
+      action: createAction(ref, ctx[init.name].state, init),
     }) as Z & {
       update: (fn: (state: T) => void) => void;
     };
@@ -91,12 +86,7 @@ export const defineStore = function <
         useEffect(() => {
           internal.current.mounted = true;
           e.effect({
-            action: createAction(
-              internal.current,
-              ref,
-              ctx[init.name].state,
-              init.action
-            ),
+            action: createAction(ref, ctx[init.name].state, init),
             state,
             update(fn) {
               fn(ctx[init.name].state);
@@ -124,30 +114,30 @@ export const defineStore = function <
 };
 
 const createAction = (
-  cur: { mounted: boolean },
   ref: any,
   state: any,
-  action: (arg: {
-    state: any;
-    ref: any;
-    update: (fn: (state: any) => void) => void;
-  }) => any
+  init: {
+    action: (arg: {
+      state: any;
+      ref: any;
+      update: (fn: (state: any) => void) => void;
+    }) => any;
+  }
 ) => {
   return new Proxy(
     {},
     {
       get(target, p, receiver) {
         return function (...arg: any[]) {
-          if (cur.mounted) {
-            const actions = action({
-              ref,
-              state,
-              update(fn) {
-                fn(state);
-              },
-            });
-            actions[p].bind(createAction(cur, ref, state, action))(...arg);
-          }
+          const actions = init.action({
+            ref,
+            state,
+            update(fn) {
+              fn(state);
+            },
+          });
+
+          actions[p].bind(createAction(ref, state, init))(...arg);
         };
       },
     }

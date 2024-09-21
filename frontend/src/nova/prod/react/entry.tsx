@@ -1,6 +1,6 @@
 import { Loading } from "../../../utils/ui/loading";
-import { base } from "../loader/base";
-import { useProd } from "../root/use-prod";
+import { w } from "../root/window";
+import { useProdState } from "./store";
 import { ProdRouter } from "./router";
 export const isPreview = () => {
   return (
@@ -14,8 +14,8 @@ export const isPreview = () => {
   ); // android localhost
 };
 
-export const PrasiRoot = () => {
-  const { status, init, responsive, page } = useProd(
+export const PrasiEntry = () => {
+  const { status, init, responsive, page } = useProdState(
     ({ state: s, action: a }) => ({
       status: s.status.router,
       responsive: s.status.responsive,
@@ -27,8 +27,8 @@ export const PrasiRoot = () => {
 
   return (
     <>
-      {status !== "ready" || (page && !page.root) ? (
-        <Loading />
+      {status !== "ready" || (page && !page.content_tree) ? (
+        <>{w.ContentLoading ? <w.ContentLoading /> : <Loading />}</>
       ) : (
         <div className="relative flex flex-1 items-center justify-center">
           <div

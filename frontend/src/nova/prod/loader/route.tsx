@@ -32,7 +32,7 @@ const loadCachedRoute = () => {
 export type PageRoute = {
   id: string;
   url: string;
-  root?: EPage["content_tree"];
+  content_tree?: EPage["content_tree"];
   loading?: true;
 };
 

@@ -1,4 +1,4 @@
-import { w } from "prod/root/prasi-window";
+import { w } from "prod/root/window";
 
 export const base = {
   root: null as unknown as URL,
@@ -21,21 +21,20 @@ export const base = {
     if (!res.startsWith("/")) return `/${res}`;
     return res;
   },
-};
+  init() {
+    if (!base.root) {
+      let url = new URL(location.href);
+      if (w._prasi.basepath) {
+        url.pathname = w._prasi.basepath;
+      }
 
-export const initBaseConfig = () => {
-  if (!base.root) {
-    let url = new URL(location.href);
-    if (w._prasi.basepath) {
-      url.pathname = w._prasi.basepath;
+      base.root = new URL(`${url.protocol}//${url.host}${url.pathname}`);
+      if (base.root.pathname.endsWith("/")) {
+        base.root.pathname = base.root.pathname.substring(
+          0,
+          base.root.length - 1
+        );
+      }
     }
-
-    base.root = new URL(`${url.protocol}//${url.host}${url.pathname}`);
-    if (base.root.pathname.endsWith("/")) {
-      base.root.pathname = base.root.pathname.substring(
-        0,
-        base.root.length - 1
-      );
-    }
-  }
+  },
 };
