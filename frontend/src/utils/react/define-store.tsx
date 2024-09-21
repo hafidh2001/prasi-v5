@@ -1,13 +1,7 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState
-} from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { proxy, Snapshot, useSnapshot } from "valtio";
 
-const default_ctx = { ctx: {}, render() {} };
+const default_ctx = { ctx: {} as any, render() {} };
 const store_ctx = createContext<{
   ctx: Record<string, { ref: any; state: any }>;
   render: () => void;
@@ -28,6 +22,10 @@ export const StoreProvider = ({ children }: { children: any }) => {
       {children}
     </store_ctx.Provider>
   );
+};
+
+export const rawStore = function <T>(name: string) {
+  return () => default_ctx.ctx[name] as { state: any; ref: any };
 };
 
 export const defineStore = function <
@@ -73,17 +71,32 @@ export const defineStore = function <
     const selection = selector({
       ref,
       state,
-      action: createAction(internal.current, ref, state, init.action),
-    }) as Z;
+      action: createAction(
+        internal.current,
+        ref,
+        ctx[init.name].state,
+        init.action
+      ),
+    }) as Z & {
+      update: (fn: (state: T) => void) => void;
+    };
+    selection.update = (fn) => {
+      fn(ctx[init.name].state);
+    };
 
     if (init.effect) {
-      const effects = init.effect({ state });
+      const effects = init.effect({ state: ctx[init.name].state });
 
       for (const e of effects) {
         useEffect(() => {
           internal.current.mounted = true;
           e.effect({
-            action: createAction(internal.current, ref, state, init.action),
+            action: createAction(
+              internal.current,
+              ref,
+              ctx[init.name].state,
+              init.action
+            ),
             state,
             update(fn) {
               fn(ctx[init.name].state);
@@ -113,7 +126,7 @@ export const defineStore = function <
 const createAction = (
   cur: { mounted: boolean },
   ref: any,
-  state: Snapshot<any>,
+  state: any,
   action: (arg: {
     state: any;
     ref: any;
@@ -126,13 +139,14 @@ const createAction = (
       get(target, p, receiver) {
         return function (...arg: any[]) {
           if (cur.mounted) {
-            action({
+            const actions = action({
               ref,
               state,
               update(fn) {
                 fn(state);
               },
             });
+            actions[p].bind(createAction(cur, ref, state, action))(...arg);
           }
         };
       },

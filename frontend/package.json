@@ -54,6 +54,7 @@
     "tailwindcss-animate": "^1.0.7",
     "tinycolor2": "^1.6.0",
     "ua-parser-js": "^1.0.39",
+    "usehooks-ts": "^3.1.0",
     "uuid": "^10.0.0",
     "valtio": "^2.0.0",
     "y-indexeddb": "^9.0.12",

@@ -1,8 +1,4 @@
 import { w } from "prod/root/prasi-window";
-import { RadixRouter } from "radix3";
-import { IItem } from "../../../utils/types/item";
-import { IRoot } from "../../../utils/types/root";
-import { PG } from "../../ed/logic/ed-global";
 
 export const base = {
   root: null as unknown as URL,
@@ -24,49 +20,6 @@ export const base = {
     const res = location.pathname.substring(base.root.pathname.length);
     if (!res.startsWith("/")) return `/${res}`;
     return res;
-  },
-  site: { id: w._prasi?.site_id } as {
-    id: string;
-    name: string;
-    responsive: PG["site"]["responsive"];
-    domain: string;
-    api_url: string;
-    code: {
-      mode: "new" | "vsc";
-    };
-    api: any;
-    db: any;
-  },
-  init_local_effect: {} as any,
-  mode: "" as "desktop" | "mobile",
-  route: {
-    status: "init" as "init" | "loading" | "ready",
-    pages: [] as { id: string; url: string }[],
-    router: null as null | RadixRouter<{ id: string; url: string }>,
-  },
-  comp: {
-    list: {} as Record<string, IItem>,
-    pending: {} as Record<string, IItem[]>,
-  },
-  layout: {
-    id: "",
-    root: null as null | IRoot,
-  },
-  cache: {
-    urls: new Set<string>(),
-  },
-  page: {
-    id: "",
-    url: "",
-    root: null as null | IRoot,
-    cache: {} as Record<
-      string,
-      {
-        id: string;
-        url: string;
-        root: IRoot;
-      }
-    >,
   },
 };
 

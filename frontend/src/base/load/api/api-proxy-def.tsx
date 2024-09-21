@@ -17,6 +17,7 @@ export const loadApiProxyDef = async (_url: string, with_types: boolean) => {
     const url_target = new URL(url);
     const url_cur = new URL(location.href);
 
+    url_cur.search = "";
     url_cur.hash = "";
     url_target.hash = "";
     let is_remote = "";

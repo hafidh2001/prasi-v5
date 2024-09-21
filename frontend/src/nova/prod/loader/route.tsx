@@ -2,6 +2,7 @@ import { apiProxy } from "base/load/api/api-proxy";
 import { dbProxy } from "base/load/db/db-proxy";
 import { createRouter } from "radix3";
 import { base } from "./base";
+import { EPage } from "../../ed/logic/types";
 
 const cached = { route: null as any, promise: null as any };
 
@@ -28,29 +29,34 @@ const loadCachedRoute = () => {
   return cached.promise;
 };
 
+export type PageRoute = {
+  id: string;
+  url: string;
+  root?: EPage["content_tree"];
+  loading?: true;
+};
+
 export const loadRouter = async () => {
-  const router = createRouter<{ id: string; url: string }>();
-  const pages = [] as { id: string; url: string }[];
+  const router = createRouter<{
+    id: string;
+    url: string;
+    content_tree?: EPage["content_tree"];
+  }>();
+  const pages = [] as PageRoute[];
+  let site = {
+    id: "",
+    name: "",
+    domain: "",
+    responsive: "all",
+    api_url: "",
+  };
+  let layout = { id: "", root: null as null | EPage["content_tree"] };
   try {
     const res = await loadCachedRoute();
 
     if (res && res.site && res.urls) {
-      if (res.layout) {
-        base.layout.id = res.layout.id;
-        base.layout.root = res.layout.root;
-      }
-
-      base.site = res.site;
-
-      base.site.code = { mode: "vsc" };
-
-      base.site.api = apiProxy(base.site.api_url);
-      base.site.db = dbProxy(base.site.api_url);
-
-      const w = window as any;
-      w.serverurl = base.site.api_url;
-      w.db = base.site.db;
-      w.api = base.site.api;
+      site = res.site;
+      layout = res.layout;
 
       for (const item of res.urls) {
         router.insert(item.url, item);
@@ -59,7 +65,7 @@ export const loadRouter = async () => {
     }
   } catch (e) {}
 
-  return { router, pages };
+  return { router, pages, site, layout };
 };
 
 export type ProdRouter = Awaited<ReturnType<typeof loadRouter>>;

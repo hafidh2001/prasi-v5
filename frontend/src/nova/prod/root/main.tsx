@@ -1,11 +1,13 @@
 import { createRoot } from "react-dom/client";
 import "../../../index.css";
-import { PrasiRoot, isPreview } from "../components/root";
+import { PrasiRoot, isPreview } from "../react/root";
 import { defineWindow } from "utils/react/define-window";
 import { defineReact } from "utils/react/define-react";
 import { w } from "./prasi-window";
 import { initBaseConfig } from "prod/loader/base";
 import { StoreProvider } from "../../../utils/react/define-store";
+import { StrictMode } from "react";
+import { rawProd } from "./use-prod";
 
 (async () => {
   import("./font");
@@ -55,13 +57,20 @@ import { StoreProvider } from "../../../utils/react/define-store";
           }
         }
       }
+      console.log(_href)
       return _href;
     };
 
+    w.prasiContext.render = () => {
+      rawProd().state.pathname = location.pathname;
+    };
+
     react.root.render(
-      <StoreProvider>
-        <PrasiRoot />
-      </StoreProvider>
+      <StrictMode>
+        <StoreProvider>
+          <PrasiRoot />
+        </StoreProvider>
+      </StrictMode>
     );
     if (document.body.classList.contains("opacity-0")) {
       document.body.classList.remove("opacity-0");
