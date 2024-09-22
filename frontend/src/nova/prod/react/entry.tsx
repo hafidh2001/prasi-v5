@@ -27,7 +27,7 @@ export const PrasiEntry = () => {
 
   return (
     <>
-      {status !== "ready" || (page && !page.content_tree) ? (
+      {status !== "ready" || (page && !page.root) ? (
         <>{w.ContentLoading ? <w.ContentLoading /> : <Loading />}</>
       ) : (
         <div className="relative flex flex-1 items-center justify-center">

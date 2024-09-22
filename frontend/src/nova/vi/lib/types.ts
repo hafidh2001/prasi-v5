@@ -1,10 +1,9 @@
 import { EPage } from "logic/types";
-import { DeepReadonly } from "popup/script/flow/runtime/types";
 import { IItem } from "utils/types/item";
 
 export type ViPage = {
   id: string;
-  content_tree: EPage["content_tree"];
+  root: EPage["content_tree"];
   url: string;
 };
 
@@ -14,6 +13,8 @@ export type ViProp = {
   page: ViPage;
   layout?: ViPage;
   comps: ViComps;
+  db: any,
+  api: any,
   mode: "desktop" | "mobile";
   loader: {
     pages: (ids: string[]) => Promise<void>;

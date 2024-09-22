@@ -33,6 +33,7 @@ export const crdt_pages = {} as Record<
   string,
   {
     doc: Doc;
+    url: string;
     awareness: Awareness;
     undoManager: UndoManager;
     actionHistory: Record<number, string>;

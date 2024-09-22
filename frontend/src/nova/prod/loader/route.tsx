@@ -30,7 +30,7 @@ const loadCachedRoute = () => {
 export type PageRoute = {
   id: string;
   url: string;
-  content_tree: EPageContentTree;
+  root: EPageContentTree;
   loading?: true;
 };
 
@@ -38,7 +38,7 @@ export const loadRouter = async () => {
   const router = createRouter<{
     id: string;
     url: string;
-    content_tree?: EPageContentTree;
+    root?: EPageContentTree;
   }>();
   const pages = [] as PageRoute[];
   let site = {

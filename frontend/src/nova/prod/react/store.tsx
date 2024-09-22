@@ -126,14 +126,14 @@ export const useProdState = defineStore({
         s.page = page;
       }
 
-      if (!page.content_tree && !page.loading) {
+      if (!page.root && !page.loading) {
         page.loading = true;
 
         loadPages([page.id]).then((result) => {
           update((s) => {
             const tree = result[page.id];
             if (tree && s.page) {
-              s.page.content_tree = tree;
+              s.page.root = tree;
               
               let mode = (
                 s.site.responsive !== "all" ? s.site.responsive : "desktop"

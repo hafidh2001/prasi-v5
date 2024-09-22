@@ -6,6 +6,7 @@ import { parseTypeDef } from "../parser/parse-type-def";
 import { compressed } from "../server/compressed";
 import type { ServerCtx } from "../server/ctx";
 import { siteLoaded, siteLoading } from "./site";
+import { crdt_comps, crdt_pages } from "../../ws/crdt/shared";
 
 export const prasiLoader = async ({
   pathname,
@@ -179,20 +180,39 @@ export const prasiLoader = async ({
       const page_ids = body.ids as string[];
       if (page_ids) {
         const ids = page_ids.filter((id) => validate(id));
+        const cached = {} as Record<
+          string,
+          { id: string; url: string; root: any }
+        >;
+
+        for (const id of ids) {
+          const crdt = crdt_pages[id];
+          if (crdt) {
+            const content_tree = crdt.doc.getMap("data").toJSON();
+            cached[id] = {
+              id,
+              url: crdt.url,
+              root: content_tree,
+            };
+          }
+        }
+
+        const uncached_ids = ids.filter((id) => !cached[id]);
+        if (uncached_ids.length === 0) {
+          return compressed(ctx, Object.values(cached));
+        }
         const pages = await _db.page.findMany({
-          where: { id: { in: ids } },
+          where: { id: { in: uncached_ids } },
           select: { id: true, content_tree: true, url: true },
         });
-        if (pages) {
-          return compressed(
-            ctx,
-            pages.map((e: any) => ({
-              id: e.id,
-              url: e.url,
-              root: e.content_tree,
-            }))
-          );
-        }
+        return compressed(ctx, [
+          ...Object.values(cached),
+          ...pages.map((e: any) => ({
+            id: e.id,
+            url: e.url,
+            root: e.content_tree,
+          })),
+        ]);
       }
       break;
     }
@@ -200,12 +220,22 @@ export const prasiLoader = async ({
       const ids = body.ids as string[];
       const result = {} as Record<string, any>;
       if (Array.isArray(ids)) {
-        const comps = await _db.component.findMany({
-          where: { id: { in: ids } },
-          select: { content_tree: true, id: true },
-        });
-        for (const comp of comps) {
-          result[comp.id] = comp.content_tree;
+        for (const id of ids) {
+          const crdt = crdt_comps[id];
+          if (crdt) {
+            result[id] = crdt.doc.getMap("data").toJSON();
+          }
+        }
+
+        const uncached_ids = ids.filter((id) => !result[id]);
+        if (uncached_ids.length > 0) {
+          const comps = await _db.component.findMany({
+            where: { id: { in: uncached_ids } },
+            select: { content_tree: true, id: true },
+          });
+          for (const comp of comps) {
+            result[comp.id] = comp.content_tree;
+          }
         }
       }
       return compressed(ctx, result);

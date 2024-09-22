@@ -11,11 +11,15 @@ export const useVi = defineStore({
       comps: (ids: string[]) => Promise<void>,
     },
     comps: {} as ViComps,
+    local_value: {} as Record<string, any>,
+    db: null as any,
+    api: null as any,
   },
   state: {
     mode: "desktop" as "mobile" | "desktop",
     page: null as null | ViPage,
     layout: null as null | ViPage,
+    local_render: {} as Record<string, number>,
     comp: { instances: {} as Record<string, IItem>, loaded: new Set<string>() },
   },
   action: ({ state, ref, update }) => ({
@@ -30,14 +34,20 @@ export const useVi = defineStore({
       page,
       comps,
       layout,
+      db,
+      api,
     }: {
       page: ViPage;
       layout?: ViPage;
       comps: ViComps;
+      db: any;
+      api: any;
     }) => {
       state.page = page;
       state.layout = layout || null;
       ref.comps = comps;
+      ref.db = db;
+      ref.api = api;
 
       for (const id of Object.keys(comps)) {
         state.comp.loaded.add(id);

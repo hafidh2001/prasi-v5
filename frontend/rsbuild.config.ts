@@ -16,6 +16,9 @@ export default defineConfig({
   },
   output: {
     cleanDistPath: true,
+    sourceMap: {
+      js: "source-map",
+    },
     distPath: { root: "../../data/prasi-static" },
     filename: { js: `[name].bundle.js` },
   },

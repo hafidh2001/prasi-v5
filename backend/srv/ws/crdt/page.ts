@@ -38,7 +38,7 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
       crdt_loading.add(page_id);
       const db_page = await _db.page.findFirst({
         where: { id: page_id },
-        select: { content_tree: true, id_site: true },
+        select: { content_tree: true, id_site: true, url: true },
       });
       if (!db_page) return;
 
@@ -129,6 +129,7 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
           undoManager,
           doc,
           awareness,
+          url: db_page.url,
           actionHistory,
           timeout: null,
           ws: new Set(),

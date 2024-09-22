@@ -10,10 +10,10 @@ export const ViPage = () => {
     layout: state.layout,
   }));
 
-  const is_layout = !!layout?.content_tree;
+  const is_layout = !!layout?.root;
   const content_tree = (is_layout
-    ? layout?.content_tree
-    : page?.content_tree) as unknown as DeepReadonly<IItem>;
+    ? layout?.root
+    : page?.root) as unknown as DeepReadonly<IItem>;
 
   return (
     <div className="flex flex-1 flex-col relative">
