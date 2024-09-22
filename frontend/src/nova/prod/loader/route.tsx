@@ -1,8 +1,6 @@
-import { apiProxy } from "base/load/api/api-proxy";
-import { dbProxy } from "base/load/db/db-proxy";
 import { createRouter } from "radix3";
+import { EPageContentTree } from "../../ed/logic/types";
 import { base } from "./base";
-import { EPage } from "../../ed/logic/types";
 
 const cached = { route: null as any, promise: null as any };
 
@@ -32,7 +30,7 @@ const loadCachedRoute = () => {
 export type PageRoute = {
   id: string;
   url: string;
-  content_tree?: EPage["content_tree"];
+  content_tree: EPageContentTree;
   loading?: true;
 };
 
@@ -40,7 +38,7 @@ export const loadRouter = async () => {
   const router = createRouter<{
     id: string;
     url: string;
-    content_tree?: EPage["content_tree"];
+    content_tree?: EPageContentTree;
   }>();
   const pages = [] as PageRoute[];
   let site = {
@@ -50,7 +48,7 @@ export const loadRouter = async () => {
     responsive: "all",
     api_url: "",
   };
-  let layout = { id: "", root: null as null | EPage["content_tree"] };
+  let layout = { id: "", root: null as null | EPageContentTree };
   try {
     const res = await loadCachedRoute();
 

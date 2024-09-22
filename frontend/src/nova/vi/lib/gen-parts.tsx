@@ -1,3 +1,4 @@
+import { DeepReadonly } from "popup/script/flow/runtime/types";
 import { produceCSS } from "utils/css/gen";
 import { IItem } from "utils/types/item";
 
@@ -7,11 +8,11 @@ type PROPS = React.DetailedHTMLProps<
 >;
 
 export const viDivProps = (
-  item: IItem,
+  item: DeepReadonly<IItem>,
   opt: { mode: "desktop" | "mobile" }
 ) => {
   const props: PROPS & { inherit?: { style: IItem; className: string } } = {
-    className: produceCSS(item, {
+    className: produceCSS(item as any, {
       mode: opt.mode,
     }),
   };

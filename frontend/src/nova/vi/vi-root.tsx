@@ -1,26 +1,37 @@
+import { FC, Suspense, useEffect } from "react";
 import { ErrorBox } from "./lib/error-box";
+import { viInit } from "./lib/init-vi";
 import { useVi } from "./lib/store";
-import { ViRender } from "./vi-render";
+import { ViProp } from "./lib/types";
+import { ViPage } from "./vi-page";
 
-export const ViRoot = () => {
-  const { page, layout } = useVi(({ state, ref }) => ({
-    page: state.page,
-    layout: state.layout,
+export const ViRoot: FC<ViProp> = ({
+  page,
+  comps,
+  layout,
+  loader,
+  enablePreload,
+}) => {
+  const { init, ref } = useVi(({ action, ref, state }) => ({
+    init: action.init,
+    state_page: state.page,
+    state_comps: ref.comps,
+    ref,
   }));
 
-  const is_layout = !!layout?.content_tree;
-  const content_tree = is_layout ? layout?.content_tree : page?.content_tree;
+  if (!ref.init) {
+    ref.init = true;
+    ref.loader.comps = loader.comps as any;
+    viInit({ loader, enablePreload: !!enablePreload });
+  }
+
+  init({ page, comps, layout });
 
   return (
-    <div className="flex flex-1 flex-col relative">
-      {Array.isArray(content_tree?.childs) &&
-        content_tree.childs.map((item) => {
-          return (
-            <ErrorBox key={item.id}>
-              <ViRender item={item} is_layout={is_layout} />
-            </ErrorBox>
-          );
-        })}
-    </div>
+    <ErrorBox>
+      <Suspense>
+        <ViPage />
+      </Suspense>
+    </ErrorBox>
   );
 };

@@ -1,24 +1,24 @@
 import { memo } from "react";
-import { Vi } from "vi/vi";
+import { ViRoot } from "vi/vi-root";
 import { base } from "../loader/base";
+import { loadPages } from "../loader/page";
 import { w } from "../root/window";
 import { useProdState } from "./store";
-import { loadPages } from "../loader/page";
 
 export const ProdRouter = memo(() => {
-  const { router, pages, page, loadPage, update, comp, layout } = useProdState(
-    ({ ref, state, action }) => ({
+  const { router, pages, page, loadPage, update, comps, layout, mode } =
+    useProdState(({ ref, state, action }) => ({
       pathname: state.pathname,
+      mode: state.mode,
       router: ref.router,
       pages: ref.pages,
       loadPage: action.loadPage,
       page: state.page,
       layout: state.layout,
-      comp: state.comps,
-      comp_load: ref.promise.load_comp,
+      comps: ref.comps,
+      comp_status: state.status.comps,
       ts: state.ts,
-    })
-  );
+    }));
 
   const found = router?.lookup(base.pathname);
   const found_page = pages?.find((e) => e.id === found?.id);
@@ -31,12 +31,13 @@ export const ProdRouter = memo(() => {
       if (page && page.content_tree) {
         return (
           <>
-            <Vi
-              comps={comp as any}
+            <ViRoot
+              mode={mode}
+              comps={comps as any}
               page={page as any}
               layout={layout as any}
               loader={{
-                async comps(ids) {},
+                async comps() {},
                 async pages(ids) {
                   loadPages(ids).then((result) => {
                     update((s) => {

@@ -8,18 +8,13 @@ export type ViPage = {
   url: string;
 };
 
-export type ViComps = Record<
-  string,
-  {
-    id: string;
-    content_tree: IItem;
-  }
->;
+export type ViComps = Record<string, IItem>;
 
 export type ViProp = {
   page: ViPage;
   layout?: ViPage;
   comps: ViComps;
+  mode: "desktop" | "mobile";
   loader: {
     pages: (ids: string[]) => Promise<void>;
     comps: (ids: string[]) => Promise<void>;

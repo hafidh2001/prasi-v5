@@ -16,20 +16,21 @@ export const useProdState = defineStore({
     db: null as null | ReturnType<typeof dbProxy>,
     pages: [] as PageRoute[],
     timeout: {
-      load_comp: null as any,
+      comps: null as any,
     },
     promise: {
-      load_comp: {} as Record<
+      comps: {} as Record<
         string,
         { promise: Promise<IItem>; resolve: (item: IItem) => void }
       >,
     },
+    comps: {} as Record<string, EBaseComp>,
   },
   state: {
     ts: Date.now(),
     pathname: location.pathname,
+    mode: "desktop" as "mobile" | "desktop",
     page: null as null | PageRoute,
-    comps: {} as Record<string, EBaseComp>,
     site: {
       id: "",
       name: "",
@@ -40,8 +41,7 @@ export const useProdState = defineStore({
     layout: { id: "", root: null as null | EPage["content_tree"] },
     status: {
       router: "init" as "init" | "loading" | "ready",
-      responsive: "desktop" as "mobile" | "desktop",
-      load_comp: {} as Record<string, "init" | "loading">,
+      comps: {} as Record<string, "init" | "loading">,
     },
   },
   action: ({ state: s, update, ref: r }) => ({
@@ -66,24 +66,24 @@ export const useProdState = defineStore({
     },
     loadComp(ids: string[]) {
       for (const id of ids) {
-        if (!s.comps[id]) {
-          if (!s.status.load_comp[id]) {
-            s.status.load_comp[id] = "init";
+        if (!r.comps[id]) {
+          if (!s.status.comps[id]) {
+            s.status.comps[id] = "init";
 
-            if (!r.promise.load_comp[id]) {
+            if (!r.promise.comps[id]) {
               const pending = { resolve: null as any };
               const promise = new Promise<IItem>((resolve) => {
                 pending.resolve = resolve;
               });
-              r.promise.load_comp[id] = { promise, resolve: pending.resolve };
+              r.promise.comps[id] = { promise, resolve: pending.resolve };
             }
           }
         }
       }
 
-      clearTimeout(r.timeout.load_comp);
-      r.timeout.load_comp = setTimeout(async () => {
-        const ids = Object.entries(s.status.load_comp)
+      clearTimeout(r.timeout.comps);
+      r.timeout.comps = setTimeout(async () => {
+        const ids = Object.entries(s.status.comps)
           .filter(([_, status]) => {
             if (status === "init") return true;
           })
@@ -91,7 +91,7 @@ export const useProdState = defineStore({
 
         update((s) => {
           for (const id of ids) {
-            s.status.load_comp[id] = "loading";
+            s.status.comps[id] = "loading";
           }
         });
 
@@ -107,14 +107,14 @@ export const useProdState = defineStore({
             update((s) => {
               for (const id of ids) {
                 if (json[id]) {
-                  s.comps[id] = structuredClone(json[id]);
-                  if (r.promise.load_comp[id]) {
-                    r.promise.load_comp[id].resolve(json[id]);
+                  r.comps[id] = structuredClone(json[id]);
+                  if (r.promise.comps[id]) {
+                    r.promise.comps[id].resolve(json[id]);
                   }
                 }
 
-                delete r.promise.load_comp[id];
-                delete s.status.load_comp[id];
+                delete r.promise.comps[id];
+                delete s.status.comps[id];
               }
             });
           }
@@ -128,11 +128,18 @@ export const useProdState = defineStore({
 
       if (!page.content_tree && !page.loading) {
         page.loading = true;
+
         loadPages([page.id]).then((result) => {
           update((s) => {
             const tree = result[page.id];
             if (tree && s.page) {
               s.page.content_tree = tree;
+              
+              let mode = (
+                s.site.responsive !== "all" ? s.site.responsive : "desktop"
+              ) as "mobile" | "desktop";
+              s.mode = tree.responsive ? tree.responsive : mode;
+
               delete s.page.loading;
 
               if (tree.component_ids) {

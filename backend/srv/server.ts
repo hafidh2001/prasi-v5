@@ -9,11 +9,17 @@ import { watch } from "fs";
 import "./utils/init";
 import { asset } from "./utils/server/asset";
 import { dir } from "./utils/dir";
+import { existsAsync } from "fs-jetpack";
+import { waitUntil } from "prasi-utils";
 
 editor.init();
 api.init();
 if (g.mode === "dev") {
-  watch(dir.root(`/frontend/prod`), (e, c) => {
+  const path = dir.data(`/site-static`);
+  if (!(await existsAsync(path))) {
+    waitUntil(() => existsAsync(path));
+  }
+  watch(path, (e, c) => {
     asset.nova.rescan();
   });
 }

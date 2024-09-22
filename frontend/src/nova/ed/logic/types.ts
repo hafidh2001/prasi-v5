@@ -5,15 +5,17 @@ export type SyncUndoItem = { id: number; ts: number; size: string };
 
 export type ESite = Omit<site, "config"> & { config: { api_url: string } };
 
+export type EPageContentTree = {
+  childs: IItem[];
+  component_ids: string[];
+  id: string;
+  id_page: string;
+  responsive: "mobile" | "desktop";
+  type: "root";
+};
+
 export type EPage = Omit<page, "content_tree"> & {
-  content_tree: {
-    childs: IItem[];
-    component_ids: string[];
-    id: string;
-    id_page: string;
-    responsive: "mobile" | "desktop";
-    type: "root";
-  };
+  content_tree: EPageContentTree;
 };
 
 export type EBaseComp = {

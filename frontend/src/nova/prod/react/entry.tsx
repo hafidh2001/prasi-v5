@@ -15,10 +15,10 @@ export const isPreview = () => {
 };
 
 export const PrasiEntry = () => {
-  const { status, init, responsive, page } = useProdState(
+  const { status, init, mode, page } = useProdState(
     ({ state: s, action: a }) => ({
       status: s.status.router,
-      responsive: s.status.responsive,
+      mode: s.mode,
       page: s.page,
       init: a.initRouter,
     })
@@ -34,7 +34,7 @@ export const PrasiEntry = () => {
           <div
             className={cx(
               "absolute flex flex-col items-stretch flex-1 bg-white main-content-preview",
-              responsive === "mobile"
+              mode === "mobile"
                 ? css`
                     @media (min-width: 1280px) {
                       border-left: 1px solid #ccc;
