@@ -1,6 +1,6 @@
 import get from "lodash.get";
 import { FNBorder } from "../types/meta-fn";
-import { responsiveVal } from "../../nova/ed/panel/side/style/tools/responsive-val";
+import { responsiveVal } from "vi/lib/responsive-val";
 
 export const cssBorder = (
   cur: { border?: FNBorder },

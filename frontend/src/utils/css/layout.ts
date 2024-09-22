@@ -1,4 +1,4 @@
-import { responsiveVal } from "../../nova/ed/panel/side/style/tools/responsive-val";
+import { responsiveVal } from "vi/lib/responsive-val";
 import { FNLayout } from "../types/meta-fn";
 
 export const cssLayout = (

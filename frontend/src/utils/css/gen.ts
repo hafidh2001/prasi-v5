@@ -1,6 +1,4 @@
 import { IItem } from "../types/item";
-import { ISection } from "../types/section";
-import { IText } from "../types/text";
 import { cssAdv } from "./advanced";
 import { cssBackground } from "./background";
 import { cssBorder } from "./border";
@@ -11,7 +9,7 @@ import { cssLayout } from "./layout";
 import { cssPadding } from "./padding";
 
 export const produceCSS = (
-  item: ISection | IItem | IText,
+  item: IItem,
   arg: {
     mode: "mobile" | "desktop";
     hover?: boolean;

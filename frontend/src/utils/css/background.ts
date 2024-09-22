@@ -1,4 +1,4 @@
-import { responsiveVal } from "../../nova/ed/panel/side/style/tools/responsive-val";
+import { responsiveVal } from "vi/lib/responsive-val";
 import { MetaItem } from "../types/meta";
 import { FNBackground } from "../types/meta-fn";
 

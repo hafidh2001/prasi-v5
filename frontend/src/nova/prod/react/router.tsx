@@ -6,13 +6,14 @@ import { useProdState } from "./store";
 import { loadPages } from "../loader/page";
 
 export const ProdRouter = memo(() => {
-  const { router, pages, page, loadPage, update, comp } = useProdState(
+  const { router, pages, page, loadPage, update, comp, layout } = useProdState(
     ({ ref, state, action }) => ({
       pathname: state.pathname,
       router: ref.router,
       pages: ref.pages,
       loadPage: action.loadPage,
       page: state.page,
+      layout: state.layout,
       comp: state.comps,
       comp_load: ref.promise.load_comp,
       ts: state.ts,
@@ -33,6 +34,7 @@ export const ProdRouter = memo(() => {
             <Vi
               comps={comp as any}
               page={page as any}
+              layout={layout as any}
               loader={{
                 async comps(ids) {},
                 async pages(ids) {
@@ -48,6 +50,7 @@ export const ProdRouter = memo(() => {
                   });
                 },
               }}
+              enablePreload
             />
           </>
         );

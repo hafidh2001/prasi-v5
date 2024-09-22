@@ -5,6 +5,16 @@ export default defineConfig({
   plugins: [pluginReact()],
   source: {
     entry: { index: "./root/main.tsx" },
+    alias: {
+      crdt: ["../../nova/ed/crdt"],
+      utils: ["../../utils"],
+      base: ["../../base"],
+      logic: ["../../nova/ed/logic"],
+      popup: ["../../nova/ed/popup"],
+      prod: ["../../nova/prod"],
+      vi: ["../../nova/vi"],
+    },
+    aliasStrategy: "prefer-alias",
   },
   output: {
     cleanDistPath: true,

@@ -24,4 +24,5 @@ export type ViProp = {
     pages: (ids: string[]) => Promise<void>;
     comps: (ids: string[]) => Promise<void>;
   };
+  enablePreload?: boolean;
 };
