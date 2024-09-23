@@ -2,7 +2,7 @@ import { EDGlobal } from "logic/ed-global";
 import { useGlobal } from "utils/react/use-global";
 import { Modal } from "utils/ui/modal";
 import { EdPrasiFlow } from "./flow/prasi-flow";
-import { EdPrasiMonaco } from "./monaco/prasi-monaco";
+import { EdPrasiCode } from "./code/prasi-code";
 import { EdScriptWorkbench } from "./parts/workbench";
 
 export const EdPopItemScript = () => {
@@ -19,7 +19,7 @@ export const EdPopItemScript = () => {
           {({ mode }) => (
             <>
               {popup.mode === "js" && (
-                <>{mode === "flow" ? <EdPrasiFlow /> : <EdPrasiMonaco />}</>
+                <>{mode === "flow" ? <EdPrasiFlow /> : <EdPrasiCode />}</>
               )}
             </>
           )}

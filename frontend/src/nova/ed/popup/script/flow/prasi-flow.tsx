@@ -28,7 +28,6 @@ export const EdPrasiFlow = function () {
       setTimeout(() => {
         if (node) {
           fg.update("Flow Reset", ({ pflow }) => {
-            console.log("asdas");
             const new_flow = defaultFlow(
               "item",
               `item-${node.item.id}`,
