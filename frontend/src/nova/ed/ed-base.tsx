@@ -16,6 +16,7 @@ import { EDGlobal } from "./logic/ed-global";
 import { EdPopCompGroup } from "./popup/comp/comp-group";
 import { EdPopCompPicker } from "./popup/comp/comp-picker";
 import { iconVSCode } from "./ui/icons";
+import { EdRight } from "./ed-right";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -96,35 +97,46 @@ export const EdBase = () => {
       }}
     >
       <PanelGroup autoSaveId="prasi-editor-left" direction="horizontal">
-        <Panel defaultSize={18} className="flex min-w-[240px]">
+        <Panel
+          hidden={!p.ui.panel.left}
+          className={cx(p.ui.panel.left && "flex min-w-[240px]")}
+        >
           <EdLeft />
         </Panel>
         <PanelResizeHandle />
-        <Panel className="flex flex-col">
+        <Panel defaultSize={78} className="flex flex-col">
           <EdTopBar />
 
-          {script.paned && script.open ? (
-            <EdPopItemScript />
-          ) : (
-            <PanelGroup autoSaveId="prasi-editor-right" direction="horizontal">
-              <Panel>
-                {p.page.tree && (
-                  <div
-                    className={cx(
-                      "w-full h-full flex flex-1 relative overflow-auto border-r",
-                      p.mode === "mobile" ? "flex-col items-center" : ""
-                    )}
-                  >
-                    <div className={mainStyle(p)}>
-                      <EdViRoot />
+          <PanelGroup autoSaveId="prasi-editor-right" direction="horizontal">
+            <Panel>
+              {script.paned && script.open ? (
+                <EdPopItemScript />
+              ) : (
+                <>
+                  {p.page.tree && (
+                    <div
+                      className={cx(
+                        "w-full h-full flex flex-1 relative overflow-auto border-r",
+                        p.mode === "mobile" ? "flex-col items-center" : ""
+                      )}
+                    >
+                      <div className={mainStyle(p)}>
+                        <EdViRoot />
+                      </div>
                     </div>
-                  </div>
-                )}
-              </Panel>
-              <PanelResizeHandle />
-              <Panel defaultSize={25}></Panel>
-            </PanelGroup>
-          )}
+                  )}
+                </>
+              )}
+            </Panel>
+            <PanelResizeHandle />
+            <Panel
+              defaultSize={25}
+              hidden={!p.ui.panel.right}
+              className={cx(p.ui.panel.right && "flex flex-col min-w-[240px]")}
+            >
+              <EdRight />
+            </Panel>
+          </PanelGroup>
         </Panel>
       </PanelGroup>
       <>

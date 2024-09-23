@@ -33,8 +33,12 @@ export const EDGlobal = {
     },
   },
   ui: {
+    panel: {
+      left: localStorage.getItem("prasi-panel-left") !== "n",
+      right: localStorage.getItem("prasi-panel-right") !== "n",
+    },
     editor: {
-      render(){},
+      render() {},
     },
     zoom: localStorage.zoom || "100%",
     comp: {
