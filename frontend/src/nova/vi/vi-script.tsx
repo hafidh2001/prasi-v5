@@ -1,11 +1,11 @@
 import { DeepReadonly } from "popup/script/flow/runtime/types";
 import { FC, ReactElement, useRef } from "react";
 import { IItem } from "utils/types/item";
-import { scriptArgs } from "./lib/script-args";
-import { createViLocal } from "./script/vi-local";
-import { useVi } from "./lib/store";
 import { compArgs } from "./lib/comp-args";
 import { parentCompArgs } from "./lib/parent-comp-args";
+import { scriptArgs } from "./lib/script-args";
+import { useVi } from "./lib/store";
+import { createViLocal } from "./script/vi-local";
 
 export const ViScript: FC<{
   item: DeepReadonly<IItem>;
@@ -19,12 +19,13 @@ export const ViScript: FC<{
     };
   ts?: number;
 }> = ({ item, childs, props }) => {
-  const { ref_comp_props, parents, db, api } = useVi(({ state, ref }) => ({
+  const { ref_comp_props, parents, db, api } = useVi(({ ref }) => ({
     ref_comp_props: ref.comp_props,
     parents: ref.item_parents,
     db: ref.db,
     api: ref.api,
   }));
+
   const internal = useRef<any>({}).current;
   const result = { children: null };
   const script_args = scriptArgs({ item, childs, props, result });
@@ -35,6 +36,7 @@ export const ViScript: FC<{
   }
 
   let comp_args = parentCompArgs(parents, ref_comp_props, item.id);
+
   if (item.component?.id) {
     ref_comp_props[item.id] = compArgs(item, comp_args, db, api);
     comp_args = ref_comp_props[item.id];

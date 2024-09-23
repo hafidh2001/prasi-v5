@@ -23,6 +23,7 @@ export const createViLocal = (
         ref_comp_props[item.id] = {};
       }
       ref_comp_props[item.id][opt.name] = local.value[item.id];
+
       local.value[item.id] = {
         ...opt.value,
         render() {

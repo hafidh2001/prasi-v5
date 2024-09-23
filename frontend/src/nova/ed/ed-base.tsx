@@ -15,6 +15,7 @@ import { iconVSCode } from "./ui/icons";
 import { EdTopBar } from "./ed-topbar";
 import { fg } from "popup/script/flow/utils/flow-global";
 import { getActiveNode } from "crdt/node/get-node-by-id";
+import { EdViRoot } from "./ed-vi-root";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -23,9 +24,14 @@ export const EdBase = () => {
 
   if (!p.page.tree && p.page.cur && p.sync) {
     p.page.tree = loadPageTree(p.sync, p.page.cur.id, {
-      async loaded() {
+      async loaded(content_tree) {
         await loadPendingComponent(p);
         fg.prasi.updated_outside = true;
+        p.page.cur.content_tree = content_tree;
+        if (["mobile", "desktop"].includes(content_tree.responsive)) {
+          p.mode = content_tree.responsive;
+        }
+        p.page.ts = Date.now();
         p.render();
       },
       async on_component(item) {
@@ -101,7 +107,7 @@ export const EdBase = () => {
             <EdPopItemScript />
           ) : (
             <PanelGroup autoSaveId="prasi-editor-right" direction="horizontal">
-              <Panel>{p.page.tree && <Preview tree={p.page.tree} />}</Panel>
+              <Panel>{p.page.tree && <EdViRoot />}</Panel>
               <PanelResizeHandle />
               <Panel defaultSize={25}></Panel>
             </PanelGroup>
@@ -113,35 +119,6 @@ export const EdBase = () => {
         <EdPopCompPicker />
         {!script.paned && script.open && <EdPopItemScript />}
       </>
-    </div>
-  );
-};
-
-const Preview = ({ tree }: { tree: PageTree }) => {
-  const p = useGlobal(EDGlobal, "EDITOR");
-  const root = tree.watch((e) => e);
-  return (
-    <div
-      className="relative overflow-auto w-full h-full border-r"
-      onClick={async () => {
-        tree.update("AMO", (e) => {
-          e.tree.id = "MO" + Date.now();
-        });
-      }}
-    >
-      <pre className="text-[8px]  p-2 absolute inset-0">
-        {Date.now()}
-        {JSON.stringify(
-          getActiveNode(p)?.item,
-          // Object.entries(root as any)
-          //   .map(([k, v]) => {
-          //     if (typeof v !== "object") return [k, v];
-          //   })
-          //   .filter((e) => e),
-          null,
-          2
-        )}
-      </pre>
     </div>
   );
 };

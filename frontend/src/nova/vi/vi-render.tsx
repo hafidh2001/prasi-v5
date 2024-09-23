@@ -8,6 +8,7 @@ export const ViRender: FC<{
   item: DeepReadonly<IItem>;
   is_layout: boolean;
 }> = ({ item, is_layout }) => {
+
   if (item.component?.id) {
     return <ViComp item={item} is_layout={is_layout} />;
   }

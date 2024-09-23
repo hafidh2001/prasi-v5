@@ -5,9 +5,10 @@ import { ViRender } from "./vi-render";
 import { IItem } from "utils/types/item";
 
 export const ViPage = () => {
-  const { page, layout } = useVi(({ state, ref }) => ({
+  const { page, layout, parents } = useVi(({ state, ref }) => ({
     page: state.page,
     layout: state.layout,
+    parents: ref.item_parents,
   }));
 
   const is_layout = !!layout?.root;
@@ -19,6 +20,8 @@ export const ViPage = () => {
     <div className="flex flex-1 flex-col relative">
       {Array.isArray(content_tree?.childs) &&
         content_tree.childs.map((item: DeepReadonly<IItem>) => {
+          parents[item.id] = "root";
+
           return (
             <ErrorBox key={item.id}>
               <ViRender item={item} is_layout={is_layout} />

@@ -4,6 +4,7 @@ import { base } from "../loader/base";
 import { loadPages } from "../loader/page";
 import { w } from "../root/window";
 import { useProdState } from "./store";
+import { Loading } from "utils/ui/loading";
 
 export const ProdRouter = memo(() => {
   const {
@@ -41,6 +42,12 @@ export const ProdRouter = memo(() => {
       return <></>;
     } else {
       if (page && page.root) {
+        let loading_comps = false;
+        for (const id of page.root.component_ids) {
+          if (!comps[id]) {
+            return <>{w.ContentLoading ? <w.ContentLoading /> : <Loading />}</>;
+          }
+        }
         return (
           <>
             <ViRoot

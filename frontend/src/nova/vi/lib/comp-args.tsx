@@ -19,20 +19,26 @@ export const compArgs = (
         if (content) {
           args[k] = {
             __jsx: true,
-            __render: (parent: IItem, parents: Record<string, string>) => {
-              const LazyChild = lazy(() => {
-                return new Promise<{ default: FC }>((done) => {
-                  done({
-                    default: () => {
-                      parents[content.id] = parent.id;
-                      return <ViRender is_layout={false} item={content} />;
-                    },
-                  });
+            __LazyChild: lazy(() => {
+              return new Promise<{ default: FC<any> }>((done) => {
+                done({
+                  default: ({
+                    parents,
+                    parent,
+                  }: {
+                    parents: any;
+                    parent: any;
+                  }) => {
+                    parents[content.id] = parent.id;
+                    return <ViRender is_layout={false} item={content} />;
+                  },
                 });
               });
+            }),
+            __render(parent: IItem, parents: Record<string, string>) {
               return (
                 <Suspense>
-                  <LazyChild />
+                  <this.__LazyChild parent={parent} parents={parents} />
                 </Suspense>
               );
             },

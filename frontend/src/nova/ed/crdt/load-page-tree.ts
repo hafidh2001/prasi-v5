@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { WebsocketProvider } from "y-websocket";
 import { Doc } from "yjs";
 import { createClient } from "../../../utils/sync/client";
-import { EPage, PNode, SyncUndoItem } from "../logic/types";
+import { EPage, EPageContentTree, PNode, SyncUndoItem } from "../logic/types";
 import { bind } from "./lib/immer-yjs";
 import { findNodeById, flattenTree } from "./node/flatten-tree";
 import { IItem } from "../../../utils/types/item";
@@ -13,29 +13,30 @@ export type PageTree = ReturnType<typeof loadPageTree>;
 export const loadPageTree = (
   sync: ReturnType<typeof createClient>,
   page_id: string,
-  arg?: { loaded: () => void; on_component?: (item: IItem) => void }
+  arg?: {
+    loaded: (content_tree: EPageContentTree) => void;
+    on_component?: (item: IItem) => void;
+  }
 ) => {
   const doc = new Doc();
   const data = doc.getMap("data");
   const immer = bind<EPage["content_tree"]>(data);
 
-  const state = {
-    loaded: false,
-  };
   const wsurl = new URL(location.href);
   wsurl.protocol = wsurl.protocol === "http:" ? "ws:" : "wss:";
   wsurl.pathname = "/crdt";
   const wsync = new WebsocketProvider(wsurl.toString(), `page-${page_id}`, doc);
 
   doc.on("update", (update, origin) => {
-    tree.nodes = flattenTree(immer.get().childs, {
+    const content_tree = immer.get();
+    tree.nodes = flattenTree(content_tree.childs, {
       visit(item) {
         if (item.component?.id && arg?.on_component) {
           arg.on_component(item);
         }
       },
     });
-    arg?.loaded();
+    arg?.loaded(content_tree);
   });
 
   const tree = {

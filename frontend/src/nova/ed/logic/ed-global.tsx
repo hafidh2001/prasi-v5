@@ -1,9 +1,9 @@
 import { NodeModel, TreeMethods } from "@minoru/react-dnd-treeview";
-import { loadPageTree } from "../crdt/load-page-tree";
-import { EBaseComp, EComp, EPage, ESite, PropFieldKind } from "./types";
-import { createClient } from "utils/sync/client";
-import { CompPickerNode } from "../popup/comp/comp-picker/render-picker-node";
 import { PFlow } from "popup/script/flow/runtime/types";
+import { createClient } from "utils/sync/client";
+import { loadPageTree, PageTree } from "../crdt/load-page-tree";
+import { CompPickerNode } from "../popup/comp/comp-picker/render-picker-node";
+import { EComp, EPage, ESite, PropFieldKind } from "./types";
 
 export const EDGlobal = {
   mode: "" as "desktop" | "mobile",
@@ -18,8 +18,9 @@ export const EDGlobal = {
     | "no-site",
   site: { config: {} } as ESite,
   page: {
+    ts: 0 as number,
     cur: null as unknown as EPage,
-    tree: null as unknown as ReturnType<typeof loadPageTree>,
+    tree: null as unknown as PageTree,
   },
   comp: {
     pending: new Set<string>(),
@@ -33,6 +34,7 @@ export const EDGlobal = {
     },
   },
   ui: {
+    zoom: localStorage.zoom || "100%",
     comp: {
       editable: true,
       creating_id: "",

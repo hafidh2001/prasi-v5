@@ -20,6 +20,7 @@ export const ViItem: FC<{
 
   const props = viDivProps(item, { mode });
 
+
   let childs = null;
   if (is_layout && item.name === "children" && page) {
     childs = <ViChilds item={page.root} is_layout={is_layout} />;

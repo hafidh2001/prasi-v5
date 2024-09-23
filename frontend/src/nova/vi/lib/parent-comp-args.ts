@@ -2,6 +2,7 @@ export const parentCompArgs = (
   parents: Record<string, string>,
   ref_comps: Record<string, any>,
   id: string,
+  debug?: true
 ) => {
   let cur_id = id;
   const args: any = {};
