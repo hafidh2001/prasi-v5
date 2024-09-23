@@ -65,7 +65,7 @@ export const EdScriptWorkbench: FC<{
   }
 
   return (
-    <div className="flex flex-1 items-stretch">
+    <div className="flex flex-1 items-stretch select-none">
       <div className="flex flex-1 flex-col ">
         <div
           className={cx(

@@ -3,18 +3,13 @@ import { FC } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { jscript } from "utils/script/jscript";
 import { Loading } from "utils/ui/loading";
-import { monacoCleanModel } from "./js/clean-models";
-import { monacoCreateModel, monacoRegisterSource } from "./js/create-model";
-import { monacoEnableJSX } from "./js/enable-jsx";
-import { jsxColorScheme } from "./js/jsx-style";
 
-export const MonacoJS: FC<{
+export const MonacoLang: FC<{
   value: string;
   onChange: (value: string) => void;
-  enableJsx?: boolean;
-  models?: Record<string, string>;
+  lang: string;
   defaultValue?: string;
-}> = ({ value, onChange, models, defaultValue }) => {
+}> = ({ value, onChange, lang, defaultValue }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const Editor = jscript.MonacoEditor;
   if (!Editor)
@@ -30,13 +25,12 @@ export const MonacoJS: FC<{
       onChange={(value) => {
         onChange(value || "");
       }}
-      className={cx(jsxColorScheme)}
       loading={
         <div className="relative w-full h-full items-center justify-center flex flex-1">
           <Loading backdrop={false} note="loading-monaco" />
         </div>
       }
-      language={"typescript"}
+      language={lang}
       options={{
         minimap: { enabled: false },
         wordWrap: "wordWrapColumn",
@@ -47,23 +41,6 @@ export const MonacoJS: FC<{
         tabSize: 2,
         useTabStops: true,
         lineNumbersMinChars: 2,
-      }}
-      onMount={async (editor, monaco) => {
-        monacoCleanModel(monaco);
-        monacoCreateModel({
-          monaco,
-          editor,
-          filename: "file:///active.tsx",
-          source: value || defaultValue || "",
-          activate: true,
-        });
-        monacoEnableJSX(editor, monaco, p);
-
-        if (models) {
-          for (const [uri, source] of Object.entries(models)) {
-            monacoRegisterSource(monaco, source, uri);
-          }
-        }
       }}
     />
   );

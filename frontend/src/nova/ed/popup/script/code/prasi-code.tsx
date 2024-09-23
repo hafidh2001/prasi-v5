@@ -3,9 +3,11 @@ import { EDGlobal } from "logic/ed-global";
 import { useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
+import { itemCssDefault, itemJsDefault } from "./default-val";
 import { jsOnChange } from "./js/on-change";
 import { typingsItem } from "./js/typings-item";
 import { MonacoJS } from "./monaco-js";
+import { MonacoLang } from "./monaco-lang";
 
 export const EdPrasiCode = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -13,6 +15,8 @@ export const EdPrasiCode = () => {
   const node = getActiveNode(p);
 
   const js = node?.item.adv?.js || "";
+  const css = node?.item.adv?.css || "";
+  const html = node?.item.adv?.html || "";
 
   useEffect(() => {
     if (!local.ready) {
@@ -36,12 +40,34 @@ export const EdPrasiCode = () => {
             <MonacoJS
               value={js}
               enableJsx
+              defaultValue={itemJsDefault}
               onChange={(val) => {
                 jsOnChange(val, local, p, node!.item.id);
               }}
               models={{
                 "file:///item.ts": typingsItem,
               }}
+            />
+          )}
+
+          {mode === "css" && (
+            <MonacoLang
+              value={css}
+              defaultValue={itemCssDefault}
+              onChange={(val) => {
+                console.log(val);
+              }}
+              lang="scss"
+            />
+          )}
+
+          {mode === "html" && (
+            <MonacoLang
+              value={html}
+              onChange={(val) => {
+                console.log(val);
+              }}
+              lang="html"
             />
           )}
         </>

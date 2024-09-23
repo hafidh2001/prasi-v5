@@ -66,7 +66,6 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
           ID: {node.item.id}
         </>
       }
-      delay={0}
       asChild
     >
       <div

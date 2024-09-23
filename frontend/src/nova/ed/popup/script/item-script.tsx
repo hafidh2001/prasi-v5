@@ -18,8 +18,10 @@ export const EdPopItemScript = () => {
         <EdScriptWorkbench>
           {({ mode }) => (
             <>
-              {popup.mode === "js" && (
+              {popup.mode === "js" ? (
                 <>{mode === "flow" ? <EdPrasiFlow /> : <EdPrasiCode />}</>
+              ) : (
+                <EdPrasiCode />
               )}
             </>
           )}
