@@ -17,8 +17,8 @@ export const MonacoJS: FC<{
   const Editor = jscript.MonacoEditor;
   if (!Editor)
     return (
-      <div className="w-full h-full items-center justify-center flex flex-1">
-        <Loading backdrop={false} note="loading-monaco" />
+      <div className="relative w-full h-full items-center justify-center flex flex-1">
+        <Loading backdrop={false} note="loading-editor" />
       </div>
     );
 
@@ -28,7 +28,11 @@ export const MonacoJS: FC<{
       onChange={(value) => {
         onChange(value || "");
       }}
-      loading={<Loading note="loading-monaco" />}
+      loading={
+        <div className="relative w-full h-full items-center justify-center flex flex-1">
+          <Loading backdrop={false} note="loading-monaco" />
+        </div>
+      }
       language={"typescript"}
       options={{
         minimap: { enabled: false },
