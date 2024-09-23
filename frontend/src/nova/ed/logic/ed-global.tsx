@@ -18,7 +18,6 @@ export const EDGlobal = {
     | "no-site",
   site: { config: {} } as ESite,
   page: {
-    ts: 0 as number,
     cur: null as unknown as EPage,
     tree: null as unknown as PageTree,
   },
@@ -34,6 +33,9 @@ export const EDGlobal = {
     },
   },
   ui: {
+    editor: {
+      render(){},
+    },
     zoom: localStorage.zoom || "100%",
     comp: {
       editable: true,

@@ -1,7 +1,7 @@
 import { DeepReadonly } from "popup/script/flow/runtime/types";
 import { FC } from "react";
 import { IItem } from "utils/types/item";
-import { viDivProps } from "./lib/gen-parts";
+import { DIV_PROPS, viDivProps } from "./lib/gen-parts";
 import { useVi } from "./lib/store";
 import { ViChilds } from "./vi-child";
 import { ViScript } from "./vi-script";
@@ -9,7 +9,8 @@ import { ViScript } from "./vi-script";
 export const ViItem: FC<{
   item: DeepReadonly<IItem>;
   is_layout: boolean;
-}> = ({ item, is_layout }) => {
+  div_props?: (item: IItem) => DIV_PROPS;
+}> = ({ item, is_layout, div_props }) => {
   const { page, mode, ts } = useVi(({ state, ref }) => ({
     page: state.page,
     db: ref.db,
@@ -18,8 +19,7 @@ export const ViItem: FC<{
     mode: state.mode,
   }));
 
-  const props = viDivProps(item, { mode });
-
+  const props = viDivProps(item, { mode, div_props: div_props?.(item as any) });
 
   let childs = null;
   if (is_layout && item.name === "children" && page) {
@@ -39,5 +39,5 @@ export const ViItem: FC<{
     return <ViScript item={item} childs={childs} props={props} ts={ts} />;
   }
 
-  return <div {...props}>{childs}</div>;
+  return <div {...props}>{childs ? childs : null}</div>;
 };

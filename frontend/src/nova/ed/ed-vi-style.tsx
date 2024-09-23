@@ -1,3 +1,4 @@
+import { getActiveNode } from "crdt/node/get-node-by-id";
 import { active } from "logic/active";
 import { PG } from "logic/ed-global";
 
@@ -50,6 +51,23 @@ export const mainStyle = (p: PG) => {
             left: 0;
             right: 0;
             border: 2px solid #73b8ff;
+          }
+        }
+      `,
+    active.item_id === getActiveNode(p)?.item.id &&
+      css`
+        .s-${active.item_id} {
+          outline: none;
+
+          &::after {
+            content: " ";
+            pointer-events: none;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border: 2px solid #1c88f3;
           }
         }
       `

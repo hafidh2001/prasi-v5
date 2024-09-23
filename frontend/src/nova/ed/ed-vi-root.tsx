@@ -1,49 +1,54 @@
 import { apiProxy } from "base/load/api/api-proxy";
 import { dbProxy } from "base/load/db/db-proxy";
-import { EDGlobal } from "logic/ed-global";
-import { memo, useEffect, useRef, useState } from "react";
+import { activateItem, active } from "logic/active";
+import { EDGlobal, PG } from "logic/ed-global";
+import { waitUntil } from "prasi-utils";
+import { memo, useRef, useState } from "react";
 import { StoreProvider } from "utils/react/define-store";
 import { useGlobal } from "utils/react/use-global";
-import { ViComps } from "vi/lib/types";
+import { Loading } from "utils/ui/loading";
+import { ViComps, ViWrapperComp } from "vi/lib/types";
 import { ViRoot } from "vi/vi-root";
-import { mainStyle } from "./ed-vi-style";
 
-export const EdViRoot = memo(({ ts }: { ts: number }) => {
+export const EdViRoot = memo(() => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const ref = useRef({
     db: dbProxy(p.site.config.api_url),
     api: apiProxy(p.site.config.api_url),
     page: null as any,
-    page_ts: 0,
     comps: {} as ViComps,
+    wrapper: ViWrapper({
+      p,
+      render: () => {
+        p.render();
+      },
+    }),
   }).current;
   const [, _set] = useState({});
   const render = () => _set({});
 
-  useEffect(() => {
-    if (ref.page_ts !== ts) {
-      ref.page = {
-        id: p.page.cur.id,
-        url: p.page.cur.url,
-        root: p.page.cur.content_tree,
-      };
-      ref.page_ts = ts;
+  p.ui.editor.render = render;
+  ref.page = {
+    id: p.page.cur.id,
+    url: p.page.cur.url,
+    root: p.page.cur.content_tree,
+  };
+
+  if (!ref.page.root) {
+    waitUntil(() => p.page.cur.content_tree).then(() => {
       render();
-    }
-  }, [ts]);
+    });
+  }
 
   for (const [k, v] of Object.entries(p.comp.loaded)) {
     ref.comps[k] = v.content_tree;
   }
 
   return (
-    <div
-      className={cx(
-        "w-full h-full flex flex-1 relative overflow-auto border-r",
-        p.mode === "mobile" ? "flex-col items-center" : ""
-      )}
-    >
-      <div className={mainStyle(p)}>
+    <>
+      {!ref.page.root ? (
+        <Loading />
+      ) : (
         <StoreProvider>
           <ViRoot
             api={ref.api}
@@ -53,9 +58,36 @@ export const EdViRoot = memo(({ ts }: { ts: number }) => {
             loader={{ async comps(ids) {}, async pages(ids) {} }}
             mode={p.mode}
             enablePreload={false}
+            wrapper={ref.wrapper}
           />
         </StoreProvider>
-      </div>
-    </div>
+      )}
+    </>
   );
 });
+
+const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
+  (({ item, is_layout, ViRender }) => {
+    return (
+      <ViRender
+        item={item}
+        is_layout={is_layout}
+        div_props={(item) => ({
+          onPointerEnter(e) {
+            active.hover.id = item.id;
+            render();
+          },
+          onPointerLeave(e) {
+            active.hover.id = "";
+            render();
+          },
+          onPointerDown(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            activateItem(p, item.id);
+            render();
+          },
+        })}
+      />
+    );
+  }) as ViWrapperComp;

@@ -1,7 +1,7 @@
 import { DeepReadonly } from "popup/script/flow/runtime/types";
 import { IItem } from "utils/types/item";
 import { defineStore } from "../../../utils/react/define-store";
-import { ViComps, ViPage } from "./types";
+import { ViComps, ViPage, ViWrapperComp } from "./types";
 
 export const useVi = defineStore({
   name: "vi-store",
@@ -15,7 +15,8 @@ export const useVi = defineStore({
     db: null as any,
     api: null as any,
     item_parents: {} as Record<string, string>,
-    comp_props: {} as Record<string, any>
+    comp_props: {} as Record<string, any>,
+    wrapper: null as null | ViWrapperComp,
   },
   state: {
     mode: "desktop" as "mobile" | "desktop",

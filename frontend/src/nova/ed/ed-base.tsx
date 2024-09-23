@@ -1,5 +1,6 @@
-import { loadPageTree, PageTree } from "crdt/load-page-tree";
+import { loadPageTree } from "crdt/load-page-tree";
 import { loadPendingComponent } from "crdt/node/load-child-comp";
+import { fg } from "popup/script/flow/utils/flow-global";
 import { EdPopItemScript } from "popup/script/item-script";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useGlobal } from "../../utils/react/use-global";
@@ -8,14 +9,13 @@ import { isLocalhost } from "../../utils/ui/is-localhost";
 import { Loading } from "../../utils/ui/loading";
 import { prasiKeybinding } from "./ed-keybinds";
 import { EdLeft } from "./ed-left";
+import { EdTopBar } from "./ed-topbar";
+import { EdViRoot } from "./ed-vi-root";
+import { mainStyle } from "./ed-vi-style";
 import { EDGlobal } from "./logic/ed-global";
 import { EdPopCompGroup } from "./popup/comp/comp-group";
 import { EdPopCompPicker } from "./popup/comp/comp-picker";
 import { iconVSCode } from "./ui/icons";
-import { EdTopBar } from "./ed-topbar";
-import { fg } from "popup/script/flow/utils/flow-global";
-import { getActiveNode } from "crdt/node/get-node-by-id";
-import { EdViRoot } from "./ed-vi-root";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -31,8 +31,8 @@ export const EdBase = () => {
         if (["mobile", "desktop"].includes(content_tree.responsive)) {
           p.mode = content_tree.responsive;
         }
-        p.page.ts = Date.now();
         p.render();
+        p.ui.editor.render();
       },
       async on_component(item) {
         if (p.sync && item.component) {
@@ -107,7 +107,20 @@ export const EdBase = () => {
             <EdPopItemScript />
           ) : (
             <PanelGroup autoSaveId="prasi-editor-right" direction="horizontal">
-              <Panel>{p.page.tree && <EdViRoot ts={p.page.ts} />}</Panel>
+              <Panel>
+                {p.page.tree && (
+                  <div
+                    className={cx(
+                      "w-full h-full flex flex-1 relative overflow-auto border-r",
+                      p.mode === "mobile" ? "flex-col items-center" : ""
+                    )}
+                  >
+                    <div className={mainStyle(p)}>
+                      <EdViRoot />
+                    </div>
+                  </div>
+                )}
+              </Panel>
               <PanelResizeHandle />
               <Panel defaultSize={25}></Panel>
             </PanelGroup>

@@ -6,11 +6,13 @@ import { useVi } from "./lib/store";
 import { ViItem } from "./vi-item";
 import { parentCompArgs } from "./lib/parent-comp-args";
 import { compArgs } from "./lib/comp-args";
+import { DIV_PROPS } from "./lib/gen-parts";
 
 export const ViComp: FC<{
   item: DeepReadonly<IItem>;
   is_layout: boolean;
-}> = ({ item, is_layout }) => {
+  div_props?: (item: IItem) => DIV_PROPS;
+}> = ({ item, is_layout, div_props }) => {
   const { comps, instances, instantiate, ref_comp_props, parents, db, api } =
     useVi(({ state, ref, action }) => ({
       comps: ref.comps,
@@ -39,5 +41,5 @@ export const ViComp: FC<{
   const instance = instances[item.id];
   if (!instance) return loading_component;
 
-  return <ViItem item={item} is_layout={is_layout} />;
+  return <ViItem item={item} is_layout={is_layout} div_props={div_props} />;
 };

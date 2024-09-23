@@ -14,6 +14,7 @@ export const ViRoot: FC<ViProp> = ({
   db,
   api,
   mode,
+  wrapper,
 }) => {
   const { init, ref } = useVi(({ action, ref, state }) => ({
     init: action.init,
@@ -25,6 +26,7 @@ export const ViRoot: FC<ViProp> = ({
   if (!ref.init) {
     ref.init = true;
     ref.loader.comps = loader.comps as any;
+    if (wrapper) ref.wrapper = wrapper;
     viInit({ loader, enablePreload: !!enablePreload });
   }
 
