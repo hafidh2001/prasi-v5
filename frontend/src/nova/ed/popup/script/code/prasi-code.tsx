@@ -1,6 +1,6 @@
 import { getActiveNode } from "crdt/node/get-node-by-id";
 import { EDGlobal } from "logic/ed-global";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { MonacoJS } from "./monaco-js";
@@ -21,6 +21,7 @@ export const EdPrasiCode = () => {
     <div className={cx("w-full h-full")}>
       <MonacoJS
         value={js}
+        enableJsx
         onChange={(val) => {
           console.log(val);
         }}
