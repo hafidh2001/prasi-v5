@@ -13,11 +13,16 @@ export default page({
   url: "/ed/:site_id/:page_id",
   component: ({}) => {
     const p = useGlobal(EDGlobal, "EDITOR");
-    const local = useLocal({
-      new_site: false,
-    });
-
-    jscript.init(local.render);
+    const local = useLocal(
+      {
+        new_site: false,
+      },
+      () => {
+        jscript.init().then(() => {
+          p.render();
+        });
+      }
+    );
 
     const w = window as any;
 

@@ -1,29 +1,34 @@
-import type { Monaco, OnMount } from "@monaco-editor/react";
+import { EDGlobal } from "logic/ed-global";
 import { FC } from "react";
+import { useGlobal } from "utils/react/use-global";
 import { jscript } from "utils/script/jscript";
 import { Loading } from "utils/ui/loading";
-import { monacoEnableJSX } from "./js/enable-jsx";
-import { useGlobal } from "utils/react/use-global";
-import { EDGlobal } from "logic/ed-global";
-import trim from "lodash.trim";
 import { monacoCleanModel } from "./js/clean-models";
-import { monacoCreateModel } from "./js/create-model";
+import { monacoCreateModel, monacoRegisterSource } from "./js/create-model";
+import { monacoEnableJSX } from "./js/enable-jsx";
 
 export const MonacoJS: FC<{
   value: string;
   onChange: (value: string) => void;
   enableJsx?: boolean;
-}> = ({ value, onChange }) => {
+  models?: Record<string, string>;
+}> = ({ value, onChange, models }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const Editor = jscript.MonacoEditor;
-  if (!Editor) return <Loading backdrop={false} note="loading-monaco" />;
+  if (!Editor)
+    return (
+      <div className="w-full h-full items-center justify-center flex flex-1">
+        <Loading backdrop={false} note="loading-monaco" />
+      </div>
+    );
 
   return (
     <Editor
-      value={value}
+      defaultValue={value}
       onChange={(value) => {
         onChange(value || "");
       }}
+      loading={<Loading note="loading-monaco" />}
       language={"typescript"}
       options={{
         minimap: { enabled: false },
@@ -46,6 +51,11 @@ export const MonacoJS: FC<{
           source: value,
           activate: true,
         });
+        if (models) {
+          for (const [uri, source] of Object.entries(models)) {
+            monacoRegisterSource(monaco, source, uri);
+          }
+        }
       }}
     />
   );

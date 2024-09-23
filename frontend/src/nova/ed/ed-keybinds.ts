@@ -37,6 +37,12 @@ export const prasiKeybinding = (p: PG) => {
         else p.page.tree.redo();
       }
     };
+    const save = (e: any) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    handler.add("ctrl+s", save);
+    handler.add("meta+s", save);
     handler.add("ctrl+z", undo);
     handler.add("meta+z", undo);
     handler.add("meta+shift+z", redo);

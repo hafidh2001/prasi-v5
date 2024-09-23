@@ -24,3 +24,19 @@ export const monacoCreateModel = ({
   if (activate) editor.setModel(nmodel);
   return nmodel;
 };
+
+export const monacoRegisterSource = (
+  monaco: Monaco,
+  source: string,
+  uri: string
+) => {
+  const model = monaco.editor.getModels().find((e) => {
+    return e.uri.toString() === uri;
+  });
+
+  if (model) {
+    model.setValue(source);
+  } else {
+    monaco.editor.createModel(source, "typescript", monaco.Uri.parse(uri));
+  }
+};

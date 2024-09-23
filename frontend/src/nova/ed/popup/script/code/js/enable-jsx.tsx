@@ -109,8 +109,6 @@ export function jsxs(
 `,
     },
   ]);
-
-  console.log("registered");
 };
 
 export const register = (monaco: Monaco, source: string, uri: string) => {
