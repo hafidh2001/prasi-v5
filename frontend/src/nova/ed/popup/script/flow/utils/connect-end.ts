@@ -30,7 +30,7 @@ export const pflowConnectEnd = ({
   const from_rf = state.fromNode;
   if (from_rf) from_id = from_rf.id;
 
-  const on_before_connect = (arg: { node: PFNode; is_new: boolean }) => {
+  const on_before_connect = (pflow: PFlow, arg: { node: PFNode; is_new: boolean }) => {
     const def = (allNodeDefinitions as any)[
       arg.node.type
     ] as PFNodeDefinition<any>;
@@ -59,7 +59,7 @@ export const pflowConnectEnd = ({
           "Flow Create Node",
           ({ pflow }) => {
             const from = pflow.nodes[from_id];
-            on_before_connect({ node: from, is_new: true });
+            on_before_connect(pflow, { node: from, is_new: true });
 
             const to_node = {
               type: "code",
@@ -116,7 +116,7 @@ export const pflowConnectEnd = ({
         if (from_node.branches) {
           fg.update("Flow Connect Node", ({ pflow }) => {
             const from_node = pflow.nodes[from_id];
-            on_before_connect({ node: from_node, is_new: false });
+            on_before_connect(pflow, { node: from_node, is_new: false });
 
             let picked_branches = from_node.branches?.find(
               (e) => e.flow.length === 0
@@ -141,7 +141,7 @@ export const pflowConnectEnd = ({
           if (found && found.flow[found.idx + 1] !== to_id) {
             fg.update("Flow Connect Node", ({ pflow }) => {
               const from_node = pflow.nodes[from_id];
-              on_before_connect({ node: from_node, is_new: false });
+              on_before_connect(pflow, { node: from_node, is_new: false });
 
               const found = findFlow({ id: from_node.id, pflow });
               if (found && found.flow) {
