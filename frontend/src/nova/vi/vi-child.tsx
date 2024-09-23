@@ -2,20 +2,19 @@ import { DeepReadonly } from "popup/script/flow/runtime/types";
 import { FC } from "react";
 import { IItem } from "utils/types/item";
 import { ViRender } from "./vi-render";
+import { useVi } from "./lib/store";
 
 export const ViChilds: FC<{
-  childs: DeepReadonly<IItem>[];
+  item: DeepReadonly<{ id: string; childs: IItem[] }>;
   is_layout: boolean;
-  comp_args: any;
-}> = ({ childs, is_layout, comp_args }) => {
-  return childs.map((item) => {
-    return (
-      <ViRender
-        key={item.id}
-        item={item}
-        is_layout={is_layout}
-        comp_args={comp_args}
-      />
-    );
+}> = ({ item, is_layout }) => {
+  const { parents } = useVi(({ state, ref }) => ({
+    parents: ref.item_parents,
+  }));
+
+  const childs = item.childs;
+  return childs.map((child) => {
+    parents[child.id] = item.id;
+    return <ViRender key={child.id} item={child} is_layout={is_layout} />;
   });
 };

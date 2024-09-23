@@ -5,7 +5,7 @@ import { IItem } from "utils/types/item";
 
 export const scriptArgs = (opt: {
   item: DeepReadonly<IItem>;
-  childs: ReactElement;
+  childs: ReactElement | null;
   props: React.ClassAttributes<HTMLDivElement> &
     React.HTMLAttributes<HTMLDivElement> & {
       inherit?: {

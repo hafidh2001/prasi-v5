@@ -3,8 +3,11 @@ import { useEffect } from "react";
 import { IItem } from "utils/types/item";
 import { useVi } from "vi/lib/store";
 
-export const createViLocal = (item: DeepReadonly<IItem>) => {
-  return (arg: {
+export const createViLocal = (
+  item: DeepReadonly<IItem>,
+  ref_comp_props: Record<string, any>
+) => {
+  return (opt: {
     name: string;
     value: any;
     effect: (local: any) => void;
@@ -16,8 +19,12 @@ export const createViLocal = (item: DeepReadonly<IItem>) => {
     }));
 
     if (!local.ts[item.id]) {
+      if (!ref_comp_props[item.id]) {
+        ref_comp_props[item.id] = {};
+      }
+      ref_comp_props[item.id][opt.name] = local.value[item.id];
       local.value[item.id] = {
-        ...arg.value,
+        ...opt.value,
         render() {
           local.update((state) => {
             state.local_render[item.id] = Date.now();
@@ -27,9 +34,9 @@ export const createViLocal = (item: DeepReadonly<IItem>) => {
     }
 
     useEffect(() => {
-      arg.effect(local.value[item.id]);
+      opt.effect(local.value[item.id]);
     });
 
-    return <>{arg.children}</>;
+    return opt.children;
   };
 };

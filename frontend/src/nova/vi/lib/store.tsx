@@ -14,6 +14,8 @@ export const useVi = defineStore({
     local_value: {} as Record<string, any>,
     db: null as any,
     api: null as any,
+    item_parents: {} as Record<string, string>,
+    comp_props: {} as Record<string, any>
   },
   state: {
     mode: "desktop" as "mobile" | "desktop",
@@ -36,18 +38,21 @@ export const useVi = defineStore({
       layout,
       db,
       api,
+      mode,
     }: {
       page: ViPage;
       layout?: ViPage;
       comps: ViComps;
       db: any;
       api: any;
+      mode: "desktop" | "mobile";
     }) => {
       state.page = page;
       state.layout = layout || null;
       ref.comps = comps;
       ref.db = db;
       ref.api = api;
+      state.mode = mode;
 
       for (const id of Object.keys(comps)) {
         state.comp.loaded.add(id);

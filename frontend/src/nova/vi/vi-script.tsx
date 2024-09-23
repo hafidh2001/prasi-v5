@@ -1,13 +1,15 @@
 import { DeepReadonly } from "popup/script/flow/runtime/types";
 import { FC, ReactElement, useRef } from "react";
-import { useLocal } from "utils/react/use-local";
 import { IItem } from "utils/types/item";
 import { scriptArgs } from "./lib/script-args";
 import { createViLocal } from "./script/vi-local";
+import { useVi } from "./lib/store";
+import { compArgs } from "./lib/comp-args";
+import { parentCompArgs } from "./lib/parent-comp-args";
 
 export const ViScript: FC<{
   item: DeepReadonly<IItem>;
-  childs: ReactElement;
+  childs: ReactElement | null;
   props: React.ClassAttributes<HTMLDivElement> &
     React.HTMLAttributes<HTMLDivElement> & {
       inherit?: {
@@ -15,24 +17,60 @@ export const ViScript: FC<{
         className: string;
       };
     };
-  comp_args: any;
-}> = ({ item, childs, props, comp_args }) => {
-  const local = useRef<any>({}).current;
-  if (item !== local.item) {
-    local.item = item;
-    local.Local = createViLocal(item);
-  }
-
+  ts?: number;
+}> = ({ item, childs, props }) => {
+  const { ref_comp_props, parents, db, api } = useVi(({ state, ref }) => ({
+    ref_comp_props: ref.comp_props,
+    parents: ref.item_parents,
+    db: ref.db,
+    api: ref.api,
+  }));
+  const internal = useRef<any>({}).current;
   const result = { children: null };
   const script_args = scriptArgs({ item, childs, props, result });
+
+  if (item !== internal.item) {
+    internal.item = item;
+    internal.Local = createViLocal(item, ref_comp_props);
+  }
+
+  let comp_args = parentCompArgs(parents, ref_comp_props, item.id);
+  if (item.component?.id) {
+    ref_comp_props[item.id] = compArgs(item, comp_args, db, api);
+    comp_args = ref_comp_props[item.id];
+  }
+
+  for (const [k, v] of Object.entries(comp_args)) {
+    if (typeof v === "object" && (v as any).__jsx) {
+      comp_args[k] = (v as any).__render(item, parents);
+    }
+  }
+
   const final_args = {
     ...comp_args,
     ...script_args,
-    Local: local.Local,
+    db,
+    api,
+    __js: item.adv!.js,
   };
+  final_args.Local = internal.Local;
 
-  const js = item.adv!.jsBuilt || "";
-  const fn = new Function(...Object.keys(final_args), js);
+  const src = item.adv!.jsBuilt || "";
+  const fn = new Function(
+    ...Object.keys(final_args),
+    `// ${item.name}: ${item.id} 
+try {
+  ${src}
+} catch (e) {
+  console.error(\`\\
+Error in item ${item.name}: ${item.id} 
+
+$\{__js}
+
+ERROR: $\{e.message}
+\`);
+}`
+  );
 
   try {
     fn(...Object.values(final_args));

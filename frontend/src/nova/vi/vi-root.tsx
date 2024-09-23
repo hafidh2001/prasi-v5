@@ -13,6 +13,7 @@ export const ViRoot: FC<ViProp> = ({
   enablePreload,
   db,
   api,
+  mode,
 }) => {
   const { init, ref } = useVi(({ action, ref, state }) => ({
     init: action.init,
@@ -27,7 +28,7 @@ export const ViRoot: FC<ViProp> = ({
     viInit({ loader, enablePreload: !!enablePreload });
   }
 
-  init({ page, comps, layout, db, api });
+  init({ page, comps, layout, db, api, mode });
 
   return (
     <ErrorBox>
