@@ -1,14 +1,14 @@
 import { apiProxy } from "base/load/api/api-proxy";
 import { dbProxy } from "base/load/db/db-proxy";
 import { EDGlobal } from "logic/ed-global";
-import { useRef } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { StoreProvider } from "utils/react/define-store";
 import { useGlobal } from "utils/react/use-global";
 import { ViComps } from "vi/lib/types";
 import { ViRoot } from "vi/vi-root";
 import { mainStyle } from "./ed-vi-style";
 
-export const EdViRoot = () => {
+export const EdViRoot = memo(({ ts }: { ts: number }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const ref = useRef({
     db: dbProxy(p.site.config.api_url),
@@ -17,17 +17,20 @@ export const EdViRoot = () => {
     page_ts: 0,
     comps: {} as ViComps,
   }).current;
+  const [, _set] = useState({});
+  const render = () => _set({});
 
-  console.log("re-render", ref.page_ts !== p.page.ts, ref.page_ts, p.page.ts);
-
-  if (ref.page_ts !== p.page.ts) {
-    ref.page = {
-      id: p.page.cur.id,
-      url: p.page.cur.url,
-      root: p.page.cur.content_tree,
-    };
-    ref.page_ts = p.page.ts;
-  }
+  useEffect(() => {
+    if (ref.page_ts !== ts) {
+      ref.page = {
+        id: p.page.cur.id,
+        url: p.page.cur.url,
+        root: p.page.cur.content_tree,
+      };
+      ref.page_ts = ts;
+      render();
+    }
+  }, [ts]);
 
   for (const [k, v] of Object.entries(p.comp.loaded)) {
     ref.comps[k] = v.content_tree;
@@ -55,4 +58,4 @@ export const EdViRoot = () => {
       </div>
     </div>
   );
-};
+});

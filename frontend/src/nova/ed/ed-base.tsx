@@ -107,7 +107,7 @@ export const EdBase = () => {
             <EdPopItemScript />
           ) : (
             <PanelGroup autoSaveId="prasi-editor-right" direction="horizontal">
-              <Panel>{p.page.tree && <EdViRoot />}</Panel>
+              <Panel>{p.page.tree && <EdViRoot ts={p.page.ts} />}</Panel>
               <PanelResizeHandle />
               <Panel defaultSize={25}></Panel>
             </PanelGroup>
