@@ -6,13 +6,14 @@ import { PFlow } from "./runtime/types";
 
 export const PrasiFlowProp = ({ pflow }: { pflow: PFlow }) => {
   const local = useLocal({
-    selection: {
+    selection: fg.prop?.selection || {
       nodes: [],
       edges: [],
       loading: false,
       selectAll() {},
     },
   } as PrasiFlowPropLocal);
+
   fg.prop = local;
 
   const sel = local.selection;

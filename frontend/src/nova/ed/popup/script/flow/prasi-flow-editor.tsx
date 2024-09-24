@@ -5,6 +5,7 @@ import {
   Edge,
   getOutgoers,
   Node,
+  Position,
   ReactFlow,
   ReactFlowInstance,
   useEdgesState,
@@ -68,7 +69,32 @@ export function PrasiFlowEditor({
   useEffect(() => {
     fg.pflow = pflow;
     const parsed = parseFlow(pflow, { nodes: [], edges: [] });
-    setNodes(parsed.nodes);
+
+    const unflowed: Node[] = [];
+    if (parsed.unflowed_nodes.size > 0) {
+      parsed.unflowed_nodes.forEach((id) => {
+        const inode = pflow.nodes[id];
+        if (inode) {
+          unflowed.push({
+            id: inode.id,
+            type: "default",
+            className: inode.type,
+            sourcePosition: Position.Bottom,
+            targetPosition: Position.Top,
+            data: {
+              type: inode.type,
+              label: inode.type === "start" ? "Start" : inode.name,
+            },
+            position: inode.position || {
+              x: 0,
+              y: 0,
+            },
+          });
+        }
+      });
+    }
+
+    setNodes([...parsed.nodes, ...unflowed]);
     setEdges(parsed.edges);
     restoreViewport({ pflow, local });
     const sel = fg.prop?.selection;
@@ -177,6 +203,11 @@ export function PrasiFlowEditor({
         edgeTypes={local.edgeTypes}
         onSelectionChange={(changes) => {
           if (fg.prop) {
+            const sel = fg.prop.selection;
+            if (sel.edges.length === 1 && sel.nodes.length === 0) {
+              if (changes.nodes.length === 0) return;
+            }
+
             fg.prop.selection = {
               ...changes,
               loading: fg.prop.selection.loading,

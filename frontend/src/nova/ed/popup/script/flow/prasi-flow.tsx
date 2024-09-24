@@ -46,6 +46,9 @@ export const EdPrasiFlow = function () {
     [node?.item.id]
   );
 
+  fg.prasi.resetDefault = resetDefault
+
+
   useEffect(() => {
     const tree = getActiveTree(p);
 

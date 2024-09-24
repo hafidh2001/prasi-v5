@@ -45,6 +45,7 @@ const fg_default = {
     item_id: "",
     skip_init_update: false,
     updated_outside: false,
+    resetDefault: (relayout: boolean) => {},
   },
   refreshFlow(pflow: RPFlow) {},
 };

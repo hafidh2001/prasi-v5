@@ -6,7 +6,7 @@ export const parseFlow = (
   pf: RPFlow,
   current: { nodes: Node[]; edges: Edge[] }
 ) => {
-  const parsed = { nodes: [], edges: [] };
+  const parsed = { nodes: [], edges: [], unflowed_nodes: new Set(Object.keys(pf.nodes)) };
 
   const existing = new Set<string>();
 
@@ -23,6 +23,7 @@ export const parseFlow = (
           existing: {
             rf_edges: parsed.edges,
             rf_nodes: parsed.nodes,
+            rf_unflowed_nodes: parsed.unflowed_nodes,
             x: 0,
             y: 0,
             next_flow: [],

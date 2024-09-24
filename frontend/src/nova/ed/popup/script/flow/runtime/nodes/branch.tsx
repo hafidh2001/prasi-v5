@@ -1,6 +1,7 @@
+import { current } from "immer";
 import { codeExec } from "../lib/code-exec";
 import { defineNode } from "../lib/define-node";
-import { PFNodeBranch } from "../types";
+import { PFNode, PFNodeBranch } from "../types";
 
 type Condition = { condition: string; name: string };
 
@@ -21,45 +22,37 @@ export const nodeBranch = defineNode({
       if (empty_branch_len === 0 || conditions.length === 0) {
         const name = "Condition " + (conditions.length + 1);
         conditions.push({ condition: "", name });
-        branches.push({ flow: [], idx: conditions.length - 1, name });
+        branches.push({
+          flow: [],
+          idx: conditions.length - 1,
+          name,
+          meta: { condition_idx: branches.length },
+        });
       }
-    }
-  },
-  on_init({ node }) {
-    if (!node.branches) {
-      node.branches = [];
-    }
-    if (node.branches) {
-      let i = 0;
+    } else {
+      if (conditions.length > branches.length) {
+        for (const [i, c] of Object.entries(conditions)) {
+          const idx = i as unknown as number;
 
-      for (const [i, c] of Object.entries(
-        (node.conditions || []) as Condition[]
-      )) {
-        const idx = i as unknown as number;
-        if (node.branches[idx]) {
-          node.branches[idx].idx = idx;
-          node.branches[idx].code = c.condition;
-          node.branches[idx].name = c.name;
-        } else {
-          node.branches[idx] = {
-            idx,
-            code: c.condition,
-            name: c.name,
-            flow: [],
-          } as any;
+          const branch = node.branches.find(
+            (e) => e.meta?.condition_idx === idx
+          );
+          if (branch) {
+            branch.idx = idx;
+            branch.code = c.condition;
+            branch.name = c.name;
+          } else {
+            node.branches.push({
+              idx,
+              code: c.condition,
+              name: c.name,
+              flow: [],
+              meta: {
+                condition_idx: idx,
+              },
+            });
+          }
         }
-      }
-
-      for (const branch of node.branches) {
-        if (
-          typeof branch.idx === "undefined" ||
-          branch.idx >= node.conditions.length
-        ) {
-          if (!node.unused_branches) node.unused_branches = [];
-          node.unused_branches.push(branch);
-          node.branches = node.branches.filter((e) => e !== branch);
-        }
-        i++;
       }
     }
   },
@@ -75,6 +68,24 @@ export const nodeBranch = defineNode({
       fields: {
         condition: { type: "code", idx: 1 },
         name: { idx: 0, type: "string" },
+      },
+      del: {
+        onChange: ({
+          node,
+          idx,
+        }: {
+          node: PFNode;
+          list: any[];
+          idx: number;
+        }) => {
+          if (!node.branches) {
+            node.branches = [];
+          }
+
+          node.branches = current(node).branches!.filter((e) => {
+            return e.meta?.condition_idx !== idx;
+          });
+        },
       },
     },
   },

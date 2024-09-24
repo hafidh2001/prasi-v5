@@ -74,12 +74,13 @@ export const pflowConnectEnd = ({
 
             if (from.branches) {
               const empty_branch = from.branches.find(
-                (e) => e.flow.length === 0
+                (e) => e.flow.length <= 1
               );
 
               if (empty_branch) {
                 if (to_node) {
-                  empty_branch.flow.push(from.id);
+                  if (!empty_branch.flow.includes(from.id))
+                    empty_branch.flow.push(from.id);
                   empty_branch.flow.push(to_node.id);
                 }
               } else {

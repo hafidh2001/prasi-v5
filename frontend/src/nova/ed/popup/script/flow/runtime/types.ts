@@ -8,6 +8,7 @@ export type PFNodeBranch = {
   name?: string;
   flow: PFNodeID[];
   idx?: number;
+  meta?: { condition_idx: number };
 };
 
 export type PFNodePosition = { x: number; y: number };
@@ -28,7 +29,6 @@ export type PFNode = Record<string, any> & {
   branches?: PFNodeBranch[];
   position?: PFNodePosition;
   size?: PFNodeSize;
-  unused_branches?: PFNodeBranch[];
 };
 
 export type RPFlow = DeepReadonly<PFlow>;
@@ -87,6 +87,9 @@ export type PFField = (
       add?: {
         checkbox: () => { label: string; value: any; checked?: boolean }[];
         onChange: (checked: any[]) => void;
+      };
+      del?: {
+        onChange: (arg: { list: any[]; idx: number; node: PFNode }) => {};
       };
     }
   | { type: "code" }

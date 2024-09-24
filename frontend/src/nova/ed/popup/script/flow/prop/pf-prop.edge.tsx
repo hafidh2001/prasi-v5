@@ -1,16 +1,15 @@
 import { Edge } from "@xyflow/react";
-import { FC } from "react";
-import { fg } from "../utils/flow-global";
-import { PFlow, PFNodeBranch } from "../runtime/types";
-import { savePF } from "../utils/save-pf";
 import { Split } from "lucide-react";
+import { FC } from "react";
 import { useLocal } from "utils/react/use-local";
+import { PFlow } from "../runtime/types";
+import { fg } from "../utils/flow-global";
 
 export const PFPropEdge: FC<{ edge: Edge; pflow: PFlow }> = ({
   edge,
   pflow,
 }) => {
-  const local = useLocal({ selected: null as null | PFNodeBranch });
+  const local = useLocal({ selected_idx: -1 });
   const node = pflow.nodes[edge.source];
   if (!node) return <></>;
 
@@ -25,7 +24,7 @@ export const PFPropEdge: FC<{ edge: Edge; pflow: PFlow }> = ({
           <div>
             {(node.branches || []).map((e, idx) => {
               const selected = e.flow.includes(edge.target);
-              if (selected) local.selected = e;
+              if (selected) local.selected_idx = idx;
               return (
                 <div
                   key={idx}
@@ -36,22 +35,13 @@ export const PFPropEdge: FC<{ edge: Edge; pflow: PFlow }> = ({
                       : "cursor-pointer hover:bg-blue-50"
                   )}
                   onClick={() => {
-                    if (local.selected && local.selected !== e) {
-                      const temp = local.selected.flow;
-                      local.selected.flow = e.flow;
-                      e.flow = temp;
-                      if (fg.prop) {
-                        fg.prop.selection.loading = true;
-                      }
-                      fg.reload(false);
-                      fg.main?.action.resetSelectedElements();
-                      fg.main?.action.addSelectedEdges([edge.id]);
-                      savePF("Change Branch", pflow, {
-                        then() {
-                          if (fg.prop) fg.prop.selection.loading = false;
-                          fg.main?.action.resetSelectedElements();
-                          fg.main?.action.addSelectedEdges([edge.id]);
-                        },
+                    if (local.selected_idx !== idx) {
+                      fg.update("Flow Change Branch", ({ pflow }) => {
+                        const n = pflow.nodes[node.id];
+                        const e = n.branches![idx];
+                        const temp = n.branches![local.selected_idx].flow;
+                        n.branches![local.selected_idx].flow = e.flow;
+                        e.flow = temp;
                       });
                     }
                   }}

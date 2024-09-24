@@ -16,6 +16,7 @@ import { useLocal } from "utils/react/use-local";
 import { EdScriptSnippet } from "./snippet";
 import { Tooltip } from "utils/ui/tooltip";
 import { TopBtn } from "../../../ui/top-btn";
+import { fg } from "../flow/utils/flow-global";
 
 export const EdScriptWorkbench: FC<{
   children: (arg: { mode: "script" | "flow" }) => ReactNode;
@@ -186,16 +187,7 @@ export const EdScriptWorkbench: FC<{
                               content="Reset Flow"
                               onClick={() => {
                                 if (confirm("Reset Flow ?")) {
-                                  getActiveTree(p).update(
-                                    "Reset Item Flow",
-                                    ({ findNode }) => {
-                                      const n = findNode(active.item_id);
-                                      if (n && n.item.adv) {
-                                        delete n.item.adv.flow;
-                                        delete n.item.adv.scriptMode;
-                                      }
-                                    }
-                                  );
+                                  fg.prasi.resetDefault(true);
                                 }
                               }}
                             >

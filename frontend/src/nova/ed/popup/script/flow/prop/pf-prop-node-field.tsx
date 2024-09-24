@@ -46,12 +46,13 @@ export const PFPropNodeField: FC<{
     }
   );
 
-  const update = (value: any) => {
+  const update = (value: any, exec?: { before: (node: PFNode) => void }) => {
     clearTimeout(fg.update_timeout);
     fg.update_timeout = setTimeout(() => {
       fg.update(`Update Node: ${name} `, ({ pflow }) => {
         const n = pflow.nodes[node.id];
         if (n) {
+          exec?.before(n);
           const obj = path && path.length > 0 ? get(n, path?.join(".")) : n;
           if (value === undefined) {
             delete obj[name];
@@ -316,7 +317,17 @@ export const PFPropNodeField: FC<{
                         onClick={() => {
                           local.value.splice(idx, 1);
                           local.render();
-                          update(local.value);
+                          update(local.value, {
+                            before: (node) => {
+                              if (field.del?.onChange) {
+                                field.del.onChange({
+                                  node: node,
+                                  list: local.value,
+                                  idx: idx,
+                                });
+                              }
+                            },
+                          });
                         }}
                       >
                         <Trash2 size={14} />

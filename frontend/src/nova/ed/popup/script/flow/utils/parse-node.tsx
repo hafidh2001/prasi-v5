@@ -15,6 +15,7 @@ export const parseNodes = (
     };
     existing?: {
       rf_nodes: Node[];
+      rf_unflowed_nodes: Set<string>;
       rf_edges: Edge[];
       x: number;
       y: number;
@@ -25,6 +26,9 @@ export const parseNodes = (
   const existing = opt?.existing || undefined;
   const rf_nodes: Node[] = existing ? existing.rf_nodes : [];
   const rf_edges: Edge[] = existing ? existing.rf_edges : [];
+  const rf_unflowed_nodes = existing
+    ? existing.rf_unflowed_nodes
+    : new Set<string>();
 
   let flow_mapped: DeepReadonly<PFNode>[] = [];
   for (let i = 0; i < flow.length; i++) {
@@ -42,6 +46,8 @@ export const parseNodes = (
   let y = 0;
 
   for (const inode of flow_nodes) {
+    rf_unflowed_nodes.delete(inode.id);
+
     const new_node: Node = {
       id: inode.id,
       type: "default",
@@ -94,6 +100,7 @@ export const parseNodes = (
               existing: {
                 rf_nodes,
                 rf_edges,
+                rf_unflowed_nodes,
                 x: i++ - 0.5,
                 y: by,
                 next_flow: flow_nodes.slice(y),
@@ -118,6 +125,7 @@ export const parseNodes = (
               existing: {
                 rf_nodes,
                 rf_edges,
+                rf_unflowed_nodes,
                 x: i++ - 0.5,
                 y: by,
                 next_flow: flow_nodes.slice(y),
