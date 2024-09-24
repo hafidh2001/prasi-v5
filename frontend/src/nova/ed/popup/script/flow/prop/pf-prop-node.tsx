@@ -1,11 +1,11 @@
 import { FC, useEffect } from "react";
 import { useLocal } from "utils/react/use-local";
-import { PFField, PFlow, PFNode } from "../runtime/types";
+import { DeepReadonly, PFField, PFNode, RPFlow } from "../runtime/types";
 import { fg } from "../utils/flow-global";
 import { getNodeFields } from "../utils/get-node-fields";
 import { PFPropNodeField } from "./pf-prop-node-field";
 
-export const PFPropNode: FC<{ node: PFNode; pflow: PFlow }> = ({
+export const PFPropNode: FC<{ node: DeepReadonly<PFNode>; pflow: RPFlow }> = ({
   node,
   pflow,
 }) => {

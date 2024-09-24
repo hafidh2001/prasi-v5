@@ -1,7 +1,6 @@
 import { Edge, NodeRemoveChange } from "@xyflow/react";
-import { RPFlow } from "../runtime/types";
-import { fg } from "./flow-global";
 import { findFlow } from "./find-node";
+import { fg } from "./flow-global";
 
 export const removeNodes = ({
   changes,
@@ -88,7 +87,7 @@ export const removeNodes = ({
       }
     },
     ({ pflow }) => {
-      if (Object.keys(pflow.nodes).length === 0) {
+      if (Object.keys(pflow?.nodes || {}).length === 0) {
         resetDefault(true);
       }
     }

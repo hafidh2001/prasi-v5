@@ -1,6 +1,7 @@
 import { Edge, Node, ReactFlowInstance } from "@xyflow/react";
 import { PFRunResult } from "../runtime/runner";
 import { PFlow, PFNode, RPFlow } from "../runtime/types";
+import { PNode } from "logic/types";
 
 export type PrasiFlowPropLocal = {
   selection: {
@@ -15,13 +16,16 @@ const fg_default = {
   pflow: null as unknown as RPFlow,
   pointer_up_id: "",
   pointer_to: null as null | { x: number; y: number },
+  updateNoDebounce(
+    action_name: string,
+    fn: (arg: { pflow: PFlow; node: PNode }) => void,
+    next?: (arg: { pflow?: RPFlow | null }) => void
+  ) {},
   update(
     action_name: string,
-    fn: (arg: { pflow: PFlow }) => void,
-    next?: (arg: { pflow: RPFlow }) => void
-  ) {
-    return null as unknown as RPFlow;
-  },
+    fn: (arg: { pflow: PFlow; node: PNode }) => void,
+    next?: (arg: { pflow?: RPFlow | null }) => void
+  ) {},
   update_timeout: null as any,
   main: null as null | {
     reactflow: null | ReactFlowInstance<Node, Edge>;

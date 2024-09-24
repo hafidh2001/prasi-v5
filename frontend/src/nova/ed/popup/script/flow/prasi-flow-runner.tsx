@@ -7,12 +7,12 @@ import { runFlow } from "./runtime/runner";
 import { fg } from "./utils/flow-global";
 import { useLocal } from "utils/react/use-local";
 import { Tooltip } from "utils/ui/tooltip";
-import { PFlow } from "./runtime/types";
+import { PFlow, RPFlow } from "./runtime/types";
 
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
 
-export const PrasiFlowRunner = ({ pflow }: { pflow: PFlow }) => {
+export const PrasiFlowRunner = ({ pflow }: { pflow: RPFlow }) => {
   const local = useLocal({
     start: 0,
     status: "idle" as "idle" | "running",

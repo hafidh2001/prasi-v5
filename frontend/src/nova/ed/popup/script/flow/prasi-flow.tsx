@@ -13,6 +13,7 @@ import { RPFlow } from "./runtime/types";
 import { fg } from "./utils/flow-global";
 import { defaultFlow } from "./utils/prasi/default-flow";
 import { initAdv } from "./utils/prasi/init-adv";
+import { current } from "immer";
 
 export const EdPrasiFlow = function () {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -25,29 +26,29 @@ export const EdPrasiFlow = function () {
 
   const resetDefault = useCallback(
     (relayout: boolean) => {
-      setTimeout(() => {
-        if (node) {
-          fg.update("Flow Reset", ({ pflow }) => {
-            const new_flow = defaultFlow(
-              "item",
-              `item-${node.item.id}`,
-              node.item.id
-            );
-            for (const [k, v] of Object.entries(new_flow)) {
-              (pflow as any)[k] = v;
-            }
-          });
-          localStorage.removeItem(`prasi-flow-vp-${`item-${node.item.id}`}`);
+      fg.updateNoDebounce(
+        "Flow Reset",
+        ({ node }) => {
+          const new_flow = defaultFlow(
+            "item",
+            `item-${node.item.id}`,
+            node.item.id
+          );
+          if (!node.item.adv) node.item.adv = {};
+          node.item.adv.flow = new_flow;
+        },
+        ({ pflow }) => {
+          localStorage.removeItem(`prasi-flow-vp-${`item-${node?.item.id}`}`);
           sflow.should_relayout = relayout;
+          sflow.current = pflow || null;
           local.render();
         }
-      });
+      );
     },
-    [node?.item.id]
+    [node?.item.id, fg.updateNoDebounce]
   );
 
-  fg.prasi.resetDefault = resetDefault
-
+  fg.prasi.resetDefault = resetDefault;
 
   useEffect(() => {
     const tree = getActiveTree(p);
@@ -57,28 +58,14 @@ export const EdPrasiFlow = function () {
         if (node.item.id !== prasi.item_id) {
           initAdv(node, tree);
           prasi.item_id = node.item.id;
-          fg.update = (
+          fg.updateNoDebounce = (
             action_name: string,
             fn,
-            next?: (arg: { pflow: RPFlow }) => void
+            next?: (arg: { pflow?: RPFlow | null }) => void
           ) => {
-            clearTimeout(fg.update_timeout);
-            fg.update_timeout = setTimeout(() => {
-              if (next) {
-                const unwatch = tree.subscribe(() => {
-                  unwatch();
-                  const node = findNodeById(
-                    active.item_id,
-                    tree.snapshot.childs
-                  );
-                  if (node) {
-                    if (node && node.item.adv && node.item.adv.flow) {
-                      next({ pflow: node.item.adv.flow });
-                    }
-                  }
-                });
-              }
-              tree.update(action_name, ({ findNode }) => {
+            tree.update(
+              action_name,
+              ({ findNode }) => {
                 const node = findNode(active.item_id);
 
                 if (node) {
@@ -95,12 +82,30 @@ export const EdPrasiFlow = function () {
                   }
 
                   if (node.item.adv?.flow) {
-                    fn({ pflow: node.item.adv.flow });
+                    fn({ pflow: node.item.adv.flow, node });
                   }
                 }
-              });
-            }, 50);
-            return node.item.adv?.flow as RPFlow;
+              },
+              ({ findNode }) => {
+                const n = findNode(node.item.id);
+
+                if (next) {
+                  next({ pflow: n?.item.adv?.flow });
+                } else {
+                  sflow.current = n?.item.adv?.flow || null;
+                }
+              }
+            );
+          };
+          fg.update = (
+            action_name: string,
+            fn,
+            next?: (arg: { pflow?: RPFlow | null }) => void
+          ) => {
+            clearTimeout(fg.update_timeout);
+            fg.update_timeout = setTimeout(() => {
+              fg.updateNoDebounce(action_name, fn, next);
+            }, 100);
           };
 
           if (

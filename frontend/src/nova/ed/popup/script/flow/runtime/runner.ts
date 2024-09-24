@@ -5,16 +5,18 @@ import {
   PFNodeDefinition,
   PFRuntime,
   PFNodeBranch,
+  RPFlow,
+  DeepReadonly,
 } from "./types";
 
 type RunFlowOpt = {
   vars?: Record<string, any>;
   capture_console: boolean;
   delay?: number;
-  after_node?: (arg: { visited: PFRunVisited[]; node: PFNode }) => void;
-  before_node?: (arg: { visited: PFRunVisited[]; node: PFNode }) => void;
+  after_node?: (arg: { visited: PFRunVisited[]; node: DeepReadonly<PFNode> }) => void;
+  before_node?: (arg: { visited: PFRunVisited[]; node: DeepReadonly<PFNode> }) => void;
 };
-export const runFlow = async (pf: PFlow, opt?: RunFlowOpt) => {
+export const runFlow = async (pf: RPFlow, opt?: RunFlowOpt) => {
   const main_flow_id = Object.keys(pf.flow).find(
     (id) => pf.nodes[id].type === "start"
   );
@@ -31,7 +33,7 @@ export const runFlow = async (pf: PFlow, opt?: RunFlowOpt) => {
 
 export type PFRunResult = Awaited<ReturnType<typeof runFlow>>;
 type PFRunVisited = {
-  node: PFNode;
+  node: DeepReadonly<PFNode>;
   parent_branch?: PFNodeBranch;
   log: any[];
   branching?: boolean;
@@ -39,7 +41,11 @@ type PFRunVisited = {
   error: any;
 };
 
-const flowRuntime = async (pf: PFlow, runtime: PFRuntime, opt?: RunFlowOpt) => {
+const flowRuntime = async (
+  pf: RPFlow,
+  runtime: PFRuntime,
+  opt?: RunFlowOpt
+) => {
   const visited: PFRunVisited[] = [];
   const vars = { ...opt?.vars };
   for (const current of runtime.nodes) {
@@ -59,8 +65,8 @@ const flowRuntime = async (pf: PFlow, runtime: PFRuntime, opt?: RunFlowOpt) => {
 };
 
 const runSingleNode = async (arg: {
-  pf: PFlow;
-  current: PFNode;
+  pf: RPFlow;
+  current: DeepReadonly<PFNode>;
   branch?: PFNodeBranch;
   visited: PFRunVisited[];
   vars: Record<string, any>;

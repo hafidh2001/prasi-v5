@@ -2,10 +2,10 @@ import { Edge } from "@xyflow/react";
 import { Split } from "lucide-react";
 import { FC } from "react";
 import { useLocal } from "utils/react/use-local";
-import { PFlow } from "../runtime/types";
+import { RPFlow } from "../runtime/types";
 import { fg } from "../utils/flow-global";
 
-export const PFPropEdge: FC<{ edge: Edge; pflow: PFlow }> = ({
+export const PFPropEdge: FC<{ edge: Edge; pflow: RPFlow }> = ({
   edge,
   pflow,
 }) => {

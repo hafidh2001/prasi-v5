@@ -1,5 +1,5 @@
 import { NodeModel, TreeMethods } from "@minoru/react-dnd-treeview";
-import { PFlow } from "popup/script/flow/runtime/types";
+import { PFlow, RPFlow } from "popup/script/flow/runtime/types";
 import { createClient } from "utils/sync/client";
 import { loadPageTree, PageTree } from "../crdt/load-page-tree";
 import { CompPickerNode } from "../popup/comp/comp-picker/render-picker-node";
@@ -28,7 +28,7 @@ export const EDGlobal = {
   script: {
     do_edit: async (newval: string, all?: boolean) => {},
     flow: {
-      current: null as null | PFlow,
+      current: null as null | RPFlow,
       should_relayout: false,
     },
   },

@@ -1,10 +1,10 @@
 import { useLocal } from "utils/react/use-local";
 import { PFPropNode } from "./prop/pf-prop-node";
 import { PFPropEdge } from "./prop/pf-prop.edge";
+import { RPFlow } from "./runtime/types";
 import { fg, PrasiFlowPropLocal } from "./utils/flow-global";
-import { PFlow } from "./runtime/types";
 
-export const PrasiFlowProp = ({ pflow }: { pflow: PFlow }) => {
+export const PrasiFlowProp = ({ pflow }: { pflow: RPFlow }) => {
   const local = useLocal({
     selection: fg.prop?.selection || {
       nodes: [],

@@ -1,13 +1,13 @@
+import get from "lodash.get";
 import { ChevronDown, Trash2 } from "lucide-react";
 import { FC, useEffect, useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { useLocal } from "utils/react/use-local";
 import { Combobox } from "utils/shadcn/comps/ui/combobox";
 import { Tooltip } from "utils/ui/tooltip";
-import { PFField, PFlow, PFNode } from "../runtime/types";
+import { DeepReadonly, PFField, PFNode, RPFlow } from "../runtime/types";
 import { fg } from "../utils/flow-global";
 import { SimplePopover } from "../utils/simple-popover";
-import get from "lodash.get";
 
 const focus = {
   timeout: null as any,
@@ -15,11 +15,11 @@ const focus = {
 
 export const PFPropNodeField: FC<{
   field: PFField;
-  node: PFNode;
+  node: DeepReadonly<PFNode>;
   name: string;
   value: any;
   path?: string[];
-  pflow: PFlow;
+  pflow: RPFlow;
 }> = ({ field, node, name, value, pflow, path }) => {
   const label = field.label || name;
   const ref = useRef<HTMLTextAreaElement>(null);

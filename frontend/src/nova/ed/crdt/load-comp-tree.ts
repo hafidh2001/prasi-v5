@@ -94,13 +94,23 @@ export const internalLoadCompTree = (
         findNode: (id: string) => null | PNode;
         findParent: (id: string) => null | PNode;
       }) => void,
-      done?: () => void
+      done?: (opt: {
+        tree: EBaseComp["content_tree"];
+        findNode: (id: string) => null | PNode;
+      }) => void
     ) {
       const _fn = (tree: EBaseComp["content_tree"]) => {
         if (done) {
           const unwatch = immer.subscribe(() => {
             unwatch();
-            done();
+            const tree = immer.get();
+            done({
+              tree,
+              findNode: (id) => {
+                const result = findNodeById(id, tree.childs);
+                return result;
+              },
+            });
           });
         }
         sync.comp.pending_action(comp_id, action_name);

@@ -70,17 +70,27 @@ export const loadPageTree = (
       action_name: string,
       fn: (opt: {
         tree: EPage["content_tree"];
-        flatten(): ReturnType<typeof flattenTree>;
         findNode: (id: string) => null | PNode;
+        flatten(): ReturnType<typeof flattenTree>;
         findParent: (id: string) => null | PNode;
       }) => void,
-      done?: () => void
+      done?: (opt: {
+        tree: EPage["content_tree"];
+        findNode: (id: string) => null | PNode;
+      }) => void
     ) {
       const _fn = (tree: EPage["content_tree"]) => {
         if (done) {
           const unwatch = immer.subscribe(() => {
             unwatch();
-            done();
+            const tree = immer.get();
+            done({
+              tree,
+              findNode: (id) => {
+                const result = findNodeById(id, tree.childs);
+                return result;
+              },
+            });
           });
         }
 

@@ -42,14 +42,14 @@ export type PFlow = {
 };
 
 export type PFNodeRuntime<T extends Record<string, any>> = {
-  current: PFNode & T;
-  prev?: PFNode;
-  first: PFNode;
-  visited: { node: PFNode; branch?: PFNodeBranch }[];
+  current: DeepReadonly<PFNode> & T;
+  prev?: DeepReadonly<PFNode>;
+  first: DeepReadonly<PFNode>;
+  visited: { node: DeepReadonly<PFNode>; branch?: PFNodeBranch }[];
 };
 
 export type PFRuntime = {
-  nodes: PFNode[];
+  nodes: DeepReadonly<PFNode>[];
 };
 
 export type PFNodeDefinition<F extends Record<string, PFField>> = {
@@ -83,7 +83,7 @@ export type PFField = (
   | {
       type: "array";
       fields: Record<string, PFField>;
-      render: (arg: { node: PFNode }) => ReactElement;
+      render: (arg: { node: DeepReadonly<PFNode> }) => ReactElement;
       add?: {
         checkbox: () => { label: string; value: any; checked?: boolean }[];
         onChange: (checked: any[]) => void;

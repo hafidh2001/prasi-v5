@@ -94,15 +94,22 @@ export function PrasiFlowEditor({
       });
     }
 
-    setNodes([...parsed.nodes, ...unflowed]);
-    setEdges(parsed.edges);
-    restoreViewport({ pflow, local });
+    if (should_relayout) {
+      relayoutNodes({
+        nodes: [...parsed.nodes, ...unflowed],
+        edges: parsed.edges,
+      });
+    } else {
+      setNodes([...parsed.nodes, ...unflowed]);
+      setEdges(parsed.edges);
+      restoreViewport({ pflow, local });
+    }
     const sel = fg.prop?.selection;
     if (sel) {
       fg.main?.action.addSelectedEdges(sel.edges?.map((e) => e.id) || []);
       fg.main?.action.addSelectedNodes(sel.nodes?.map((e) => e.id) || []);
     }
-  }, [pflow]);
+  }, [pflow, should_relayout]);
 
   const relayoutNodes = (arg?: { nodes: Node[]; edges: Edge[] }) => {
     try {
