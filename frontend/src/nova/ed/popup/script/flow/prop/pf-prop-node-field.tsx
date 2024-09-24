@@ -1,14 +1,13 @@
 import { ChevronDown, Trash2 } from "lucide-react";
-import { FC, useRef } from "react";
+import { FC, useEffect, useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { useLocal } from "utils/react/use-local";
-import { PFField, PFlow, PFNode } from "../runtime/types";
-import { lockFocus, restoreFocus } from "../utils/caret-pos";
-import { fg } from "../utils/flow-global";
-import { savePF } from "../utils/save-pf";
-import { SimplePopover } from "../utils/simple-popover";
-import { Tooltip } from "utils/ui/tooltip";
 import { Combobox } from "utils/shadcn/comps/ui/combobox";
+import { Tooltip } from "utils/ui/tooltip";
+import { PFField, PFlow, PFNode } from "../runtime/types";
+import { fg } from "../utils/flow-global";
+import { SimplePopover } from "../utils/simple-popover";
+import get from "lodash.get";
 
 const focus = {
   timeout: null as any,
@@ -19,18 +18,16 @@ export const PFPropNodeField: FC<{
   node: PFNode;
   name: string;
   value: any;
+  path?: string[];
   pflow: PFlow;
-}> = ({ field, node, name, value, pflow }) => {
+}> = ({ field, node, name, value, pflow, path }) => {
   const label = field.label || name;
   const ref = useRef<HTMLTextAreaElement>(null);
 
-  const save = () => {
-    fg.prop?.render();
-    savePF("Update " + name, pflow);
-  };
-
   const local = useLocal(
     {
+      value: null as any,
+      ready: false,
       options: [] as {
         value: string;
         label: string;
@@ -48,6 +45,38 @@ export const PFPropNodeField: FC<{
       local.render();
     }
   );
+
+  const update = (value: any) => {
+    clearTimeout(fg.update_timeout);
+    fg.update_timeout = setTimeout(() => {
+      fg.update(`Update Node: ${name} `, ({ pflow }) => {
+        const n = pflow.nodes[node.id];
+        if (n) {
+          const obj = path && path.length > 0 ? get(n, path?.join(".")) : n;
+          if (value === undefined) {
+            delete obj[name];
+          } else {
+            obj[name] = value;
+          }
+        }
+      });
+    }, 300);
+  };
+
+  useEffect(() => {
+    local.value = value;
+    if (typeof value === "object") {
+      if (Array.isArray(value)) {
+        local.value = [...value];
+      } else {
+        local.value = { ...value };
+      }
+    }
+    local.ready = true;
+    local.render();
+  }, [name, value]);
+
+  if (!local.ready) return null;
 
   return (
     <>
@@ -78,34 +107,25 @@ export const PFPropNodeField: FC<{
         </Tooltip>
         {field.type === "string" && (
           <TextareaAutosize
-            ref={restoreFocus(node[name], ref)}
             className={cx(
               "flex-1 outline-none p-1 border-l resize-none min-w-0 w-full bg-transparent"
             )}
-            value={node[name] || ""}
+            value={local.value || ""}
             spellCheck={false}
             onChange={(e) => {
               const value = e.currentTarget.value;
-              node[name] = value;
-
-              save();
-
-              clearTimeout(focus.timeout);
-
-              lockFocus(node[name], ref);
-              focus.timeout = setTimeout(() => {
-                fg.reload(false);
-              }, 1000);
+              local.value = value;
+              local.render();
+              update(value || undefined);
             }}
           />
         )}
         {field.type === "options" && (
           <Combobox
             options={local.options}
-            defaultValue={field.multiple ? node[name] || [] : node[name]}
+            defaultValue={field.multiple ? local.value || [] : local.value}
             onChange={(value) => {
-              node[name] = value;
-              save();
+              update(value);
             }}
             className={css`
               * {
@@ -173,21 +193,22 @@ export const PFPropNodeField: FC<{
                   )}
                   onClick={() => {
                     if (field.multiple) {
-                      if (!Array.isArray(node[name])) {
-                        node[name] = [];
+                      if (!Array.isArray(local.value)) {
+                        local.value = [];
                       }
-                      const idx = node[name].findIndex(
+                      const idx = local.value.findIndex(
                         (val: any) => val === e.value
                       );
                       if (idx >= 0) {
-                        node[name].splice(idx, 1);
+                        local.value.splice(idx, 1);
                       } else {
-                        node[name].push(e.value);
+                        local.value.push(e.value);
                       }
                     } else {
-                      node[name] = e.value;
+                      local.value = e.value;
                     }
-                    save();
+                    local.render();
+                    update(local.value);
                   }}
                 >
                   {e.el || e.label}
@@ -210,7 +231,7 @@ export const PFPropNodeField: FC<{
         )}
         {field.type === "array" && (
           <SimplePopover
-            content={<div className={cx("text-xs")}>Hello</div>}
+            content={<div className={cx("text-xs")}>...</div>}
             disabled={typeof field.add?.checkbox === "undefined"}
           >
             <div className="flex-1 justify-end items-center flex">
@@ -225,11 +246,12 @@ export const PFPropNodeField: FC<{
                       for (const [k, v] of Object.entries(field.fields)) {
                         item[k] = "";
                       }
-                      if (!Array.isArray(node[name])) {
-                        node[name] = [];
+                      if (!Array.isArray(local.value)) {
+                        local.value = [];
                       }
-                      node[name].push(item);
-                      save();
+                      local.value.push(item);
+                      local.render();
+                      update(local.value);
                     }
                   }
                 }}
@@ -239,12 +261,11 @@ export const PFPropNodeField: FC<{
             </div>
           </SimplePopover>
         )}
-        {field.optional && node[name] && (
+        {field.optional && local.value && (
           <div
             className="del flex items-center justify-center w-[25px] border-l cursor-pointer hover:bg-red-100"
             onClick={() => {
-              delete node[name];
-              save();
+              update(undefined);
             }}
           >
             <Trash2 size={14} />
@@ -254,8 +275,8 @@ export const PFPropNodeField: FC<{
 
       {field.type === "array" && (
         <div className={cx("flex flex-col items-stretch", field.className)}>
-          {Array.isArray(node[name]) &&
-            node[name].map((data, idx) => {
+          {Array.isArray(local.value) &&
+            local.value.map((data, idx) => {
               return (
                 <div
                   key={idx}
@@ -267,7 +288,6 @@ export const PFPropNodeField: FC<{
                   {field.render ? (
                     field.render({
                       node,
-                      save,
                     })
                   ) : (
                     <>
@@ -277,14 +297,15 @@ export const PFPropNodeField: FC<{
                       <div className="flex flex-col flex-1 ">
                         {Object.entries(field.fields)
                           .sort((a, b) => a[1].idx - b[1].idx)
-                          .map(([key, field]) => {
+                          .map(([key, field], idx) => {
                             return (
                               <PFPropNodeField
                                 pflow={pflow}
                                 key={key}
                                 field={field}
                                 name={key}
-                                node={data}
+                                node={node}
+                                path={[...(path || []), name, idx.toString()]}
                                 value={data[key]}
                               />
                             );
@@ -293,8 +314,9 @@ export const PFPropNodeField: FC<{
                       <div
                         className="del flex items-center justify-center w-[25px] border-l border-b cursor-pointer hover:bg-red-100"
                         onClick={() => {
-                          node[name].splice(idx, 1);
-                          save();
+                          local.value.splice(idx, 1);
+                          local.render();
+                          update(local.value);
                         }}
                       >
                         <Trash2 size={14} />

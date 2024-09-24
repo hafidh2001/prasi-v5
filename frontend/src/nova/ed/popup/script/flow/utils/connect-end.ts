@@ -30,7 +30,10 @@ export const pflowConnectEnd = ({
   const from_rf = state.fromNode;
   if (from_rf) from_id = from_rf.id;
 
-  const on_before_connect = (pflow: PFlow, arg: { node: PFNode; is_new: boolean }) => {
+  const on_before_connect = (
+    pflow: PFlow,
+    arg: { node: PFNode; is_new: boolean }
+  ) => {
     const def = (allNodeDefinitions as any)[
       arg.node.type
     ] as PFNodeDefinition<any>;
@@ -73,12 +76,16 @@ export const pflowConnectEnd = ({
               const empty_branch = from.branches.find(
                 (e) => e.flow.length === 0
               );
-              console.log(empty_branch, to_node);
 
               if (empty_branch) {
                 if (to_node) {
                   empty_branch.flow.push(from.id);
                   empty_branch.flow.push(to_node.id);
+                }
+              } else {
+                const f = findFlow({ id: from_id, pflow: pflow });
+                if (f) {
+                  f.flow?.push(to_node.id);
                 }
               }
             } else {

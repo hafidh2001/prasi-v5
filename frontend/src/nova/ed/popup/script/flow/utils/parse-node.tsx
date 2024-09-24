@@ -1,6 +1,7 @@
 import { Edge, Node, Position } from "@xyflow/react";
 import { DeepReadonly, PFNode, PFNodeID } from "../runtime/types";
 import { allNodeDefinitions } from "../runtime/nodes";
+import { fg } from "./flow-global";
 
 export const EdgeType = "default";
 
@@ -66,12 +67,6 @@ export const parseNodes = (
     }
 
     y++;
-
-    const on_init = (allNodeDefinitions as any)[inode.type]?.on_init;
-
-    if (on_init) {
-      on_init({ node: inode, flow, nodes });
-    }
 
     if (inode.branches) {
       let i = 0;

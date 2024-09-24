@@ -16,12 +16,10 @@ import { PFNodeDefinition, RPFlow } from "../runtime/types";
 import { fg } from "./flow-global";
 import { savePF } from "./save-pf";
 
-export const RenderNode = function (
-  arg: {
-    id: string;
-    data: { label: string; type: string };
-  }
-) {
+export const RenderNode = function (arg: {
+  id: string;
+  data: { label: string; type: string };
+}) {
   const pflow = fg.pflow;
   const { data, id } = arg;
   const connection = useConnection<Node>();
@@ -316,23 +314,6 @@ export const RenderNode = function (
                 }}
                 rows={1}
                 ref={ref_name}
-                onChange={(e) => {
-                  if (node) {
-                    const value = e.currentTarget.value;
-                    node.name = value;
-                    fg.main?.render();
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (
-                    !e.currentTarget.value &&
-                    (e.key === "Backspace" || e.key === "Delete")
-                  ) {
-                    delete pflow?.nodes[id];
-                    savePF("Rename Node", pflow);
-                    fg.reload();
-                  }
-                }}
                 className={cx(
                   "flex flex-1 bg-transparent min-w-0 w-0 outline-none resize-none text-[15px] items-center flex-col"
                 )}
@@ -401,15 +382,21 @@ export const RenderNode = function (
                 const pf = pflow;
                 if (pf) {
                   const node = pf.nodes[id];
-                  node.type = value;
-                  fg.reload();
+                  fg.update("Flow Change Node Type", ({ pflow }) => {
+                    const n = pflow.nodes[node.id];
+                    if (n) {
+                      n.type = value;
 
-                  setTimeout(() => {
-                    fg.reload();
-                    savePF("Change Type", pf);
-                    setTimeout(() => {
-                      selection.add([id]);
-                    });
+                      const on_init = (allNodeDefinitions as any)[n.type]
+                        ?.on_init;
+                      if (on_init) {
+                        on_init({
+                          node: n,
+                          flow: pflow.flow,
+                          nodes: pflow.nodes,
+                        });
+                      }
+                    }
                   });
                 }
               }}
