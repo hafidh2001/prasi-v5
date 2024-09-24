@@ -70,7 +70,7 @@ export const RenderNode = function (arg: {
       }}
       ref={ref_node}
       className={cx(
-        "border border-slate-600 rounded-sm",
+        "border border-slate-600  rounded-sm",
         def?.className,
         !node?.name && "items-center justify-center flex",
         node?.size?.w &&
@@ -81,6 +81,13 @@ export const RenderNode = function (arg: {
           css`
             height: ${node.size.h}px;
           `,
+        css`
+          .react-flow__resize-control.handle {
+            width: 10px !important;
+            height: 10px !important;
+            border-radius: 3px !important;
+          }
+        `,
         css`
           .source-edge svg,
           .node-move,
@@ -144,7 +151,15 @@ export const RenderNode = function (arg: {
         <NodeResizer
           onResize={(e, p) => {
             if (node) {
-              // node.size = { w: p.width, h: p.height };
+              clearTimeout(fg.update_timeout);
+              fg.update_timeout = setTimeout(() => {
+                fg.update("Resize Node", ({ pflow }) => {
+                  const n = pflow.nodes[node.id];
+                  if (n) {
+                    n.size = { w: p.width, h: p.height };
+                  }
+                });
+              }, 300);
             }
           }}
           onResizeEnd={() => {
@@ -157,7 +172,7 @@ export const RenderNode = function (arg: {
         {id}
       </div>
 
-      <div
+      {/* <div
         className={cx(
           "node-move transition-all",
           css`
@@ -188,25 +203,20 @@ export const RenderNode = function (arg: {
         >
           <Move size={14} />
         </div>
-      </div>
+      </div> */}
       {node && (
         <Tooltip
-          content={!fg.resizing.has(node.id) ? "Resize Node" : "Done Resizing"}
+          content={
+            !fg.resizing.has(node.id) ? "Move / Resize Node" : "Done Resizing"
+          }
           className={cx(
             "node-move transition-all",
             css`
               position: absolute;
               padding-left: 5px;
-            `,
-            node.name
-              ? css`
-                  top: 33px;
-                  right: -30px;
-                `
-              : css`
-                  top: 3px;
-                  right: -60px;
-                `
+              top: 3px;
+              right: -30px;
+            `
           )}
           onClick={() => {
             if (node) {
