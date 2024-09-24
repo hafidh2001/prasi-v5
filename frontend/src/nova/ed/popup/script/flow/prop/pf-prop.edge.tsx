@@ -46,7 +46,7 @@ export const PFPropEdge: FC<{ edge: Edge; pflow: PFlow }> = ({
                     }
                   }}
                 >
-                  {e.name}
+                  {e.name || "Branch " + (idx + 1)}
                 </div>
               );
             })}

@@ -12,19 +12,17 @@ import { findFlow } from "./find-node";
 import { fg } from "./flow-global";
 import { savePF } from "./save-pf";
 
-export const RenderEdge = function (
-  {
-    id,
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
-    sourcePosition,
-    targetPosition,
-    style = {},
-    markerEnd,
-  }: EdgeComponentProps
-) {
+export const RenderEdge = function ({
+  id,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  sourcePosition,
+  targetPosition,
+  style = {},
+  markerEnd,
+}: EdgeComponentProps) {
   const pflow = fg.pflow;
   const { getEdge } = useReactFlow();
   const [edgePath, labelX, labelY] = getBezierPath({
@@ -82,59 +80,56 @@ export const RenderEdge = function (
               `
           )}
           onClick={(e) => {
-            if (is_branch) return true;
-            e.stopPropagation();
-            e.preventDefault();
-            if (id) {
-              const edge = getEdge(id);
-              const pf = pflow;
-              if (edge && pf) {
-                const node = pf.nodes[edge.source];
-                let from = null as null | { flow: string[]; idx: number };
-                if ((node.branches || []).length > 0) {
-                  for (const branch of node.branches!) {
-                    const idx = branch.flow.findIndex((e) => e === edge.target);
-                    if (idx >= 0) {
-                      from = { flow: branch.flow, idx: idx - 1 };
-                      break;
-                    }
-                  }
-                } else {
-                  from = findFlow({ id: edge.source, pflow: pf });
-                }
-
-                const source = pf.nodes[edge.source];
-                const target = pf.nodes[edge.target];
-                if (
-                  from &&
-                  source &&
-                  source.position &&
-                  target &&
-                  target.position
-                ) {
-                  source.position.y -= 20;
-                  target.position.y += 20;
-                  const pf_node: PFNode = {
-                    id: createId(),
-                    type: "code",
-                    position: {
-                      x: source.position.x,
-                      y: source.position.y + 75,
-                    },
-                  };
-                  pf.nodes[pf_node.id] = pf_node;
-                  from.flow.splice(from.idx + 1, 0, pf_node.id);
-                  savePF("Create Node", pf);
-
-                  fg.reload();
-
-                  setTimeout(() => {
-                    fg.main?.action.resetSelectedElements();
-                    fg.main?.action.addSelectedNodes([pf_node.id]);
-                  });
-                }
-              }
-            }
+            // if (is_branch) return true;
+            // e.stopPropagation();
+            // e.preventDefault();
+            // if (id) {
+            //   const edge = getEdge(id);
+            //   const pf = pflow;
+            //   if (edge && pf) {
+            //     const node = pf.nodes[edge.source];
+            //     let from = null as null | { flow: string[]; idx: number };
+            //     if ((node.branches || []).length > 0) {
+            //       for (const branch of node.branches!) {
+            //         const idx = branch.flow.findIndex((e) => e === edge.target);
+            //         if (idx >= 0) {
+            //           from = { flow: branch.flow, idx: idx - 1 };
+            //           break;
+            //         }
+            //       }
+            //     } else {
+            //       from = findFlow({ id: edge.source, pflow: pf });
+            //     }
+            //     const source = pf.nodes[edge.source];
+            //     const target = pf.nodes[edge.target];
+            //     if (
+            //       from &&
+            //       source &&
+            //       source.position &&
+            //       target &&
+            //       target.position
+            //     ) {
+            //       source.position.y -= 20;
+            //       target.position.y += 20;
+            //       const pf_node: PFNode = {
+            //         id: createId(),
+            //         type: "code",
+            //         position: {
+            //           x: source.position.x,
+            //           y: source.position.y + 75,
+            //         },
+            //       };
+            //       pf.nodes[pf_node.id] = pf_node;
+            //       from.flow.splice(from.idx + 1, 0, pf_node.id);
+            //       savePF("Create Node", pf);
+            //       fg.reload();
+            //       setTimeout(() => {
+            //         fg.main?.action.resetSelectedElements();
+            //         fg.main?.action.addSelectedNodes([pf_node.id]);
+            //       });
+            //     }
+            //   }
+            // }
           }}
         >
           <div className={"label"}>{label}</div>

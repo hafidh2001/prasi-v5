@@ -23,7 +23,7 @@ import { pflowEdgeChanges } from "./utils/edge-changes";
 import { fg } from "./utils/flow-global";
 import { getLayoutedElements } from "./utils/node-layout";
 import { parseFlow } from "./utils/parse-flow";
-import { removeNode } from "./utils/remove-node";
+import { removeNodes } from "./utils/remove-node";
 import { RenderEdge } from "./utils/render-edge";
 import { RenderNode } from "./utils/render-node";
 import { restoreViewport } from "./utils/restore-viewport";
@@ -223,6 +223,7 @@ export function PrasiFlowEditor({
         onNodesChange={(changes) => {
           const pf = pflow;
           if (pf) {
+            const del_changes = [];
             for (const c of changes) {
               if (c.type === "position") {
                 fg.update("Flow Move Node", ({ pflow }) => {
@@ -232,8 +233,11 @@ export function PrasiFlowEditor({
                   }
                 });
               } else if (c.type === "remove") {
-                removeNode({ c, edges, resetDefault });
+                del_changes.push(c);
               }
+            }
+            if (del_changes.length > 0) {
+              removeNodes({ changes: del_changes, edges, resetDefault });
             }
           }
 
