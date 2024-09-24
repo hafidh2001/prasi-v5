@@ -26,6 +26,8 @@ export const EdPrasiFlow = function () {
 
   const resetDefault = useCallback(
     (relayout: boolean) => {
+      sflow.should_relayout = relayout;
+
       fg.updateNoDebounce(
         "Flow Reset",
         ({ node }) => {
@@ -39,9 +41,12 @@ export const EdPrasiFlow = function () {
         },
         ({ pflow }) => {
           localStorage.removeItem(`prasi-flow-vp-${`item-${node?.item.id}`}`);
-          sflow.should_relayout = relayout;
           sflow.current = pflow || null;
           local.render();
+
+          setTimeout(() => {
+            sflow.should_relayout = false;
+          }, 500);
         }
       );
     },
