@@ -3,7 +3,7 @@ import {
   Node,
   NodeResizer,
   Position,
-  useConnection
+  useConnection,
 } from "@xyflow/react";
 import { Check, Maximize2 } from "lucide-react";
 import { useRef } from "react";
@@ -375,6 +375,7 @@ export const RenderNode = function (arg: {
               defaultValue={data.type}
               onChange={(value) => {
                 data.type = value;
+                local.type_opened = false;
                 const pf = pflow;
                 if (pf) {
                   const node = pf.nodes[id];
@@ -412,12 +413,13 @@ export const RenderNode = function (arg: {
                   )}
                   onPointerUp={(e) => {
                     if (node.type !== "start") {
-                      local.type_opened = open;
+                      e.stopPropagation();
 
+                      local.type_opened = open;
+                      local.render();
                       setTimeout(() => {
                         setOpen(true);
                       });
-                      e.stopPropagation();
                     }
                   }}
                 >
