@@ -339,7 +339,7 @@ export const RenderNode = function (arg: {
           <div
             className={cx(
               "line-type flex items-center ",
-              !node.name && node.type !== "start" && "justify-center pr-2",
+              !node.name && node.type !== "start" && "justify-center",
               css`
                 svg {
                   width: 14px;
@@ -416,7 +416,7 @@ export const RenderNode = function (arg: {
                   className={cx(
                     "flex",
                     node.type !== "start"
-                      ? "absolute z-10 items-stretch"
+                      ? "absolute z-10 items-stretch justify-center px-1"
                       : "item-center w-full"
                   )}
                   onClick={(e) => {
@@ -431,7 +431,8 @@ export const RenderNode = function (arg: {
                       node.type === "start"
                         ? "flex items-center justify-center w-full h-full flex-1 space-x-1"
                         : cx(
-                            "flex hover:bg-blue-700 hover:text-white rounded-sm ml-[3px] py-[2px] px-[4px] flex-row items-center space-x-[3px]",
+                            node.name ? "mr-[2px]" : "justify-center",
+                            "flex-1 flex hover:bg-blue-700 hover:text-white rounded-[3px] py-[2px] px-[6px] flex-row items-center",
                             css`
                               cursor: pointer !important;
                             `

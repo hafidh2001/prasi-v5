@@ -1,3 +1,5 @@
+import { current } from "immer";
+import capitalize from "lodash.capitalize";
 import get from "lodash.get";
 import { ChevronDown, Trash2 } from "lucide-react";
 import { FC, useEffect, useRef } from "react";
@@ -5,13 +7,24 @@ import TextareaAutosize from "react-textarea-autosize";
 import { useLocal } from "utils/react/use-local";
 import { Combobox } from "utils/shadcn/comps/ui/combobox";
 import { Tooltip } from "utils/ui/tooltip";
-import { DeepReadonly, PFField, PFNode, RPFlow } from "../runtime/types";
+import { allNodeDefinitions } from "../runtime/nodes";
+import {
+  DeepReadonly,
+  PFField,
+  PFNode,
+  PFNodeDefinition,
+  RPFlow,
+} from "../runtime/types";
 import { fg } from "../utils/flow-global";
 import { SimplePopover } from "../utils/simple-popover";
 
-const focus = {
-  timeout: null as any,
-};
+export type FieldChangedAction =
+  | "text-changed"
+  | "option-picked"
+  | "buttons-checked"
+  | "array-added"
+  | "array-deleted"
+  | "field-cleared";
 
 export const PFPropNodeField: FC<{
   field: PFField;
@@ -23,6 +36,7 @@ export const PFPropNodeField: FC<{
 }> = ({ field, node, name, value, pflow, path }) => {
   const label = field.label || name;
   const ref = useRef<HTMLTextAreaElement>(null);
+  const def = (allNodeDefinitions as any)[node.type] as PFNodeDefinition<any>;
 
   const local = useLocal(
     {
@@ -46,21 +60,32 @@ export const PFPropNodeField: FC<{
     }
   );
 
-  const update = (value: any, exec?: { before: (node: PFNode) => void }) => {
+  const update = (action: FieldChangedAction, path: string[], value: any) => {
     clearTimeout(fg.update_timeout);
     fg.update_timeout = setTimeout(() => {
-      fg.update(`Update Node: ${name} `, ({ pflow }) => {
-        const n = pflow.nodes[node.id];
-        if (n) {
-          exec?.before(n);
-          const obj = path && path.length > 0 ? get(n, path?.join(".")) : n;
-          if (value === undefined) {
-            delete obj[name];
-          } else {
-            obj[name] = value;
+      fg.update(
+        `Flow [${name}]: ${capitalize(action.split("-").join(" "))}  `,
+        ({ pflow }) => {
+          const n = pflow.nodes[node.id];
+          if (n) {
+            const obj = path && path.length > 0 ? get(n, path?.join(".")) : n;
+            if (value === undefined) {
+              delete obj[name];
+            } else {
+              obj[name] = value;
+            }
+
+            if (def.fields_changed) {
+              def.fields_changed({
+                action,
+                node: n,
+                path: [...(path || []), name].join("."),
+                pflow,
+              });
+            }
           }
         }
-      });
+      );
     }, 300);
   };
 
@@ -117,7 +142,7 @@ export const PFPropNodeField: FC<{
               const value = e.currentTarget.value;
               local.value = value;
               local.render();
-              update(value || undefined);
+              update("text-changed", path || [], value || undefined);
             }}
           />
         )}
@@ -126,7 +151,7 @@ export const PFPropNodeField: FC<{
             options={local.options}
             defaultValue={field.multiple ? local.value || [] : local.value}
             onChange={(value) => {
-              update(value);
+              update("option-picked", path || [], value);
             }}
             className={css`
               * {
@@ -209,7 +234,7 @@ export const PFPropNodeField: FC<{
                       local.value = e.value;
                     }
                     local.render();
-                    update(local.value);
+                    update("buttons-checked", path || [], local.value);
                   }}
                 >
                   {e.el || e.label}
@@ -231,29 +256,24 @@ export const PFPropNodeField: FC<{
           </div>
         )}
         {field.type === "array" && (
-          <SimplePopover
-            content={<div className={cx("text-xs")}>...</div>}
-            disabled={typeof field.add?.checkbox === "undefined"}
-          >
+          <SimplePopover content={<div className={cx("text-xs")}>...</div>}>
             <div className="flex-1 justify-end items-center flex">
               <div
                 className={cx(
                   "border select-none px-2 text-[11px] mr-[2px] cursor-pointer hover:bg-blue-600 hover:border-blue-600 hover:text-white"
                 )}
                 onClick={() => {
-                  if (typeof field.add?.checkbox === "undefined") {
-                    const item = {} as any;
-                    if (field.fields) {
-                      for (const [k, v] of Object.entries(field.fields)) {
-                        item[k] = "";
-                      }
-                      if (!Array.isArray(local.value)) {
-                        local.value = [];
-                      }
-                      local.value.push(item);
-                      local.render();
-                      update(local.value);
+                  const item = {} as any;
+                  if (field.fields) {
+                    for (const [k, v] of Object.entries(field.fields)) {
+                      item[k] = "";
                     }
+                    if (!Array.isArray(local.value)) {
+                      local.value = [];
+                    }
+                    local.value.push(item);
+                    local.render();
+                    update("array-added", path || [], local.value);
                   }
                 }}
               >
@@ -266,7 +286,7 @@ export const PFPropNodeField: FC<{
           <div
             className="del flex items-center justify-center w-[25px] border-l cursor-pointer hover:bg-red-100"
             onClick={() => {
-              update(undefined);
+              update("field-cleared", path || [], undefined);
             }}
           >
             <Trash2 size={14} />
@@ -298,7 +318,7 @@ export const PFPropNodeField: FC<{
                       <div className="flex flex-col flex-1 ">
                         {Object.entries(field.fields)
                           .sort((a, b) => a[1].idx - b[1].idx)
-                          .map(([key, field], idx) => {
+                          .map(([key, field]) => {
                             return (
                               <PFPropNodeField
                                 pflow={pflow}
@@ -317,17 +337,7 @@ export const PFPropNodeField: FC<{
                         onClick={() => {
                           local.value.splice(idx, 1);
                           local.render();
-                          update(local.value, {
-                            before: (node) => {
-                              if (field.del?.onChange) {
-                                field.del.onChange({
-                                  node: node,
-                                  list: local.value,
-                                  idx: idx,
-                                });
-                              }
-                            },
-                          });
+                          update("array-deleted", path || [], local.value);
                         }}
                       >
                         <Trash2 size={14} />

@@ -178,10 +178,10 @@ export function PrasiFlowEditor({
             &.selected {
               .react-flow__edge-path {
                 stroke-width: 2px;
-                stroke: blue;
+                stroke: blue !important;
               }
               .react-flow__edge-text {
-                fill: blue;
+                fill: blue !important;
               }
             }
           }

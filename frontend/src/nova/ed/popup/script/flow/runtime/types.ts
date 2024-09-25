@@ -8,7 +8,7 @@ export type PFNodeBranch = {
   name?: string;
   flow: PFNodeID[];
   idx?: number;
-  meta?: { condition_idx: number };
+  meta?: { condition_idx: string | number };
 };
 
 export type PFNodePosition = { x: number; y: number };
@@ -71,11 +71,17 @@ export type PFNodeDefinition<F extends Record<string, PFField>> = {
   process: (arg: {
     vars: Record<string, any>;
     node: PFNodeRuntime<{ [K in keyof F]: F[K] }>;
-    processBranch: (branch: PFNodeBranch) => Promise<void>;
+    processBranch: (branch: DeepReadonly<PFNodeBranch>) => Promise<void>;
     next: () => void;
     console: typeof console;
   }) => void | Promise<void>;
   fields?: F;
+  fields_changed?: (arg: {
+    pflow: PFlow;
+    node: PFNode;
+    path: string;
+    action: string;
+  }) => void;
 };
 
 export type PFField = (
@@ -84,13 +90,6 @@ export type PFField = (
       type: "array";
       fields: Record<string, PFField>;
       render: (arg: { node: DeepReadonly<PFNode> }) => ReactElement;
-      add?: {
-        checkbox: () => { label: string; value: any; checked?: boolean }[];
-        onChange: (checked: any[]) => void;
-      };
-      del?: {
-        onChange: (arg: { list: any[]; idx: number; node: PFNode }) => {};
-      };
     }
   | { type: "code" }
   | {

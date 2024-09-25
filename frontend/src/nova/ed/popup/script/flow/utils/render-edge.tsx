@@ -1,4 +1,3 @@
-import { createId } from "@paralleldrive/cuid2";
 import {
   BaseEdge,
   Edge,
@@ -7,11 +6,10 @@ import {
   getBezierPath,
   useReactFlow,
 } from "@xyflow/react";
-import { PFlow, PFNode, PFNodeBranch, RPFlow } from "../runtime/types";
-import { findFlow } from "./find-node";
+import { PFNodeBranch } from "../runtime/types";
 import { fg } from "./flow-global";
-import { savePF } from "./save-pf";
 
+import { useState } from "react";
 export const RenderEdge = function ({
   id,
   sourceX,
@@ -23,7 +21,6 @@ export const RenderEdge = function ({
   style = {},
   markerEnd,
 }: EdgeComponentProps) {
-  const pflow = fg.pflow;
   const { getEdge } = useReactFlow();
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -45,7 +42,7 @@ export const RenderEdge = function ({
       <EdgeLabelRenderer>
         <div
           className={cx(
-            "nodrag nopan absolute",
+            "nodrag nopan absolute edge-" + id,
             css`
               font-size: 11px;
               pointer-events: all;

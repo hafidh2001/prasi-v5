@@ -56,6 +56,21 @@ export const nodeBranch = defineNode({
       }
     }
   },
+  fields_changed({ node }) {
+    if (!node.branches) node.branches = [];
+    const conditions = node.conditions as Condition[];
+
+    node.branches = node.branches.filter((e, idx) => {
+      const found = conditions.find(
+        (c, idx) => idx + "" === e.meta?.condition_idx + ""
+      );
+      if (found) {
+        e.name = found.name;
+        return true;
+      }
+      return false;
+    });
+  },
   fields: {
     conditions: {
       label: "Conditions",

@@ -97,7 +97,7 @@ const runSingleNode = async (arg: {
     node: current,
     parent_branch: branch,
     log: [] as any[],
-    tstamp: 0,
+    tstamp: Date.now(),
     branching: false,
     error: null,
   };
@@ -134,8 +134,6 @@ const runSingleNode = async (arg: {
               visited,
             },
             processBranch: async (branch) => {
-              run_visit.tstamp = Date.now();
-
               for (const id of branch.flow) {
                 if (current.id === id) continue; // Prevent re-visiting the current node
 
