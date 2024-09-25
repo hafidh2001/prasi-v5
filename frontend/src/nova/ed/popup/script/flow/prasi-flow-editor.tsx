@@ -15,7 +15,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { LayoutDashboard } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocal } from "utils/react/use-local";
 import { RPFlow } from "./runtime/types";
 import { pflowConnectEnd } from "./utils/connect-end";
@@ -201,6 +201,7 @@ export function PrasiFlowEditor({
         }
       }}
     >
+      {Date.now()}
       <ReactFlow
         maxZoom={1.1}
         onInit={(ref) => {

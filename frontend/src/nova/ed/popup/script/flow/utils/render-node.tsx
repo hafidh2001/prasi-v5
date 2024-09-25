@@ -4,6 +4,7 @@ import {
   NodeResizer,
   Position,
   useConnection,
+  useStore,
 } from "@xyflow/react";
 import { Check, Maximize2 } from "lucide-react";
 import { useRef } from "react";
@@ -27,6 +28,11 @@ export const RenderNode = function (arg: {
   const ref_name = useRef<HTMLTextAreaElement>(null);
   const ref_node = useRef<HTMLDivElement>(null);
 
+  useStore((actions) => ({
+    add: actions.addSelectedNodes,
+    reset: actions.resetSelectedElements,
+  }));
+  
   if (connection.inProgress) {
     fg.pointer_to = connection.to;
   }
@@ -342,6 +348,7 @@ export const RenderNode = function (arg: {
             ></div>
             <Combobox
               onOpenChange={(value) => {
+                console.log("open change", value);
                 local.type_opened = value;
                 local.render();
               }}

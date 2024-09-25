@@ -1,9 +1,8 @@
 import { Edge, EdgeChange } from "@xyflow/react";
-import { PFNodeDefinition, RPFlow } from "../runtime/types";
-import { findPFNode, immutableFindPFNode } from "./find-node";
-import { fg } from "./flow-global";
 import { allNodeDefinitions } from "../runtime/nodes";
-import { current } from "immer";
+import { PFNodeDefinition, RPFlow } from "../runtime/types";
+import { findPFNode } from "./find-node";
+import { fg } from "./flow-global";
 
 export const pflowEdgeChanges = ({
   changes,
