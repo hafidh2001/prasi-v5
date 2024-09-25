@@ -3,18 +3,17 @@ import {
   Node,
   NodeResizer,
   Position,
-  useConnection,
-  useStore,
+  useConnection
 } from "@xyflow/react";
-import { Check, Maximize2, Move } from "lucide-react";
-import { Fragment, useRef } from "react";
+import { Check, Maximize2 } from "lucide-react";
+import { useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
+import { useLocal } from "utils/react/use-local";
 import { Combobox } from "utils/shadcn/comps/ui/combobox";
 import { Tooltip } from "utils/ui/tooltip";
 import { allNodeDefinitions } from "../runtime/nodes";
-import { PFNodeDefinition, RPFlow } from "../runtime/types";
+import { PFNodeDefinition } from "../runtime/types";
 import { fg } from "./flow-global";
-import { savePF } from "./save-pf";
 import { NodeTypeLabel } from "./node-type-label";
 
 export const RenderNode = function (arg: {
@@ -22,23 +21,11 @@ export const RenderNode = function (arg: {
   data: { label: string; type: string };
 }) {
   const pflow = fg.pflow;
+  const local = useLocal({ type_opened: false });
   const { data, id } = arg;
   const connection = useConnection<Node>();
   const ref_name = useRef<HTMLTextAreaElement>(null);
   const ref_node = useRef<HTMLDivElement>(null);
-
-  const selection = useStore((actions) => ({
-    add: actions.addSelectedNodes,
-    reset: actions.resetSelectedElements,
-  }));
-
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     if (fg.prop?.selection.nodes.find((e) => e.id === id)) {
-  //       if (ref_name.current) ref_name.current.select();
-  //     }
-  //   });
-  // }, [fg.prop?.selection.nodes.find((e) => e.id === id)]);
 
   if (connection.inProgress) {
     fg.pointer_to = connection.to;
@@ -60,7 +47,7 @@ export const RenderNode = function (arg: {
       tabIndex={0}
       id={`pf-${node.id}`}
       onKeyDown={(e) => {
-        if (e.key.length === 1) {
+        if (e.key.length === 1 && !local.type_opened) {
           const input: HTMLInputElement | null = document.querySelector(
             "#prasi-flow-node-name"
           );
@@ -354,6 +341,10 @@ export const RenderNode = function (arg: {
               `)}
             ></div>
             <Combobox
+              onOpenChange={(value) => {
+                local.type_opened = value;
+                local.render();
+              }}
               options={Object.keys(allNodeDefinitions)
                 .filter((e) => e !== "start")
                 .map((e) => {
@@ -362,7 +353,7 @@ export const RenderNode = function (arg: {
                   ] as PFNodeDefinition<any>;
                   return {
                     value: e,
-                    label: e,
+                    label: def.type,
                     el: (
                       <>
                         <div
@@ -419,9 +410,13 @@ export const RenderNode = function (arg: {
                       ? "absolute z-10 items-stretch justify-center px-1"
                       : "item-center w-full"
                   )}
-                  onClick={(e) => {
+                  onPointerUp={(e) => {
                     if (node.type !== "start") {
-                      setOpen(true);
+                      local.type_opened = open;
+
+                      setTimeout(() => {
+                        setOpen(true);
+                      });
                       e.stopPropagation();
                     }
                   }}

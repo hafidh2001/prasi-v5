@@ -1,6 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
+import { allNodeDefinitions } from "popup/script/flow/runtime/nodes";
 import * as React from "react";
 
 import {
@@ -24,6 +25,7 @@ export function Combobox({
   onChange,
   defaultValue,
   className,
+  onOpenChange,
 }: {
   className?: string;
   options: (
@@ -32,6 +34,7 @@ export function Combobox({
   )[];
   onChange: (value: string) => void;
   defaultValue: string;
+  onOpenChange?: (open: boolean) => void;
   children: (opt: {
     setOpen: (open: boolean) => void;
     open: boolean;
@@ -46,7 +49,13 @@ export function Combobox({
   });
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={(value) => {
+        onOpenChange?.(value);
+        setOpen(value);
+      }}
+    >
       <PopoverTrigger asChild>{children({ setOpen, open })}</PopoverTrigger>
       <PopoverContent className={cx("w-[200px] p-0", className)}>
         <Command>
@@ -71,23 +80,31 @@ export function Combobox({
                 return (
                   <CommandItem
                     key={item.value}
-                    value={item.value}
+                    value={item.label}
                     className="text-sm"
                     onSelect={(currentValue) => {
-                      if (Array.isArray(value)) {
-                        if (!value.includes(item.value)) {
-                          setValue([...value, ...item.value] as any);
-                        } else {
-                          setValue(
-                            value.filter((e) => e !== item.value) as any
-                          );
+                      const type = Object.entries(allNodeDefinitions).find(
+                        ([k, e]) => {
+                          return e.type === currentValue;
                         }
-                      } else {
-                        setValue(currentValue === value ? "" : currentValue);
-                        setOpen(false);
-                      }
+                      )?.[0] as string | undefined;
 
-                      onChange(currentValue);
+                      if (type) {
+                        if (Array.isArray(value)) {
+                          if (!value.includes(item.value)) {
+                            setValue([...value, ...item.value] as any);
+                          } else {
+                            setValue(
+                              value.filter((e) => e !== item.value) as any
+                            );
+                          }
+                        } else {
+                          setValue(type === value ? "" : type);
+                          setOpen(false);
+                        }
+
+                        onChange(type);
+                      }
                     }}
                   >
                     <Check
