@@ -1,9 +1,8 @@
-import { current } from "immer";
+import { createId } from "@paralleldrive/cuid2";
 import { codeExec } from "../lib/code-exec";
 import { defineNode } from "../lib/define-node";
-import { PFNode, PFNodeBranch } from "../types";
-
-type Condition = { condition: string; name: string };
+import { PFField, PFNodeBranch } from "../types";
+type Condition = { condition: string; name: string; id: string };
 
 export const nodeBranch = defineNode({
   type: "branch",
@@ -20,13 +19,19 @@ export const nodeBranch = defineNode({
       ).length;
 
       if (empty_branch_len === 0 || conditions.length === 0) {
-        const name = "Condition " + (conditions.length + 1);
-        conditions.push({ condition: "", name });
+        let len = conditions.length + 1;
+        let name = "Condition " + len;
+        while (conditions.some((e) => e.name === name)) {
+          name = "Condition " + ++len;
+        }
+
+        const condition_id = createId();
+        conditions.push({ condition: "", name, id: condition_id });
         branches.push({
           flow: [],
           idx: conditions.length - 1,
           name,
-          meta: { condition_idx: branches.length },
+          meta: { condition_id: condition_id },
         });
       }
     } else {
@@ -35,7 +40,7 @@ export const nodeBranch = defineNode({
           const idx = i as unknown as number;
 
           const branch = node.branches.find(
-            (e) => e.meta?.condition_idx === idx
+            (e) => e.meta?.condition_id === c.id
           );
           if (branch) {
             branch.idx = idx;
@@ -48,7 +53,7 @@ export const nodeBranch = defineNode({
               name: c.name,
               flow: [],
               meta: {
-                condition_idx: idx,
+                condition_id: c.id,
               },
             });
           }
@@ -56,20 +61,28 @@ export const nodeBranch = defineNode({
       }
     }
   },
-  fields_changed({ node }) {
-    if (!node.branches) node.branches = [];
-    const conditions = node.conditions as Condition[];
+  on_before_disconnect({ from, to, flow }) {
+    if (from.type === "branch" && from.branches) {
+      const idx = from.branches.findIndex((e) => e.flow === flow);
+      if (idx >= 0) from.branches.splice(idx, 1);
+    }
+  },
+  on_fields_changed({ node, action }) {
+    if (action.startsWith("array-")) {
+      if (!node.branches) node.branches = [];
+      const conditions = node.conditions as Condition[];
 
-    node.branches = node.branches.filter((e, idx) => {
-      const found = conditions.find(
-        (c, idx) => idx + "" === e.meta?.condition_idx + ""
-      );
-      if (found) {
-        e.name = found.name;
-        return true;
-      }
-      return false;
-    });
+      node.branches = node.branches.filter((e, idx) => {
+        const found = conditions.find(
+          (_, idx) => idx + "" === e.meta?.condition_id + ""
+        );
+        if (found) {
+          e.name = found.name;
+          return true;
+        }
+        return false;
+      });
+    }
   },
   fields: {
     conditions: {
@@ -81,29 +94,18 @@ export const nodeBranch = defineNode({
         }
       `,
       fields: {
-        condition: { type: "code", idx: 1 },
-        name: { idx: 0, type: "string" },
-      },
-      del: {
-        onChange: ({
-          node,
-          idx,
-        }: {
-          node: PFNode;
-          list: any[];
-          idx: number;
-        }) => {
-          if (!node.branches) {
-            node.branches = [];
-          }
-
-          node.branches = current(node).branches!.filter((e) => {
-            return e.meta?.condition_idx !== idx;
-          });
+        condition: { type: "code", idx: 1, label: "Code" },
+        name: {
+          idx: 0,
+          type: "string",
+          label: "Name",
+          placeholder: ({ node, path }) => {
+            return path;
+          },
         },
       },
     },
-  },
+  } as Record<string, PFField>,
   process: async ({ node, vars, processBranch, next }) => {
     const branches = [];
     if (node.current.branches) {

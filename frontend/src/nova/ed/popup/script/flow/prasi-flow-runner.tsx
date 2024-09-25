@@ -2,12 +2,12 @@ import JsonView from "@uiw/react-json-view";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { Play, Trash } from "lucide-react";
-import { runFlow } from "./runtime/runner";
-import { fg } from "./utils/flow-global";
+import { Eraser, Play } from "lucide-react";
 import { useLocal } from "utils/react/use-local";
 import { Tooltip } from "utils/ui/tooltip";
-import { PFlow, RPFlow } from "./runtime/types";
+import { runFlow } from "./runtime/runner";
+import { RPFlow } from "./runtime/types";
+import { fg } from "./utils/flow-global";
 import { NodeTypeLabel } from "./utils/node-type-label";
 
 dayjs.extend(duration);
@@ -112,7 +112,7 @@ export const PrasiFlowRunner = ({ pflow }: { pflow: RPFlow }) => {
                 local.render();
               }}
             >
-              <Trash />
+              <Eraser />
             </div>
           </Tooltip>
 
@@ -166,7 +166,8 @@ export const PrasiFlowRunner = ({ pflow }: { pflow: RPFlow }) => {
               * {
                 font-size: 12px;
               }
-              .node-type *, .node-type {
+              .node-type *,
+              .node-type {
                 font-size: 9px;
               }
             `

@@ -115,6 +115,71 @@ export const immutableFindPFNode = (
   return true;
 };
 
+export const findPFNode = (
+  nodes: Record<string, PFNode>,
+  flow: PFNodeID[],
+  fn: (arg: {
+    flow: PFNodeID[];
+    idx: number;
+    parent?: PFNode;
+    branch?: PFNodeBranch;
+    is_invalid: boolean;
+  }) => boolean,
+  visited = new Set<string>(),
+  arg?: {
+    parent?: PFNode;
+    branch?: PFNodeBranch;
+  }
+) => {
+  let idx = 0;
+  for (const id of flow) {
+    if (
+      !fn({
+        flow,
+        idx,
+        parent: arg?.parent,
+        branch: arg?.branch,
+        is_invalid: false,
+      })
+    ) {
+      return false;
+    }
+    const node = nodes[id];
+    if (!node) {
+      fn({
+        flow,
+        idx,
+        parent: arg?.parent,
+        branch: arg?.branch,
+        is_invalid: true,
+      });
+      continue;
+    }
+    if (visited.has(node.id)) {
+      continue;
+    } else {
+      visited.add(node.id);
+    }
+
+    if (node && node.branches) {
+      for (const branch of node.branches) {
+        if (branch.flow.length > 0) {
+          if (
+            !findPFNode(nodes, branch.flow, fn, visited, {
+              parent: node,
+              branch,
+            })
+          ) {
+            return false;
+          }
+        }
+      }
+    }
+    idx++;
+  }
+  return true;
+};
+
 export const findFlow = ({
   id,
   pflow: pf,

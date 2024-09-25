@@ -8,7 +8,7 @@ export type PFNodeBranch = {
   name?: string;
   flow: PFNodeID[];
   idx?: number;
-  meta?: { condition_idx: string | number };
+  meta?: { condition_id: string };
 };
 
 export type PFNodePosition = { x: number; y: number };
@@ -63,10 +63,22 @@ export type PFNodeDefinition<F extends Record<string, PFField>> = {
     pflow: PFlow;
   }) => void;
   on_after_connect?: (arg: { from: PFNode; to: PFNode }) => void;
+  on_before_disconnect?: (arg: {
+    from: PFNode;
+    to: PFNode;
+    flow: PFNodeID[];
+  }) => void;
+  on_after_disconnect?: (arg: { from: PFNode; to: PFNode }) => void;
   on_init?: (arg: {
     node: PFNode;
     flow: PFNodeID[];
     nodes: Record<string, PFNode>;
+  }) => void;
+  on_fields_changed?: (arg: {
+    pflow: PFlow;
+    node: PFNode;
+    path: string;
+    action: string;
   }) => void;
   process: (arg: {
     vars: Record<string, any>;
@@ -76,20 +88,20 @@ export type PFNodeDefinition<F extends Record<string, PFField>> = {
     console: typeof console;
   }) => void | Promise<void>;
   fields?: F;
-  fields_changed?: (arg: {
-    pflow: PFlow;
-    node: PFNode;
-    path: string;
-    action: string;
-  }) => void;
 };
 
 export type PFField = (
-  | { type: "string" }
+  | {
+      type: "string";
+      placeholder?: (arg: {
+        node: DeepReadonly<PFNode>;
+        path: string;
+      }) => string;
+    }
   | {
       type: "array";
       fields: Record<string, PFField>;
-      render: (arg: { node: DeepReadonly<PFNode> }) => ReactElement;
+      render?: (arg: { node: DeepReadonly<PFNode> }) => ReactElement;
     }
   | { type: "code" }
   | {
@@ -99,4 +111,4 @@ export type PFField = (
         (string | { value: string; label: string; el?: ReactElement })[]
       >;
     }
-) & { idx: number; label: string; optional?: boolean; className?: string };
+) & { idx?: number; label: string; optional?: boolean; className?: string };

@@ -1,4 +1,3 @@
-import { findNodeById } from "crdt/node/flatten-tree";
 import { getActiveNode } from "crdt/node/get-node-by-id";
 import { active, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
@@ -13,7 +12,6 @@ import { RPFlow } from "./runtime/types";
 import { fg } from "./utils/flow-global";
 import { defaultFlow } from "./utils/prasi/default-flow";
 import { initAdv } from "./utils/prasi/init-adv";
-import { current } from "immer";
 
 export const EdPrasiFlow = function () {
   const p = useGlobal(EDGlobal, "EDITOR");

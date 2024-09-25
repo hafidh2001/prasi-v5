@@ -1,7 +1,9 @@
 import { Edge, EdgeChange } from "@xyflow/react";
-import { RPFlow } from "../runtime/types";
-import { immutableFindPFNode } from "./find-node";
+import { PFNodeDefinition, RPFlow } from "../runtime/types";
+import { findPFNode, immutableFindPFNode } from "./find-node";
 import { fg } from "./flow-global";
+import { allNodeDefinitions } from "../runtime/nodes";
+import { current } from "immer";
 
 export const pflowEdgeChanges = ({
   changes,
@@ -48,7 +50,7 @@ export const pflowEdgeChanges = ({
           if (edge) {
             fg.update("Flow Remove Line", ({ pflow }) => {
               for (const flow of Object.values(pflow.flow)) {
-                immutableFindPFNode(
+                findPFNode(
                   pflow.nodes,
                   flow,
                   ({ flow, idx, parent, is_invalid }) => {
@@ -66,11 +68,45 @@ export const pflowEdgeChanges = ({
                         flow[idx - 1] === edge.source ||
                         parent?.id === edge.source
                       ) {
+                        const from_node = pflow.nodes[edge.source];
+                        const from_def = (allNodeDefinitions as any)[
+                          from_node.type
+                        ] as PFNodeDefinition<any>;
+
+                        const to_node = pflow.nodes[edge.target];
+                        const to_def = (allNodeDefinitions as any)[
+                          to_node.type
+                        ] as PFNodeDefinition<any>;
+
+                        if (from_def.on_before_disconnect) {
+                          from_def.on_before_disconnect({
+                            from: from_node,
+                            to: to_node,
+                            flow,
+                          });
+                        }
+
+                        if (to_def.on_before_disconnect) {
+                          to_def.on_before_disconnect({
+                            from: from_node,
+                            to: to_node,
+                            flow,
+                          });
+                        }
+
                         const res = flow.splice(idx, flow.length - idx);
                         if (res.length > 0) {
                           pflow.flow[res[0]] = res;
                         }
                         return false;
+                      } else {
+                        const idx = flow.indexOf(edge.target);
+                        if (idx >= 0) {
+                          const res = flow.splice(idx);
+                          if (res.length > 1) {
+                            pflow.flow[res[0]] = res;
+                          }
+                        }
                       }
                     }
 

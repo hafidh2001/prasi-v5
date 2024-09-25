@@ -75,8 +75,8 @@ export const PFPropNodeField: FC<{
               obj[name] = value;
             }
 
-            if (def.fields_changed) {
-              def.fields_changed({
+            if (def.on_fields_changed) {
+              def.on_fields_changed({
                 action,
                 node: n,
                 path: [...(path || []), name].join("."),
@@ -256,31 +256,29 @@ export const PFPropNodeField: FC<{
           </div>
         )}
         {field.type === "array" && (
-          <SimplePopover content={<div className={cx("text-xs")}>...</div>}>
-            <div className="flex-1 justify-end items-center flex">
-              <div
-                className={cx(
-                  "border select-none px-2 text-[11px] mr-[2px] cursor-pointer hover:bg-blue-600 hover:border-blue-600 hover:text-white"
-                )}
-                onClick={() => {
-                  const item = {} as any;
-                  if (field.fields) {
-                    for (const [k, v] of Object.entries(field.fields)) {
-                      item[k] = "";
-                    }
-                    if (!Array.isArray(local.value)) {
-                      local.value = [];
-                    }
-                    local.value.push(item);
-                    local.render();
-                    update("array-added", path || [], local.value);
+          <div className="flex-1 justify-end items-center flex">
+            <div
+              className={cx(
+                "border select-none px-2 text-[11px] mr-[2px] cursor-pointer hover:bg-blue-600 hover:border-blue-600 hover:text-white"
+              )}
+              onClick={() => {
+                const item = {} as any;
+                if (field.fields) {
+                  for (const [k, v] of Object.entries(field.fields)) {
+                    item[k] = "";
                   }
-                }}
-              >
-                + Add
-              </div>
+                  if (!Array.isArray(local.value)) {
+                    local.value = [];
+                  }
+                  local.value.push(item);
+                  local.render();
+                  update("array-added", path || [], local.value);
+                }
+              }}
+            >
+              + Add
             </div>
-          </SimplePopover>
+          </div>
         )}
         {field.optional && local.value && (
           <div
@@ -317,7 +315,7 @@ export const PFPropNodeField: FC<{
                       </div>
                       <div className="flex flex-col flex-1 ">
                         {Object.entries(field.fields)
-                          .sort((a, b) => a[1].idx - b[1].idx)
+                          .sort((a, b) => a[1].idx! - b[1].idx!)
                           .map(([key, field]) => {
                             return (
                               <PFPropNodeField

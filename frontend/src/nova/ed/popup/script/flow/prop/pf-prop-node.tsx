@@ -4,6 +4,7 @@ import { DeepReadonly, PFField, PFNode, RPFlow } from "../runtime/types";
 import { fg } from "../utils/flow-global";
 import { getNodeFields } from "../utils/get-node-fields";
 import { PFPropNodeField } from "./pf-prop-node-field";
+import { useReactFlow } from "@xyflow/react";
 
 export const PFPropNode: FC<{ node: DeepReadonly<PFNode>; pflow: RPFlow }> = ({
   node,
@@ -45,10 +46,37 @@ export const PFPropNode: FC<{ node: DeepReadonly<PFNode>; pflow: RPFlow }> = ({
         }}
         placeholder={"Node Name"}
       />
-      <div className="text-xs text-slate-400 p-1 border-b">ID: {node.id}</div>
+      <div className="text-xs text-slate-400 pl-1 py-1 border-b flex items-center justify-between">
+        <div>ID: {node.id}</div>
+        {(node.branches || []).length > 0 && (
+          <div className={"pr-[2px]"}>
+            <div
+              className={cx(
+                "border select-none text-black px-2 text-[11px] cursor-pointer hover:bg-blue-600 hover:border-blue-600 hover:text-white"
+              )}
+              onClick={() => {
+                const branch = node.branches?.[0];
+                if (branch) {
+                  if (branch.flow[0] === node.id) {
+                    fg.main?.action.addSelectedEdges([
+                      `${branch.flow[0]}-${branch.flow[1]}`,
+                    ]);
+                  } else {
+                    fg.main?.action.addSelectedEdges([
+                      `${node.id}-${branch.flow[0]}`,
+                    ]);
+                  }
+                }
+              }}
+            >
+              Branches
+            </div>
+          </div>
+        )}
+      </div>
 
       {Object.entries((def.fields || {}) as Record<string, PFField>)
-        .sort((a, b) => a[1].idx - b[1].idx)
+        .sort((a, b) => a[1].idx! - b[1].idx!)
         .map(([key, item]) => {
           return (
             <PFPropNodeField

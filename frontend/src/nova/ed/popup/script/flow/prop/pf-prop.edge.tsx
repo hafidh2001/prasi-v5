@@ -1,5 +1,5 @@
 import { Edge } from "@xyflow/react";
-import { Split } from "lucide-react";
+import { Split, Trash } from "lucide-react";
 import { FC } from "react";
 import { useLocal } from "utils/react/use-local";
 import { RPFlow } from "../runtime/types";
@@ -19,7 +19,7 @@ export const PFPropEdge: FC<{ edge: Edge; pflow: RPFlow }> = ({
         <>
           <div className="flex items-center p-1 border-b px-1 space-x-1">
             <Split size={9} />
-            <div>Change Branch:</div>
+            <div>Branches:</div>
           </div>
           <div>
             {(node.branches || []).map((e, idx) => {
@@ -29,7 +29,7 @@ export const PFPropEdge: FC<{ edge: Edge; pflow: RPFlow }> = ({
                 <div
                   key={idx}
                   className={cx(
-                    "pl-4 py-1 select-none",
+                    "pl-4 py-1 select-none justify-between flex items-center border-b",
                     selected
                       ? "cursor-default bg-blue-500 text-white"
                       : "cursor-pointer hover:bg-blue-50"
@@ -46,7 +46,23 @@ export const PFPropEdge: FC<{ edge: Edge; pflow: RPFlow }> = ({
                     }
                   }}
                 >
-                  {e.name || "Branch " + (idx + 1)}
+                  <div>{e.name || "Branch " + (idx + 1)}</div>
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      fg.update("Delete Branch", ({ pflow }) => {
+                        const n = pflow.nodes[node.id];
+                        n.branches?.splice(idx, 1);
+                      });
+                    }}
+                    className={cx(
+                      "p-1 border bg-white mr-2 text-red-600 rounded-sm cursor-pointer",
+                      selected ? "border-red-200" : "border-red-600"
+                    )}
+                  >
+                    <Trash size={12} />
+                  </div>
                 </div>
               );
             })}
