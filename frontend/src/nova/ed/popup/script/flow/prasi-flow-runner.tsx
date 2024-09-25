@@ -8,6 +8,7 @@ import { fg } from "./utils/flow-global";
 import { useLocal } from "utils/react/use-local";
 import { Tooltip } from "utils/ui/tooltip";
 import { PFlow, RPFlow } from "./runtime/types";
+import { NodeTypeLabel } from "./utils/node-type-label";
 
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
@@ -165,7 +166,7 @@ export const PrasiFlowRunner = ({ pflow }: { pflow: RPFlow }) => {
               * {
                 font-size: 12px;
               }
-              .node-type {
+              .node-type *, .node-type {
                 font-size: 9px;
               }
             `
@@ -219,10 +220,10 @@ export const PrasiFlowRunner = ({ pflow }: { pflow: RPFlow }) => {
                       )}
                       <div
                         className={cx(
-                          "uppercase node-type border border-slate-500 font-mono px-2 bg-white"
+                          "node-type flex border border-slate-500 font-mono pr-1 bg-white"
                         )}
                       >
-                        {e.node.type}
+                        <NodeTypeLabel node={e.node} />
                       </div>
                       <div className="flex-1">
                         {e.node.type !== "start" ? e.node.name : ""}

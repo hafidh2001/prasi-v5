@@ -15,6 +15,7 @@ import { allNodeDefinitions } from "../runtime/nodes";
 import { PFNodeDefinition, RPFlow } from "../runtime/types";
 import { fg } from "./flow-global";
 import { savePF } from "./save-pf";
+import { NodeTypeLabel } from "./node-type-label";
 
 export const RenderNode = function (arg: {
   id: string;
@@ -115,17 +116,22 @@ export const RenderNode = function (arg: {
           `,
 
         fg.node_running.includes(arg.id) &&
-          (fg.node_running[fg.node_running.length - 1] === id ||
-          !pflow!.nodes[arg.id].branches
-            ? css`
-                color: white;
-                background: #419625 !important;
-                border: 1px solid #419625;
-              `
-            : css`
-                background: #f8f5d5 !important;
-                border: 1px solid #91860c;
-              `),
+          css`
+            color: white;
+            background: #419625 !important;
+            border: 1px solid #419625;
+          `,
+        // (fg.node_running[fg.node_running.length - 1] === id ||
+        // !pflow!.nodes[arg.id].branches
+        //   ? css`
+        //       color: white;
+        //       background: #419625 !important;
+        //       border: 1px solid #419625;
+        //     `
+        //   : css`
+        //       background: #f8f5d5 !important;
+        //       border: 1px solid #91860c;
+        //     `),
 
         fg.run?.visited?.find((e) => e.node.id === arg.id) &&
           css`
@@ -153,7 +159,7 @@ export const RenderNode = function (arg: {
             if (node) {
               clearTimeout(fg.update_timeout);
               fg.update_timeout = setTimeout(() => {
-                fg.update("Resize Node", ({ pflow }) => {
+                fg.updateNoDebounce("Resize Node", ({ pflow }) => {
                   const n = pflow.nodes[node.id];
                   if (n) {
                     n.size = { w: p.width, h: p.height };
@@ -370,18 +376,7 @@ export const RenderNode = function (arg: {
                           dangerouslySetInnerHTML={{ __html: def.icon }}
                         ></div>
 
-                        {def.type.split(".").map((e, idx) => (
-                          <div key={idx} className="flex space-x-1 ml-1">
-                            {idx > 0 && <div> &bull; </div>}
-                            <div
-                              className={
-                                e.length > 2 ? "capitalize" : "uppercase"
-                              }
-                            >
-                              {e}
-                            </div>
-                          </div>
-                        ))}
+                        <NodeTypeLabel node={def} />
                       </>
                     ),
                   };
@@ -392,7 +387,7 @@ export const RenderNode = function (arg: {
                 const pf = pflow;
                 if (pf) {
                   const node = pf.nodes[id];
-                  fg.update("Flow Change Node Type", ({ pflow }) => {
+                  fg.updateNoDebounce("Flow Change Node Type", ({ pflow }) => {
                     const n = pflow.nodes[node.id];
                     if (n) {
                       n.type = value;
@@ -445,18 +440,7 @@ export const RenderNode = function (arg: {
                   >
                     <div dangerouslySetInnerHTML={{ __html: def.icon }}></div>
                     <div className="flex space-x-1">
-                      {def.type.split(".").map((e, idx) => (
-                        <Fragment key={idx}>
-                          {idx > 0 && <div> &bull; </div>}
-                          <div
-                            className={
-                              e.length > 2 ? "capitalize" : "uppercase"
-                            }
-                          >
-                            {e}
-                          </div>
-                        </Fragment>
-                      ))}
+                      <NodeTypeLabel node={def} />
                     </div>
                   </div>
                 </div>

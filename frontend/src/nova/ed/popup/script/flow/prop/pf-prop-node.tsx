@@ -61,7 +61,13 @@ export const PFPropNode: FC<{ node: DeepReadonly<PFNode>; pflow: RPFlow }> = ({
             />
           );
         })}
-      <pre className={cx("text-[9px]")}>{JSON.stringify(node, null, 2)}</pre>
+      <div className="relative overflow-auto w-full h-full flex-1">
+        <div className="absolute inset-0">
+          <pre className={cx("text-[9px]")}>
+            {JSON.stringify(node, null, 2)}
+          </pre>
+        </div>
+      </div>
     </>
   );
 };

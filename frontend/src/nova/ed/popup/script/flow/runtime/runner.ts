@@ -1,20 +1,25 @@
 import { allNodeDefinitions } from "./nodes";
 import {
-  PFlow,
+  DeepReadonly,
   PFNode,
+  PFNodeBranch,
   PFNodeDefinition,
   PFRuntime,
-  PFNodeBranch,
   RPFlow,
-  DeepReadonly,
 } from "./types";
 
 type RunFlowOpt = {
   vars?: Record<string, any>;
   capture_console: boolean;
   delay?: number;
-  after_node?: (arg: { visited: PFRunVisited[]; node: DeepReadonly<PFNode> }) => void;
-  before_node?: (arg: { visited: PFRunVisited[]; node: DeepReadonly<PFNode> }) => void;
+  after_node?: (arg: {
+    visited: PFRunVisited[];
+    node: DeepReadonly<PFNode>;
+  }) => void;
+  before_node?: (arg: {
+    visited: PFRunVisited[];
+    node: DeepReadonly<PFNode>;
+  }) => void;
 };
 export const runFlow = async (pf: RPFlow, opt?: RunFlowOpt) => {
   const main_flow_id = Object.keys(pf.flow).find(
@@ -48,6 +53,10 @@ const flowRuntime = async (
 ) => {
   const visited: PFRunVisited[] = [];
   const vars = { ...opt?.vars };
+
+  // Global execution count initialized here
+  const executionCount = new Map<string, number>(); // Track execution counts globally
+
   for (const current of runtime.nodes) {
     if (
       !(await runSingleNode({
@@ -56,6 +65,7 @@ const flowRuntime = async (
         visited,
         vars,
         opt,
+        executionCount,
       }))
     ) {
       break;
@@ -71,8 +81,9 @@ const runSingleNode = async (arg: {
   visited: PFRunVisited[];
   vars: Record<string, any>;
   opt?: RunFlowOpt;
+  executionCount: Map<string, number>;
 }) => {
-  const { pf, visited, vars, current, branch, opt } = arg;
+  const { pf, visited, vars, current, branch, opt, executionCount } = arg;
   const { capture_console, after_node, before_node } = opt || {};
   const def = (allNodeDefinitions as any)[
     current.type
@@ -93,9 +104,8 @@ const runSingleNode = async (arg: {
   visited.push(run_visit);
 
   if (current.vars) {
-    for (const [k, v] of Object.entries(current.vars)) {
-      vars[k] = v;
-    }
+    // Create a new vars object instead of mutating the existing one
+    Object.assign(vars, current.vars);
   }
 
   try {
@@ -103,6 +113,11 @@ const runSingleNode = async (arg: {
       async (resolve, reject) => {
         if (current.branches) {
           run_visit.branching = true;
+
+          // Delay execution if the node has branches
+          if (opt?.delay) {
+            await new Promise((done) => setTimeout(done, opt.delay));
+          }
 
           if (after_node) {
             after_node({ visited: visited, node: current });
@@ -122,21 +137,31 @@ const runSingleNode = async (arg: {
               run_visit.tstamp = Date.now();
 
               for (const id of branch.flow) {
-                if (current.id == id) continue;
+                if (current.id === id) continue; // Prevent re-visiting the current node
+
+                // Increment the execution count for this node across all branches
+                const currentCount = executionCount.get(id) || 0;
+                executionCount.set(id, currentCount + 1); // Update the count
+
+                // Log if a node is executed more than once
+                if (currentCount + 1 > 1) {
+                  console.warn(
+                    `Node [${pf.nodes[id].type}] '${id}' executed multiple times: ${currentCount + 1} times.`
+                  );
+                }
 
                 const new_current = pf.nodes[id];
                 if (!new_current) break;
-                if (
-                  !(await runSingleNode({
-                    pf,
-                    current: new_current,
-                    visited,
-                    vars,
-                    opt,
-                  }))
-                ) {
-                  break;
-                }
+
+                // Call runSingleNode recursively
+                await runSingleNode({
+                  pf,
+                  current: new_current,
+                  visited,
+                  vars,
+                  opt,
+                  executionCount,
+                });
               }
             },
             next: resolve,
@@ -150,7 +175,8 @@ const runSingleNode = async (arg: {
               : console,
           });
         } catch (e) {
-          reject(e);
+          console.error(`Error executing node '${current.id}':`, e); // More informative error logging
+          reject(e); // Ensure rejection propagates
         }
       }
     );
@@ -160,9 +186,7 @@ const runSingleNode = async (arg: {
     }
 
     if (opt?.delay) {
-      await new Promise((done) => {
-        setTimeout(done, opt.delay);
-      });
+      await new Promise((done) => setTimeout(done, opt.delay));
     }
 
     if (after_node) {
@@ -171,6 +195,7 @@ const runSingleNode = async (arg: {
 
     if (execute_node) {
       for (const id of execute_node.flow) {
+        // Allow tracking even if executed again
         if (id === current.id) {
           continue;
         }
@@ -184,18 +209,17 @@ const runSingleNode = async (arg: {
             visited,
             vars,
             opt,
+            executionCount,
           });
         }
       }
     }
-    if (!run_visit.branching) return true;
-    return false;
+
+    return !run_visit.branching;
   } catch (e: any) {
     run_visit.tstamp = Date.now();
-    if (e) {
-      run_visit.error = e;
-      console.error(e);
-    }
+    run_visit.error = e;
+    console.error(`Error processing node:`, e); // More informative output
     return false;
   }
 };
