@@ -10,7 +10,9 @@ import {
   ReactFlowInstance,
   useEdgesState,
   useNodesState,
+  useReactFlow,
   useStore,
+  useStoreApi,
   Viewport,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -52,6 +54,7 @@ export function PrasiFlowEditor({
       resetSelectedElements: () => {},
       addSelectedNodes: () => {},
       addSelectedEdges: () => {},
+      focusNode: () => {},
     },
   });
   fg.main = local;
@@ -201,7 +204,6 @@ export function PrasiFlowEditor({
         }
       }}
     >
-      {Date.now()}
       <ReactFlow
         maxZoom={1.1}
         onInit={(ref) => {
@@ -302,6 +304,8 @@ export function PrasiFlowEditor({
 }
 
 const Selection = () => {
+  const { zoomIn, zoomOut, setCenter } = useReactFlow();
+  const store = useStoreApi();
   const { resetSelectedElements, addSelectedNodes, addSelectedEdges } =
     useStore((store) => ({
       resetSelectedElements: store.resetSelectedElements,
@@ -314,6 +318,21 @@ const Selection = () => {
       resetSelectedElements,
       addSelectedNodes,
       addSelectedEdges,
+      focusNode: (id) => {
+        const { nodeLookup } = store.getState();
+        const nodes = Array.from(nodeLookup).map(([, node]) => node);
+
+        if (nodes.length > 0) {
+          const node = nodes.find((node) => node.id === id);
+
+          if (node && node.measured.width && node.measured.height) {
+            const x = node.position.x + node.measured.width / 2;
+            const y = node.position.y + node.measured.height / 2;
+
+            setCenter(x, y, { duration: 1000 });
+          }
+        }
+      },
     };
   return <></>;
 };

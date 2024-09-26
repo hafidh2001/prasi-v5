@@ -188,9 +188,11 @@ export const PrasiFlowRunner = ({ pflow }: { pflow: RPFlow }) => {
                   )}
                   onClick={() => {
                     const rf_node = fg.prop?.selection.nodes[0];
-                    if (rf_node?.id !== e.node.id) {
-                      fg.main?.action.resetSelectedElements();
-                      fg.main?.action.addSelectedNodes([e.node.id]);
+                    const action = fg.main?.action;
+                    if (rf_node?.id !== e.node.id && action) {
+                      action.resetSelectedElements();
+                      action.addSelectedNodes([e.node.id]);
+                      action.focusNode(e.node.id);
                     }
                   }}
                 >

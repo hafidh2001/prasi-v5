@@ -34,6 +34,7 @@ const fg_default = {
       resetSelectedElements: () => void;
       addSelectedNodes: (arg: string[]) => void;
       addSelectedEdges: (arg: string[]) => void;
+      focusNode: (id: string) => void;
     };
   },
   run: null as null | PFRunResult,
