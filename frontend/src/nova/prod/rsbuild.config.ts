@@ -10,6 +10,7 @@ export default defineConfig({
       utils: ["../../utils"],
       base: ["../../base"],
       logic: ["../../nova/ed/logic"],
+      expr: ["../../nova/ed/popup/script/expr"],
       popup: ["../../nova/ed/popup"],
       prod: ["../../nova/prod"],
       vi: ["../../nova/vi"],

@@ -7,6 +7,7 @@
       "logic/*": ["./src/nova/ed/logic/*"],
       "popup/*": ["./src/nova/ed/popup/*"],
       "prod/*": ["./src/nova/prod/*"],
+      "expr*": ["./src/nova/ed/popup/script/expr"],
       "vi/*": ["./src/nova/vi/*"]
     },
     "target": "ES2020",
