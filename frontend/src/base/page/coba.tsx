@@ -6,7 +6,7 @@ export default page({
   component: ({}) => {
     return (
       <div className="flex items-center justify-center flex-1">
-        <div className=" w-[300px] h-[300px] border p-2">
+        <div className=" w-[300px] h-[600px] border p-2 flex items-center">
           <PrasiExpr
             // value={{
             //   type: "expression",

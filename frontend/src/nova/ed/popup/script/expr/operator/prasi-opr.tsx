@@ -1,6 +1,7 @@
 import { FC } from "react";
 import ContentEditable from "react-contenteditable";
 import { useLocal } from "utils/react/use-local";
+import { ExprPicker } from "../lib/picker";
 import { EOperator, EValue } from "../lib/type";
 import { operators } from "./operators";
 
@@ -14,8 +15,9 @@ export const POperator: FC<{ operator?: EOperator; base: EValue }> = ({
     value: opr?.syntax || "",
     hovered: false,
   });
+
   return (
-    <div
+    <ExprPicker
       className={cx(
         "eopr",
         local.focused && "focused",
@@ -32,6 +34,13 @@ export const POperator: FC<{ operator?: EOperator; base: EValue }> = ({
         onChange={(e) => {
           local.value = e.currentTarget.innerText;
           local.render();
+        }}
+        onKeyDown={(e) => {
+          console.log(e.key)
+          if (e.key === " ") {
+            e.preventDefault();
+            e.stopPropagation();
+          }
         }}
         onFocus={() => {
           local.focused = true;
@@ -50,6 +59,6 @@ export const POperator: FC<{ operator?: EOperator; base: EValue }> = ({
           local.render();
         }}
       ></ContentEditable>
-    </div>
+    </ExprPicker>
   );
 };

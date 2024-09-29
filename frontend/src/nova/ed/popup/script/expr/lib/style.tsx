@@ -3,12 +3,14 @@ export const prasiExprStyle = css`
     display: flex;
     padding: 2px;
     flex-wrap: wrap;
+    font-family: "Liga Menlo", monospace;
 
     .evalue {
       border: 1px solid #ccc;
     }
     .eopr {
-      border: 1px solid #8a1cff;
+      border: 1px solid white;
+      color: #8a1cff;
     }
 
     .evalue,
@@ -20,8 +22,8 @@ export const prasiExprStyle = css`
       margin-bottom: 5px;
       cursor: pointer;
 
-      &.blank {
-        border: 1px solid white;
+      &.eopr {
+        padding: 2px;
       }
 
       &.hovered {
@@ -51,7 +53,6 @@ export const prasiExprStyle = css`
       align-items: center;
       border-radius: 2px;
       padding: 0px 4px;
-      margin-right: -2px;
       cursor: pointer;
       background: white;
       &:hover {
@@ -76,6 +77,11 @@ export const prasiExprStyle = css`
     .value-content,
     .operator-content {
       font-size: 0.9em;
+
+      &.value-content {
+        font-size: 0.8em;
+      }
+      text-align: center;
     }
   }
 `;

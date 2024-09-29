@@ -120,34 +120,71 @@ function mapPlacementSideToCSSProperty(placement: Placement) {
 
   return staticSide;
 }
-function PopoverArrow() {
+function PopoverArrow(children: any) {
   const context = usePopoverContext();
-  const { x: arrowX, y: arrowY } = context.middlewareData.arrow || {
+  let { x: arrowX, y: arrowY } = context.middlewareData.arrow || {
     x: 0,
     y: 0,
   };
   const staticSide = mapPlacementSideToCSSProperty(context.placement) as string;
 
+  if (staticSide === "left") arrowX = undefined;
+
   return (
     <div
-      ref={context.arrowRef}
-      style={{
-        left: arrowX != null ? `${arrowX}px` : "",
-        top: arrowY != null ? `${arrowY}px` : "",
-        [staticSide]: "-4px",
-        transform: "rotate(45deg)",
-      }}
       className={cx(
-        "arrow",
         css`
-          pointer-events: none;
           position: absolute;
-          width: 10px;
-          height: 10px;
-          background: white;
-        `
+          overflow: hidden;
+          padding: 2px;
+        `,
+        typeof arrowX === "number" &&
+          css`
+            left: ${arrowX}px;
+          `,
+        typeof arrowY === "number" &&
+          css`
+            top: ${arrowY}px;
+          `,
+        ["top", "bottom"].includes(staticSide) &&
+          css`
+            width: 16px;
+            height: 5px;
+          `,
+        ["left", "right"].includes(staticSide) &&
+          css`
+            height: 16px;
+            width: 5px;
+          `,
+        "flex items-start justify-start"
       )}
-    />
+      style={{ [staticSide]: "-5px" }}
+      ref={context.arrowRef}
+    >
+      <div
+        style={{
+          transform: "rotate(45deg)",
+          position: "absolute",
+        }}
+        className={cx(
+          "arrow",
+          css`
+            pointer-events: none;
+            width: 10px;
+            height: 10px;
+            background: white;
+          `,
+          staticSide === "right" &&
+            css`
+              left: -7px;
+            `,
+          staticSide === "bottom" &&
+            css`
+              top: -7px;
+            `
+        )}
+      />
+    </div>
   );
 }
 
@@ -187,7 +224,7 @@ export function Popover({
   children: React.ReactNode;
   content?: React.ReactNode;
   arrow?: boolean;
-  asChild?: boolean
+  asChild?: boolean;
 } & PopoverOptions) {
   const popover = usePopover({ modal, ...restOptions });
 
