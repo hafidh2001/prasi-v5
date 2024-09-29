@@ -12,12 +12,17 @@ export const jsOnChange = (
   local.change_timeout = setTimeout(async () => {
     const transform = jscript.transform!;
     if (!p.ui.popup.script.prop_name) {
-      const res = await transform(`render(${val})`, {
-        jsx: "transform",
-        logLevel: "silent",
-        format: "cjs",
-        loader: "tsx",
-      });
+      let built = null;
+      try {
+        const res = await transform(`render(${val})`, {
+          jsx: "transform",
+          logLevel: "silent",
+          format: "cjs",
+          loader: "tsx",
+        });
+        built = res.code;
+      } catch (e) {}
+
       getActiveTree(p).update("Update item script", ({ findNode }) => {
         const n = findNode(id);
         if (n && n.item) {
@@ -26,7 +31,7 @@ export const jsOnChange = (
           }
 
           n.item.adv.js = val;
-          n.item.adv.jsBuilt = res.code;
+          if (built !== null) n.item.adv.jsBuilt = built;
         }
       });
     }

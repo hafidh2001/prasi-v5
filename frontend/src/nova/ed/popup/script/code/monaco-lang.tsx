@@ -40,6 +40,9 @@ export const MonacoLang: FC<{
         formatOnType: true,
         tabSize: 2,
         useTabStops: true,
+        automaticLayout: true,
+        fontFamily: "'Liga Menlo', monospace",
+        fontLigatures: true,
         lineNumbersMinChars: 2,
       }}
     />

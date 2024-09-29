@@ -6,10 +6,8 @@ export const prasiExprStyle = css`
     font-family: "Liga Menlo", monospace;
 
     .evalue {
-      border: 1px solid #ccc;
     }
     .eopr {
-      border: 1px solid white;
       color: #8a1cff;
     }
 
@@ -28,12 +26,10 @@ export const prasiExprStyle = css`
 
       &.hovered {
         background: #c0d0ff;
-        border: 1px solid #c0d0ff;
       }
 
       &.focused {
         outline: 1px solid blue;
-        border: 1px solid blue;
         background: white;
       }
 
@@ -61,8 +57,6 @@ export const prasiExprStyle = css`
     }
 
     .evalue {
-      margin-right: 5px;
-
       & .eicon {
         pointer-events: none;
         display: flex;

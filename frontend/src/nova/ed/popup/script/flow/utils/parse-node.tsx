@@ -1,7 +1,5 @@
 import { Edge, Node, Position } from "@xyflow/react";
 import { DeepReadonly, PFNode, PFNodeID } from "../runtime/types";
-import { allNodeDefinitions } from "../runtime/nodes";
-import { fg } from "./flow-global";
 
 export const EdgeType = "default";
 
@@ -21,7 +19,7 @@ export const parseNodes = (
       y: number;
       next_flow: DeepReadonly<PFNode>[];
     };
-  }
+  },
 ) => {
   const existing = opt?.existing || undefined;
   const rf_nodes: Node[] = existing ? existing.rf_nodes : [];
@@ -48,6 +46,16 @@ export const parseNodes = (
   for (const inode of flow_nodes) {
     rf_unflowed_nodes.delete(inode.id);
 
+    const position: any = { ...inode.position };
+
+    if (isNaN(position.x)) {
+      position.x = 0;
+    }
+
+    if (isNaN(position.y)) {
+      position.y = 0;
+    }
+
     const new_node: Node = {
       id: inode.id,
       type: "default",
@@ -58,10 +66,12 @@ export const parseNodes = (
         type: inode.type,
         label: inode.type === "start" ? "Start" : inode.name,
       },
-      position: inode.position || {
-        x: (existing?.x || 0) * 200,
-        y: ((existing?.y || 0) + y) * 100,
-      },
+      position: inode.position
+        ? position
+        : {
+            x: (existing?.x || 0) * 200,
+            y: ((existing?.y || 0) + y) * 100,
+          },
     };
 
     const node = opt?.current?.nodes.find((e) => inode.id === e.id) || new_node;

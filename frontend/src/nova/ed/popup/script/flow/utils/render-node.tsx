@@ -10,12 +10,12 @@ import { Check, Maximize2 } from "lucide-react";
 import { useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { useLocal } from "utils/react/use-local";
-import { Combobox } from "utils/shadcn/comps/ui/combobox";
 import { Tooltip } from "utils/ui/tooltip";
 import { allNodeDefinitions } from "../runtime/nodes";
 import { PFNodeDefinition } from "../runtime/types";
 import { fg } from "./flow-global";
 import { NodeTypeLabel } from "./node-type-label";
+import { NodeTypePicker } from "./type-picker";
 
 export const RenderNode = function (arg: {
   id: string;
@@ -32,7 +32,7 @@ export const RenderNode = function (arg: {
     add: actions.addSelectedNodes,
     reset: actions.resetSelectedElements,
   }));
-  
+
   if (connection.inProgress) {
     fg.pointer_to = connection.to;
   }
@@ -55,7 +55,7 @@ export const RenderNode = function (arg: {
       onKeyDown={(e) => {
         if (e.key.length === 1 && !local.type_opened) {
           const input: HTMLInputElement | null = document.querySelector(
-            "#prasi-flow-node-name"
+            "#prasi-flow-node-name",
           );
           if (input) {
             input.focus();
@@ -130,7 +130,7 @@ export const RenderNode = function (arg: {
           css`
             background: #f3ffef;
             border: 1px solid #175203;
-          `
+          `,
       )}
       // onPointerDown={() => {
       //   selection.reset();
@@ -215,7 +215,7 @@ export const RenderNode = function (arg: {
               padding-left: 5px;
               top: 3px;
               right: -30px;
-            `
+            `,
           )}
           onClick={() => {
             if (node) {
@@ -243,7 +243,7 @@ export const RenderNode = function (arg: {
                     color: white;
                   }
                 }
-              `
+              `,
             )}
           >
             {fg.resizing.has(node.id) ? (
@@ -294,7 +294,7 @@ export const RenderNode = function (arg: {
                 border: 1px dashed black;
               }
             } */
-          `
+          `,
         )}
       ></Handle>
       <Handle
@@ -306,13 +306,13 @@ export const RenderNode = function (arg: {
         <div
           className={cx(
             "flex flex-col items-stretch",
-            data.type !== "start" ? "min-w-[137px] " : "min-w-[65px] "
+            data.type !== "start" ? "min-w-[137px] " : "min-w-[65px] ",
           )}
         >
           {node.name && data.type !== "start" && (
             <div
               className={cx(
-                "flex items-center py-1 px-2 border-b border-t-slate-500"
+                "flex items-center py-1 px-2 border-b border-t-slate-500",
               )}
             >
               <TextareaAutosize
@@ -324,7 +324,7 @@ export const RenderNode = function (arg: {
                 rows={1}
                 ref={ref_name}
                 className={cx(
-                  "flex flex-1 bg-transparent min-w-0 w-0 outline-none resize-none text-[15px] items-center flex-col"
+                  "flex flex-1 bg-transparent min-w-0 w-0 outline-none resize-none text-[15px] items-center flex-col",
                 )}
               ></TextareaAutosize>
             </div>
@@ -338,7 +338,7 @@ export const RenderNode = function (arg: {
                   width: 14px;
                   height: 14px;
                 }
-              `
+              `,
             )}
           >
             <div
@@ -346,7 +346,7 @@ export const RenderNode = function (arg: {
                 height: 28px;
               `)}
             ></div>
-            <Combobox
+            <NodeTypePicker
               onOpenChange={(value) => {
                 console.log("open change", value);
                 local.type_opened = value;
@@ -404,11 +404,6 @@ export const RenderNode = function (arg: {
                   });
                 }
               }}
-              className={css`
-                * {
-                  font-size: 13px !important;
-                }
-              `}
             >
               {({ setOpen, open }) => (
                 <div
@@ -416,7 +411,7 @@ export const RenderNode = function (arg: {
                     "flex",
                     node.type !== "start"
                       ? "absolute z-10 items-stretch justify-center px-1"
-                      : "item-center w-full"
+                      : "item-center w-full",
                   )}
                   onPointerUp={(e) => {
                     if (node.type !== "start") {
@@ -439,7 +434,7 @@ export const RenderNode = function (arg: {
                             "flex-1 flex hover:bg-blue-700 hover:text-white rounded-[3px] py-[2px] px-[6px] flex-row items-center",
                             css`
                               cursor: pointer !important;
-                            `
+                            `,
                           )
                     }
                   >
@@ -450,7 +445,7 @@ export const RenderNode = function (arg: {
                   </div>
                 </div>
               )}
-            </Combobox>
+            </NodeTypePicker>
           </div>
         </div>
       )}

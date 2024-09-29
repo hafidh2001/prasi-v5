@@ -5,7 +5,7 @@ import {
   MonacoJsxSyntaxHighlight,
 } from "monaco-jsx-syntax-highlight-v2";
 export type MonacoEditor = Parameters<OnMount>[0];
-type Monaco = Parameters<OnMount>[1];
+export type Monaco = Parameters<OnMount>[1];
 
 type CompilerOptions = Parameters<
   Parameters<OnMount>[1]["languages"]["typescript"]["typescriptDefaults"]["setCompilerOptions"]
@@ -14,6 +14,7 @@ type CompilerOptions = Parameters<
 export const monacoEnableJSX = async (
   editor: MonacoEditor,
   monaco: Monaco,
+  arg?: { nolib?: boolean },
   p?: PG
 ) => {
   monaco.languages.register({ id: "typescript" });
@@ -44,7 +45,7 @@ export const monacoEnableJSX = async (
     jsx: monaco.languages.typescript.JsxEmit.React,
     target: monaco.languages.typescript.ScriptTarget.ES2015,
     allowNonTsExtensions: true,
-    lib: ["esnext", "dom"],
+    lib: arg?.nolib ? [] : ["es6", "dom"],
     module: monaco.languages.typescript.ModuleKind.ESNext,
     esModuleInterop: true,
     moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,

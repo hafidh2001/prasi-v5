@@ -5,7 +5,7 @@ import { jscript } from "utils/script/jscript";
 import { Loading } from "utils/ui/loading";
 import { monacoCleanModel } from "./js/clean-models";
 import { monacoCreateModel, monacoRegisterSource } from "./js/create-model";
-import { monacoEnableJSX } from "./js/enable-jsx";
+import { Monaco, MonacoEditor, monacoEnableJSX } from "./js/enable-jsx";
 import { jsxColorScheme } from "./js/jsx-style";
 
 export const MonacoJS: FC<{
@@ -13,8 +13,11 @@ export const MonacoJS: FC<{
   onChange: (value: string) => void;
   enableJsx?: boolean;
   models?: Record<string, string>;
+  className?: string;
+  nolib?: boolean;
   defaultValue?: string;
-}> = ({ value, onChange, models, defaultValue }) => {
+  onMount?: (editor: MonacoEditor, monaco: Monaco) => void;
+}> = ({ value, onChange, models, defaultValue, className, nolib, onMount }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const Editor = jscript.MonacoEditor;
   if (!Editor)
@@ -30,7 +33,7 @@ export const MonacoJS: FC<{
       onChange={(value) => {
         onChange(value || "");
       }}
-      className={cx(jsxColorScheme)}
+      className={cx(jsxColorScheme, className)}
       loading={
         <div className="relative w-full h-full items-center justify-center flex flex-1">
           <Loading backdrop={false} note="loading-monaco" />
@@ -46,6 +49,9 @@ export const MonacoJS: FC<{
         formatOnType: true,
         tabSize: 2,
         useTabStops: true,
+        automaticLayout: true,
+        fontFamily: "'Liga Menlo', monospace",
+        fontLigatures: true,
         lineNumbersMinChars: 2,
       }}
       onMount={async (editor, monaco) => {
@@ -57,12 +63,16 @@ export const MonacoJS: FC<{
           source: value || defaultValue || "",
           activate: true,
         });
-        monacoEnableJSX(editor, monaco, p);
+        monacoEnableJSX(editor, monaco, { nolib }, p);
 
         if (models) {
           for (const [uri, source] of Object.entries(models)) {
             monacoRegisterSource(monaco, source, uri);
           }
+        }
+
+        if (onMount) {
+          onMount(editor, monaco);
         }
       }}
     />

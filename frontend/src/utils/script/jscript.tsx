@@ -1,9 +1,8 @@
 import type { Editor as MonacoEditor } from "@monaco-editor/react";
-import type { transform } from "esbuild-wasm";
+import type { formatMessages, transform } from "esbuild-wasm";
 import type estree from "prettier/plugins/estree";
 import type ts from "prettier/plugins/typescript";
 import type Prettier from "prettier/standalone";
-import { PG } from "../../nova/ed/logic/ed-global";
 export type FBuild = (
   entryFileName: string,
   src: string,
@@ -15,6 +14,7 @@ export const jscript = {
   MonacoEditor: null as typeof MonacoEditor | null,
   pending: null as null | Promise<void>,
   transform: null as null | typeof transform,
+  formatMessages: null as null | typeof formatMessages,
   prettier: {
     standalone: null as null | typeof Prettier,
     estree: null as null | typeof estree,
@@ -41,6 +41,7 @@ export const jscript = {
                 "https://cdn.jsdelivr.net/npm/esbuild-wasm@0.24.0/esbuild.wasm",
             });
             jscript.transform = esbuild.transform;
+            jscript.formatMessages = esbuild.formatMessages;
           })(),
           (async () => {
             const monaco_react = await import("@monaco-editor/react");

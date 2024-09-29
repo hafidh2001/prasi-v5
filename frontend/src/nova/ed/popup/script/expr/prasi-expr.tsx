@@ -67,6 +67,7 @@ const PValue: FC<{ base: EValue; className?: string; varName?: string }> = ({
           e.stopPropagation();
           e.preventDefault();
         }}
+        tabIndex={0}
       >
         {varName}
       </div>

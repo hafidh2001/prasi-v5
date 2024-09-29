@@ -29,6 +29,8 @@ export type PFNode = Record<string, any> & {
   branches?: PFNodeBranch[];
   position?: PFNodePosition;
   size?: PFNodeSize;
+  _codeBuild?: Record<string, string>;
+  _codeError?: Record<string, string>;
 };
 
 export type RPFlow = DeepReadonly<PFlow>;

@@ -1,11 +1,11 @@
-import { current } from "immer";
 import capitalize from "lodash.capitalize";
 import get from "lodash.get";
-import { ChevronDown, Trash2 } from "lucide-react";
+import { ChevronDown, Trash2, TriangleAlert } from "lucide-react";
 import { FC, useEffect, useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { useLocal } from "utils/react/use-local";
 import { Combobox } from "utils/shadcn/comps/ui/combobox";
+import { Popover } from "utils/ui/popover";
 import { Tooltip } from "utils/ui/tooltip";
 import { allNodeDefinitions } from "../runtime/nodes";
 import {
@@ -16,7 +16,7 @@ import {
   RPFlow,
 } from "../runtime/types";
 import { fg } from "../utils/flow-global";
-import { SimplePopover } from "../utils/simple-popover";
+import { PFPropCode } from "./pf-prop-code";
 
 export type FieldChangedAction =
   | "text-changed"
@@ -24,7 +24,8 @@ export type FieldChangedAction =
   | "buttons-checked"
   | "array-added"
   | "array-deleted"
-  | "field-cleared";
+  | "field-cleared"
+  | "code-changed";
 
 export const PFPropNodeField: FC<{
   field: PFField;
@@ -60,7 +61,12 @@ export const PFPropNodeField: FC<{
     }
   );
 
-  const update = (action: FieldChangedAction, path: string[], value: any) => {
+  const update = (
+    action: FieldChangedAction,
+    path: string[],
+    value: any,
+    modifyNode?: (node: PFNode) => void
+  ) => {
     clearTimeout(fg.update_timeout);
     fg.update_timeout = setTimeout(() => {
       fg.update(
@@ -69,10 +75,14 @@ export const PFPropNodeField: FC<{
           const n = pflow.nodes[node.id];
           if (n) {
             const obj = path && path.length > 0 ? get(n, path?.join(".")) : n;
-            if (value === undefined) {
-              delete obj[name];
+            if (modifyNode) {
+              modifyNode(n);
             } else {
-              obj[name] = value;
+              if (value === undefined) {
+                delete obj[name];
+              } else {
+                obj[name] = value;
+              }
             }
 
             if (def.on_fields_changed) {
@@ -153,11 +163,6 @@ export const PFPropNodeField: FC<{
             onChange={(value) => {
               update("option-picked", path || [], value);
             }}
-            className={css`
-              * {
-                font-size: 13px !important;
-              }
-            `}
           >
             {({ setOpen }) => {
               let selected = <></>;
@@ -244,15 +249,78 @@ export const PFPropNodeField: FC<{
           </div>
         )}
         {field.type === "code" && (
-          <div className="flex-1 border-l justify-center items-center flex">
-            <div
-              className={cx(
-                "border border-slate-500 px-2 text-[11px] mx-[2px] cursor-pointer hover:bg-blue-600 hover:border-blue-600 hover:text-white"
-              )}
-              onClick={() => {}}
+          <div className="flex-1 border-l justify-between items-center flex">
+            <Popover
+              placement="left"
+              popoverClassName={css`
+                border: 1px solid black;
+                background: white;
+                .arrow {
+                  border: 1px solid black;
+                }
+              `}
+              asChild
+              backdrop={false}
+              content={
+                <PFPropCode
+                  name={name}
+                  node={node}
+                  field={field}
+                  update={(value, built, errors) => {
+                    update("code-changed", path || [], value, (node) => {
+                      if (!node._codeBuild) node._codeBuild = {};
+                      if (!node._codeError) node._codeError = {};
+                      if (errors) {
+                        node._codeError[name] = errors;
+                      } else {
+                        delete node._codeError[name];
+                      }
+                      node[name] = value;
+                      node._codeBuild[name] = built;
+                    });
+                  }}
+                />
+              }
             >
-              Edit Code
-            </div>
+              <div className="border border-slate-500 px-2 text-[11px] mx-[2px] cursor-pointer hover:bg-blue-600 hover:border-blue-600 hover:text-white">
+                Edit Code
+              </div>
+            </Popover>
+
+            {node._codeError && node._codeError[name] && (
+              <Popover
+                popoverClassName={css`
+                  border: 1px solid red;
+                  border-radius: 5px;
+                  padding: 5px 0px;
+                  background: white;
+                  .arrow {
+                    border: 1px solid red;
+                  }
+                `}
+                content={
+                  <div
+                    className={cx(
+                      "text-xs text-red-600 flex items-center space-x-1 mx-2",
+                      css`
+                        font-family: "Liga Menlo", monospace;
+                        white-space: pre-wrap;
+                        line-height: 130%;
+                        font-size: 0.7em;
+                      `
+                    )}
+                  >
+                    {node._codeError[name]}
+                  </div>
+                }
+                asChild
+              >
+                <div className="text-xs cursor-pointer text-red-600 flex items-center mr-2">
+                  <TriangleAlert size={12} />{" "}
+                  <div className="pl-[2px]">ERROR</div>
+                </div>
+              </Popover>
+            )}
           </div>
         )}
         {field.type === "array" && (

@@ -1,4 +1,4 @@
-import { getActiveNode, getNodeById } from "crdt/node/get-node-by-id";
+import { getNodeById } from "crdt/node/get-node-by-id";
 import { active, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import {
@@ -13,10 +13,10 @@ import {
 import { FC, ReactNode, useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
-import { EdScriptSnippet } from "./snippet";
 import { Tooltip } from "utils/ui/tooltip";
 import { TopBtn } from "../../../ui/top-btn";
 import { fg } from "../flow/utils/flow-global";
+import { EdScriptSnippet } from "./snippet";
 
 export const EdScriptWorkbench: FC<{
   children: (arg: { mode: "script" | "flow" }) => ReactNode;

@@ -62,6 +62,7 @@ export const pflowConnectEnd = ({
           "Flow Create Node",
           ({ pflow }) => {
             const from = pflow.nodes[from_id];
+
             on_before_connect(pflow, { node: from, is_new: true });
 
             const to_node = {
@@ -92,12 +93,19 @@ export const pflowConnectEnd = ({
             } else {
               const f = findFlow({ id: from_id, pflow: pflow });
               if (f) {
-                f.flow?.push(to_node.id);
+                const res = f.flow?.splice(
+                  f.idx + 1,
+                  f.flow.length - f.idx,
+                  to_node.id
+                );
+                if (res && res.length > 0) {
+                  pflow.flow[res[0]] = res;
+                }
               }
             }
           },
           ({ pflow }) => {
-            fg.refreshFlow(pflow);
+            fg.refreshFlow(pflow as PFlow);
             setTimeout(() => {
               fg.main?.action.resetSelectedElements();
               fg.main?.action.addSelectedNodes([to_id]);
@@ -141,6 +149,12 @@ export const pflowConnectEnd = ({
 
             if (picked_branches) {
               connectNode(pflow, picked_branches.flow, from_node.id, to_id);
+            } else {
+              delete from_node.branches;
+              const found = findFlow({ id: from_node.id, pflow });
+              if (found && found.flow) {
+                connectNode(pflow, found.flow, from_node.id, to_id);
+              }
             }
           });
         } else {

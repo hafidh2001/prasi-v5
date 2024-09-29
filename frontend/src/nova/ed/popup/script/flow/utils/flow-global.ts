@@ -52,7 +52,7 @@ const fg_default = {
     updated_outside: false,
     resetDefault: (relayout: boolean) => {},
   },
-  refreshFlow(pflow: RPFlow) {},
+  refreshFlow(pflow: RPFlow | PFlow)  {},
 };
 const w = window as unknown as {
   prasi_flow_global: typeof fg_default;

@@ -16,10 +16,10 @@ import {
   Viewport,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { LayoutDashboard } from "lucide-react";
-import { useEffect, useState } from "react";
+import { WandSparkles } from "lucide-react";
+import { useEffect } from "react";
 import { useLocal } from "utils/react/use-local";
-import { RPFlow } from "./runtime/types";
+import { PFlow, RPFlow } from "./runtime/types";
 import { pflowConnectEnd } from "./utils/connect-end";
 import { pflowEdgeChanges } from "./utils/edge-changes";
 import { fg } from "./utils/flow-global";
@@ -62,7 +62,7 @@ export function PrasiFlowEditor({
   const [nodes, setNodes, onNodesChange] = useNodesState([] as Node[]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[]);
 
-  fg.refreshFlow = (pflow: RPFlow) => {
+  fg.refreshFlow = (pflow: RPFlow | PFlow) => {
     fg.pflow = pflow;
     const parsed = parseFlow(pflow, { nodes, edges });
     setNodes(parsed.nodes);
@@ -193,7 +193,7 @@ export function PrasiFlowEditor({
             max-width: 15px;
             max-height: 15px;
           }
-        `
+        `,
       )}
       tabIndex={0}
       onKeyDown={(e) => {
@@ -285,7 +285,7 @@ export function PrasiFlowEditor({
         onViewportChange={(e) => {
           localStorage.setItem(
             `prasi-flow-vp-${pflow.name}`,
-            JSON.stringify(e)
+            JSON.stringify(e),
           );
           local.viewport = e;
           local.render();
@@ -295,7 +295,7 @@ export function PrasiFlowEditor({
         <Background />
         <Controls position="top-left" showInteractive={false}>
           <ControlButton onClick={() => relayoutNodes()} title="auto layout">
-            <LayoutDashboard strokeWidth={1.8} />
+            <WandSparkles strokeWidth={1.8} />
           </ControlButton>
         </Controls>
       </ReactFlow>
