@@ -17,6 +17,7 @@ import {
 } from "../runtime/types";
 import { fg } from "../utils/flow-global";
 import { PFPropCode } from "./pf-prop-code";
+import set from "lodash.set";
 
 export type FieldChangedAction =
   | "text-changed"
@@ -114,6 +115,7 @@ export const PFPropNodeField: FC<{
 
   if (!local.ready) return null;
 
+  const varpath = [...(path || []), name].join(".");
   return (
     <>
       <div
@@ -263,20 +265,22 @@ export const PFPropNodeField: FC<{
               backdrop={false}
               content={
                 <PFPropCode
-                  name={name}
                   node={node}
                   field={field}
+                  value={local.value}
                   update={(value, built, errors) => {
+                    local.value = value;
+                    local.render();
                     update("code-changed", path || [], value, (node) => {
                       if (!node._codeBuild) node._codeBuild = {};
                       if (!node._codeError) node._codeError = {};
                       if (errors) {
-                        node._codeError[name] = errors;
+                        node._codeError[varpath] = errors;
                       } else {
-                        delete node._codeError[name];
+                        delete node._codeError[varpath];
                       }
-                      node[name] = value;
-                      node._codeBuild[name] = built;
+                      set(node, varpath, value);
+                      node._codeBuild[varpath] = built;
                     });
                   }}
                 />
@@ -287,40 +291,41 @@ export const PFPropNodeField: FC<{
               </div>
             </Popover>
 
-            {node._codeError && node._codeError[name] && (
-              <Popover
-                popoverClassName={css`
-                  border: 1px solid red;
-                  border-radius: 5px;
-                  padding: 5px 0px;
-                  background: white;
-                  .arrow {
+            {node._codeError &&
+              node._codeError[varpath] && (
+                <Popover
+                  popoverClassName={css`
                     border: 1px solid red;
+                    border-radius: 5px;
+                    padding: 5px 0px;
+                    background: white;
+                    .arrow {
+                      border: 1px solid red;
+                    }
+                  `}
+                  content={
+                    <div
+                      className={cx(
+                        "text-xs text-red-600 flex items-center space-x-1 mx-2",
+                        css`
+                          font-family: "Liga Menlo", monospace;
+                          white-space: pre-wrap;
+                          line-height: 130%;
+                          font-size: 0.7em;
+                        `
+                      )}
+                    >
+                      {node._codeError[varpath]}
+                    </div>
                   }
-                `}
-                content={
-                  <div
-                    className={cx(
-                      "text-xs text-red-600 flex items-center space-x-1 mx-2",
-                      css`
-                        font-family: "Liga Menlo", monospace;
-                        white-space: pre-wrap;
-                        line-height: 130%;
-                        font-size: 0.7em;
-                      `
-                    )}
-                  >
-                    {node._codeError[name]}
+                  asChild
+                >
+                  <div className="text-xs cursor-pointer text-red-600 flex items-center mr-2">
+                    <TriangleAlert size={12} />{" "}
+                    <div className="pl-[2px]">ERROR</div>
                   </div>
-                }
-                asChild
-              >
-                <div className="text-xs cursor-pointer text-red-600 flex items-center mr-2">
-                  <TriangleAlert size={12} />{" "}
-                  <div className="pl-[2px]">ERROR</div>
-                </div>
-              </Popover>
-            )}
+                </Popover>
+              )}
           </div>
         )}
         {field.type === "array" && (

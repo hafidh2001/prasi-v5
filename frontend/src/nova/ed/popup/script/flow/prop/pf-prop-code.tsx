@@ -7,11 +7,10 @@ import { DeepReadonly, PFField, PFNode } from "../runtime/types";
 export const PFPropCode: FC<{
   field: PFField;
   node: DeepReadonly<PFNode>;
-  name: string;
+  value: string;
   update: (value: string, valueBuilt: string, errors: string) => void;
-}> = ({ field, node, name, update }) => {
+}> = ({ field, value, update }) => {
   if (field.type !== "code") return null;
-  const value = node[name];
   return (
     <div
       className={cx(css`
@@ -25,6 +24,10 @@ export const PFPropCode: FC<{
           flex: 1;
           width: auto !important;
           height: auto !important;
+        }
+        .editor-widget {
+          font-size: 13px;
+          min-height: 22px;
         }
       `)}
     >

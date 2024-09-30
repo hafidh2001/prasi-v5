@@ -53,6 +53,14 @@ export const MonacoJS: FC<{
         fontFamily: "'Liga Menlo', monospace",
         fontLigatures: true,
         lineNumbersMinChars: 2,
+        suggest: nolib
+          ? {
+              showSnippets: false,
+              showWords: false,
+              showKeywords: false,
+              showModules: false, // disables `globalThis`, but also disables user-defined modules suggestions.
+            }
+          : undefined,
       }}
       onMount={async (editor, monaco) => {
         monacoCleanModel(monaco);

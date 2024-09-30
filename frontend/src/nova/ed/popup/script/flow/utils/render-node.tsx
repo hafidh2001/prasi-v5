@@ -55,7 +55,7 @@ export const RenderNode = function (arg: {
       onKeyDown={(e) => {
         if (e.key.length === 1 && !local.type_opened) {
           const input: HTMLInputElement | null = document.querySelector(
-            "#prasi-flow-node-name",
+            "#prasi-flow-node-name"
           );
           if (input) {
             input.focus();
@@ -130,12 +130,8 @@ export const RenderNode = function (arg: {
           css`
             background: #f3ffef;
             border: 1px solid #175203;
-          `,
+          `
       )}
-      // onPointerDown={() => {
-      //   selection.reset();
-      //   selection.add([id]);
-      // }}
       onPointerUp={() => {
         if (connection.inProgress && connection.fromNode.id) {
           fg.pointer_up_id = id;
@@ -215,7 +211,7 @@ export const RenderNode = function (arg: {
               padding-left: 5px;
               top: 3px;
               right: -30px;
-            `,
+            `
           )}
           onClick={() => {
             if (node) {
@@ -243,7 +239,7 @@ export const RenderNode = function (arg: {
                     color: white;
                   }
                 }
-              `,
+              `
             )}
           >
             {fg.resizing.has(node.id) ? (
@@ -294,7 +290,7 @@ export const RenderNode = function (arg: {
                 border: 1px dashed black;
               }
             } */
-          `,
+          `
         )}
       ></Handle>
       <Handle
@@ -306,13 +302,13 @@ export const RenderNode = function (arg: {
         <div
           className={cx(
             "flex flex-col items-stretch",
-            data.type !== "start" ? "min-w-[137px] " : "min-w-[65px] ",
+            data.type !== "start" ? "min-w-[137px] " : "min-w-[65px] "
           )}
         >
           {node.name && data.type !== "start" && (
             <div
               className={cx(
-                "flex items-center py-1 px-2 border-b border-t-slate-500",
+                "flex items-center py-1 px-2 border-b border-t-slate-500"
               )}
             >
               <TextareaAutosize
@@ -324,7 +320,7 @@ export const RenderNode = function (arg: {
                 rows={1}
                 ref={ref_name}
                 className={cx(
-                  "flex flex-1 bg-transparent min-w-0 w-0 outline-none resize-none text-[15px] items-center flex-col",
+                  "flex flex-1 bg-transparent min-w-0 w-0 outline-none resize-none text-[15px] items-center flex-col"
                 )}
               ></TextareaAutosize>
             </div>
@@ -338,7 +334,7 @@ export const RenderNode = function (arg: {
                   width: 14px;
                   height: 14px;
                 }
-              `,
+              `
             )}
           >
             <div
@@ -411,10 +407,13 @@ export const RenderNode = function (arg: {
                     "flex",
                     node.type !== "start"
                       ? "absolute z-10 items-stretch justify-center px-1"
-                      : "item-center w-full",
+                      : "item-center w-full"
                   )}
                   onPointerUp={(e) => {
                     if (node.type !== "start") {
+                      if (connection.inProgress) {
+                        return;
+                      }
                       e.stopPropagation();
 
                       local.type_opened = open;
@@ -434,7 +433,7 @@ export const RenderNode = function (arg: {
                             "flex-1 flex hover:bg-blue-700 hover:text-white rounded-[3px] py-[2px] px-[6px] flex-row items-center",
                             css`
                               cursor: pointer !important;
-                            `,
+                            `
                           )
                     }
                   >
