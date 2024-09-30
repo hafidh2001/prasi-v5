@@ -46,6 +46,7 @@
     "prasi-db": "workspace:*",
     "prettier": "^3.3.3",
     "radix3": "^1.1.2",
+    "re-resizable": "^6.10.0",
     "react": "^18.3.1",
     "react-contenteditable": "^3.3.7",
     "react-dom": "^18.3.1",

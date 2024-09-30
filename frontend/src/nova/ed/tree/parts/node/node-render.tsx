@@ -46,6 +46,7 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
     return <></>;
   }
 
+
   const { is_active, is_component, is_hover } = parseNodeState({ item });
 
   return (

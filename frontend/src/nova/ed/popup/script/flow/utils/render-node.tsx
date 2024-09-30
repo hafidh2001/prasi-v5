@@ -6,7 +6,7 @@ import {
   useConnection,
   useStore,
 } from "@xyflow/react";
-import { Check, Maximize2 } from "lucide-react";
+import { Check, Maximize2, TriangleAlert } from "lucide-react";
 import { useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { useLocal } from "utils/react/use-local";
@@ -47,6 +47,8 @@ export const RenderNode = function (arg: {
   if (!node) {
     return null;
   }
+
+  const has_error = Object.keys(node._codeError || {}).length > 0;
 
   return (
     <div
@@ -98,8 +100,8 @@ export const RenderNode = function (arg: {
         `,
         fg.prop?.selection.nodes?.find((e) => e.id === id) &&
           css`
-            border: 1px solid blue;
-            outline: 1px solid blue;
+            border: 1px solid ${has_error ? "red" : "blue"};
+            outline: 1px solid ${has_error ? "red" : "blue"};
           `,
         fg.node_running.length > 0 &&
           css`
@@ -142,6 +144,14 @@ export const RenderNode = function (arg: {
         }
       }}
     >
+      {has_error && (
+        <div className="absolute right-0 top-[8px] pointer-events-none">
+          <div className="text-xs cursor-pointer text-red-600 flex items-center mr-2">
+            <TriangleAlert size={12} />
+          </div>
+        </div>
+      )}
+
       {node && fg.resizing.has(node.id) && (
         <NodeResizer
           onResize={(e, p) => {

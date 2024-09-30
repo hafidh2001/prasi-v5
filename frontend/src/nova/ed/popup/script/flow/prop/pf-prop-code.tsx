@@ -3,16 +3,25 @@ import { FC } from "react";
 import { debounce } from "utils/script/debounce";
 import { jscript } from "utils/script/jscript";
 import { DeepReadonly, PFField, PFNode } from "../runtime/types";
+import { Resizable } from "re-resizable";
 
 export const PFPropCode: FC<{
   field: PFField;
   node: DeepReadonly<PFNode>;
   value: string;
+  error?: string;
   update: (value: string, valueBuilt: string, errors: string) => void;
 }> = ({ field, value, update }) => {
   if (field.type !== "code") return null;
   return (
-    <div
+    <Resizable
+      defaultSize={{
+        height:
+          parseInt(localStorage.getItem("prasi-flow-code-height") || "") || 100,
+      }}
+      maxWidth={700}
+      minWidth={700}
+      boundsByDirection
       className={cx(css`
         min-width: 700px;
         min-height: 100px;
@@ -29,7 +38,15 @@ export const PFPropCode: FC<{
           font-size: 13px;
           min-height: 22px;
         }
+        resize: both;
+        border: 2px solid white;
       `)}
+      onResizeStop={(_, __, div) => {
+        localStorage.setItem(
+          "prasi-flow-code-height",
+          div.clientHeight.toString()
+        );
+      }}
     >
       <MonacoJS
         nolib
@@ -69,6 +86,6 @@ export const PFPropCode: FC<{
           editor.focus();
         }}
       />
-    </div>
+    </Resizable>
   );
 };

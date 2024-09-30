@@ -251,16 +251,31 @@ export const PFPropNodeField: FC<{
           </div>
         )}
         {field.type === "code" && (
-          <div className="flex-1 border-l justify-between items-center flex">
+          <div
+            className={cx(
+              "flex-1 border-l justify-between items-center flex",
+              node._codeError && node._codeError[varpath] && "bg-red-500"
+            )}
+          >
             <Popover
               placement="left"
-              popoverClassName={css`
-                border: 1px solid black;
-                background: white;
-                .arrow {
-                  border: 1px solid black;
-                }
-              `}
+              popoverClassName={
+                node._codeError && node._codeError[varpath]
+                  ? css`
+                      border: 2px solid red;
+                      background: white;
+                      .arrow {
+                        border: 2px solid red;
+                      }
+                    `
+                  : css`
+                      border: 2px solid black;
+                      background: white;
+                      .arrow {
+                        border: 2px solid black;
+                      }
+                    `
+              }
               asChild
               backdrop={false}
               content={
@@ -268,6 +283,7 @@ export const PFPropNodeField: FC<{
                   node={node}
                   field={field}
                   value={local.value}
+                  error={node._codeError && node._codeError[varpath]}
                   update={(value, built, errors) => {
                     local.value = value;
                     local.render();
@@ -286,46 +302,45 @@ export const PFPropNodeField: FC<{
                 />
               }
             >
-              <div className="border border-slate-500 px-2 text-[11px] mx-[2px] cursor-pointer hover:bg-blue-600 hover:border-blue-600 hover:text-white">
+              <div className="border bg-white border-slate-500 px-2 text-[11px] mx-[2px] cursor-pointer hover:bg-blue-600 hover:border-blue-600 hover:text-white">
                 Edit Code
               </div>
             </Popover>
 
-            {node._codeError &&
-              node._codeError[varpath] && (
-                <Popover
-                  popoverClassName={css`
+            {node._codeError && node._codeError[varpath] && (
+              <Popover
+                popoverClassName={css`
+                  border: 1px solid red;
+                  border-radius: 5px;
+                  padding: 5px 0px;
+                  background: white;
+                  .arrow {
                     border: 1px solid red;
-                    border-radius: 5px;
-                    padding: 5px 0px;
-                    background: white;
-                    .arrow {
-                      border: 1px solid red;
-                    }
-                  `}
-                  content={
-                    <div
-                      className={cx(
-                        "text-xs text-red-600 flex items-center space-x-1 mx-2",
-                        css`
-                          font-family: "Liga Menlo", monospace;
-                          white-space: pre-wrap;
-                          line-height: 130%;
-                          font-size: 0.7em;
-                        `
-                      )}
-                    >
-                      {node._codeError[varpath]}
-                    </div>
                   }
-                  asChild
-                >
-                  <div className="text-xs cursor-pointer text-red-600 flex items-center mr-2">
-                    <TriangleAlert size={12} />{" "}
-                    <div className="pl-[2px]">ERROR</div>
+                `}
+                content={
+                  <div
+                    className={cx(
+                      "text-xs text-red-500 flex items-center space-x-1 mx-2",
+                      css`
+                        font-family: "Liga Menlo", monospace;
+                        white-space: pre-wrap;
+                        line-height: 130%;
+                        font-size: 0.7em;
+                      `
+                    )}
+                  >
+                    {node._codeError[varpath]}
                   </div>
-                </Popover>
-              )}
+                }
+                asChild
+              >
+                <div className="text-xs cursor-pointer text-white flex items-center mr-2">
+                  <TriangleAlert size={12} />{" "}
+                  <div className="pl-[2px]">ERROR</div>
+                </div>
+              </Popover>
+            )}
           </div>
         )}
         {field.type === "array" && (
@@ -408,7 +423,33 @@ export const PFPropNodeField: FC<{
                         onClick={() => {
                           local.value.splice(idx, 1);
                           local.render();
-                          update("array-deleted", path || [], local.value);
+                          update(
+                            "array-deleted",
+                            path || [],
+                            local.value,
+                            (node) => {
+                              set(node, varpath, local.value);
+                              const idxpath = varpath + "." + idx;
+                              if (node._codeBuild) {
+                                for (const [i, e] of Object.entries(
+                                  node._codeBuild
+                                )) {
+                                  if (i.startsWith(idxpath)) {
+                                    delete node._codeBuild[i];
+                                  }
+                                }
+                              }
+                              if (node._codeError) {
+                                for (const [i, e] of Object.entries(
+                                  node._codeError
+                                )) {
+                                  if (i.startsWith(idxpath)) {
+                                    delete node._codeError[i];
+                                  }
+                                }
+                              }
+                            }
+                          );
                         }}
                       >
                         <Trash2 size={14} />
