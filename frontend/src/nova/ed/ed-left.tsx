@@ -19,6 +19,7 @@ import { EdTreeSearch } from "./tree/parts/search";
 import { active } from "./logic/active";
 import { EdCompTree } from "./tree/ed-comp-tree";
 import { EdTreeTopBar } from "./tree/parts/top-bar";
+import { Loading } from "utils/ui/loading";
 
 export const EdLeft = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -148,7 +149,9 @@ export const EdLeft = () => {
           }}
           ref={ref_tree}
         >
-          {p.page.tree && (
+          {!p.page.tree ? (
+            <Loading />
+          ) : (
             <>
               {p.ui.left.mode === "tree" && (
                 <>

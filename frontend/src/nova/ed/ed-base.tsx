@@ -29,6 +29,7 @@ export const EdBase = () => {
         await loadPendingComponent(p);
         fg.prasi.updated_outside = true;
         p.page.cur.content_tree = content_tree;
+        if (!p.mode) p.mode = "desktop";
         if (["mobile", "desktop"].includes(content_tree.responsive)) {
           p.mode = content_tree.responsive;
         }
@@ -107,36 +108,40 @@ export const EdBase = () => {
         <Panel defaultSize={78} className="flex flex-col">
           <EdTopBar />
 
-          <PanelGroup autoSaveId="prasi-editor-right" direction="horizontal">
-            <Panel>
-              {script.paned && script.open ? (
-                <EdPopItemScript />
-              ) : (
-                <>
-                  {p.page.tree && (
-                    <div
-                      className={cx(
-                        "w-full h-full flex flex-1 relative overflow-auto border-r",
-                        p.mode === "mobile" ? "flex-col items-center" : ""
-                      )}
-                    >
-                      <div className={mainStyle(p)}>
-                        <EdViRoot />
+          {p.page.tree && p.mode && (
+            <PanelGroup autoSaveId="prasi-editor-right" direction="horizontal">
+              <Panel>
+                {script.paned && script.open ? (
+                  <EdPopItemScript />
+                ) : (
+                  <>
+                    {p.page.tree && (
+                      <div
+                        className={cx(
+                          "w-full h-full flex flex-1 relative overflow-auto border-r",
+                          p.mode === "mobile" ? "flex-col items-center" : ""
+                        )}
+                      >
+                        <div className={mainStyle(p)}>
+                          <EdViRoot />
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </Panel>
-            <PanelResizeHandle />
-            <Panel
-              defaultSize={25}
-              hidden={!p.ui.panel.right}
-              className={cx(p.ui.panel.right && "flex flex-col min-w-[240px]")}
-            >
-              <EdRight />
-            </Panel>
-          </PanelGroup>
+                    )}
+                  </>
+                )}
+              </Panel>
+              <PanelResizeHandle />
+              <Panel
+                defaultSize={25}
+                hidden={!p.ui.panel.right}
+                className={cx(
+                  p.ui.panel.right && "flex flex-col min-w-[240px]"
+                )}
+              >
+                <EdRight />
+              </Panel>
+            </PanelGroup>
+          )}
         </Panel>
       </PanelGroup>
       <>
