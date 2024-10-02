@@ -31,6 +31,7 @@ export const EDGlobal = {
       current: null as null | RPFlow,
       should_relayout: false,
     },
+    monaco_selection: null as any,
   },
   ui: {
     panel: {

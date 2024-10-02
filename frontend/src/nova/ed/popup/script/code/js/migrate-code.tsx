@@ -1,5 +1,5 @@
 import { ScriptModel } from "crdt/node/load-script-models";
-import { replaceString } from "./replace-string";
+import { generateImports } from "./merge-parent-var";
 
 export const migrateCode = (
   model: ScriptModel,
@@ -13,8 +13,11 @@ export const migrateCode = (
 
   let inject = "";
 
+  const imports = generateImports(model, models);
+
   if (local.name) {
     inject = `
+
 export const ${local.name} = {
   name: "${local.name}",
   value: ${local.value},
@@ -25,8 +28,8 @@ export const ${local.name} = {
   const final_code = `\
 // #region system⠀  
 import React from "react";\
-${inject.trim()}
-// #endregion
+${imports}
+// #endregion${inject}
 
 export default () => (${model.extracted_content})`;
   return final_code;

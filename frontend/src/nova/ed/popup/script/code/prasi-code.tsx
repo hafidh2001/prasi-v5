@@ -3,7 +3,7 @@ import { EDGlobal } from "logic/ed-global";
 import { useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
-import { itemCssDefault, itemJsDefault } from "./default-val";
+import { itemCssDefault, itemJsDefault } from "./js/default-val";
 import { jsOnChange } from "./js/on-change";
 import { typingsItem } from "./js/typings-item";
 import { MonacoJS } from "./monaco-js";
@@ -39,11 +39,16 @@ export const EdPrasiCode = () => {
 
   if (!models[id]) {
     models[id] = {
-      name: `file:///${id}.tsx`, 
-      path: [],
+      name: `file:///${id}.tsx`,
+      path_names: [],
       source: js,
-      title: ''
-    }
+      title: "",
+      id,
+      path_ids: [],
+      extracted_content: "",
+      local: { name: "", value: "" },
+      import_region: { end: 0, start: 0 },
+    };
   }
 
   return (

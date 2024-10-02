@@ -19,7 +19,7 @@ export const loopItem = (
       item,
       parent,
       path_name: [...path_name, item.name],
-      path_id: [...path_name, item.id],
+      path_id: [...path_id, item.id],
     });
     if (item.component?.id) {
       const props = parsePropForJsx(item);
@@ -27,7 +27,7 @@ export const loopItem = (
         loopItem([prop], fn, {
           parent: item,
           path_name: [...path_name, item.name],
-          path_id: [...path_name, item.id],
+          path_id: [...path_id, item.id],
         });
       }
     } else {
@@ -35,7 +35,7 @@ export const loopItem = (
         loopItem(item.childs, fn, {
           parent: item,
           path_name: [...path_name, item.name],
-          path_id: [...path_name, item.id],
+          path_id: [...path_id, item.id],
         });
       }
     }

@@ -9,6 +9,7 @@ import { jsxColorScheme } from "./js/jsx-style";
 import { registerPrettier } from "./js/register-prettier";
 import { registerReact } from "./js/register-react";
 import { foldRegionVState } from "./js/fold-region-vstate";
+import { registerEditorOpener } from "./js/editor-opener";
 
 export const MonacoJS: FC<{
   highlightJsx?: boolean;
@@ -89,13 +90,31 @@ export const MonacoJS: FC<{
             m.model = monacoRegisterSource(monaco, m.source, m.name);
           }
 
+          if (m.model) {
+            (m.model as any).prasi_model = m;
+          }
+
           if (m.name === activeModel && m.model) {
             editor.setModel(m.model);
+            registerEditorOpener(editor, monaco, p);
             monacoEnableJSX(editor, monaco, { nolib }, p);
             editor.trigger(undefined, "editor.action.formatDocument", null);
-            editor.restoreViewState(
-              foldRegionVState(m.model.getLinesContent())
-            );
+            const vstate = foldRegionVState(m.model.getLinesContent());
+            editor.restoreViewState(vstate);
+
+            if (p.script.monaco_selection) {
+              let i = 0;
+              const ival = setInterval(() => {
+                if (i < 5) {
+                  editor.focus();
+                  editor.setSelection(p.script.monaco_selection);
+                } else {
+                  p.script.monaco_selection = null;
+                  clearInterval(ival);
+                }
+                i++;
+              }, 50);
+            }
           }
         }
 
