@@ -48,11 +48,23 @@ export const EdScriptWorkbench: FC<{
   const is_error = popup.typings.status === "error" && popup.mode === "js";
 
   let script_mode = "flow" as "flow" | "script";
-  if (!item?.adv?.scriptMode && item?.adv?.js) {
+  if (!item?.adv?.scriptMode && item?.adv?.js && !item.adv.flow) {
     script_mode = "script";
   }
   if (item?.adv?.scriptMode) {
     script_mode = item.adv.scriptMode;
+  }
+  if (p.script.monaco_selection) {
+    if (script_mode === "flow") {
+      getActiveTree(p).update("Switch to script mode", ({ findNode }) => {
+        const n = findNode(active.item_id);
+        if (n) {
+          if (!n.item.adv) n.item.adv = {};
+          n.item.adv.scriptMode = "script";
+        }
+      });
+    }
+    script_mode = "script";
   }
 
   if (node && node.item.component?.id) {

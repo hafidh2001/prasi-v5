@@ -20,7 +20,6 @@ export const MonacoJS: FC<{
     name: string;
     source: string;
     model?: ReturnType<typeof monacoCreateModel>;
-    onChange?: (source: string, e: any) => void;
   }[];
   className?: string;
   nolib?: boolean;
@@ -130,8 +129,9 @@ export const MonacoJS: FC<{
             registerEditorOpener(editor, monaco, p);
             monacoEnableJSX(editor, monaco, { nolib }, p);
             editor.trigger(undefined, "editor.action.formatDocument", null);
-            const vstate = foldRegionVState(m.model.getLinesContent());
-            editor.restoreViewState(vstate);
+            editor.restoreViewState(
+              foldRegionVState(m.model.getLinesContent())
+            );
 
             if (p.script.monaco_selection) {
               let i = 0;

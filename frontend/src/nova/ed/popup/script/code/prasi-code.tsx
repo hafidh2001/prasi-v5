@@ -1,16 +1,15 @@
 import { getActiveNode } from "crdt/node/get-node-by-id";
+import { getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import { useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { itemCssDefault, itemJsDefault } from "./js/default-val";
-import { jsOnChange } from "./js/on-change";
+import { migrateCode } from "./js/migrate-code";
 import { typingsItem } from "./js/typings-item";
 import { MonacoJS } from "./monaco-js";
 import { MonacoLang } from "./monaco-lang";
-import { jscript } from "utils/script/jscript";
-import { traverse } from "utils/script/parser/traverse";
-import { getActiveTree } from "logic/active";
+
 export const EdPrasiCode = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({ id: "", ready: false, change_timeout: null as any });
@@ -36,19 +35,10 @@ export const EdPrasiCode = () => {
 
   const id = node?.item.id || "";
   const models = getActiveTree(p).script_models;
-
-  if (!models[id]) {
-    models[id] = {
-      name: `file:///${id}.tsx`,
-      path_names: [],
-      source: js,
-      title: "",
-      id,
-      path_ids: [],
-      extracted_content: "",
-      local: { name: "", value: "" },
-      import_region: { end: 0, start: 0 },
-    };
+  const model = models[id];
+  if (!model.source) {
+    model.extracted_content = itemJsDefault;
+    model.source = migrateCode(model, models);
   }
 
   return (

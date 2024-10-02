@@ -12,7 +12,6 @@ export type ScriptModel = {
   path_names: string[];
   path_ids: string[];
   title: string;
-  onChange?: (source: string, e: any) => void;
   local: { name: string; value: string };
   extracted_content: string;
   import_region: { start: 0; end: 0 };

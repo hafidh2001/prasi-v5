@@ -1,6 +1,8 @@
 import { getActiveNode } from "crdt/node/get-node-by-id";
+import { current } from "immer";
 import { active, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
+import { PNode } from "logic/types";
 import { useCallback, useEffect } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useGlobal } from "utils/react/use-global";
@@ -29,22 +31,23 @@ export const EdPrasiFlow = function () {
       fg.updateNoDebounce(
         "Flow Reset",
         ({ node }) => {
-          const new_flow = defaultFlow(
-            "item",
-            `item-${node.item.id}`,
-            node.item.id
-          );
           if (!node.item.adv) node.item.adv = {};
-          node.item.adv.flow = new_flow;
+          delete node.item.adv.flow;
         },
-        ({ pflow }) => {
-          localStorage.removeItem(`prasi-flow-vp-${`item-${node?.item.id}`}`);
-          sflow.current = pflow || null;
-          local.render();
+        ({ node }) => {
+          if (node) {
+            localStorage.removeItem(`prasi-flow-vp-${`item-${node.item.id}`}`);
+            sflow.current = defaultFlow(
+              "item",
+              `item-${node.item.id}`,
+              node.item.id
+            );
+            local.render();
 
-          setTimeout(() => {
-            sflow.should_relayout = false;
-          }, 500);
+            setTimeout(() => {
+              sflow.should_relayout = false;
+            }, 500);
+          }
         }
       );
     },
@@ -64,7 +67,7 @@ export const EdPrasiFlow = function () {
           fg.updateNoDebounce = (
             action_name: string,
             fn,
-            next?: (arg: { pflow?: RPFlow | null }) => void
+            next?: (arg: { pflow?: RPFlow | null; node: PNode }) => void
           ) => {
             tree.update(
               action_name,
@@ -92,8 +95,8 @@ export const EdPrasiFlow = function () {
               ({ findNode }) => {
                 const n = findNode(node.item.id);
 
-                if (next) {
-                  next({ pflow: n?.item.adv?.flow });
+                if (next && n) {
+                  next({ pflow: n?.item.adv?.flow, node: n });
                 } else {
                   sflow.current = n?.item.adv?.flow || null;
                 }
@@ -118,7 +121,11 @@ export const EdPrasiFlow = function () {
                 (e) => e.type === "start"
               ))
           ) {
-            resetDefault(true);
+            sflow.current = defaultFlow(
+              "item",
+              `item-${node.item.id}`,
+              node.item.id
+            );
             return;
           }
         }
@@ -140,6 +147,7 @@ export const EdPrasiFlow = function () {
           <PanelGroup direction="vertical">
             <Panel>
               <PrasiFlowEditor
+                has_flow={!!node?.item.adv?.flow}
                 resetDefault={resetDefault}
                 pflow={sflow.current}
                 should_relayout={sflow.should_relayout}

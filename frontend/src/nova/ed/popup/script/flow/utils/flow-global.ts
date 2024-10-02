@@ -19,7 +19,7 @@ const fg_default = {
   updateNoDebounce(
     action_name: string,
     fn: (arg: { pflow: PFlow; node: PNode }) => void,
-    next?: (arg: { pflow?: RPFlow | null }) => void
+    next?: (arg: { pflow?: RPFlow | null; node: PNode }) => void
   ) {},
   update(
     action_name: string,
@@ -52,7 +52,7 @@ const fg_default = {
     updated_outside: false,
     resetDefault: (relayout: boolean) => {},
   },
-  refreshFlow(pflow: RPFlow | PFlow)  {},
+  refreshFlow(pflow: RPFlow | PFlow) {},
 };
 const w = window as unknown as {
   prasi_flow_global: typeof fg_default;

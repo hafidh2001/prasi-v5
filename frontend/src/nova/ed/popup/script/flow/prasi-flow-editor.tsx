@@ -34,10 +34,12 @@ export function PrasiFlowEditor({
   pflow,
   should_relayout,
   resetDefault,
+  has_flow,
 }: {
   pflow: RPFlow;
   should_relayout: boolean;
   resetDefault: (relayout: boolean) => void;
+  has_flow: boolean;
 }) {
   const local = useLocal({
     reactflow: null as null | ReactFlowInstance<Node, Edge>,
@@ -122,19 +124,21 @@ export function PrasiFlowEditor({
       setNodes([...layoutedNodes]);
       setEdges([...layoutedEdges]);
 
-      fg.update("Flow Relayout", ({ pflow }) => {
-        for (const n of layoutedNodes) {
-          const node = pflow.nodes[n.id];
-          if (node) {
-            if (
-              node.position?.x !== n.position.x ||
-              node.position.y !== n.position.y
-            ) {
-              node.position = n.position;
+      if (has_flow) {
+        fg.update("Flow Relayout", ({ pflow }) => {
+          for (const n of layoutedNodes) {
+            const node = pflow.nodes[n.id];
+            if (node) {
+              if (
+                node.position?.x !== n.position.x ||
+                node.position.y !== n.position.y
+              ) {
+                node.position = n.position;
+              }
             }
           }
-        }
-      });
+        });
+      }
 
       const ref = local.reactflow;
       if (ref) {
@@ -193,7 +197,7 @@ export function PrasiFlowEditor({
             max-width: 15px;
             max-height: 15px;
           }
-        `,
+        `
       )}
       tabIndex={0}
       onKeyDown={(e) => {
@@ -285,7 +289,7 @@ export function PrasiFlowEditor({
         onViewportChange={(e) => {
           localStorage.setItem(
             `prasi-flow-vp-${pflow.name}`,
-            JSON.stringify(e),
+            JSON.stringify(e)
           );
           local.viewport = e;
           local.render();
