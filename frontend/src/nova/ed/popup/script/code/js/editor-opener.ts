@@ -17,7 +17,13 @@ export const registerEditorOpener = (
       const prasi_model = (model as any).prasi_model as ScriptModel;
       if (model && prasi_model.id) {
         p.script.monaco_selection = input.options.selection;
+
+        // active.item_id = prasi_model.id;
+        // editor.setModel(model);
+        // editor.setSelection(input.options.selection);
+
         activateItem(p, prasi_model.id);
+
       }
     }
     return result; // always return the base result

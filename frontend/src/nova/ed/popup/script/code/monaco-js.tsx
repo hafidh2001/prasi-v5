@@ -1,5 +1,5 @@
 import { EDGlobal } from "logic/ed-global";
-import { FC } from "react";
+import { FC, useEffect, useRef } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { jscript } from "utils/script/jscript";
 import { Loading } from "utils/ui/loading";
@@ -10,6 +10,7 @@ import { registerPrettier } from "./js/register-prettier";
 import { registerReact } from "./js/register-react";
 import { foldRegionVState } from "./js/fold-region-vstate";
 import { registerEditorOpener } from "./js/editor-opener";
+import { useLocal } from "utils/react/use-local";
 
 export const MonacoJS: FC<{
   highlightJsx?: boolean;
@@ -26,8 +27,37 @@ export const MonacoJS: FC<{
   onMount?: (editor: MonacoEditor, monaco: Monaco) => void;
 }> = ({ models, activeModel, className, nolib, onMount }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
+  const local = useLocal({ editor: null as null | MonacoEditor });
   const Editor = jscript.MonacoEditor;
 
+  useEffect(() => {
+    const preventCtrlP = function (event: any) {
+      const w = window as any;
+      if (
+        event.keyCode === 80 &&
+        (event.ctrlKey || event.metaKey) &&
+        !event.altKey &&
+        (!event.shiftKey || w.chrome || w.opera)
+      ) {
+        event.preventDefault();
+        if (event.stopImmediatePropagation) {
+          event.stopImmediatePropagation();
+        } else {
+          event.stopPropagation();
+        }
+        local.editor?.trigger(
+          "ctrl-shift-p",
+          "editor.action.quickCommand",
+          null
+        );
+        return;
+      }
+    };
+    window.addEventListener("keydown", preventCtrlP, true);
+    return () => {
+      window.removeEventListener("keydown", preventCtrlP, true);
+    };
+  }, []);
   if (!Editor)
     return (
       <div className="relative w-full h-full items-center justify-center flex flex-1">
@@ -70,6 +100,7 @@ export const MonacoJS: FC<{
             },
       }}
       onMount={async (editor, monaco) => {
+        local.editor = editor;
         // monacoCleanModel(monaco);
         registerPrettier(monaco);
         await registerReact(monaco);
