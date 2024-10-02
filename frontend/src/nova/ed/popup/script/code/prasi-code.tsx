@@ -16,7 +16,7 @@ export const EdPrasiCode = () => {
   const node = getActiveNode(p);
 
   const js = node?.item.adv?.js || "";
-  const css = node?.item.adv?.css || "";
+  const _css = node?.item.adv?.css || "";
   const html = node?.item.adv?.html || "";
 
   useEffect(() => {
@@ -42,7 +42,16 @@ export const EdPrasiCode = () => {
   }
 
   return (
-    <div className={cx("w-full h-full")}>
+    <div
+      className={cx(
+        "w-full h-full",
+        css`
+          .margin-view-overlays {
+            padding-left: 3px;
+          }
+        `
+      )}
+    >
       {local.ready && (
         <>
           {mode === "js" && (
@@ -61,7 +70,7 @@ export const EdPrasiCode = () => {
 
           {mode === "css" && (
             <MonacoLang
-              value={css}
+              value={_css}
               defaultValue={itemCssDefault}
               onChange={(val) => {
                 console.log(val);
