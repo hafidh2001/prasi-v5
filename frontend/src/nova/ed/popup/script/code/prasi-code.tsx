@@ -8,7 +8,9 @@ import { jsOnChange } from "./js/on-change";
 import { typingsItem } from "./js/typings-item";
 import { MonacoJS } from "./monaco-js";
 import { MonacoLang } from "./monaco-lang";
-
+import { jscript } from "utils/script/jscript";
+import { traverse } from "utils/script/parser/traverse";
+import { getActiveTree } from "logic/active";
 export const EdPrasiCode = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({ id: "", ready: false, change_timeout: null as any });
@@ -32,21 +34,33 @@ export const EdPrasiCode = () => {
 
   const mode = p.ui.popup.script.mode;
 
+  const id = node?.item.id || "";
+  const models = getActiveTree(p).script_models;
+
+  if (!models[id]) {
+    models[id] = {
+      name: `file:///${id}.tsx`, 
+      path: [],
+      source: js,
+      title: ''
+    }
+  }
+
   return (
     <div className={cx("w-full h-full")}>
       {local.ready && (
         <>
           {mode === "js" && (
             <MonacoJS
-              value={js}
-              enableJsx
-              defaultValue={itemJsDefault}
-              onChange={(val) => {
-                jsOnChange(val, local, p, node!.item.id);
-              }}
-              models={{
-                "file:///item.ts": typingsItem,
-              }}
+              highlightJsx
+              models={[
+                {
+                  name: "file:///typings-item.ts",
+                  source: typingsItem,
+                },
+                ...Object.values(models),
+              ]}
+              activeModel={models[id].name}
             />
           )}
 

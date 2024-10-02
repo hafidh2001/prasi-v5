@@ -3,23 +3,30 @@ import { FC } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { jscript } from "utils/script/jscript";
 import { Loading } from "utils/ui/loading";
-import { monacoCleanModel } from "./js/clean-models";
 import { monacoCreateModel, monacoRegisterSource } from "./js/create-model";
 import { Monaco, MonacoEditor, monacoEnableJSX } from "./js/enable-jsx";
 import { jsxColorScheme } from "./js/jsx-style";
+import { registerPrettier } from "./js/register-prettier";
+import { registerReact } from "./js/register-react";
+import { foldRegionVState } from "./js/fold-region-vstate";
 
 export const MonacoJS: FC<{
-  value: string;
-  onChange: (value: string) => void;
-  enableJsx?: boolean;
-  models?: Record<string, string>;
+  highlightJsx?: boolean;
+  sidebar?: boolean;
+  activeModel: string;
+  models: {
+    name: string;
+    source: string;
+    model?: ReturnType<typeof monacoCreateModel>;
+    onChange?: (source: string, e: any) => void;
+  }[];
   className?: string;
   nolib?: boolean;
-  defaultValue?: string;
   onMount?: (editor: MonacoEditor, monaco: Monaco) => void;
-}> = ({ value, onChange, models, defaultValue, className, nolib, onMount }) => {
+}> = ({ models, activeModel, className, nolib, onMount }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const Editor = jscript.MonacoEditor;
+
   if (!Editor)
     return (
       <div className="relative w-full h-full items-center justify-center flex flex-1">
@@ -29,10 +36,6 @@ export const MonacoJS: FC<{
 
   return (
     <Editor
-      defaultValue={value || defaultValue}
-      onChange={(value) => {
-        onChange(value || "");
-      }}
       className={cx(jsxColorScheme, className)}
       loading={
         <div className="relative w-full h-full items-center justify-center flex flex-1">
@@ -60,22 +63,39 @@ export const MonacoJS: FC<{
               showKeywords: false,
               showModules: false, // disables `globalThis`, but also disables user-defined modules suggestions.
             }
-          : undefined,
+          : {
+              showWords: false,
+              showKeywords: false,
+            },
       }}
       onMount={async (editor, monaco) => {
-        monacoCleanModel(monaco);
-        monacoCreateModel({
-          monaco,
-          editor,
-          filename: "file:///active.tsx",
-          source: value || defaultValue || "",
-          activate: true,
-        });
-        monacoEnableJSX(editor, monaco, { nolib }, p);
+        // monacoCleanModel(monaco);
+        registerPrettier(monaco);
+        await registerReact(monaco);
 
-        if (models) {
-          for (const [uri, source] of Object.entries(models)) {
-            monacoRegisterSource(monaco, source, uri);
+        const monacoModels = monaco.editor.getModels();
+        for (const m of models) {
+          if (!m.source) continue;
+
+          const model = monacoModels.find(
+            (e) => e === m.model || e.uri.toString() === m.name
+          );
+          if (model) {
+            if (m.model && !m.model.isDisposed) {
+              m.model.dispose();
+            }
+            m.model = model;
+          } else {
+            m.model = monacoRegisterSource(monaco, m.source, m.name);
+          }
+
+          if (m.name === activeModel && m.model) {
+            editor.setModel(m.model);
+            monacoEnableJSX(editor, monaco, { nolib }, p);
+            editor.trigger(undefined, "editor.action.formatDocument", null);
+            editor.restoreViewState(
+              foldRegionVState(m.model.getLinesContent())
+            );
           }
         }
 

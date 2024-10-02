@@ -8,6 +8,7 @@ import { WebsocketProvider } from "y-websocket";
 import { Doc } from "yjs";
 import { bind } from "./lib/immer-yjs";
 import { findNodeById, flattenTree } from "./node/flatten-tree";
+import { loadScriptModels, ScriptModel } from "./node/load-script-models";
 
 export type CompTree = ReturnType<typeof internalLoadCompTree>;
 
@@ -40,8 +41,9 @@ export const internalLoadCompTree = (
   wsurl.pathname = "/crdt";
   const wsync = new WebsocketProvider(wsurl.toString(), `comp-${comp_id}`, doc);
 
-  doc.on("update", (update, origin) => {
-    component.nodes = flattenTree([immer.get()], {
+  doc.on("update", async (update, origin) => {
+    const content_tree = immer.get();
+    component.nodes = flattenTree([content_tree], {
       comp_id,
       visit(item) {
         if (item.component?.id && opt?.on_component) {
@@ -51,7 +53,9 @@ export const internalLoadCompTree = (
     });
 
     fg.prasi.updated_outside = true;
-    opt.on_update(immer.get());
+    component.script_models = await loadScriptModels([content_tree]);
+
+    opt.on_update(content_tree);
     if (!state.loaded) {
       state.loaded = true;
       opt.on_load?.(component);
@@ -85,6 +89,7 @@ export const internalLoadCompTree = (
     listen: (fn: () => void) => {
       return immer.subscribe(fn);
     },
+    script_models: {} as Record<string, ScriptModel>,
     before_update: null as null | ((do_update: () => void) => void),
     update(
       action_name: string,

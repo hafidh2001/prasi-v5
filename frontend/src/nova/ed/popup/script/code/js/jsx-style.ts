@@ -1,4 +1,8 @@
 export const jsxColorScheme = css`
+  .editor-widget {
+    font-size: 13px;
+    min-height: 22px;
+  }
   .monaco-editor {
     .mtk9 {
       color: #022f62;

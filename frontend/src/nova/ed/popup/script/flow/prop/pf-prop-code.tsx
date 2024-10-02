@@ -34,10 +34,6 @@ export const PFPropCode: FC<{
           width: auto !important;
           height: auto !important;
         }
-        .editor-widget {
-          font-size: 13px;
-          min-height: 22px;
-        }
         resize: both;
         border: 2px solid white;
       `)}
@@ -50,38 +46,44 @@ export const PFPropCode: FC<{
     >
       <MonacoJS
         nolib
-        value={value}
         className={cx(css`
           .monaco-editor {
             border: 0px;
             outline: none;
           }
         `)}
-        onChange={debounce(async (src) => {
-          if (src) {
-            let built = "";
-            let errors = "";
-            try {
-              const transform = jscript.transform!;
-              const res = await transform(src, {
-                jsx: "transform",
-                logLevel: "silent",
-                format: "cjs",
-                loader: "tsx",
-              });
-              built = res.code;
-            } catch (e: any) {
-              const formatError = jscript.formatMessages!;
+        activeModel="prasi:///active.tsx"
+        models={[
+          {
+            name: "prasi:///active.tsx",
+            source: value,
+            async onChange(src) {
+              if (src) {
+                let built = "";
+                let errors = "";
+                try {
+                  const transform = jscript.transform!;
+                  const res = await transform(src, {
+                    jsx: "transform",
+                    logLevel: "silent",
+                    format: "cjs",
+                    loader: "tsx",
+                  });
+                  built = res.code;
+                } catch (e: any) {
+                  const formatError = jscript.formatMessages!;
 
-              errors = (await formatError(e.errors, { kind: "error" })).join(
-                "\n\n"
-              );
-            }
-            update(src, built, errors);
-          } else {
-            update("", "", "");
-          }
-        })}
+                  errors = (
+                    await formatError(e.errors, { kind: "error" })
+                  ).join("\n\n");
+                }
+                update(src, built, errors);
+              } else {
+                update("", "", "");
+              }
+            },
+          },
+        ]}
         onMount={(editor) => {
           editor.focus();
         }}

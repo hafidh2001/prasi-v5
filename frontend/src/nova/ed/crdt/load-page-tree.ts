@@ -7,6 +7,7 @@ import { EPage, EPageContentTree, PNode, SyncUndoItem } from "../logic/types";
 import { bind } from "./lib/immer-yjs";
 import { findNodeById, flattenTree } from "./node/flatten-tree";
 import { IItem } from "../../../utils/types/item";
+import { loadScriptModels, ScriptModel } from "./node/load-script-models";
 
 export type PageTree = ReturnType<typeof loadPageTree>;
 
@@ -27,7 +28,7 @@ export const loadPageTree = (
   wsurl.pathname = "/crdt";
   const wsync = new WebsocketProvider(wsurl.toString(), `page-${page_id}`, doc);
 
-  doc.on("update", (update, origin) => {
+  doc.on("update", async (update, origin) => {
     const content_tree = immer.get();
     tree.nodes = flattenTree(content_tree.childs, {
       visit(item) {
@@ -36,6 +37,7 @@ export const loadPageTree = (
         }
       },
     });
+    tree.script_models = await loadScriptModels(content_tree.childs);
     arg?.loaded(content_tree);
   });
 
@@ -65,6 +67,7 @@ export const loadPageTree = (
     listen: (fn: () => void) => {
       return immer.subscribe(fn);
     },
+    script_models: {} as Record<string, ScriptModel>,
     before_update: null as null | ((do_update: () => void) => void),
     update(
       action_name: string,

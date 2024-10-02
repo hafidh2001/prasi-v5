@@ -108,7 +108,9 @@ export const EdBase = () => {
         <Panel defaultSize={78} className="flex flex-col">
           <EdTopBar />
 
-          {p.page.tree && p.mode && (
+          {!(p.page.tree && p.mode) ? (
+            <Loading note="loading-editor" backdrop={false} />
+          ) : (
             <PanelGroup autoSaveId="prasi-editor-right" direction="horizontal">
               <Panel>
                 {script.paned && script.open ? (

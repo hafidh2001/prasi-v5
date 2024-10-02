@@ -42,6 +42,7 @@ export const monacoEnableJSX = async (
   const compilerOptions: CompilerOptions = {
     // note: ReactJSX ga bisa solve type buat <div> etc...
     // yg bisa solve cmn JsxEmit.React
+    // tapi kalau JsxEmit.React itu misal mau ada export, kudu ada import React from "react"
     jsx: monaco.languages.typescript.JsxEmit.React,
     target: monaco.languages.typescript.ScriptTarget.ES2015,
     allowNonTsExtensions: true,
@@ -55,62 +56,6 @@ export const monacoEnableJSX = async (
   monaco.languages.typescript.typescriptDefaults.setCompilerOptions(
     compilerOptions
   );
-
-  monaco.languages.typescript.typescriptDefaults.setExtraLibs([
-    {
-      filePath: "csstype.d.ts",
-      content: `declare module "csstype" {
-${await loadText("https://cdn.jsdelivr.net/npm/csstype@3.1.3/index.d.ts")}
-}`,
-    },
-    {
-      filePath: "prop-types.d.ts",
-      content: `declare module "prop-types" {
-${await loadText(
-  "https://cdn.jsdelivr.net/npm/@types/prop-types@15.7.12/index.d.ts"
-)}
-}`,
-    },
-    {
-      filePath: "react.d.ts",
-      content: `
-${await loadText("https://cdn.jsdelivr.net/npm/@types/react@18.3.3/index.d.ts")}
-`,
-    },
-    {
-      filePath: "jsx-runtime.d.ts",
-      content: `declare module "react/jsx-runtime" {
-import * as React from "./";
-export { Fragment } from "./";
-
-export namespace JSX {
-  type ElementType = React.JSX.ElementType;
-}
-
-/**
-* Create a React element.
-*
-* You should not use this function directly. Use JSX and a transpiler instead.
-*/
-export function jsx(
-  type: React.ElementType,
-  props: unknown,
-  key?: React.Key,
-): React.ReactElement;
-
-/**
-* Create a React element.
-*
-* You should not use this function directly. Use JSX and a transpiler instead.
-*/
-export function jsxs(
-  type: React.ElementType,
-  props: unknown,
-  key?: React.Key,
-): React.ReactElement;
-`,
-    },
-  ]);
 };
 
 export const register = (monaco: Monaco, source: string, uri: string) => {
@@ -122,14 +67,5 @@ export const register = (monaco: Monaco, source: string, uri: string) => {
     model.setValue(source);
   } else {
     monaco.editor.createModel(source, "typescript", monaco.Uri.parse(uri));
-  }
-};
-
-const loadText = async (url: string) => {
-  try {
-    const res = await fetch(url);
-    return await res.text();
-  } catch (e) {
-    return "";
   }
 };

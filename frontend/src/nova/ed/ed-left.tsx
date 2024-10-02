@@ -150,7 +150,8 @@ export const EdLeft = () => {
           ref={ref_tree}
         >
           {!p.page.tree ? (
-            <Loading />
+
+            <Loading backdrop={false} note="loading-tree" />
           ) : (
             <>
               {p.ui.left.mode === "tree" && (

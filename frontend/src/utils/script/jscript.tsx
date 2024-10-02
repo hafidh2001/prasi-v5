@@ -1,4 +1,5 @@
 import type { Editor as MonacoEditor } from "@monaco-editor/react";
+import type { parseSync } from "@oxc-parser/wasm";
 import type { formatMessages, transform } from "esbuild-wasm";
 import type estree from "prettier/plugins/estree";
 import type ts from "prettier/plugins/typescript";
@@ -15,11 +16,14 @@ export const jscript = {
   pending: null as null | Promise<void>,
   transform: null as null | typeof transform,
   formatMessages: null as null | typeof formatMessages,
+  parse: null as null | typeof parseSync,
   prettier: {
     standalone: null as null | typeof Prettier,
     estree: null as null | typeof estree,
     ts: null as null | typeof ts,
+    format: async (source: string) => source,
   },
+  loaded: false,
   async init() {
     if (this.pending) {
       await this.pending;
@@ -27,13 +31,30 @@ export const jscript = {
     if (!this.pending) {
       this.pending = new Promise<void>(async (resolve) => {
         await Promise.all([
-          // (async () => {
-          //   this.prettier.standalone = (
-          //     await import("prettier/standalone")
-          //   ).default;
-          //   this.prettier.estree = await import("prettier/plugins/estree");
-          //   this.prettier.ts = await import("prettier/plugins/typescript");
-          // })(),
+          (async () => {
+            this.prettier.standalone = (
+              await import("prettier/standalone")
+            ).default;
+            this.prettier.estree = await import("prettier/plugins/estree");
+            this.prettier.ts = await import("prettier/plugins/typescript");
+
+            const prettier = jscript.prettier.standalone;
+            const prettier_ts = jscript.prettier.ts;
+            const prettier_estree = jscript.prettier.estree;
+
+            if (prettier && prettier_estree && prettier_ts) {
+              this.prettier.format = (source) =>
+                prettier.format(source, {
+                  parser: "typescript",
+                  plugins: [prettier_ts, prettier_estree],
+                });
+            }
+          })(),
+          (async () => {
+            const oxc = await import("@oxc-parser/wasm");
+            (oxc.default as any)();
+            jscript.parse = oxc.parseSync;
+          })(),
           (async () => {
             const esbuild = await import("esbuild-wasm");
             await esbuild.initialize({
@@ -56,6 +77,7 @@ export const jscript = {
         resolve();
       });
       await this.pending;
+      this.loaded = true;
     }
   },
 };
