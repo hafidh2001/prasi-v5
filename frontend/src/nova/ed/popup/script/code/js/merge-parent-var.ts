@@ -16,8 +16,9 @@ export const generateImports = (
   }
   const result: string[] = [];
   for (const [k, v] of Object.entries(imports)) {
+    const id = k.replace(".tsx", "").replace("file:///", "");
     result.push(
-      `import { ${v.join(", ")} } from "${k.replace(".tsx", "").replace("file:///", "./")}";`
+      `import { ${v.join(", ")} } from "./${id}"; /* ${models[id].title.trim()} */`
     );
   }
 

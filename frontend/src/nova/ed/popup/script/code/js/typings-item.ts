@@ -12,6 +12,8 @@ const isDesktop: boolean;
 const __props: any;
 const siteurl: (path:string) => string;
 const preloaded: (url:string) => boolean;
+const _local_name_ = Symbol("local_name");
+const defineLocal: <T extends Record<string, any>>(arg: {value:T, name: string}) => T & { [_local_name_]: string };
 const preload: (urls: string | string[], opt?: {
   on_load?: (
     pages: {

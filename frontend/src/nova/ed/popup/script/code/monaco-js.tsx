@@ -1,32 +1,36 @@
+import { ScriptModel } from "crdt/node/load-script-models";
 import { EDGlobal } from "logic/ed-global";
-import { FC, useEffect, useRef } from "react";
+import { FC, useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
+import { useLocal } from "utils/react/use-local";
 import { jscript } from "utils/script/jscript";
 import { Loading } from "utils/ui/loading";
-import { monacoCreateModel, monacoRegisterSource } from "./js/create-model";
+import { monacoRegisterSource } from "./js/create-model";
+import { registerEditorOpener } from "./js/editor-opener";
 import { Monaco, MonacoEditor, monacoEnableJSX } from "./js/enable-jsx";
+import { foldRegionVState } from "./js/fold-region-vstate";
 import { jsxColorScheme } from "./js/jsx-style";
 import { registerPrettier } from "./js/register-prettier";
 import { registerReact } from "./js/register-react";
-import { foldRegionVState } from "./js/fold-region-vstate";
-import { registerEditorOpener } from "./js/editor-opener";
-import { useLocal } from "utils/react/use-local";
 
 export const MonacoJS: FC<{
   highlightJsx?: boolean;
   sidebar?: boolean;
   activeModel: string;
-  models: {
-    name: string;
-    source: string;
-    model?: ReturnType<typeof monacoCreateModel>;
-  }[];
+  models: Partial<ScriptModel>[];
+  onChange?: (arg: {
+    value: string;
+    model: Partial<ScriptModel>;
+    event: any;
+  }) => void;
   className?: string;
   nolib?: boolean;
   onMount?: (editor: MonacoEditor, monaco: Monaco) => void;
-}> = ({ models, activeModel, className, nolib, onMount }) => {
+}> = ({ models, activeModel, className, nolib, onMount, onChange }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
-  const local = useLocal({ editor: null as null | MonacoEditor });
+  const local = useLocal({
+    editor: null as null | MonacoEditor,
+  });
   const Editor = jscript.MonacoEditor;
 
   useEffect(() => {
@@ -117,7 +121,12 @@ export const MonacoJS: FC<{
             }
             m.model = model;
           } else {
-            m.model = monacoRegisterSource(monaco, m.source, m.name);
+            m.model = monacoRegisterSource(monaco, m.source, m.name || "");
+            m.model.onDidChangeContent((e) => {
+              if (onChange && m.model) {
+                onChange({ value: m.model.getValue(), model: m, event: e });
+              }
+            });
           }
 
           if (m.model) {
@@ -128,7 +137,8 @@ export const MonacoJS: FC<{
             editor.setModel(m.model);
             registerEditorOpener(editor, monaco, p);
             monacoEnableJSX(editor, monaco, { nolib }, p);
-            editor.trigger(undefined, "editor.action.formatDocument", null);
+            // editor.trigger(undefined, "editor.action.formatDocument", null);
+
             editor.restoreViewState(
               foldRegionVState(m.model.getLinesContent())
             );
@@ -141,6 +151,7 @@ export const MonacoJS: FC<{
                   editor.setSelection(p.script.monaco_selection);
                 } else {
                   p.script.monaco_selection = null;
+
                   clearInterval(ival);
                 }
                 i++;

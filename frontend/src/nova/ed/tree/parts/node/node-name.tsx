@@ -9,8 +9,6 @@ import { LoadingSpinner } from "utils/ui/loading";
 import { PNode } from "../../../logic/types";
 import { scrollTreeActiveItem } from "../scroll-tree";
 import { ComponentIcon } from "./node-indent";
-import capitalize from "lodash.capitalize";
-import startCase from "lodash.startcase";
 
 export const EdTreeNodeName: FC<{
   raw: NodeModel<PNode>;
@@ -46,7 +44,8 @@ export const EdTreeNodeName: FC<{
               if (node.parent?.component?.is_jsx_root) {
                 return;
               }
-              getActiveTree(p).update("Rename item", ({ findNode }) => {
+              const tree = getActiveTree(p);
+              tree.update("Rename item", ({ findNode }) => {
                 const n = findNode(node?.item.id);
                 if (n) {
                   n.item.name = local.rename || "";
@@ -61,6 +60,7 @@ export const EdTreeNodeName: FC<{
                   }
                 }
               });
+              tree.script_models[node.item.id].title = local.rename;
 
               p.ui.tree.rename_id = "";
               p.render();

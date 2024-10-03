@@ -18,9 +18,8 @@ export const staticFile = async (
 ) => {
   const glob = new Glob("**");
 
-  let index = null as null | BunFile;
-
   const internal = {
+    index: null as null | BunFile,
     rescan_timeout: null as any,
     router: createRouter<{
       mime: string | null;
@@ -62,7 +61,7 @@ export const staticFile = async (
       }
 
       if (opt.index) {
-        return new Response(index);
+        return new Response(internal.index);
       }
     },
   };
@@ -79,7 +78,7 @@ export const staticFile = async (
       }
 
       for await (const file of glob.scan(path)) {
-        if (file === "index.html") index = Bun.file(join(path, file));
+        if (file === "index.html") internal.index = Bun.file(join(path, file));
 
         static_file.paths.add(join(path, file));
 

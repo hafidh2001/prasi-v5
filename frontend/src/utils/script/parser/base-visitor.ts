@@ -1,5 +1,6 @@
 import type * as oxc from "./oxc-types";
 import type {
+  ComputedMemberExpression,
   ExportNamedDeclaration,
   FunctionBody,
   JSXIdentifier,
@@ -352,6 +353,14 @@ export class BaseVisitor implements Required<RecursiveVisitors<unknown>> {
     st: S,
     cb: Callback<S>
   ) {
+    cb(n.expression, st);
+  }
+  ComputedMemberExpression<S>(
+    n: ComputedMemberExpression,
+    st: S,
+    cb: Callback<S>
+  ) {
+    cb(n.object, st);
     cb(n.expression, st);
   }
   StaticMemberExpression<S>(

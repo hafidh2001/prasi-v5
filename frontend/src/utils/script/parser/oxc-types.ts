@@ -1,4 +1,5 @@
 import {
+  ComputedMemberExpression,
   FunctionBody,
   JSXIdentifier,
   ExportNamedDeclaration as OXCExportNamedDeclaration,
@@ -1683,7 +1684,7 @@ export interface JSXEmptyExpression extends Node, HasSpan {
 export interface JSXExpressionContainer extends Node, HasSpan {
   type: "JSXExpressionContainer";
 
-  expression: StaticMemberExpression | JSXExpression;
+  expression: ComputedMemberExpression | StaticMemberExpression | JSXExpression;
 }
 
 export type JSXExpression = JSXEmptyExpression | Expression;

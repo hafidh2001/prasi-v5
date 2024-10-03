@@ -137,7 +137,7 @@ export const EdBase = () => {
                 defaultSize={25}
                 hidden={!p.ui.panel.right}
                 className={cx(
-                  p.ui.panel.right && "flex flex-col min-w-[240px]"
+                  p.ui.panel.right && "flex flex-col min-w-[240px] border-l"
                 )}
               >
                 <EdRight />

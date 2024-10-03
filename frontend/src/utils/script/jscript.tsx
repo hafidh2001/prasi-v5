@@ -4,6 +4,9 @@ import type { formatMessages, transform } from "esbuild-wasm";
 import type estree from "prettier/plugins/estree";
 import type ts from "prettier/plugins/typescript";
 import type Prettier from "prettier/standalone";
+import { SimpleVisitors } from "./parser/acorn-types";
+import { traverse } from "./parser/traverse";
+
 export type FBuild = (
   entryFileName: string,
   src: string,
@@ -24,6 +27,14 @@ export const jscript = {
     format: async (source: string) => source,
   },
   loaded: false,
+  traverse: (code: string, visitors: SimpleVisitors<any>) => {
+    const ast = jscript.parse?.(code, {
+      sourceFilename: "script.tsx",
+      sourceType: "script",
+    });
+
+    if (ast) traverse(ast.program, visitors);
+  },
   async init() {
     if (this.pending) {
       await this.pending;
@@ -80,4 +91,12 @@ export const jscript = {
       this.loaded = true;
     }
   },
+};
+
+export const cutCode = (
+  code: string,
+  pos: any,
+  offset?: number
+) => {
+  return code.substring(pos.start + (offset || 0), pos.end + (offset || 0));
 };

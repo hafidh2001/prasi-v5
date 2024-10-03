@@ -1,3 +1,4 @@
+import { monacoCreateModel } from "popup/script/code/js/create-model";
 import { migrateCode } from "popup/script/code/js/migrate-code";
 import { parseItemCode } from "popup/script/code/js/parse-item-code";
 import { waitUntil } from "prasi-utils";
@@ -14,7 +15,7 @@ export type ScriptModel = {
   title: string;
   local: { name: string; value: string };
   extracted_content: string;
-  import_region: { start: 0; end: 0 };
+  model?: ReturnType<typeof monacoCreateModel>;
 };
 
 export const loadScriptModels = async (items: IItem[]) => {
@@ -38,7 +39,6 @@ export const loadScriptModels = async (items: IItem[]) => {
             name: `file:///${file}.tsx`,
             local: { name: "", value: "" },
             extracted_content: "",
-            import_region: { start: 0, end: 0 },
           };
         }
       }
@@ -52,7 +52,6 @@ export const loadScriptModels = async (items: IItem[]) => {
         title: `${item.name}`,
         local: { name: "", value: "" },
         extracted_content: "",
-        import_region: { start: 0, end: 0 },
       };
     }
   });

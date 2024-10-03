@@ -1,9 +1,10 @@
 import { ScriptModel } from "crdt/node/load-script-models";
 import get from "lodash.get";
 import trim from "lodash.trim";
-import { jscript } from "utils/script/jscript";
+import { cutCode, jscript } from "utils/script/jscript";
 import { traverse } from "utils/script/parser/traverse";
 import { replaceString } from "./replace-string";
+import { ObjectExpression } from "@oxc-parser/wasm";
 
 export const parseItemCode = (model: ScriptModel) => {
   const replacements: Array<{
@@ -44,22 +45,28 @@ export const parseItemCode = (model: ScriptModel) => {
       },
       ExportNamedDeclaration: (node) => {
         if (node.declaration?.type === "VariableDeclaration") {
-          for (const dec of node.declaration.declarations) {
+          for (const d of node.declaration.declarations) {
             if (
-              dec.init?.type === "ObjectExpression" &&
-              dec.id.type === "Identifier"
+              d.init?.type === "CallExpression" &&
+              d.id.type === "Identifier"
             ) {
-              exports[dec.id.name] = {};
-              for (const prop of dec.init.properties) {
-                if (
-                  prop.type === "ObjectProperty" &&
-                  prop.key.type === "Identifier"
-                ) {
-                  exports[dec.id.name][prop.key.name] = cutCode(
-                    model.source,
-                    prop.value,
-                    -2
-                  );
+              const dec = d.init.arguments[0] as ObjectExpression;
+              if (dec.properties) {
+                for (const prop of dec.properties) {
+                  if (
+                    prop.type === "ObjectProperty" &&
+                    prop.key.type === "Identifier"
+                  ) {
+                    if (!exports[d.id.name]) {
+                      exports[d.id.name] = {};
+                    }
+
+                    exports[d.id.name][prop.key.name] = cutCode(
+                      model.source,
+                      prop.value,
+                      -2
+                    );
+                  }
                 }
               }
             }
@@ -82,18 +89,24 @@ export const parseItemCode = (model: ScriptModel) => {
                     model.local.name = attr.value.value;
                     replacements.push({
                       ...attr.value,
-                      replacement: `{${model.local.name}.name}`,
+                      replacement: `{${model.local.name}[_local_name_]}`,
                     });
-                  } else if (
-                    attr.value.type === "JSXExpressionContainer" &&
-                    attr.value.expression.type === "StaticMemberExpression"
-                  ) {
-                    const name = get(
-                      exports,
-                      cutCode(model.source, attr.value.expression, -2)
-                    );
-                    if (name) {
-                      model.local.name = trim(name, "`'\"");
+                  } else if (attr.value.type === "JSXExpressionContainer") {
+                    if (
+                      attr.value.expression.type === "ComputedMemberExpression"
+                    ) {
+                      const name = get(
+                        exports,
+                        cutCode(
+                          model.source,
+                          attr.value.expression.object,
+                          -2
+                        ) + ".name"
+                      );
+
+                      if (name) {
+                        model.local.name = trim(name, "`'\"");
+                      }
                     }
                   }
                 } else if (attr.name.name === "value") {
@@ -107,19 +120,8 @@ export const parseItemCode = (model: ScriptModel) => {
                     );
                     replacements.push({
                       ...attr.value.expression,
-                      replacement: `${model.local.name}.value`,
+                      replacement: `${model.local.name}`,
                     });
-                  } else if (
-                    attr.value.type === "JSXExpressionContainer" &&
-                    attr.value.expression.type === "StaticMemberExpression"
-                  ) {
-                    const value = get(
-                      exports,
-                      cutCode(model.source, attr.value.expression, -2)
-                    );
-                    if (value) {
-                      model.local.value = value;
-                    }
                   }
                 }
               }
@@ -134,12 +136,4 @@ export const parseItemCode = (model: ScriptModel) => {
     const replaced = replaceString(model.source, replacements);
     model.extracted_content = replaced;
   }
-};
-
-const cutCode = (
-  code: string,
-  pos: { start: number; end: number },
-  offset?: number
-) => {
-  return code.substring(pos.start + (offset || 0), pos.end + (offset || 0));
 };
