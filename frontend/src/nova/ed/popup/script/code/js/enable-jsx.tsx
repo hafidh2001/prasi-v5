@@ -18,9 +18,6 @@ export const monacoEnableJSX = async (
   p?: PG
 ) => {
   monaco.languages.register({ id: "typescript" });
-  const m = monaco as any;
-  m.customJSMounted = true;
-
   if (editor.getModel()) {
     const jsxHgController = new MonacoJsxSyntaxHighlight(getWorker(), monaco);
     const { highlighter } = jsxHgController.highlighterBuilder({

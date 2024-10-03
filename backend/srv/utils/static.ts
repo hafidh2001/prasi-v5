@@ -48,11 +48,15 @@ export const staticFile = async (
               store.set(fullpath, gz);
             }
 
+            const headers: any = {
+              "content-encoding": "gzip",
+              "content-type": mime || "",
+            };
+            if (g.mode === "prod") {
+              headers["cache-control"] = "public, max-age=604800, immutable";
+            }
             return new Response(gz, {
-              headers: {
-                "content-encoding": "gzip",
-                "content-type": mime || "",
-              },
+              headers,
             });
           }
         } else {

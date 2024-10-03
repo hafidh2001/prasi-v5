@@ -1,18 +1,17 @@
 import { getActiveNode } from "crdt/node/get-node-by-id";
 import { getActiveTree } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
+import { waitUntil } from "prasi-utils";
 import { useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
+import { cutCode, jscript } from "utils/script/jscript";
 import { itemCssDefault, itemJsDefault } from "./js/default-val";
 import { migrateCode } from "./js/migrate-code";
+import { replaceString } from "./js/replace-string";
 import { typingsItem } from "./js/typings-item";
 import { MonacoJS } from "./monaco-js";
 import { MonacoLang } from "./monaco-lang";
-import { cutCode, jscript } from "utils/script/jscript";
-import { waitUntil } from "prasi-utils";
-import { replaceString } from "./js/replace-string";
-import { Loading } from "utils/ui/loading";
 
 export const EdPrasiCode = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -40,13 +39,13 @@ export const EdPrasiCode = () => {
   const id = node?.item.id || "";
   const models = getActiveTree(p).script_models;
   const model = models[id];
-  if (!model.source) {
+
+  if (model && !model.source) {
     model.extracted_content = itemJsDefault;
     jscript.prettier.format(migrateCode(model, models)).then((formatted) => {
       model.source = formatted;
       local.render();
     });
-    return <Loading backdrop={false} note="preparing code" />;
   }
 
   return (
@@ -60,7 +59,7 @@ export const EdPrasiCode = () => {
         `
       )}
     >
-      {local.ready && (
+      {local.ready && model && model.source && (
         <>
           {mode === "js" && (
             <MonacoJS
@@ -78,7 +77,7 @@ export const EdPrasiCode = () => {
                   update.push(p, model.id, value);
                 }
               }}
-              activeModel={models[id].name}
+              activeModel={model.name}
             />
           )}
 

@@ -4,6 +4,10 @@ import trim from "lodash.trim";
 import { waitUntil } from "prasi-utils";
 
 export const registerPrettier = (monaco: Monaco) => {
+  const m = monaco as any;
+  if (m.prasiPrettierRegistered) return;
+  m.prasiPrettierRegistered = true;
+  
   monaco.languages.registerDocumentFormattingEditProvider("typescript", {
     async provideDocumentFormattingEdits(model, options, token) {
       if (!jscript.loaded) {

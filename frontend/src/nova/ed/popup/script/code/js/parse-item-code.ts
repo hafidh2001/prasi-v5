@@ -89,7 +89,7 @@ export const parseItemCode = (model: ScriptModel) => {
                     model.local.name = attr.value.value;
                     replacements.push({
                       ...attr.value,
-                      replacement: `{${model.local.name}[_local_name_]}`,
+                      replacement: `{${model.local.name}[__localname]}`,
                     });
                   } else if (attr.value.type === "JSXExpressionContainer") {
                     if (

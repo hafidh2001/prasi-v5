@@ -90,6 +90,10 @@ export const internalLoadCompTree = (
       return immer.subscribe(fn);
     },
     script_models: {} as Record<string, ScriptModel>,
+    async reloadScriptModels() {
+      const content_tree = immer.get();
+      component.script_models = await loadScriptModels([content_tree]);
+    },
     before_update: null as null | ((do_update: () => void) => void),
     update(
       action_name: string,

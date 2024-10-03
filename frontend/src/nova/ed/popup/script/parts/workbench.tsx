@@ -5,6 +5,7 @@ import {
   Code,
   GitFork,
   PanelLeftOpen,
+  PanelTopClose,
   PictureInPicture2,
   ScrollText,
   Trash,
@@ -227,7 +228,7 @@ export const EdScriptWorkbench: FC<{
                   }}
                   className="flex items-center justify-center px-2 cursor-pointer hover:text-blue-600"
                 >
-                  <PanelLeftOpen size={13} />
+                  <PanelTopClose size={13} />
                 </div>
               </Tooltip>
             )}

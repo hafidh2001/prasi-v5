@@ -1,6 +1,4 @@
-import { EDGlobal } from "logic/ed-global";
 import { FC } from "react";
-import { useGlobal } from "utils/react/use-global";
 import { jscript } from "utils/script/jscript";
 import { Loading } from "utils/ui/loading";
 
@@ -10,12 +8,11 @@ export const MonacoLang: FC<{
   lang: string;
   defaultValue?: string;
 }> = ({ value, onChange, lang, defaultValue }) => {
-  const p = useGlobal(EDGlobal, "EDITOR");
   const Editor = jscript.MonacoEditor;
   if (!Editor)
     return (
       <div className="relative w-full h-full items-center justify-center flex flex-1">
-        <Loading backdrop={false} note="loading-editor" />
+        <Loading backdrop={false} note="loading-monaco-lang" />
       </div>
     );
 

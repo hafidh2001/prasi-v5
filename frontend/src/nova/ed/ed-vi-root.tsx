@@ -28,6 +28,7 @@ export const EdViRoot = memo(() => {
   const render = () => _set({});
 
   p.ui.editor.render = render;
+  if (!p.page.cur) return <Loading />;
   ref.page = {
     id: p.page.cur.id,
     url: p.page.cur.url,

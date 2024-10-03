@@ -64,7 +64,7 @@ export const MonacoJS: FC<{
   if (!Editor)
     return (
       <div className="relative w-full h-full items-center justify-center flex flex-1">
-        <Loading backdrop={false} note="loading-editor" />
+        <Loading backdrop={false} note="loading-monaco" />
       </div>
     );
 

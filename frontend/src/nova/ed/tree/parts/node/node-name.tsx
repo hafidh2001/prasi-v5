@@ -45,26 +45,31 @@ export const EdTreeNodeName: FC<{
                 return;
               }
               const tree = getActiveTree(p);
-              tree.update("Rename item", ({ findNode }) => {
-                const n = findNode(node?.item.id);
-                if (n) {
-                  n.item.name = local.rename || "";
+              tree.update(
+                "Rename item",
+                ({ findNode }) => {
+                  const n = findNode(node?.item.id);
+                  if (n) {
+                    n.item.name = local.rename || "";
 
-                  if (
-                    !n.item.name &&
-                    n.item.component?.id &&
-                    p.comp.loaded[n.item.component?.id].content_tree.name
-                  ) {
-                    n.item.name =
-                      p.comp.loaded[n.item.component?.id].content_tree.name;
+                    if (
+                      !n.item.name &&
+                      n.item.component?.id &&
+                      p.comp.loaded[n.item.component?.id].content_tree.name
+                    ) {
+                      n.item.name =
+                        p.comp.loaded[n.item.component?.id].content_tree.name;
+                    }
                   }
-                }
-              });
-              tree.script_models[node.item.id].title = local.rename;
+                },
+                async () => {
+                  await tree.reloadScriptModels();
 
-              p.ui.tree.rename_id = "";
-              p.render();
-              setTimeout(scrollTreeActiveItem);
+                  p.ui.tree.rename_id = "";
+                  p.render();
+                  setTimeout(scrollTreeActiveItem);
+                }
+              );
             }}
             onKeyDown={(e) => {
               e.stopPropagation();

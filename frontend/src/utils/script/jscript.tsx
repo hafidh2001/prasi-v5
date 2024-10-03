@@ -58,19 +58,25 @@ export const jscript = {
                 prettier.format(source, {
                   parser: "typescript",
                   plugins: [prettier_ts, prettier_estree],
+                  proseWrap: "always",
+                  semi: false,
+                  arrowParens: "always",
+                  experimentalTernaries: true,
+                  trailingComma: "none",
+                  bracketSameLine: false,
+                  bracketSpacing: true,
                 });
             }
           })(),
           (async () => {
             const oxc = await import("@oxc-parser/wasm");
-            (oxc.default as any)();
+            (oxc.default as any)({});
             jscript.parse = oxc.parseSync;
           })(),
           (async () => {
             const esbuild = await import("esbuild-wasm");
             await esbuild.initialize({
-              wasmURL:
-                "https://cdn.jsdelivr.net/npm/esbuild-wasm@0.24.0/esbuild.wasm",
+              wasmURL: new URL("esbuild-wasm/esbuild.wasm", import.meta.url),
             });
             jscript.transform = esbuild.transform;
             jscript.formatMessages = esbuild.formatMessages;
@@ -93,10 +99,6 @@ export const jscript = {
   },
 };
 
-export const cutCode = (
-  code: string,
-  pos: any,
-  offset?: number
-) => {
+export const cutCode = (code: string, pos: any, offset?: number) => {
   return code.substring(pos.start + (offset || 0), pos.end + (offset || 0));
 };

@@ -1,6 +1,9 @@
 import { Monaco } from "./enable-jsx";
 
 export const registerReact = async (monaco: Monaco) => {
+  const m = monaco as any;
+  if (m.prasiReactRegistered) return;
+  m.prasiReactRegistered = true;
   monaco.languages.typescript.typescriptDefaults.setExtraLibs([
     {
       filePath: "csstype.d.ts",
