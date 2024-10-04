@@ -223,11 +223,16 @@ export function PrasiFlowEditor({
           if (fg.prop) {
             const sel = fg.prop.selection;
             if (sel.edges.length === 1 && sel.nodes.length === 0) {
-              if (changes.nodes.length === 0) return;
+              if (changes.nodes.length === 0) {
+                fg.prop.selection.changes = changes;
+                setTimeout(local.render);
+                return;
+              }
             }
 
             fg.prop.selection = {
               ...changes,
+              changes,
               loading: fg.prop.selection.loading,
               selectAll() {
                 fg.main?.action.resetSelectedElements();
@@ -298,6 +303,19 @@ export function PrasiFlowEditor({
           local.viewport = e;
           local.render();
         }}
+        onPointerUp={() => {
+          setTimeout(() => {
+            const sel = fg.prop?.selection;
+            if (
+              sel &&
+              sel.edges.length === 1 &&
+              sel.changes?.edges.length === 0
+            ) {
+              sel.edges = [];
+              fg.prop?.render();
+            }
+          }, 100);
+        }}
       >
         <Selection />
         <Background />
@@ -310,6 +328,8 @@ export function PrasiFlowEditor({
       {fg.pickNodeType && (
         <>
           <NodeTypePicker
+            from_id={fg.pickNodeType.from_id}
+            pflow={pflow}
             name={"pick-node"}
             value={""}
             onChange={(value) => {

@@ -18,18 +18,21 @@ import {
   PopoverTrigger,
 } from "utils/shadcn/comps/ui/popover";
 import { cn } from "utils/shadcn/lib";
-import { PFNodeDefinition } from "../runtime/types";
+import { PFNodeDefinition, RPFlow } from "../runtime/types";
+import { immutableFindFlow } from "./find-node";
 import { NodeTypeLabel } from "./node-type-label";
 
 export const NodeTypePicker: React.FC<{
   value: keyof typeof allNodeDefinitions | "";
   onChange: (value: keyof typeof allNodeDefinitions) => void;
   name?: string;
+  pflow: RPFlow;
+  from_id: string;
   defaultOpen?: boolean;
   children?:
     | React.ReactElement
     | ((opt: { setOpen: (open: boolean) => void; open: boolean }) => any);
-}> = ({ value, onChange, children, name, defaultOpen }) => {
+}> = ({ value, onChange, from_id, children, name, defaultOpen, pflow }) => {
   const local = useLocal({ open: defaultOpen || false, onChangeCalled: false });
 
   const setOpen = (open: boolean) => {
@@ -44,13 +47,60 @@ export const NodeTypePicker: React.FC<{
     local.render();
   };
 
+  const render_child =
+    typeof children === "object"
+      ? children
+      : typeof children === "function" &&
+        children({
+          open: local.open,
+          setOpen,
+        });
+
+  if (!local.open) return render_child;
+
+  const found = immutableFindFlow({ id: from_id, pflow });
+  let branch_mode =
+    typeof found.branch?.mode === "undefined" ? "normal" : found.branch.mode;
+
+  if (found.branch && !found.branch.mode) {
+    let find: typeof found | null = found;
+    let visited = new Set<string>();
+    while (find) {
+      if (find.branch && find.branch.mode) branch_mode = find.branch.mode;
+
+      for (const node of Object.values(pflow.nodes)) {
+        if (visited.has(node.id)) {
+          find = null;
+          break;
+        }
+        if (node.branches?.find((b) => b === found.branch)) {
+          find = immutableFindFlow({ id: node.id, pflow });
+          if (!find.branch) {
+            find = null;
+            break;
+          }
+        }
+        visited.add(node.id);
+      }
+    }
+  }
+
   return (
     <PFDropdown
       open={local.open}
       name={name}
       setOpen={setOpen}
       options={Object.keys(allNodeDefinitions)
-        .filter((e) => e !== "start")
+        .filter((node_type) => {
+          const def = (allNodeDefinitions as any)[
+            node_type
+          ] as PFNodeDefinition<any>;
+          if (node_type === "start") return false;
+          if (branch_mode === "sync-only" && def.is_async) return false;
+          if (branch_mode === "async-only" && def.is_async === false)
+            return false;
+          return true;
+        })
         .map((e) => {
           const def = (allNodeDefinitions as any)[e] as PFNodeDefinition<any>;
           return {
@@ -80,13 +130,7 @@ export const NodeTypePicker: React.FC<{
         onChange(value as any);
       }}
     >
-      {typeof children === "object"
-        ? children
-        : typeof children === "function" &&
-          children({
-            open: local.open,
-            setOpen,
-          })}
+      {render_child}
     </PFDropdown>
   );
 };

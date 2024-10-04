@@ -356,6 +356,8 @@ export const RenderNode = function (arg: {
             ></div>
             <NodeTypePicker
               value={data.type}
+              from_id={node.id}
+              pflow={pflow}
               onChange={(value) => {
                 data.type = value;
                 local.type_opened = false;

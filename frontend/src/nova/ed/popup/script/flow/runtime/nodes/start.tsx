@@ -8,10 +8,15 @@ export const nodeStart = defineNode({
     const node = runtime.node;
     if (node.jsx) {
       const render = node.branches?.find((e) => e.name === "Render");
-      state.startEffects = () => {
-        node.branches
-          ?.filter((e) => e.name === "Effect")
-          .map((e) => processBranch(e));
+      state.react = {
+        render() {
+          if (render) return processBranch(render);
+        },
+        effects() {
+          return node.branches
+            ?.filter((e) => e.name !== "Render")
+            .map((e) => processBranch(e));
+        },
       };
 
       if (render) {
@@ -30,6 +35,21 @@ export const nodeStart = defineNode({
     next();
   },
   default: { jsx: false },
+  render_edge_label: ({ node, branch }) => {
+    return (
+      <div>
+        {branch?.name === "Effect" ? (
+          <div className="text-center leading-3">
+            Effect
+            <br />
+            <div className="text-[80%]">After Render</div>
+          </div>
+        ) : (
+          "Render"
+        )}
+      </div>
+    );
+  },
   on_before_connect({ node, is_new, pflow }) {
     if (is_new) {
       if (!node.branches) {
@@ -41,8 +61,10 @@ export const nodeStart = defineNode({
       if (node.jsx) {
         if (node.branches.find((e) => e.name === "Render")) {
           new_branch.name = "Effect";
+          new_branch.mode = "async-only";
         } else {
           new_branch.name = "Render";
+          new_branch.mode = "sync-only";
         }
       }
 

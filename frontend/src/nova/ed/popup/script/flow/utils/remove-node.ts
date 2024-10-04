@@ -1,6 +1,7 @@
 import { Edge, NodeRemoveChange } from "@xyflow/react";
 import { findFlow, loopPFNode } from "./find-node";
 import { fg } from "./flow-global";
+import { current } from "immer";
 
 export const removeNodes = ({
   changes,
@@ -21,6 +22,14 @@ export const removeNodes = ({
         while (found?.flow) {
           if (found.flow) {
             found.flow.splice(found.idx, 1);
+
+            if (found.flow.length <= 1) {
+              const node = pflow.nodes[found.flow[0]];
+              if (node && node.branches && found.branch) {
+                const idx = node.branches.indexOf(found.branch);
+                node.branches.splice(idx, 1);
+              }
+            }
           }
           found = findFlow({ pflow, id });
         }

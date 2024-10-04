@@ -59,9 +59,11 @@ export const pflowConnectEnd = ({
         fg.pointer_to = null;
 
         if (fg.pointer_up_pos) {
+
           fg.pickNodeType = {
             x: fg.pointer_up_pos.x,
             y: fg.pointer_up_pos.y,
+            from_id: from_id,
             pick(type) {
               if (!type) return;
               fg.update(

@@ -1,6 +1,6 @@
-import { Edge, Node, ReactFlowInstance } from "@xyflow/react";
+import { Edge, Node, OnSelectionChangeParams, ReactFlowInstance } from "@xyflow/react";
 import { PFRunResult } from "../runtime/runner";
-import { PFlow, PFNode, RPFlow } from "../runtime/types";
+import { PFlow, PFNode, PFNodeBranch, RPFlow } from "../runtime/types";
 import { PNode } from "logic/types";
 import { PRASI_NODE_DEFS } from "../runtime/nodes";
 
@@ -10,6 +10,7 @@ export type PrasiFlowPropLocal = {
     edges: Edge[];
     loading: boolean;
     selectAll: () => void;
+    changes?: OnSelectionChangeParams;
   };
 };
 
@@ -58,6 +59,7 @@ const fg_default = {
   pickNodeType: null as null | {
     x: number;
     y: number;
+    from_id: string,
     pick: (type: keyof PRASI_NODE_DEFS) => void;
   },
 };

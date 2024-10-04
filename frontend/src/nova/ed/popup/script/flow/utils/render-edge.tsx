@@ -6,10 +6,11 @@ import {
   getBezierPath,
   useReactFlow,
 } from "@xyflow/react";
-import { PFNodeBranch } from "../runtime/types";
+import { PFNodeBranch, PFNodeDefinition } from "../runtime/types";
 import { fg } from "./flow-global";
 
 import { useState } from "react";
+import { allNodeDefinitions } from "../runtime/nodes";
 export const RenderEdge = function ({
   id,
   sourceX,
@@ -34,8 +35,14 @@ export const RenderEdge = function ({
   const edge = (id ? getEdge(id) : undefined) as unknown as Edge<{
     branch: PFNodeBranch;
   }>;
-  const label = edge?.data?.branch?.name || "";
+  const pflow = fg.pflow;
+  const name = edge?.data?.branch?.name || "";
   const is_branch = !!edge?.data?.branch;
+  const from = pflow.nodes[edge.source];
+  const from_def = (allNodeDefinitions as any)[
+    from.type
+  ] as PFNodeDefinition<any>;
+
   return (
     <>
       <BaseEdge path={edgePath} markerEnd={markerEnd} style={style} />
@@ -62,7 +69,7 @@ export const RenderEdge = function ({
                 }
               } */
             `,
-            !label &&
+            !name &&
               css`
                 .plus {
                   opacity: 0.4 !important;
@@ -129,7 +136,11 @@ export const RenderEdge = function ({
             // }
           }}
         >
-          <div className={"label"}>{label}</div>
+          <div className={"label"}>
+            {from_def?.render_edge_label
+              ? from_def.render_edge_label({ node: from, branch: edge.data?.branch })
+              : name}
+          </div>
           {/* {!is_branch && (
             <button
               className={cx(

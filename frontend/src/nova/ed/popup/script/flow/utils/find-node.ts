@@ -11,11 +11,11 @@ import {
 export const immutableFindFlow = ({
   id,
   pflow,
-  from,
+  parent_id,
 }: {
   id: string;
   pflow: RPFlow;
-  from?: string;
+  parent_id?: string;
 }) => {
   let result = {
     flow: [] as Readonly<PFNodeID[]>,
@@ -29,8 +29,8 @@ export const immutableFindFlow = ({
         flow,
         ({ flow, idx, parent, branch }) => {
           if (flow[idx] === id) {
-            if (from) {
-              if (from === parent?.id || from === id) {
+            if (parent_id) {
+              if (parent_id === parent?.id || parent_id === id) {
                 result = { flow, idx, branch };
                 return false;
               }
@@ -88,9 +88,11 @@ export const immutableFindPFNode = (
         branch: arg?.branch,
         is_invalid: true,
       });
+      idx++;
       continue;
     }
     if (visited.has(node.id)) {
+      idx++;
       continue;
     } else {
       visited.add(node.id);
@@ -153,9 +155,11 @@ export const findPFNode = (
         branch: arg?.branch,
         is_invalid: true,
       });
+      idx++;
       continue;
     }
     if (visited.has(node.id)) {
+      idx++;
       continue;
     } else {
       visited.add(node.id);

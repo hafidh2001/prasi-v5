@@ -46,7 +46,14 @@ export const PFPropEdge: FC<{ edge: Edge; pflow: RPFlow }> = ({
                     }
                   }}
                 >
-                  <div>{e.name || "Branch " + (idx + 1)}</div>
+                  <div className="flex space-x-1 items-center">
+                    <div>{e.name || "Branch " + (idx + 1)}</div>
+                    {e.mode && (
+                      <div className="text-[9px] ml-2 px-2 border rounded-sm uppercase">
+                        {e.mode}
+                      </div>
+                    )}
+                  </div>
                   <div
                     onClick={(e) => {
                       e.stopPropagation();

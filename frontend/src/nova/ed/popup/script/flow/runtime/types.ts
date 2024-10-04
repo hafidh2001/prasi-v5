@@ -7,7 +7,7 @@ export type PFNodeBranch = {
   code?: string;
   name?: string;
   flow: PFNodeID[];
-  allow_async?: boolean;
+  mode?: "async-only" | "sync-only" | "normal";
   idx?: number;
   meta?: { condition_id: string };
 };
@@ -68,6 +68,10 @@ export type PFNodeDefinition<
   is_async?: boolean;
   icon: string;
   default?: G;
+  render_edge_label?: (arg: {
+    node: DeepReadonly<PFNode<G>>;
+    branch?: PFNodeBranch;
+  }) => ReactElement;
   on_before_connect?: (arg: {
     node: PFNode<G>;
     is_new: boolean;
@@ -94,7 +98,13 @@ export type PFNodeDefinition<
     processBranch: (branch: DeepReadonly<PFNodeBranch>) => Promise<void>;
     next: () => void;
     console: typeof console;
-    state: any;
+    state: {
+      react?: {
+        effects: () => void;
+        render: () => void;
+        rendered?: boolean;
+      };
+    };
   }) => void | Promise<void>;
   fields?: F;
 };

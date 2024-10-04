@@ -9,12 +9,12 @@ export const defaultFlow = (type: "item", name: string, start_id: string) => {
         [start_id]: {
           type: "start",
           branches: [
-            { flow: [start_id, a], name: "Render" },
+            { flow: [start_id, a], name: "Render", mode: "sync-only" },
             { flow: [], name: "Effect" },
           ],
           jsx: true,
         },
-        [a]: { type: "itemRender" },
+        [a]: { type: "reactOutput" },
       });
 
       return {
