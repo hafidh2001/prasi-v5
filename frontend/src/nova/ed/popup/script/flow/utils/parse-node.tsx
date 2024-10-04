@@ -19,7 +19,7 @@ export const parseNodes = (
       y: number;
       next_flow: DeepReadonly<PFNode>[];
     };
-  },
+  }
 ) => {
   const existing = opt?.existing || undefined;
   const rf_nodes: Node[] = existing ? existing.rf_nodes : [];
