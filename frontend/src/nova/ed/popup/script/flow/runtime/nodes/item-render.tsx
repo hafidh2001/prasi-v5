@@ -3,6 +3,7 @@ import { defineNode } from "../lib/define-node";
 
 export const nodeItemRender = defineNode({
   type: "item.render",
+  has_branches: true,
   fields: {
     class_name: { idx: 0, type: "string", label: "CSS Class" },
   },

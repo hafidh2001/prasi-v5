@@ -2,6 +2,7 @@ import { Edge, Node, ReactFlowInstance } from "@xyflow/react";
 import { PFRunResult } from "../runtime/runner";
 import { PFlow, PFNode, RPFlow } from "../runtime/types";
 import { PNode } from "logic/types";
+import { PRASI_NODE_DEFS } from "../runtime/nodes";
 
 export type PrasiFlowPropLocal = {
   selection: {
@@ -15,6 +16,7 @@ export type PrasiFlowPropLocal = {
 const fg_default = {
   pflow: null as unknown as RPFlow,
   pointer_up_id: "",
+  pointer_up_pos: { x: 0, y: 0 },
   pointer_to: null as null | { x: number; y: number },
   updateNoDebounce(
     action_name: string,
@@ -53,6 +55,11 @@ const fg_default = {
     resetDefault: (relayout: boolean) => {},
   },
   refreshFlow(pflow: RPFlow | PFlow) {},
+  pickNodeType: null as null | {
+    x: number;
+    y: number;
+    pick: (type: keyof PRASI_NODE_DEFS) => void;
+  },
 };
 const w = window as unknown as {
   prasi_flow_global: typeof fg_default;

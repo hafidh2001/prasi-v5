@@ -33,14 +33,21 @@ export const PrasiFlowProp = ({ pflow }: { pflow: RPFlow }) => {
         >
           {sel.nodes.length === 0 && sel.edges.length === 0 ? (
             <>
-              <div className="text-xs">Please Select Node</div>
+              <div className="relative overflow-auto w-full h-full flex-1">
+                <div className="absolute inset-0">
+                  <pre className={cx("text-[9px]")}>
+                    {JSON.stringify(pflow, null, 2)}
+                  </pre>
+                </div>
+              </div>
+              {/* <div className="text-xs">Please Select Node</div>
               <div className="text-xs italic">&mdash; Or &mdash;</div>
               <div className="text-xs">
                 <span className="text-[10px] rounded-sm font-mono border border-slate-300 px-[5px] py-[1px]">
                   Shift
                 </span>{" "}
                 Drag to multi-select
-              </div>
+              </div> */}
             </>
           ) : (
             <div

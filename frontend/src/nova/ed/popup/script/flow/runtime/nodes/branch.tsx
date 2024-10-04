@@ -2,13 +2,12 @@ import { createId } from "@paralleldrive/cuid2";
 import { codeExec } from "../lib/code-exec";
 import { defineNode } from "../lib/define-node";
 import { PFField, PFNodeBranch } from "../types";
-import { current } from "immer";
 type Condition = { condition: string; name: string; id: string };
 
 export const nodeBranch = defineNode({
   type: "branch",
+  has_branches: true,
   on_before_connect: ({ node, is_new }) => {
-
     if (!node.conditions) node.conditions = [];
     if (!node.branches) node.branches = [];
 
@@ -37,7 +36,6 @@ export const nodeBranch = defineNode({
         });
       }
     } else {
-
       if (conditions.length > branches.length) {
         for (const [i, c] of Object.entries(conditions)) {
           const idx = i as unknown as number;

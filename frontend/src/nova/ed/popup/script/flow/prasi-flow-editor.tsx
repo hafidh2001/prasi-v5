@@ -29,6 +29,7 @@ import { removeNodes } from "./utils/remove-node";
 import { RenderEdge } from "./utils/render-edge";
 import { RenderNode } from "./utils/render-node";
 import { restoreViewport } from "./utils/restore-viewport";
+import { NodeTypePicker } from "./utils/type-picker";
 
 export function PrasiFlowEditor({
   pflow,
@@ -207,6 +208,9 @@ export function PrasiFlowEditor({
           fg.prop?.selection.selectAll();
         }
       }}
+      onPointerUp={(e) => {
+        fg.pointer_up_pos = { x: e.clientX, y: e.clientY };
+      }}
     >
       <ReactFlow
         maxZoom={1.1}
@@ -303,6 +307,70 @@ export function PrasiFlowEditor({
           </ControlButton>
         </Controls>
       </ReactFlow>
+      {fg.pickNodeType && (
+        <>
+          <NodeTypePicker
+            name={"pick-node"}
+            value={"code"}
+            onChange={(value) => {
+              fg.pickNodeType?.pick(value);
+              fg.pickNodeType = null;
+              fg.main?.render();
+            }}
+            defaultOpen={true}
+          >
+            <div
+              className={cx(
+                "absolute rounded-xs",
+                css`
+                  left: ${fg.pickNodeType.x}px;
+                  top: ${fg.pickNodeType.y}px;
+                  width: 10px;
+                  height: 10px;
+                  @keyframes dash {
+                    to {
+                      background-position:
+                        100% 0,
+                        /* Top border (moves to the right) */ 100% 100%,
+                        /* Right border (moves downward) */ 0 100%,
+                        /* Bottom border (moves to the left) */ 0 0; /* Left border (moves upward) */
+                    }
+                  }
+
+                  &::before {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    background-image:
+                      linear-gradient(90deg, black 50%, transparent 50%),
+                      /* Top */
+                        linear-gradient(0deg, black 50%, transparent 50%),
+                      /* Right */
+                        linear-gradient(90deg, black 50%, transparent 50%),
+                      /* Bottom */
+                        linear-gradient(0deg, black 50%, transparent 50%); /* Left */
+
+                    background-size:
+                      4px 1px,
+                      /* Top */ 1px 4px,
+                      /* Right */ 4px 1px,
+                      /* Bottom */ 1px 4px; /* Left */
+
+                    background-position:
+                      0 0,
+                      /* Top */ 100% 0,
+                      /* Right */ 0 100%,
+                      /* Bottom */ 0 0; /* Left */
+
+                    background-repeat: repeat-x, repeat-y, repeat-x, repeat-y;
+                    animation: dash 4s linear infinite; /* Longer duration */
+                  }
+                `
+              )}
+            ></div>
+          </NodeTypePicker>
+        </>
+      )}
     </div>
   );
 }

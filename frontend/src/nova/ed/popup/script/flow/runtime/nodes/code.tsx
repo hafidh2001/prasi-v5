@@ -3,6 +3,7 @@ import { defineNode } from "../lib/define-node";
 
 export const nodeCode = defineNode({
   type: "code",
+  has_branches: false,
   fields: {
     source_code: { idx: 0, type: "code", label: "Code" },
   },

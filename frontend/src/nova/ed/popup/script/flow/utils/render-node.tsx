@@ -16,10 +16,12 @@ import { PFNodeDefinition } from "../runtime/types";
 import { fg } from "./flow-global";
 import { NodeTypeLabel } from "./node-type-label";
 import { NodeTypePicker } from "./type-picker";
+import { current } from "immer";
+import { findFlow } from "./find-node";
 
 export const RenderNode = function (arg: {
   id: string;
-  data: { label: string; type: string };
+  data: { label: string; type: keyof typeof allNodeDefinitions };
 }) {
   const pflow = fg.pflow;
   const local = useLocal({ type_opened: false });
@@ -353,39 +355,7 @@ export const RenderNode = function (arg: {
               `)}
             ></div>
             <NodeTypePicker
-              onOpenChange={(value) => {
-                console.log("open change", value);
-                local.type_opened = value;
-                local.render();
-              }}
-              options={Object.keys(allNodeDefinitions)
-                .filter((e) => e !== "start")
-                .map((e) => {
-                  const def = (allNodeDefinitions as any)[
-                    e
-                  ] as PFNodeDefinition<any>;
-                  return {
-                    value: e,
-                    label: def.type,
-                    el: (
-                      <>
-                        <div
-                          className={css`
-                            svg {
-                              width: 12px;
-                              height: 12px;
-                              margin-right: 5px;
-                            }
-                          `}
-                          dangerouslySetInnerHTML={{ __html: def.icon }}
-                        ></div>
-
-                        <NodeTypeLabel node={def} />
-                      </>
-                    ),
-                  };
-                })}
-              defaultValue={data.type}
+              value={data.type}
               onChange={(value) => {
                 data.type = value;
                 local.type_opened = false;
@@ -395,15 +365,51 @@ export const RenderNode = function (arg: {
                   fg.updateNoDebounce("Flow Change Node Type", ({ pflow }) => {
                     const n = pflow.nodes[node.id];
                     if (n) {
+                      const from = (allNodeDefinitions as any)[
+                        n.type
+                      ] as PFNodeDefinition<any>;
+                      const to = (allNodeDefinitions as any)[
+                        value
+                      ] as PFNodeDefinition<any>;
+                      const on_init = to?.on_init;
+
+                      if (to && from) {
+                        if (from.has_branches && !to.has_branches) {
+                          if (n.branches && n.branches.length > 1) {
+                            if (
+                              !confirm(
+                                "Changing to this type will disconnect branches. Do you want to continue?"
+                              )
+                            ) {
+                              return;
+                            }
+                          }
+
+                          const found = findFlow({ id: n.id, pflow });
+                          if (found && found.flow) {
+                            const flow = n.branches?.[0].flow;
+                            if (flow) {
+                              console.log(current(n));
+                              // delete n.branches;
+                            }
+                          }
+                        }
+
+                        if (!from.has_branches && to.has_branches) {
+                          const found = findFlow({ id: n.id, pflow });
+                          if (found && found.flow) {
+                            const idx = found.flow.indexOf(n.id);
+                            found.flow.splice(idx, found.flow.length - idx + 1);
+                            n.branches = [];
+                          }
+                        }
+                      }
                       n.type = value;
 
-                      const on_init = (allNodeDefinitions as any)[n.type]
-                        ?.on_init;
                       if (on_init) {
                         on_init({
                           node: n,
-                          flow: pflow.flow,
-                          nodes: pflow.nodes,
+                          pflow,
                         });
                       }
                     }

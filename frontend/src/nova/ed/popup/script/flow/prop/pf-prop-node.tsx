@@ -4,7 +4,6 @@ import { DeepReadonly, PFField, PFNode, RPFlow } from "../runtime/types";
 import { fg } from "../utils/flow-global";
 import { getNodeFields } from "../utils/get-node-fields";
 import { PFPropNodeField } from "./pf-prop-node-field";
-import { useReactFlow } from "@xyflow/react";
 
 export const PFPropNode: FC<{ node: DeepReadonly<PFNode>; pflow: RPFlow }> = ({
   node,

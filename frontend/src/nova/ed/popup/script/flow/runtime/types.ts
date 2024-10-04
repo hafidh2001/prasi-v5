@@ -7,6 +7,7 @@ export type PFNodeBranch = {
   code?: string;
   name?: string;
   flow: PFNodeID[];
+  allow_async?: boolean;
   idx?: number;
   meta?: { condition_id: string };
 };
@@ -58,12 +59,14 @@ export type PFNodeDefinition<F extends Record<string, PFField>> = {
   type: string;
   className?: string;
   vars?: Record<string, any>;
+  is_async?: boolean;
   icon: string;
   on_before_connect?: (arg: {
     node: PFNode;
     is_new: boolean;
     pflow: PFlow;
   }) => void;
+  has_branches: boolean;
   on_after_connect?: (arg: { from: PFNode; to: PFNode }) => void;
   on_before_disconnect?: (arg: {
     from: PFNode;
@@ -71,11 +74,7 @@ export type PFNodeDefinition<F extends Record<string, PFField>> = {
     flow: PFNodeID[];
   }) => void;
   on_after_disconnect?: (arg: { from: PFNode; to: PFNode }) => void;
-  on_init?: (arg: {
-    node: PFNode;
-    flow: PFNodeID[];
-    nodes: Record<string, PFNode>;
-  }) => void;
+  on_init?: (arg: { node: PFNode; pflow: PFlow }) => void;
   on_fields_changed?: (arg: {
     pflow: PFlow;
     node: PFNode;

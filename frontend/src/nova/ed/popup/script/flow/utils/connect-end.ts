@@ -11,7 +11,6 @@ import {
 } from "../runtime/types";
 import { findFlow, immutableFindFlow } from "./find-node";
 import { fg } from "./flow-global";
-import { current } from "immer";
 
 export const pflowConnectEnd = ({
   state,
@@ -58,60 +57,69 @@ export const pflowConnectEnd = ({
         position.x -= 70;
         fg.pointer_to = null;
 
-        fg.update(
-          "Flow Create Node",
-          ({ pflow }) => {
-            const from = pflow.nodes[from_id];
+        if (fg.pointer_up_pos) {
+          fg.pickNodeType = {
+            x: fg.pointer_up_pos.x,
+            y: fg.pointer_up_pos.y,
+            pick(type) {
+              fg.update(
+                "Flow Create Node",
+                ({ pflow }) => {
+                  const from = pflow.nodes[from_id];
 
-            on_before_connect(pflow, { node: from, is_new: true });
+                  on_before_connect(pflow, { node: from, is_new: true });
 
-            const to_node = {
-              type: "code",
-              id: createId(),
-              position,
-            };
-            to_id = to_node.id;
-            pflow.nodes[to_node.id] = to_node;
+                  const to_node = {
+                    type: type,
+                    id: createId(),
+                    position,
+                  };
+                  to_id = to_node.id;
+                  pflow.nodes[to_node.id] = to_node;
 
-            if (from.branches) {
-              const empty_branch = from.branches.find(
-                (e) => e.flow.length <= 1
+                  if (from.branches) {
+                    const empty_branch = from.branches.find(
+                      (e) => e.flow.length <= 1
+                    );
+
+                    if (empty_branch) {
+                      if (to_node) {
+                        if (!empty_branch.flow.includes(from.id))
+                          empty_branch.flow.push(from.id);
+                        empty_branch.flow.push(to_node.id);
+                      }
+                    } else {
+                      const f = findFlow({ id: from_id, pflow: pflow });
+                      if (f) {
+                        f.flow?.push(to_node.id);
+                      }
+                    }
+                  } else {
+                    const f = findFlow({ id: from_id, pflow: pflow });
+                    if (f) {
+                      const res = f.flow?.splice(
+                        f.idx + 1,
+                        f.flow.length - f.idx,
+                        to_node.id
+                      );
+                      if (res && res.length > 0) {
+                        pflow.flow[res[0]] = res;
+                      }
+                    }
+                  }
+                },
+                ({ pflow }) => {
+                  fg.refreshFlow(pflow as PFlow);
+                  setTimeout(() => {
+                    fg.main?.action.resetSelectedElements();
+                    fg.main?.action.addSelectedNodes([to_id]);
+                  });
+                }
               );
-
-              if (empty_branch) {
-                if (to_node) {
-                  if (!empty_branch.flow.includes(from.id))
-                    empty_branch.flow.push(from.id);
-                  empty_branch.flow.push(to_node.id);
-                }
-              } else {
-                const f = findFlow({ id: from_id, pflow: pflow });
-                if (f) {
-                  f.flow?.push(to_node.id);
-                }
-              }
-            } else {
-              const f = findFlow({ id: from_id, pflow: pflow });
-              if (f) {
-                const res = f.flow?.splice(
-                  f.idx + 1,
-                  f.flow.length - f.idx,
-                  to_node.id
-                );
-                if (res && res.length > 0) {
-                  pflow.flow[res[0]] = res;
-                }
-              }
-            }
-          },
-          ({ pflow }) => {
-            fg.refreshFlow(pflow as PFlow);
-            setTimeout(() => {
-              fg.main?.action.resetSelectedElements();
-              fg.main?.action.addSelectedNodes([to_id]);
-            });
-          }
-        );
+            },
+          };
+          fg.main?.render();
+        }
 
         return;
       }
@@ -127,15 +135,18 @@ export const pflowConnectEnd = ({
 
     if (!edgeFound && pf) {
       const from_node = pf.nodes[from_id];
+      const form_dev = (allNodeDefinitions as any)[
+        from_node.type
+      ] as PFNodeDefinition<any>;
 
       if (from_node) {
         if (from_node.branches) {
           fg.update("Flow Connect Node", ({ pflow }) => {
             const from_node = pflow.nodes[from_id];
-            on_before_connect(pflow, { node: from_node, is_new: false });
+            on_before_connect(pflow, { node: from_node, is_new: true });
 
             let picked_branches = from_node.branches?.find(
-              (e) => e.flow.length === 0
+              (e) => e.flow.length <= 1
             );
 
             if (!picked_branches && from_node?.branches?.[0]) {
@@ -150,10 +161,13 @@ export const pflowConnectEnd = ({
             if (picked_branches) {
               connectNode(pflow, picked_branches.flow, from_node.id, to_id);
             } else {
-              delete from_node.branches;
-              const found = findFlow({ id: from_node.id, pflow });
-              if (found && found.flow) {
-                connectNode(pflow, found.flow, from_node.id, to_id);
+              if (!form_dev.has_branches) {
+                delete from_node.branches;
+                const found = findFlow({ id: from_node.id, pflow });
+                if (found && found.flow) {
+                  connectNode(pflow, found.flow, from_node.id, to_id);
+                }
+              } else {
               }
             }
           });

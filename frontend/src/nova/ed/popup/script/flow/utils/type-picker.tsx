@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import { allNodeDefinitions } from "popup/script/flow/runtime/nodes";
 import * as React from "react";
 
+import { useLocal } from "utils/react/use-local";
 import {
   Command,
   CommandEmpty,
@@ -17,30 +18,102 @@ import {
   PopoverTrigger,
 } from "utils/shadcn/comps/ui/popover";
 import { cn } from "utils/shadcn/lib";
+import { PFNodeDefinition } from "../runtime/types";
+import { NodeTypeLabel } from "./node-type-label";
 
-export function NodeTypePicker({
+export const NodeTypePicker: React.FC<{
+  value: keyof typeof allNodeDefinitions;
+  onChange: (value: keyof typeof allNodeDefinitions) => void;
+  name?: string;
+  defaultOpen?: boolean;
+  children?:
+    | React.ReactElement
+    | ((opt: { setOpen: (open: boolean) => void; open: boolean }) => any);
+}> = ({ value, onChange, children, name, defaultOpen }) => {
+  const local = useLocal({ open: defaultOpen || false, onChangeCalled: false });
+
+  const setOpen = (open: boolean) => {
+    if (!open) {
+      if (!local.onChangeCalled) {
+        onChange(value);
+      } else {
+        local.onChangeCalled = false;
+      }
+    }
+    local.open = open;
+    local.render();
+  };
+
+  return (
+    <PFDropdown
+      open={local.open}
+      name={name}
+      setOpen={setOpen}
+      options={Object.keys(allNodeDefinitions)
+        .filter((e) => e !== "start")
+        .map((e) => {
+          const def = (allNodeDefinitions as any)[e] as PFNodeDefinition<any>;
+          return {
+            value: e,
+            label: def.type,
+            el: (
+              <>
+                <div
+                  className={css`
+                    svg {
+                      width: 12px;
+                      height: 12px;
+                      margin-right: 5px;
+                    }
+                  `}
+                  dangerouslySetInnerHTML={{ __html: def.icon }}
+                ></div>
+
+                <NodeTypeLabel node={def} />
+              </>
+            ),
+          };
+        })}
+      defaultValue={value}
+      onChange={(value) => {
+        local.onChangeCalled = true;
+        onChange(value as any);
+      }}
+    >
+      {typeof children === "object"
+        ? children
+        : typeof children === "function" &&
+          children({
+            open: local.open,
+            setOpen,
+          })}
+    </PFDropdown>
+  );
+};
+
+export function PFDropdown({
   options,
   children,
   onChange,
   defaultValue,
   className,
-  onOpenChange,
+  name,
+  open,
+  setOpen,
 }: {
+  open: boolean;
   className?: string;
+  name?: string;
   options: (
     | { value: string; label: string; el?: React.ReactElement }
     | string
   )[];
   onChange: (value: string) => void;
   defaultValue: string;
-  onOpenChange?: (open: boolean) => void;
-  children: (opt: {
-    setOpen: (open: boolean) => void;
-    open: boolean;
-  }) => React.ReactElement;
+  children?: React.ReactElement;
+  setOpen: (open: boolean) => void;
 }) {
-  const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState(defaultValue);
+  const [_value, setValue] = React.useState(defaultValue);
 
   const _options = options.map((e) => {
     if (typeof e === "string") return { label: e, value: e };
@@ -51,11 +124,10 @@ export function NodeTypePicker({
     <Popover
       open={open}
       onOpenChange={(value) => {
-        onOpenChange?.(value);
         setOpen(value);
       }}
     >
-      <PopoverTrigger asChild>{children({ setOpen, open })}</PopoverTrigger>
+      {children && <PopoverTrigger asChild>{children}</PopoverTrigger>}
       <PopoverContent className={cx("w-[200px] p-0", className)}>
         <Command>
           <CommandInput
@@ -65,16 +137,16 @@ export function NodeTypePicker({
               css`
                 padding: 0px;
                 height: 35px;
-              `,
+              `
             )}
           />
           <CommandList>
             <CommandEmpty>No option found.</CommandEmpty>
             <CommandGroup>
               {_options.map((item) => {
-                const is_checked = Array.isArray(value)
-                  ? value.includes(item.value)
-                  : value === item.value;
+                const is_checked = Array.isArray(_value)
+                  ? _value.includes(item.value)
+                  : _value === item.value;
 
                 return (
                   <CommandItem
@@ -82,30 +154,33 @@ export function NodeTypePicker({
                     value={item.label}
                     className={cx(
                       "text-sm",
-                      is_checked && "bg-blue-700 text-white ",
+                      is_checked && "bg-blue-700 text-white "
                     )}
+                    onPointerDown={(e) => {
+                      e.stopPropagation();
+                    }}
                     onSelect={(currentValue) => {
                       const type = Object.entries(allNodeDefinitions).find(
                         ([k, e]) => {
                           return e.type === currentValue;
-                        },
+                        }
                       )?.[0] as string | undefined;
 
                       if (type) {
-                        if (Array.isArray(value)) {
-                          if (!value.includes(item.value)) {
-                            setValue([...value, ...item.value] as any);
+                        if (Array.isArray(_value)) {
+                          if (!_value.includes(item.value)) {
+                            setValue([..._value, ...item.value] as any);
                           } else {
                             setValue(
-                              value.filter((e) => e !== item.value) as any,
+                              _value.filter((e) => e !== item.value) as any
                             );
                           }
                         } else {
-                          setValue(type === value ? "" : type);
-                          setOpen(false);
+                          setValue(type === _value ? "" : type);
                         }
 
                         onChange(type);
+                        setOpen(false);
                       }
                     }}
                   >
@@ -113,7 +188,7 @@ export function NodeTypePicker({
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4 absolute right-0",
-                        is_checked ? "opacity-100" : "opacity-0",
+                        is_checked ? "opacity-100" : "opacity-0"
                       )}
                     />
                   </CommandItem>
@@ -135,7 +210,7 @@ const CommandItem = React.forwardRef<
     ref={ref}
     className={cn(
       "relative flex cursor-pointer py-1 select-none items-center rounded-sm px-2 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected='true']:bg-blue-100 data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50",
-      className,
+      className
     )}
     {...props}
   />
@@ -150,7 +225,7 @@ const CommandInput = React.forwardRef<
       ref={ref}
       className={cn(
         "flex h-11 w-full rounded-md bg-transparent py-1 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
-        className,
+        className
       )}
       {...props}
     />

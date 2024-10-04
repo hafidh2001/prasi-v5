@@ -2,6 +2,7 @@ import { defineNode } from "../lib/define-node";
 
 export const nodeStart = defineNode({
   type: "start",
+  has_branches: true,
   process: async ({ node, next, processBranch }) => {
     const branches: Promise<void>[] = [];
     if (node.current.branches) {
@@ -18,7 +19,7 @@ export const nodeStart = defineNode({
         node.branches = [];
         pflow.flow[node.id] = [node.id];
       }
-      node.branches.push({ flow: [] });
+      node.branches.push({ flow: [node.id] });
     }
   },
   className: css`
