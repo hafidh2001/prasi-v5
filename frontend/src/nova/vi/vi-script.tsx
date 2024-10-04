@@ -3,10 +3,11 @@ import { FC, ReactElement, useRef } from "react";
 import { IItem } from "utils/types/item";
 import { compArgs } from "./lib/comp-args";
 import { parentCompArgs } from "./lib/parent-comp-args";
+import { __localname, parentLocalArgs } from "./lib/parent-local-args";
+import { passPropDefiner } from "./lib/passprop-definer";
 import { scriptArgs } from "./lib/script-args";
 import { useVi } from "./lib/store";
 import { createViLocal } from "./script/vi-local";
-import { __localname, parentLocalArgs } from "./lib/parent-local-args";
 
 export const ViScript: FC<{
   item: DeepReadonly<IItem>;
@@ -20,13 +21,14 @@ export const ViScript: FC<{
     };
   ts?: number;
 }> = ({ item, childs, props }) => {
-  const { ref_comp_props, parents, db, api, local_parents } = useVi(
+  const { ref_comp_props, parents, db, api, local_parents, pass_props } = useVi(
     ({ ref }) => ({
       ref_comp_props: ref.comp_props,
       parents: ref.item_parents,
       db: ref.db,
       api: ref.api,
       local_parents: ref.local_value,
+      pass_props: ref.pass_props,
     })
   );
 
@@ -64,6 +66,7 @@ export const ViScript: FC<{
       arg.value[__localname] = arg.name;
       return arg.value;
     },
+    definePassProp: passPropDefiner(pass_props, item.id),
   };
   final_args.Local = internal.Local;
 

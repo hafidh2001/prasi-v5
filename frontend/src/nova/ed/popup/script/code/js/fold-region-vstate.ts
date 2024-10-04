@@ -1,4 +1,4 @@
-export const foldRegionVState = (str: string[]) => {
+export const foldRegionVState = (str: string[], vstate?: any) => {
   let start = -1;
   let end = -1;
   for (let i = 0; i < str.length; i++) {
@@ -33,6 +33,7 @@ export const foldRegionVState = (str: string[]) => {
       },
       firstPositionDeltaTop: 0,
     },
+    ...vstate,
     contributionsState: {
       "editor.contrib.wordHighlighter": false,
       "editor.contrib.folding": {

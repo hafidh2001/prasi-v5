@@ -21,6 +21,8 @@ export const MonacoJS: FC<{
   onChange?: (arg: {
     value: string;
     model: Partial<ScriptModel>;
+    editor: MonacoEditor;
+    monaco: Monaco;
     event: any;
   }) => void;
   className?: string;
@@ -124,7 +126,17 @@ export const MonacoJS: FC<{
             m.model = monacoRegisterSource(monaco, m.source, m.name || "");
             m.model.onDidChangeContent((e) => {
               if (onChange && m.model) {
-                onChange({ value: m.model.getValue(), model: m, event: e });
+                if (m.model._ignoreChanges) {
+                  delete m.model._ignoreChanges;
+                  return;
+                }
+                onChange({
+                  value: m.model.getValue(),
+                  model: m,
+                  event: e,
+                  editor,
+                  monaco,
+                });
               }
             });
           }
@@ -137,7 +149,6 @@ export const MonacoJS: FC<{
             editor.setModel(m.model);
             registerEditorOpener(editor, monaco, p);
             monacoEnableJSX(editor, monaco, { nolib }, p);
-            // editor.trigger(undefined, "editor.action.formatDocument", null);
 
             editor.restoreViewState(
               foldRegionVState(m.model.getLinesContent())

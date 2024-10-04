@@ -3,10 +3,10 @@ import { useEffect, useRef, useState } from "react";
 import { WebsocketProvider } from "y-websocket";
 import { Doc } from "yjs";
 import { createClient } from "../../../utils/sync/client";
+import { IItem } from "../../../utils/types/item";
 import { EPage, EPageContentTree, PNode, SyncUndoItem } from "../logic/types";
 import { bind } from "./lib/immer-yjs";
 import { findNodeById, flattenTree } from "./node/flatten-tree";
-import { IItem } from "../../../utils/types/item";
 import { loadScriptModels, ScriptModel } from "./node/load-script-models";
 
 export type PageTree = ReturnType<typeof loadPageTree>;
@@ -37,7 +37,7 @@ export const loadPageTree = (
         }
       },
     });
-    tree.script_models = await loadScriptModels(content_tree.childs);
+    await loadScriptModels(content_tree.childs, tree.script_models);
     arg?.loaded(content_tree);
   });
 
@@ -70,7 +70,7 @@ export const loadPageTree = (
     script_models: {} as Record<string, ScriptModel>,
     async reloadScriptModels() {
       const content_tree = immer.get();
-      tree.script_models = await loadScriptModels(content_tree.childs);
+      await loadScriptModels(content_tree.childs, tree.script_models);
     },
     before_update: null as null | ((do_update: () => void) => void),
     update(

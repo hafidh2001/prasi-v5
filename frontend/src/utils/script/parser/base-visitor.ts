@@ -1,5 +1,6 @@
 import type * as oxc from "./oxc-types";
 import type {
+  BindingProperty,
   ComputedMemberExpression,
   ExportNamedDeclaration,
   FunctionBody,
@@ -86,7 +87,11 @@ export class BaseVisitor implements Required<RecursiveVisitors<unknown>> {
     cb(n.callee, st);
 
     for (const arg of n.arguments) {
-      cb(arg.expression, st);
+      if (typeof arg.expression !== "object") {
+        cb(arg as any, st);
+      } else {
+        cb(arg.expression, st);
+      }
     }
 
     if (n.typeArguments) {
@@ -342,6 +347,9 @@ export class BaseVisitor implements Required<RecursiveVisitors<unknown>> {
     if (n.body) {
       cb(n.body, st);
     }
+  }
+  BindingProperty<S>(n: BindingProperty, st: S, cb: Callback<S>) {
+    cb(n.value, st);
   }
   FunctionBody<S>(n: FunctionBody, st: S, cb: Callback<S>) {
     for (const statement of n.statements ?? []) {

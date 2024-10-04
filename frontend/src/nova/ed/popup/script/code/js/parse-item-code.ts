@@ -5,6 +5,9 @@ import { cutCode, jscript } from "utils/script/jscript";
 import { traverse } from "utils/script/parser/traverse";
 import { replaceString } from "./replace-string";
 import { ObjectExpression } from "@oxc-parser/wasm";
+import { parseItemLocal } from "./parse-item-local";
+import { parseItemPassProp } from "./parse-item-passprop";
+import { SingleExportVar } from "./parse-item-types";
 
 export const parseItemCode = (model: ScriptModel) => {
   const replacements: Array<{
@@ -27,7 +30,7 @@ export const parseItemCode = (model: ScriptModel) => {
   }
 
   if (ast) {
-    const exports = {} as Record<string, any>;
+    const exports = model.exports;
     traverse(ast.program, {
       ExportDefaultDeclaration: (node) => {
         if (
@@ -50,6 +53,14 @@ export const parseItemCode = (model: ScriptModel) => {
               d.init?.type === "CallExpression" &&
               d.id.type === "Identifier"
             ) {
+              if (!exports[d.id.name]) {
+                exports[d.id.name] = {
+                  name: "",
+                  type: "local",
+                  value: "",
+                };
+              }
+
               const dec = d.init.arguments[0] as ObjectExpression;
               if (dec.properties) {
                 for (const prop of dec.properties) {
@@ -57,15 +68,19 @@ export const parseItemCode = (model: ScriptModel) => {
                     prop.type === "ObjectProperty" &&
                     prop.key.type === "Identifier"
                   ) {
-                    if (!exports[d.id.name]) {
-                      exports[d.id.name] = {};
+                    const single_export = exports[d.id.name] as any;
+                    if (single_export) {
+                      if (prop.key.name === "name") {
+                        if (prop.value.type === "StringLiteral")
+                          single_export[prop.key.name] = prop.value.value;
+                      } else {
+                        single_export[prop.key.name] = cutCode(
+                          model.source,
+                          prop.value,
+                          -2
+                        );
+                      }
                     }
-
-                    exports[d.id.name][prop.key.name] = cutCode(
-                      model.source,
-                      prop.value,
-                      -2
-                    );
                   }
                 }
               }
@@ -76,58 +91,8 @@ export const parseItemCode = (model: ScriptModel) => {
       JSXElement: (node) => {
         const name = node.openingElement.name;
 
-        if (name.type === "JSXIdentifier") {
-          if (name.name === "Local") {
-            for (const attr of node.openingElement.attributes) {
-              if (
-                attr.type === "JSXAttribute" &&
-                attr.name.type === "JSXIdentifier" &&
-                attr.value
-              ) {
-                if (attr.name.name === "name") {
-                  if (attr.value.type === "StringLiteral") {
-                    model.local.name = attr.value.value;
-                    replacements.push({
-                      ...attr.value,
-                      replacement: `{${model.local.name}[__localname]}`,
-                    });
-                  } else if (attr.value.type === "JSXExpressionContainer") {
-                    if (
-                      attr.value.expression.type === "ComputedMemberExpression"
-                    ) {
-                      const name = get(
-                        exports,
-                        cutCode(
-                          model.source,
-                          attr.value.expression.object,
-                          -2
-                        ) + ".name"
-                      );
-
-                      if (name) {
-                        model.local.name = trim(name, "`'\"");
-                      }
-                    }
-                  }
-                } else if (attr.name.name === "value") {
-                  if (
-                    attr.value.type === "JSXExpressionContainer" &&
-                    attr.value.expression.type === "ObjectExpression"
-                  ) {
-                    model.local.value = cutCode(
-                      model.source,
-                      attr.value.expression
-                    );
-                    replacements.push({
-                      ...attr.value.expression,
-                      replacement: `${model.local.name}`,
-                    });
-                  }
-                }
-              }
-            }
-          }
-        }
+        parseItemLocal({ name, node, model, replacements, exports });
+        parseItemPassProp({ name, node, model, replacements, exports });
       },
     });
   }

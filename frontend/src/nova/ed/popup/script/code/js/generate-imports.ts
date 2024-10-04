@@ -15,8 +15,7 @@ export const generateImports = (
     imports[v].push(k);
   }
   const result: string[] = [];
-  for (const [k, v] of Object.entries(imports)) {
-    const id = k.replace(".tsx", "").replace("file:///", "");
+  for (const [id, v] of Object.entries(imports)) {
     result.push(
       `import { ${v.join(", ")} } from "./${id}"; /* ${models[id].title.trim()} */`
     );
@@ -35,8 +34,8 @@ const mergeParentVars = (
     if (model.id !== id) {
       const m = models[id];
       if (m) {
-        if (m.local.name) {
-          variables[m.local.name] = m.name;
+        for (const e of Object.values(m.exports)) {
+          variables[e.name] = m.id;
         }
       }
     }

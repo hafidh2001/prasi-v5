@@ -1,5 +1,6 @@
 import { ScriptModel } from "crdt/node/load-script-models";
-import { generateImports } from "./merge-parent-var";
+import { generateImports } from "./generate-imports";
+import { generatePassProp } from "./generate-passprop";
 
 export const migrateCode = (
   model: ScriptModel,
@@ -46,10 +47,11 @@ const generateRegion = (
   models: Record<string, ScriptModel>
 ) => {
   const imports = generateImports(model, models);
+  const passprop = generatePassProp(model);
 
   return `\
 // #region generated⠀
 import React from "react";\
-${imports}
+${imports}${passprop}
 // #endregion`;
 };

@@ -12,6 +12,7 @@ export const useVi = defineStore({
     },
     comps: {} as ViComps,
     local_value: {} as Record<string, any>,
+    pass_props: {} as Record<string, any>,
     db: null as any,
     api: null as any,
     item_parents: {} as Record<string, string>,
