@@ -7,9 +7,9 @@ export const nodeCode = defineNode({
   fields: {
     source_code: { idx: 0, type: "code", label: "Code" },
   },
-  process: async ({ next, node, vars, console }) => {
-    if (node.current.source_code) {
-      await codeExec({ code: node.current.source_code, node, vars, console });
+  process: async ({ next, runtime: node, vars, console }) => {
+    if (node.node.source_code) {
+      await codeExec({ code: node.node.source_code, node, vars, console });
     }
     next();
   },

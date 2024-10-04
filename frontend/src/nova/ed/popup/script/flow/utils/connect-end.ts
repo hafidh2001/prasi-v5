@@ -11,6 +11,7 @@ import {
 } from "../runtime/types";
 import { findFlow, immutableFindFlow } from "./find-node";
 import { fg } from "./flow-global";
+import { current } from "immer";
 
 export const pflowConnectEnd = ({
   state,
@@ -62,6 +63,7 @@ export const pflowConnectEnd = ({
             x: fg.pointer_up_pos.x,
             y: fg.pointer_up_pos.y,
             pick(type) {
+              if (!type) return;
               fg.update(
                 "Flow Create Node",
                 ({ pflow }) => {
@@ -81,15 +83,19 @@ export const pflowConnectEnd = ({
                     const empty_branch = from.branches.find(
                       (e) => e.flow.length <= 1
                     );
+                    const f = findFlow({ id: from_id, pflow: pflow });
 
                     if (empty_branch) {
+                      if (!f.flow) {
+                        pflow.flow[from_id] = [from.id];
+                      }
+
                       if (to_node) {
                         if (!empty_branch.flow.includes(from.id))
                           empty_branch.flow.push(from.id);
                         empty_branch.flow.push(to_node.id);
                       }
                     } else {
-                      const f = findFlow({ id: from_id, pflow: pflow });
                       if (f) {
                         f.flow?.push(to_node.id);
                       }
@@ -97,13 +103,17 @@ export const pflowConnectEnd = ({
                   } else {
                     const f = findFlow({ id: from_id, pflow: pflow });
                     if (f) {
-                      const res = f.flow?.splice(
-                        f.idx + 1,
-                        f.flow.length - f.idx,
-                        to_node.id
-                      );
-                      if (res && res.length > 0) {
-                        pflow.flow[res[0]] = res;
+                      if (!f.flow) {
+                        pflow.flow[from_id] = [from.id];
+                      } else {
+                        const res = f.flow?.splice(
+                          f.idx + 1,
+                          f.flow.length - f.idx,
+                          to_node.id
+                        );
+                        if (res && res.length > 0) {
+                          pflow.flow[res[0]] = res;
+                        }
                       }
                     }
                   }
@@ -140,7 +150,7 @@ export const pflowConnectEnd = ({
       ] as PFNodeDefinition<any>;
 
       if (from_node) {
-        if (from_node.branches) {
+        if (from_node.branches || !!form_dev.has_branches) {
           fg.update("Flow Connect Node", ({ pflow }) => {
             const from_node = pflow.nodes[from_id];
             on_before_connect(pflow, { node: from_node, is_new: true });
@@ -180,8 +190,12 @@ export const pflowConnectEnd = ({
               on_before_connect(pflow, { node: from_node, is_new: false });
 
               const found = findFlow({ id: from_node.id, pflow });
-              if (found && found.flow) {
-                connectNode(pflow, found.flow, from_node.id, to_id);
+              if (found) {
+                if (found.flow) {
+                  connectNode(pflow, found.flow, from_node.id, to_id);
+                } else {
+                  pflow.flow[from_id] = [from_id, to_id];
+                }
               }
             });
           }

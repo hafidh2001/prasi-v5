@@ -22,7 +22,7 @@ export type DeepReadonly<T> = T extends Function
     ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
     : T;
 
-export type PFNode = Record<string, any> & {
+export type PFNode<T = Record<string, any>> = T & {
   id: string;
   name?: string;
   type: string;
@@ -44,49 +44,57 @@ export type PFlow = {
   flow: Record<string, PFNodeID[]>;
 };
 
-export type PFNodeRuntime<T extends Record<string, any>> = {
-  current: DeepReadonly<PFNode> & T;
-  prev?: DeepReadonly<PFNode>;
-  first: DeepReadonly<PFNode>;
-  visited: { node: DeepReadonly<PFNode>; branch?: PFNodeBranch }[];
+export type PFNodeRuntime<
+  T extends Record<string, any>,
+  K extends Record<string, any> = Record<string, any>,
+> = {
+  node: DeepReadonly<PFNode<K>> & T;
+  prev?: DeepReadonly<PFNode<K>>;
+  first: DeepReadonly<PFNode<K>>;
+  visited: { node: DeepReadonly<PFNode<K>>; branch?: PFNodeBranch }[];
 };
 
 export type PFRuntime = {
   nodes: DeepReadonly<PFNode>[];
 };
 
-export type PFNodeDefinition<F extends Record<string, PFField>> = {
+export type PFNodeDefinition<
+  F extends Record<string, PFField>,
+  G extends Record<string, any> = Record<string, any>,
+> = {
   type: string;
   className?: string;
   vars?: Record<string, any>;
   is_async?: boolean;
   icon: string;
+  default?: G;
   on_before_connect?: (arg: {
-    node: PFNode;
+    node: PFNode<G>;
     is_new: boolean;
     pflow: PFlow;
   }) => void;
   has_branches: boolean;
-  on_after_connect?: (arg: { from: PFNode; to: PFNode }) => void;
+  on_after_connect?: (arg: { from: PFNode<G>; to: PFNode<G> }) => void;
   on_before_disconnect?: (arg: {
-    from: PFNode;
-    to: PFNode;
+    from: PFNode<G>;
+    to: PFNode<G>;
     flow: PFNodeID[];
   }) => void;
-  on_after_disconnect?: (arg: { from: PFNode; to: PFNode }) => void;
-  on_init?: (arg: { node: PFNode; pflow: PFlow }) => void;
+  on_after_disconnect?: (arg: { from: PFNode<G>; to: PFNode<G> }) => void;
+  on_init?: (arg: { node: PFNode<G>; pflow: PFlow }) => void;
   on_fields_changed?: (arg: {
     pflow: PFlow;
-    node: PFNode;
+    node: PFNode<G>;
     path: string;
     action: string;
   }) => void;
   process: (arg: {
     vars: Record<string, any>;
-    node: PFNodeRuntime<{ [K in keyof F]: F[K] }>;
+    runtime: PFNodeRuntime<{ [K in keyof F]: F[K] }, G>;
     processBranch: (branch: DeepReadonly<PFNodeBranch>) => Promise<void>;
     next: () => void;
     console: typeof console;
+    state: any;
   }) => void | Promise<void>;
   fields?: F;
 };

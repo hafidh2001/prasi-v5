@@ -22,7 +22,7 @@ import { PFNodeDefinition } from "../runtime/types";
 import { NodeTypeLabel } from "./node-type-label";
 
 export const NodeTypePicker: React.FC<{
-  value: keyof typeof allNodeDefinitions;
+  value: keyof typeof allNodeDefinitions | "";
   onChange: (value: keyof typeof allNodeDefinitions) => void;
   name?: string;
   defaultOpen?: boolean;
@@ -35,7 +35,7 @@ export const NodeTypePicker: React.FC<{
   const setOpen = (open: boolean) => {
     if (!open) {
       if (!local.onChangeCalled) {
-        onChange(value);
+        onChange(value as any);
       } else {
         local.onChangeCalled = false;
       }

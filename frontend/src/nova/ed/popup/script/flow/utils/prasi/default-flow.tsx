@@ -6,7 +6,15 @@ export const defaultFlow = (type: "item", name: string, start_id: string) => {
       const [a, b, c, d, e, f, g, h, i, j] = createIds(10);
 
       const nodes = createManyNodes({
-        [start_id]: { type: "start", branches: [] },
+        [start_id]: {
+          type: "start",
+          branches: [
+            { flow: [start_id, a], name: "Render" },
+            { flow: [], name: "Effect" },
+          ],
+          jsx: true,
+        },
+        [a]: { type: "itemRender" },
       });
 
       return {

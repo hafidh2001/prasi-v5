@@ -57,6 +57,7 @@ const flowRuntime = async (
   // Global execution count initialized here
   const executionCount = new Map<string, number>(); // Track execution counts globally
 
+  const state = {};
   for (const current of runtime.nodes) {
     if (
       !(await runSingleNode({
@@ -65,6 +66,7 @@ const flowRuntime = async (
         visited,
         vars,
         opt,
+        state,
         executionCount,
       }))
     ) {
@@ -80,10 +82,12 @@ const runSingleNode = async (arg: {
   branch?: PFNodeBranch;
   visited: PFRunVisited[];
   vars: Record<string, any>;
+  state: any;
   opt?: RunFlowOpt;
   executionCount: Map<string, number>;
 }) => {
-  const { pf, visited, vars, current, branch, opt, executionCount } = arg;
+  const { pf, visited, vars, current, branch, opt, executionCount, state } =
+    arg;
   const { capture_console, after_node, before_node } = opt || {};
   const def = (allNodeDefinitions as any)[
     current.type
@@ -104,7 +108,6 @@ const runSingleNode = async (arg: {
   visited.push(run_visit);
 
   if (current.vars) {
-    // Create a new vars object instead of mutating the existing one
     Object.assign(vars, current.vars);
   }
 
@@ -127,8 +130,9 @@ const runSingleNode = async (arg: {
         try {
           await def.process({
             vars,
-            node: {
-              current,
+            state,
+            runtime: {
+              node: current,
               first: visited[0].node,
               prev: visited[visited.length - 1].node,
               visited,
@@ -158,6 +162,7 @@ const runSingleNode = async (arg: {
                   visited,
                   vars,
                   opt,
+                  state,
                   executionCount,
                 });
               }
@@ -208,6 +213,7 @@ const runSingleNode = async (arg: {
             vars,
             opt,
             executionCount,
+            state,
           });
         }
       }

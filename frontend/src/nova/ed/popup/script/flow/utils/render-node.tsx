@@ -371,43 +371,53 @@ export const RenderNode = function (arg: {
                       const to = (allNodeDefinitions as any)[
                         value
                       ] as PFNodeDefinition<any>;
-                      const on_init = to?.on_init;
+                      const on_before_connect = to?.on_before_connect;
 
                       if (to && from) {
                         if (from.has_branches && !to.has_branches) {
-                          if (n.branches && n.branches.length > 1) {
-                            if (
-                              !confirm(
-                                "Changing to this type will disconnect branches. Do you want to continue?"
-                              )
-                            ) {
-                              return;
-                            }
-                          }
-
                           const found = findFlow({ id: n.id, pflow });
                           if (found && found.flow) {
                             const flow = n.branches?.[0].flow;
                             if (flow) {
-                              console.log(current(n));
-                              // delete n.branches;
+                              found.flow.splice(
+                                found.flow.indexOf(n.id) + 1,
+                                0,
+                                ...flow.filter((e) => e !== n.id)
+                              );
+                              if (n.branches) {
+                                for (let i = 0; i < n.branches.length; i++) {
+                                  if (i === 0) continue;
+                                  const b = n.branches[i];
+                                  const flow = b.flow.slice(0);
+                                  pflow.flow[flow[0]] = flow;
+                                }
+                                delete n.branches;
+                              }
                             }
                           }
-                        }
-
-                        if (!from.has_branches && to.has_branches) {
+                        } else if (!from.has_branches && to.has_branches) {
                           const found = findFlow({ id: n.id, pflow });
                           if (found && found.flow) {
                             const idx = found.flow.indexOf(n.id);
-                            found.flow.splice(idx, found.flow.length - idx + 1);
-                            n.branches = [];
+                            n.branches = [
+                              {
+                                flow: [
+                                  n.id,
+                                  ...found.flow.splice(
+                                    idx + 1,
+                                    found.flow.length - idx + 1
+                                  ),
+                                ],
+                              },
+                            ];
                           }
                         }
                       }
                       n.type = value;
 
-                      if (on_init) {
-                        on_init({
+                      if (on_before_connect) {
+                        on_before_connect({
+                          is_new: true,
                           node: n,
                           pflow,
                         });

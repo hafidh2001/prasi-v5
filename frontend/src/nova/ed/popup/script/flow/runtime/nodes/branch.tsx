@@ -15,25 +15,51 @@ export const nodeBranch = defineNode({
     const conditions = node.conditions as Condition[];
 
     if (conditions.length === branches.length) {
+      let raw_branch = [];
+      for (const branch of branches) {
+        if (
+          branch.flow &&
+          branch.flow.length > 0 &&
+          !branch.meta?.condition_id
+        ) {
+          raw_branch.push(branch);
+        }
+      }
+
       let empty_branch_len = branches.filter(
         (e) => !e.flow || (e.flow && e.flow.length === 0)
       ).length;
 
       if (empty_branch_len === 0 || conditions.length === 0) {
-        let len = conditions.length + 1;
-        let name = "Condition " + len;
-        while (conditions.some((e) => e.name === name)) {
-          name = "Condition " + ++len;
+        let condition_id = "";
+        let name = "";
+
+        if (conditions.length === 0 || raw_branch.length === 0) {
+          let len = conditions.length + 1;
+          name = "Condition " + len;
+          while (conditions.some((e) => e.name === name)) {
+            name = "Condition " + ++len;
+          }
+
+          condition_id = createId();
+          conditions.push({ condition: "", name, id: condition_id });
+        } else {
+          condition_id = conditions[0].id;
+          name = conditions[0].name;
         }
 
-        const condition_id = createId();
-        conditions.push({ condition: "", name, id: condition_id });
-        branches.push({
-          flow: [],
-          idx: conditions.length - 1,
-          name,
-          meta: { condition_id: condition_id },
-        });
+        if (raw_branch.length > 0) {
+          raw_branch[0].meta = { condition_id };
+          raw_branch[0].name = name;
+          raw_branch[0].idx = conditions.length - 1;
+        } else {
+          branches.push({
+            flow: [],
+            idx: conditions.length - 1,
+            name,
+            meta: { condition_id: condition_id },
+          });
+        }
       }
     } else {
       if (conditions.length > branches.length) {
@@ -41,12 +67,14 @@ export const nodeBranch = defineNode({
           const idx = i as unknown as number;
 
           const branch = node.branches.find(
-            (e) => e.meta?.condition_id === c.id
+            (e) => e.meta?.condition_id === c.id || !e.meta?.condition_id
           );
+
           if (branch) {
             branch.idx = idx;
             branch.code = c.condition;
             branch.name = c.name;
+            branch.meta = { condition_id: c.id };
           } else {
             node.branches.push({
               idx,
@@ -57,6 +85,23 @@ export const nodeBranch = defineNode({
                 condition_id: c.id,
               },
             });
+          }
+        }
+      } else {
+        for (const [i, b] of Object.entries(branches)) {
+          const idx = i as unknown as number;
+          if (!b.meta?.condition_id) {
+            let len = conditions.length + 1;
+            let name = "Condition " + len;
+            while (conditions.some((e) => e.name === name)) {
+              name = "Condition " + ++len;
+            }
+
+            const condition_id = createId();
+            conditions.push({ condition: "", name, id: condition_id });
+            b.meta = { condition_id };
+            if (!b.idx) b.idx = idx;
+            b.name = name;
           }
         }
       }
@@ -75,7 +120,7 @@ export const nodeBranch = defineNode({
 
       node.branches = node.branches.filter((e, idx) => {
         const found = conditions.find(
-          (_, idx) => idx + "" === e.meta?.condition_id + ""
+          (c, idx) => c.id === e.meta?.condition_id
         );
         if (found) {
           e.name = found.name;
@@ -107,10 +152,10 @@ export const nodeBranch = defineNode({
       },
     },
   } as Record<string, PFField>,
-  process: async ({ node, vars, processBranch, next }) => {
+  process: async ({ runtime: node, vars, processBranch, next }) => {
     const branches = [];
-    if (node.current.branches) {
-      for (const branch of node.current.branches) {
+    if (node.node.branches) {
+      for (const branch of node.node.branches) {
         if (branch.code) {
           const result = codeExec({
             code: `return ${branch.code}`,

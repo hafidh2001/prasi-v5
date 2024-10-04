@@ -1,25 +1,52 @@
 import { defineNode } from "../lib/define-node";
+import { PFNodeBranch } from "../types";
 
 export const nodeStart = defineNode({
   type: "start",
   has_branches: true,
-  process: async ({ node, next, processBranch }) => {
-    const branches: Promise<void>[] = [];
-    if (node.current.branches) {
-      for (const branch of node.current.branches) {
-        branches.push(processBranch(branch));
+  process: async ({ runtime: runtime, next, processBranch, state }) => {
+    const node = runtime.node;
+    if (node.jsx) {
+      const render = node.branches?.find((e) => e.name === "Render");
+      state.startEffects = () => {
+        node.branches
+          ?.filter((e) => e.name === "Effect")
+          .map((e) => processBranch(e));
+      };
+
+      if (render) {
+        await processBranch(render);
       }
+    } else {
+      const branches: Promise<void>[] = [];
+      if (runtime.node.branches) {
+        for (const branch of runtime.node.branches) {
+          branches.push(processBranch(branch));
+        }
+      }
+
+      await Promise.all(branches);
     }
-    await Promise.all(branches);
     next();
   },
+  default: { jsx: false },
   on_before_connect({ node, is_new, pflow }) {
     if (is_new) {
       if (!node.branches) {
         node.branches = [];
         pflow.flow[node.id] = [node.id];
       }
-      node.branches.push({ flow: [node.id] });
+
+      const new_branch: PFNodeBranch = { flow: [node.id], name: "" };
+      if (node.jsx) {
+        if (node.branches.find((e) => e.name === "Render")) {
+          new_branch.name = "Effect";
+        } else {
+          new_branch.name = "Render";
+        }
+      }
+
+      node.branches.push(new_branch);
     }
   },
   className: css`

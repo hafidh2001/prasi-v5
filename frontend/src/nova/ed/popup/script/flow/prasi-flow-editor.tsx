@@ -311,7 +311,7 @@ export function PrasiFlowEditor({
         <>
           <NodeTypePicker
             name={"pick-node"}
-            value={"code"}
+            value={""}
             onChange={(value) => {
               fg.pickNodeType?.pick(value);
               fg.pickNodeType = null;

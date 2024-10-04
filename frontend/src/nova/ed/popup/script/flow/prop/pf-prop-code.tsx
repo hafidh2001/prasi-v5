@@ -53,35 +53,36 @@ export const PFPropCode: FC<{
           }
         `)}
         activeModel="prasi:///active.tsx"
+        onChange={async ({ value }) => {
+          const src = value;
+          if (src) {
+            let built = "";
+            let errors = "";
+            try {
+              const transform = jscript.transform!;
+              const res = await transform(src, {
+                jsx: "transform",
+                logLevel: "silent",
+                format: "cjs",
+                loader: "tsx",
+              });
+              built = res.code;
+            } catch (e: any) {
+              const formatError = jscript.formatMessages!;
+
+              errors = (await formatError(e.errors, { kind: "error" })).join(
+                "\n\n"
+              );
+            }
+            update(src, built, errors);
+          } else {
+            update("", "", "");
+          }
+        }}
         models={[
           {
             name: "prasi:///active.tsx",
             source: value,
-            async onChange(src) {
-              if (src) {
-                let built = "";
-                let errors = "";
-                try {
-                  const transform = jscript.transform!;
-                  const res = await transform(src, {
-                    jsx: "transform",
-                    logLevel: "silent",
-                    format: "cjs",
-                    loader: "tsx",
-                  });
-                  built = res.code;
-                } catch (e: any) {
-                  const formatError = jscript.formatMessages!;
-
-                  errors = (
-                    await formatError(e.errors, { kind: "error" })
-                  ).join("\n\n");
-                }
-                update(src, built, errors);
-              } else {
-                update("", "", "");
-              }
-            },
           },
         ]}
         onMount={(editor) => {
