@@ -44,7 +44,7 @@ export const ViComp: FC<{
 
   return (
     <ViItem
-      item={item}
+      item={instance}
       __idx={__idx}
       is_layout={is_layout}
       div_props={div_props}

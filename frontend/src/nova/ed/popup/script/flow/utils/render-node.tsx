@@ -6,18 +6,15 @@ import {
   useConnection,
   useStore,
 } from "@xyflow/react";
-import { Check, Maximize2, TriangleAlert } from "lucide-react";
+import { Move, TriangleAlert } from "lucide-react";
 import { useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { useLocal } from "utils/react/use-local";
 import { Tooltip } from "utils/ui/tooltip";
 import { allNodeDefinitions } from "../runtime/nodes";
-import { PFNodeDefinition } from "../runtime/types";
 import { fg } from "./flow-global";
+import { getNodeDef } from "./get-node-def";
 import { NodeTypeLabel } from "./node-type-label";
-import { NodeTypePicker } from "./type-picker";
-import { current } from "immer";
-import { findFlow } from "./find-node";
 
 export const RenderNode = function (arg: {
   id: string;
@@ -40,13 +37,13 @@ export const RenderNode = function (arg: {
   }
 
   const node = pflow.nodes[id];
-  const def: PFNodeDefinition<any> = node
-    ? (allNodeDefinitions as any)[node.type]
-    : undefined;
-
-  const left = data.type === "start" ? 38 : 74;
-
   if (!node) {
+    return null;
+  }
+  const left = data.type === "start" ? 38 : 74;
+  const def = getNodeDef(node.type);
+
+  if (!def) {
     return null;
   }
 
@@ -226,20 +223,20 @@ export const RenderNode = function (arg: {
               right: -30px;
             `
           )}
-          onClick={() => {
-            if (node) {
-              if (fg.resizing.has(node.id)) {
-                fg.resizing.delete(node.id);
-              } else {
-                fg.resizing.add(node.id);
-              }
-              fg.render();
-            }
-          }}
+          // onClick={() => {
+          //   if (node) {
+          //     if (fg.resizing.has(node.id)) {
+          //       fg.resizing.delete(node.id);
+          //     } else {
+          //       fg.resizing.add(node.id);
+          //     }
+          //     fg.render();
+          //   }
+          // }}
         >
           <div
             className={cx(
-              "flex items-center justify-center cursor-pointer",
+              "flex items-center justify-center cursor-move",
               css`
                 width: 25px;
                 height: 25px;
@@ -255,11 +252,12 @@ export const RenderNode = function (arg: {
               `
             )}
           >
-            {fg.resizing.has(node.id) ? (
+            <Move size={14} />
+            {/* {fg.resizing.has(node.id) ? (
               <Check size={14} />
             ) : (
               <Maximize2 size={14} />
-            )}
+            )} */}
           </div>
         </Tooltip>
       )}
@@ -355,7 +353,7 @@ export const RenderNode = function (arg: {
                 height: 28px;
               `)}
             ></div>
-            <NodeTypePicker
+            {/* <NodeTypePicker
               value={data.type}
               from_id={node.id}
               pflow={pflow}
@@ -430,50 +428,42 @@ export const RenderNode = function (arg: {
                 }
               }}
             >
-              {({ setOpen, open }) => (
-                <div
-                  className={cx(
-                    "flex",
-                    node.type !== "start"
-                      ? "absolute z-10 items-stretch justify-center px-1"
-                      : "item-center w-full"
-                  )}
-                  onPointerUp={(e) => {
-                    if (node.type !== "start") {
-                      if (connection.inProgress) {
-                        return;
-                      }
-                      e.stopPropagation();
+              {({ setOpen, open }) => ( */}
+            <div
+              className={cx("flex", "item-center w-full")}
+              // onPointerUp={(e) => {
+              //   if (node.type !== "start") {
+              //     if (connection.inProgress) {
+              //       return;
+              //     }
+              //     e.stopPropagation();
 
-                      local.type_opened = open;
-                      local.render();
-                      setTimeout(() => {
-                        setOpen(true);
-                      });
-                    }
-                  }}
-                >
-                  <div
-                    className={
-                      node.type === "start"
-                        ? "flex items-center justify-center w-full h-full flex-1 space-x-1"
-                        : cx(
-                            node.name ? "mr-[2px]" : "justify-center",
-                            "flex-1 flex hover:bg-blue-700 hover:text-white rounded-[3px] py-[2px] px-[6px] flex-row items-center",
-                            css`
-                              cursor: pointer !important;
-                            `
-                          )
-                    }
-                  >
-                    <div dangerouslySetInnerHTML={{ __html: def.icon }}></div>
-                    <div className="flex space-x-1">
-                      <NodeTypeLabel node={def} />
-                    </div>
-                  </div>
+              //     local.type_opened = open;
+              //     local.render();
+              //     setTimeout(() => {
+              //       setOpen(true);
+              //     });
+              //   }
+              // }}
+            >
+              <div
+                className={
+                  node.type === "start"
+                    ? "flex items-center justify-center w-full h-full flex-1 space-x-1 pointer-events-none"
+                    : cx(
+                        node.name ? "mr-[2px]" : "justify-center",
+                        "flex-1 flex py-[2px] px-[6px] flex-row items-center"
+                      )
+                }
+              >
+                <div dangerouslySetInnerHTML={{ __html: def.icon }}></div>
+                <div className="flex space-x-1">
+                  <NodeTypeLabel node={def} />
                 </div>
-              )}
-            </NodeTypePicker>
+              </div>
+            </div>
+            {/* )}
+            </NodeTypePicker> */}
           </div>
         </div>
       )}

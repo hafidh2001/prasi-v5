@@ -18,6 +18,7 @@ import {
 import { fg } from "../utils/flow-global";
 import { PFPropCode } from "./pf-prop-code";
 import set from "lodash.set";
+import { getNodeDef } from "../utils/get-node-def";
 
 export type FieldChangedAction =
   | "text-changed"
@@ -38,7 +39,11 @@ export const PFPropNodeField: FC<{
 }> = ({ field, node, name, value, pflow, path }) => {
   const label = field.label || name;
   const ref = useRef<HTMLTextAreaElement>(null);
-  const def = (allNodeDefinitions as any)[node.type] as PFNodeDefinition<any>;
+  const def = getNodeDef(node.type);
+
+  if (!def) {
+    return null;
+  }
 
   const local = useLocal(
     {

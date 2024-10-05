@@ -5,7 +5,6 @@ import {
   Edge,
   getOutgoers,
   Node,
-  Position,
   ReactFlow,
   ReactFlowInstance,
   useEdgesState,
@@ -17,7 +16,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { WandSparkles } from "lucide-react";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useLocal } from "utils/react/use-local";
 import { PFlow, RPFlow } from "./runtime/types";
 import { pflowConnectEnd } from "./utils/connect-end";
@@ -34,13 +33,13 @@ import { NodeTypePicker } from "./utils/type-picker";
 export function PrasiFlowEditor({
   pflow,
   resetDefault,
-  has_flow,
+  update_on_relayout,
   bind,
 }: {
   pflow: RPFlow;
-  resetDefault: (relayout: boolean) => void;
-  has_flow: boolean;
-  bind: (arg: { relayout: () => void }) => void;
+  resetDefault: () => void;
+  update_on_relayout: boolean;
+  bind: (arg: { fitView: () => void }) => void;
 }) {
   const local = useLocal({
     reactflow: null as null | ReactFlowInstance<Node, Edge>,
@@ -66,61 +65,25 @@ export function PrasiFlowEditor({
   const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[]);
 
   fg.refreshFlow = (pflow: RPFlow | PFlow) => {
+    console.log("refreshing flow");
     fg.pflow = pflow;
     const parsed = parseFlow(pflow, { nodes, edges });
     setNodes(parsed.nodes);
     setEdges(parsed.edges);
   };
 
-  useEffect(() => {
-    fg.pflow = pflow;
-    const parsed = parseFlow(pflow, { nodes: [], edges: [] });
+  const relayoutNodes = useCallback(
+    (arg?: { nodes: Node[]; edges: Edge[] }) => {
+      try {
+        const n = arg?.nodes || nodes;
+        const e = arg?.edges || edges;
+        const { nodes: layoutedNodes, edges: layoutedEdges } =
+          getLayoutedElements(n, e, "TB");
 
-    const unflowed: Node[] = [];
-    if (parsed.unflowed_nodes.size > 0) {
-      parsed.unflowed_nodes.forEach((id) => {
-        const inode = pflow.nodes[id];
-        if (inode) {
-          unflowed.push({
-            id: inode.id,
-            type: "default",
-            className: inode.type,
-            sourcePosition: Position.Bottom,
-            targetPosition: Position.Top,
-            data: {
-              type: inode.type,
-              label: inode.type === "start" ? "Start" : inode.name,
-            },
-            position: inode.position || {
-              x: 0,
-              y: 0,
-            },
-          });
-        }
-      });
-    }
+        setNodes([...layoutedNodes]);
+        setEdges([...layoutedEdges]);
 
-    setNodes([...parsed.nodes, ...unflowed]);
-    setEdges(parsed.edges);
-    restoreViewport({ pflow, local });
-
-    const sel = fg.prop?.selection;
-    if (sel) {
-      fg.main?.action.addSelectedEdges(sel.edges?.map((e) => e.id) || []);
-      fg.main?.action.addSelectedNodes(sel.nodes?.map((e) => e.id) || []);
-    }
-  }, [pflow]);
-
-  const relayoutNodes = (arg?: { nodes: Node[]; edges: Edge[] }) => {
-    try {
-      const { nodes: layoutedNodes, edges: layoutedEdges } =
-        getLayoutedElements(arg?.nodes || nodes, arg?.edges || edges, "TB");
-
-      setNodes([...layoutedNodes]);
-      setEdges([...layoutedEdges]);
-
-      if (has_flow) {
-        fg.update("Flow Relayout", ({ pflow }) => {
+        const update = ({ pflow }: { pflow: PFlow }) => {
           for (const n of layoutedNodes) {
             const node = pflow.nodes[n.id];
             if (node) {
@@ -132,20 +95,56 @@ export function PrasiFlowEditor({
               }
             }
           }
-        });
-      }
+        };
 
+        if (update_on_relayout) {
+          fg.update("Flow Relayout", update);
+        } else {
+          update({ pflow: pflow as any });
+        }
+
+        const ref = local.reactflow;
+        if (ref) {
+          setTimeout(() => {
+            ref.fitView();
+            local.render();
+          });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    },
+    [setNodes, setEdges, update_on_relayout, nodes, edges]
+  );
+
+  useEffect(() => {
+    if (fg.pflow !== pflow || nodes.length === 0 || edges.length === 0) {
+      fg.pflow = pflow;
+      const parsed = parseFlow(pflow, { nodes: [], edges: [] });
+
+      setNodes([...parsed.nodes, ...parsed.unflowed_nodes]);
+      setEdges(parsed.edges);
+      restoreViewport({ pflow, local });
+
+      const sel = fg.prop?.selection;
+      if (sel) {
+        fg.main?.action.addSelectedEdges(sel.edges?.map((e) => e.id) || []);
+        fg.main?.action.addSelectedNodes(sel.nodes?.map((e) => e.id) || []);
+      }
+    }
+  }, [pflow, relayoutNodes]);
+
+  bind({
+    fitView() {
       const ref = local.reactflow;
       if (ref) {
         setTimeout(() => {
           ref.fitView();
+          local.render();
         });
       }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-  bind({ relayout: relayoutNodes });
+    },
+  });
 
   if (local.refresh.executing) {
     local.refresh.executing = false;
@@ -255,7 +254,7 @@ export function PrasiFlowEditor({
               }
             }
             if (del_changes.length > 0) {
-              removeNodes({ changes: del_changes, edges, resetDefault });
+              removeNodes({ pflow, changes: del_changes, edges, resetDefault });
             }
           }
 

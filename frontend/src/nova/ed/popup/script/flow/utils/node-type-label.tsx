@@ -1,10 +1,9 @@
-import { allNodeDefinitions } from "../runtime/nodes";
-import { PFNodeDefinition } from "../runtime/types";
+import { getNodeDef } from "./get-node-def";
 
 export const NodeTypeLabel: React.FC<{ node: { type: string } }> = ({
   node,
 }) => {
-  const def = (allNodeDefinitions as any)[node.type] as PFNodeDefinition<any>;
+  const def = getNodeDef(node.type);
   const type = def?.type || node.type;
 
   return type.split(".").map((e, idx) => (

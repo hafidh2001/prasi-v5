@@ -53,7 +53,10 @@ export const internalLoadCompTree = (
     });
 
     fg.prasi.updated_outside = true;
-    await loadScriptModels([content_tree], component.script_models);
+    await loadScriptModels([content_tree], component.script_models, {
+      exclude_comp_ids: [comp_id],
+    });
+    console.log(content_tree, component.script_models);
 
     opt.on_update(content_tree);
     if (!state.loaded) {
@@ -92,7 +95,9 @@ export const internalLoadCompTree = (
     script_models: {} as Record<string, ScriptModel>,
     async reloadScriptModels() {
       const content_tree = immer.get();
-      await loadScriptModels([content_tree], component.script_models);
+      await loadScriptModels([content_tree], component.script_models, {
+        exclude_comp_ids: [comp_id],
+      });
     },
     before_update: null as null | ((do_update: () => void) => void),
     update(

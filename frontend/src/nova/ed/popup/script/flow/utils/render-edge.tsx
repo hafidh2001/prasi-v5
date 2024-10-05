@@ -39,9 +39,11 @@ export const RenderEdge = function ({
   const name = edge?.data?.branch?.name || "";
   const is_branch = !!edge?.data?.branch;
   const from = pflow.nodes[edge.source];
-  const from_def = (allNodeDefinitions as any)[
+  const from_def = (allNodeDefinitions as any)?.[
     from.type
   ] as PFNodeDefinition<any>;
+
+  if (!from_def) return null; 
 
   return (
     <>
@@ -138,7 +140,10 @@ export const RenderEdge = function ({
         >
           <div className={"label"}>
             {from_def?.render_edge_label
-              ? from_def.render_edge_label({ node: from, branch: edge.data?.branch })
+              ? from_def.render_edge_label({
+                  node: from,
+                  branch: edge.data?.branch,
+                })
               : name}
           </div>
           {/* {!is_branch && (

@@ -61,7 +61,7 @@ export const EdPrasiCode = () => {
     >
       {local.ready && model && model.source && (
         <>
-          {mode === "js" && (
+          {(mode === "js" || mode === "flow") && (
             <MonacoJS
               highlightJsx
               models={[
@@ -86,34 +86,6 @@ export const EdPrasiCode = () => {
                 if (model.id) {
                   model.source = value;
                   model.exports = {};
-
-                  // clearTimeout(local.change_timeout);
-                  // local.change_timeout = setTimeout(() => {
-                  //   const markers = monaco.editor.getModelMarkers({
-                  //     owner: "typescript",
-                  //   });
-                  //   if (markers.length === 0) {
-                  //     parseItemCode(model as any);
-                  //     model.source = migrateCode(model as any, models);
-
-                  //     if (model.model) {
-                  //       const vstate = editor.saveViewState();
-                  //       model.model._ignoreChanges = true;
-                  //       model.model.applyEdits([
-                  //         {
-                  //           text: model.source,
-                  //           range: model.model.getFullModelRange(),
-                  //         },
-                  //       ]);
-                  //       editor.restoreViewState(
-                  //         foldRegionVState(
-                  //           model.model.getLinesContent(),
-                  //           vstate
-                  //         )
-                  //       );
-                  //     }
-                  //   }
-                  // }, 2000);
 
                   update.push(p, model.id, value);
                 }

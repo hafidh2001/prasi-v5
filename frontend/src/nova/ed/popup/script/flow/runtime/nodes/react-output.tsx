@@ -33,7 +33,6 @@ export const nodeReactOutput = defineNode({
     border: 2px solid purple !important;
   `,
   node_picker(def) {
-    console.log(def);
     if (["react.output", "react.render"].includes(def.type))
       return { hidden: true };
   },

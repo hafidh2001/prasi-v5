@@ -36,6 +36,7 @@ export const monacoEnableJSX = async (
     });
   }
 
+
   const compilerOptions: CompilerOptions = {
     // note: ReactJSX ga bisa solve type buat <div> etc...
     // yg bisa solve cmn JsxEmit.React

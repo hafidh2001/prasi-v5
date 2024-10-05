@@ -1,10 +1,11 @@
 import { allNodeDefinitions } from "../runtime/nodes";
-import { PFNodeDefinition } from "../runtime/types";
+import { DeepReadonly, PFNode, PFNodeDefinition } from "../runtime/types";
+import { getNodeDef } from "./get-node-def";
 
-export const getNodeFields = (node: any) => {
+export const getNodeFields = (node: DeepReadonly<PFNode>) => {
   const data = {} as Record<string, any>;
 
-  const def = (allNodeDefinitions as any)[node.type];
+  const def = getNodeDef(node.type);
 
   if (def) {
     for (const key of Object.keys(def.fields || {})) {

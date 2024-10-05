@@ -52,7 +52,6 @@ export const PFPropCode: FC<{
             outline: none;
           }
         `)}
-        activeModel="prasi:///active.tsx"
         onChange={async ({ value }) => {
           const src = value;
           if (src) {
@@ -79,6 +78,7 @@ export const PFPropCode: FC<{
             update("", "", "");
           }
         }}
+        activeModel="prasi:///active.tsx"
         models={[
           {
             name: "prasi:///active.tsx",

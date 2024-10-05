@@ -1,5 +1,4 @@
 import { getActiveNode } from "crdt/node/get-node-by-id";
-import { current } from "immer";
 import { active, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import { PNode } from "logic/types";
@@ -17,15 +16,27 @@ import { initAdv } from "./utils/prasi/init-adv";
 
 export const EdPrasiFlow = function () {
   const p = useGlobal(EDGlobal, "EDITOR");
-  const local = useLocal({ relayout() {} });
-  fg.render = local.render;
+  const local = useLocal({ fitView() {} });
   const sflow = p.script.flow;
   const popup = p.ui.popup.script;
   const node = getActiveNode(p);
   const prasi = fg.prasi;
+  fg.render = local.render;
 
-  const resetDefault = useCallback(
-    (relayout: boolean) => {
+  const resetDefault = useCallback(() => {
+    const afterReset = (node: PNode) => {
+      if (node) {
+        localStorage.removeItem(`prasi-flow-vp-${`item-${node.item.id}`}`);
+        sflow.current = structuredClone(
+          defaultFlow("item", `item-${node.item.id}`, node.item.id)
+        );
+        local.render();
+        setTimeout(() => {
+          local.fitView();
+        }, 500);
+      }
+    };
+    if (node?.item.adv?.flow) {
       fg.updateNoDebounce(
         "Flow Reset",
         ({ node }) => {
@@ -33,26 +44,13 @@ export const EdPrasiFlow = function () {
           delete node.item.adv.flow;
         },
         ({ node }) => {
-          if (node) {
-            localStorage.removeItem(`prasi-flow-vp-${`item-${node.item.id}`}`);
-            sflow.current = defaultFlow(
-              "item",
-              `item-${node.item.id}`,
-              node.item.id
-            );
-            local.render();
-          }
+          afterReset(node);
         }
       );
-
-      if (relayout) {
-        setTimeout(() => {
-          local.relayout();
-        }, 300);
-      }
-    },
-    [node?.item.id, fg.updateNoDebounce]
-  );
+    } else if (node) {
+      afterReset(node);
+    }
+  }, [node?.item.id, fg.updateNoDebounce]);
 
   fg.prasi.resetDefault = resetDefault;
 
@@ -60,7 +58,10 @@ export const EdPrasiFlow = function () {
     const tree = getActiveTree(p);
 
     if (node && tree) {
-      if (popup.prop_name === "" && popup.mode === "js") {
+      if (
+        popup.prop_name === "" &&
+        (popup.mode === "js" || popup.mode === "flow")
+      ) {
         if (node.item.id !== prasi.item_id) {
           initAdv(node, tree);
           prasi.item_id = node.item.id;
@@ -79,12 +80,8 @@ export const EdPrasiFlow = function () {
                     node.item.adv = {};
                   }
 
-                  if (!node.item.adv?.flow) {
-                    node.item.adv.flow = defaultFlow(
-                      "item",
-                      `item-${node.item.id}`,
-                      node.item.id
-                    );
+                  if (!node.item.adv?.flow && sflow.current) {
+                    node.item.adv.flow = sflow.current as any;
                   }
 
                   if (node.item.adv?.flow) {
@@ -147,11 +144,11 @@ export const EdPrasiFlow = function () {
           <PanelGroup direction="vertical">
             <Panel>
               <PrasiFlowEditor
-                has_flow={!!node?.item.adv?.flow}
+                update_on_relayout={!!node?.item.adv?.flow}
                 resetDefault={resetDefault}
                 pflow={sflow.current}
-                bind={({ relayout }) => {
-                  local.relayout = relayout;
+                bind={({ fitView }) => {
+                  local.fitView = fitView;
                 }}
               />
             </Panel>

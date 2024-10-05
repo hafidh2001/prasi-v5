@@ -12,8 +12,6 @@ import { foldRegionVState } from "./js/fold-region-vstate";
 import { jsxColorScheme } from "./js/jsx-style";
 import { registerPrettier } from "./js/register-prettier";
 import { registerReact } from "./js/register-react";
-import { monacoCleanModel } from "./js/clean-models";
-import { waitUntil } from "prasi-utils";
 
 export const MonacoJS: FC<{
   highlightJsx?: boolean;
@@ -74,6 +72,7 @@ export const MonacoJS: FC<{
       window.removeEventListener("keydown", preventCtrlP, true);
     };
   }, []);
+
   if (!Editor)
     return (
       <div className="relative w-full h-full items-center justify-center flex flex-1">
@@ -128,7 +127,8 @@ export const MonacoJS: FC<{
         const monacoModels = monaco.editor.getModels();
 
         for (const m of _models) {
-          if (!m.source) continue;
+          if (!m.source && m.name !== activeModel) continue;
+          if (!m.source) m.source = "";
 
           const model = monacoModels.find(
             (e) => e === m.model || e.uri.toString() === m.name

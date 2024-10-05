@@ -12,8 +12,29 @@ export const defaultFlow = (type: "item", name: string, start_id: string) => {
             { flow: [start_id, a], name: "Render", mode: "sync-only" },
           ],
           jsx: true,
+          position: {
+            x: 37,
+            y: 0,
+          },
         },
-        [a]: { type: "reactOutput" },
+        [a]: {
+          type: "reactOutput",
+          branches: [{ name: "children", flow: [a, b], mode: "sync-only" }],
+          position: {
+            x: 0,
+            y: 80,
+          },
+        },
+        [b]: {
+          type: "code",
+          source_code: "children",
+          _codeBuild: { source_code: "children" },
+          _codeError: {},
+          position: {
+            x: 1,
+            y: 162,
+          },
+        },
       });
 
       return {

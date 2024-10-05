@@ -4,7 +4,6 @@ import { EDGlobal } from "logic/ed-global";
 import {
   Code,
   GitFork,
-  PanelLeftOpen,
   PanelTopClose,
   PictureInPicture2,
   ScrollText,
@@ -68,7 +67,11 @@ export const EdScriptWorkbench: FC<{
     script_mode = "script";
   }
 
-  if (node && node.item.component?.id) {
+  if (
+    node &&
+    node.item.component?.id &&
+    node.item.component.id !== active.comp?.id
+  ) {
     return (
       <div className="flex items-center text-sm text-center flex-col justify-center flex-1">
         <ScrollText className="mb-2" />
@@ -125,7 +128,7 @@ export const EdScriptWorkbench: FC<{
                     );
                   })}
                 </div>
-                {popup.mode === "js" && (
+                {(popup.mode === "js" || popup.mode === "flow") && (
                   <>
                     {popup.type === "item" && (
                       <>

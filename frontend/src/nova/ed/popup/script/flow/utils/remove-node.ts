@@ -1,20 +1,25 @@
 import { Edge, NodeRemoveChange } from "@xyflow/react";
-import { findFlow, loopPFNode } from "./find-node";
+import { RPFlow } from "../runtime/types";
+import { findFlow } from "./find-node";
 import { fg } from "./flow-global";
-import { current } from "immer";
 
 export const removeNodes = ({
+  pflow,
   changes,
   edges,
   resetDefault,
 }: {
+  pflow: RPFlow;
   changes: NodeRemoveChange[];
   edges: Edge[];
   resetDefault: (relayout: boolean) => void;
 }) => {
-  fg.update(
-    "Flow Remove Node",
-    ({ pflow }) => {
+  if (Object.keys(pflow?.nodes || {}).length === changes.length) {
+    setTimeout(() => {
+      resetDefault(true);
+    }, 100);
+  } else {
+    fg.update("Flow Remove Node", ({ pflow }) => {
       for (const c of changes) {
         const id = c.id;
 
@@ -36,11 +41,6 @@ export const removeNodes = ({
         delete pflow.nodes[id];
         delete pflow.flow[id];
       }
-    },
-    ({ pflow }) => {
-      if (Object.keys(pflow?.nodes || {}).length === 0) {
-        resetDefault(true);
-      }
-    }
-  );
+    });
+  }
 };

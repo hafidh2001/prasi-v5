@@ -21,6 +21,7 @@ import { cn } from "utils/shadcn/lib";
 import { PFNodeDefinition, RPFlow } from "../runtime/types";
 import { immutableFindFlow } from "./find-node";
 import { NodeTypeLabel } from "./node-type-label";
+import { getNodeDef } from "./get-node-def";
 
 export const NodeTypePicker: React.FC<{
   value: keyof typeof allNodeDefinitions | "";
@@ -67,9 +68,7 @@ export const NodeTypePicker: React.FC<{
     typeof found.branch?.mode === "undefined" ? "normal" : found.branch.mode;
 
   if (pflow.nodes[from_id].type) {
-    const def = (allNodeDefinitions as any)[
-      pflow.nodes[from_id].type
-    ] as PFNodeDefinition<any>;
+    const def = getNodeDef(pflow.nodes[from_id].type)!;
     if (def.node_picker) node_picker = def.node_picker;
   }
 
@@ -105,9 +104,7 @@ export const NodeTypePicker: React.FC<{
       setOpen={setOpen}
       options={Object.keys(allNodeDefinitions)
         .filter((node_type) => {
-          const def = (allNodeDefinitions as any)[
-            node_type
-          ] as PFNodeDefinition<any>;
+          const def = getNodeDef(node_type)!;
           if (node_type === "start") return false;
           if (branch_mode === "sync-only" && def.is_async) return false;
           if (branch_mode === "async-only" && def.is_async === false)
@@ -121,7 +118,8 @@ export const NodeTypePicker: React.FC<{
           return true;
         })
         .map((e) => {
-          const def = (allNodeDefinitions as any)[e] as PFNodeDefinition<any>;
+          const def = getNodeDef(e)!;
+
           return {
             value: e,
             label: def.type,

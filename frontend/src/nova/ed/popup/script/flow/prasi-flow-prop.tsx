@@ -35,9 +35,14 @@ export const PrasiFlowProp = ({ pflow }: { pflow: RPFlow }) => {
             <>
               <div className="relative overflow-auto w-full h-full flex-1">
                 <div className="absolute inset-0">
-                  <pre className={cx("text-[9px]")}>
-                    {JSON.stringify(pflow, null, 2)}
-                  </pre>
+                  <pre
+                    className={cx("text-[9px]")}
+                    contentEditable
+                    dangerouslySetInnerHTML={{
+                      __html: JSON.stringify(pflow, null, 2),
+                    }}
+                    spellCheck={false}
+                  ></pre>
                 </div>
               </div>
               {/* <div className="text-xs">Please Select Node</div>
