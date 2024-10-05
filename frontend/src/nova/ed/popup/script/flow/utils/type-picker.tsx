@@ -59,32 +59,44 @@ export const NodeTypePicker: React.FC<{
   if (!local.open) return render_child;
 
   const found = immutableFindFlow({ id: from_id, pflow });
+  let node_picker = undefined as
+    | undefined
+    | PFNodeDefinition<any>["node_picker"];
+
   let branch_mode =
     typeof found.branch?.mode === "undefined" ? "normal" : found.branch.mode;
 
-  if (found.branch && !found.branch.mode) {
-    let find: typeof found | null = found;
-    let visited = new Set<string>();
-    while (find) {
-      if (find.branch && find.branch.mode) branch_mode = find.branch.mode;
+  if (pflow.nodes[from_id].type) {
+    const def = (allNodeDefinitions as any)[
+      pflow.nodes[from_id].type
+    ] as PFNodeDefinition<any>;
+    if (def.node_picker) node_picker = def.node_picker;
+  }
 
-      for (const node of Object.values(pflow.nodes)) {
-        if (visited.has(node.id)) {
-          find = null;
-          break;
-        }
-        if (node.branches?.find((b) => b === found.branch)) {
-          find = immutableFindFlow({ id: node.id, pflow });
-          if (!find.branch) {
+  if (found.branch) {
+    if (!found.branch.mode) {
+      let find: typeof found | null = found;
+      let visited = new Set<string>();
+      while (find) {
+        if (find.branch && find.branch.mode) branch_mode = find.branch.mode;
+
+        for (const node of Object.values(pflow.nodes)) {
+          if (visited.has(node.id)) {
             find = null;
             break;
           }
+          if (node.branches?.find((b) => b === found.branch)) {
+            find = immutableFindFlow({ id: node.id, pflow });
+            if (!find.branch) {
+              find = null;
+              break;
+            }
+          }
+          visited.add(node.id);
         }
-        visited.add(node.id);
       }
     }
   }
-  console.log(branch_mode);
 
   return (
     <PFDropdown
@@ -100,6 +112,12 @@ export const NodeTypePicker: React.FC<{
           if (branch_mode === "sync-only" && def.is_async) return false;
           if (branch_mode === "async-only" && def.is_async === false)
             return false;
+
+          if (node_picker) {
+            const res = node_picker(def);
+            if (res && res.hidden) return false;
+          }
+
           return true;
         })
         .map((e) => {

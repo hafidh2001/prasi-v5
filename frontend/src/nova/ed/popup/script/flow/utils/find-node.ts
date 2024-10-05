@@ -197,18 +197,19 @@ export const findFlow = ({
     flow: null as null | PFNodeID[],
     idx: -1,
     branch: undefined as void | PFNodeBranch,
+    parent: undefined as void | PFNode,
   };
   for (const flow of Object.values(pf.flow)) {
     if (
       !loopPFNode(pf.nodes, flow, ({ flow, idx, parent, branch }) => {
         if (flow[idx] === id) {
           if (from) {
-            if (from === parent?.id || from === id) {
-              result = { flow, idx, branch };
+            if (from === parent?.id || from === id || from === flow[idx - 1]) {
+              result = { flow, idx, branch, parent };
               return false;
             }
           } else {
-            result = { flow, idx, branch };
+            result = { flow, idx, branch, parent };
             return false;
           }
         }
@@ -262,9 +263,11 @@ export const loopPFNode = (
         branch: arg?.branch,
         is_invalid: true,
       });
+      idx++;
       continue;
     }
     if (visited.has(node.id)) {
+      idx++;
       continue;
     } else {
       visited.add(node.id);

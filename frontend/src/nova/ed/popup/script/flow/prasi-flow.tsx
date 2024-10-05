@@ -17,7 +17,7 @@ import { initAdv } from "./utils/prasi/init-adv";
 
 export const EdPrasiFlow = function () {
   const p = useGlobal(EDGlobal, "EDITOR");
-  const local = useLocal({});
+  const local = useLocal({ relayout() {} });
   fg.render = local.render;
   const sflow = p.script.flow;
   const popup = p.ui.popup.script;
@@ -26,8 +26,6 @@ export const EdPrasiFlow = function () {
 
   const resetDefault = useCallback(
     (relayout: boolean) => {
-      sflow.should_relayout = relayout;
-
       fg.updateNoDebounce(
         "Flow Reset",
         ({ node }) => {
@@ -43,13 +41,15 @@ export const EdPrasiFlow = function () {
               node.item.id
             );
             local.render();
-
-            setTimeout(() => {
-              sflow.should_relayout = false;
-            }, 500);
           }
         }
       );
+
+      if (relayout) {
+        setTimeout(() => {
+          local.relayout();
+        }, 300);
+      }
     },
     [node?.item.id, fg.updateNoDebounce]
   );
@@ -150,7 +150,9 @@ export const EdPrasiFlow = function () {
                 has_flow={!!node?.item.adv?.flow}
                 resetDefault={resetDefault}
                 pflow={sflow.current}
-                should_relayout={sflow.should_relayout}
+                bind={({ relayout }) => {
+                  local.relayout = relayout;
+                }}
               />
             </Panel>
 

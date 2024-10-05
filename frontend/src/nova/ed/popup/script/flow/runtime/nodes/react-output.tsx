@@ -8,14 +8,49 @@ export const nodeReactOutput = defineNode({
     class_name: { idx: 0, type: "string", label: "CSS Class" },
   },
   is_async: false,
-  process: async ({ next, runtime: node, vars, state }) => {
+  process: async ({ next, runtime, processBranch, state }) => {
     next();
 
     const react = state.react;
     if (react) {
+      if (runtime.node.branches) {
+        const children = runtime.node.branches.find(
+          (e) => e.name === "children"
+        );
+
+        if (react.status === "rendering") react.status = "rendered";
+        if (children) await processBranch(children);
+      }
+
       if (react.status === "init") {
         react.status = "rendered";
         await react.effects();
+      }
+    }
+  },
+
+  className: css`
+    border: 2px solid purple !important;
+  `,
+  node_picker(def) {
+    console.log(def);
+    if (["react.output", "react.render"].includes(def.type))
+      return { hidden: true };
+  },
+  on_before_connect({ node, is_new }) {
+    if (node.branches) {
+      const children = node.branches.find((e) => e.name === "children");
+      if (!children) {
+        node.branches.push({
+          flow: [node.id],
+          name: "children",
+          mode: "sync-only",
+        });
+      } else if (is_new) {
+        node.branches.push({
+          flow: [node.id],
+          name: "event",
+        });
       }
     }
   },

@@ -2,7 +2,7 @@ import JsonView from "@uiw/react-json-view";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { Eraser, Play } from "lucide-react";
+import { Eraser, Play, StopCircle } from "lucide-react";
 import { useLocal } from "utils/react/use-local";
 import { Tooltip } from "utils/ui/tooltip";
 import { runFlow } from "./runtime/runner";
@@ -16,10 +16,11 @@ dayjs.extend(relativeTime);
 export const PrasiFlowRunner = ({ pflow }: { pflow: RPFlow }) => {
   const local = useLocal({
     start: 0,
-    status: "idle" as "idle" | "running",
+    status: "idle" as "idle" | "running" | "stopping",
     logref: null as null | HTMLDivElement,
     delay: Number(localStorage.getItem("prasi-flow-delay")) || 300,
     delay_timeout: null as any,
+    stop() {},
   });
   return (
     <div
@@ -47,15 +48,16 @@ export const PrasiFlowRunner = ({ pflow }: { pflow: RPFlow }) => {
         <div className="flex items-center space-x-[5px]">
           <Tooltip content={"Run Flow"} asChild>
             <div
-              className={cx(
-                "btn",
-                local.status === "running" &&
-                  css`
-                    opacity: 0.3;
-                  `
-              )}
+              className={cx("btn")}
               onClick={async () => {
-                if (local.status === "running") return;
+                if (local.status === "running") {
+                  local.stop();
+                  local.status = "stopping";
+                  local.render();
+                  fg.main?.render();
+
+                  return;
+                }
                 if (pflow) {
                   local.status = "running";
                   local.start = Date.now();
@@ -65,15 +67,27 @@ export const PrasiFlowRunner = ({ pflow }: { pflow: RPFlow }) => {
                   fg.run = await runFlow(pflow, {
                     capture_console: true,
                     delay: local.delay,
+                    init: ({ stop }) => {
+                      local.stop = stop;
+                      local.render();
+                    },
                     before_node({ node }) {
+                      local.status = "running";
                       fg.node_running.push(node.id);
                       fg.main?.render();
                     },
-                    after_node({ visited, node }) {
+                    visit_node({ visited, node, runningNodes, stopping }) {
                       fg.node_running = fg.node_running.filter(
                         (id) => id !== node.id
                       );
                       fg.run = { visited } as any;
+
+                      if (local.status !== "stopping") {
+                        if (runningNodes.size === 0) {
+                          local.status = "idle";
+                        }
+                      }
+
                       local.render();
                       fg.main?.render();
 
@@ -85,7 +99,6 @@ export const PrasiFlowRunner = ({ pflow }: { pflow: RPFlow }) => {
                       });
                     },
                   });
-                  local.status = "idle";
                   local.render();
                   fg.main?.render();
 
@@ -98,7 +111,7 @@ export const PrasiFlowRunner = ({ pflow }: { pflow: RPFlow }) => {
                 }
               }}
             >
-              <Play />
+              {local.status !== "running" ? <Play /> : <StopCircle />}
             </div>
           </Tooltip>
 
@@ -175,7 +188,9 @@ export const PrasiFlowRunner = ({ pflow }: { pflow: RPFlow }) => {
         >
           {!fg.run ? (
             <div className="text-slate-400 p-2">
-              {local.status === "idle" ? "Flow Log..." : "🚀 Running Flow..."}
+              {local.status !== "running"
+                ? "Flow Log..."
+                : "🚀 Running Flow..."}
             </div>
           ) : (
             fg.run.visited?.map((e, idx) => {
@@ -279,14 +294,14 @@ export const PrasiFlowRunner = ({ pflow }: { pflow: RPFlow }) => {
                 css`
                   padding: 10px;
                   height: 50px;
-                  color: ${local.status === "idle" ? "#ccc" : "#63a2ff"};
+                  color: ${local.status !== "running" ? "#ccc" : "#63a2ff"};
                   * {
                     font-size: 9px;
                   }
                 `
               )}
             >
-              {local.status === "idle" && <div>&mdash; END &mdash;</div>}
+              {local.status !== "running" && <div>&mdash; END &mdash;</div>}
               {local.status === "running" && (
                 <div className="flex items-center space-x-1">
                   <LoadingSpinner size={12} /> <div>Running...</div>

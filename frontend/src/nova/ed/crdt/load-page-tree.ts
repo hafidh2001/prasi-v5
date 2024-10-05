@@ -87,20 +87,6 @@ export const loadPageTree = (
       }) => void
     ) {
       const _fn = (tree: EPage["content_tree"]) => {
-        if (done) {
-          const unwatch = immer.subscribe(() => {
-            unwatch();
-            const tree = immer.get();
-            done({
-              tree,
-              findNode: (id) => {
-                const result = findNodeById(id, tree.childs);
-                return result;
-              },
-            });
-          });
-        }
-
         sync.page.pending_action(page_id, action_name);
         fn({
           tree,
@@ -122,6 +108,21 @@ export const loadPageTree = (
           },
         });
       };
+
+      let unwatch = undefined as any;
+      if (done) {
+        unwatch = immer.subscribe(() => {
+          unwatch();
+          const tree = immer.get();
+          done({
+            tree,
+            findNode: (id) => {
+              const result = findNodeById(id, tree.childs);
+              return result;
+            },
+          });
+        });
+      }
 
       if (this.before_update) {
         this.before_update(() => immer.update(_fn));

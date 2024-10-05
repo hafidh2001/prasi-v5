@@ -12,14 +12,18 @@ type RunFlowOpt = {
   vars?: Record<string, any>;
   capture_console: boolean;
   delay?: number;
-  after_node?: (arg: {
+  visit_node?: (arg: {
     visited: PFRunVisited[];
     node: DeepReadonly<PFNode>;
+    runningNodes: Set<PFRunVisited>;
+    stopping: boolean;
   }) => void;
   before_node?: (arg: {
     visited: PFRunVisited[];
     node: DeepReadonly<PFNode>;
   }) => void;
+  init?: (arg: { stop: () => void }) => void;
+  forced_stop?: boolean;
 };
 export const runFlow = async (pf: RPFlow, opt?: RunFlowOpt) => {
   const main_flow_id = Object.keys(pf.flow).find(
@@ -29,6 +33,14 @@ export const runFlow = async (pf: RPFlow, opt?: RunFlowOpt) => {
     const runtime: PFRuntime = {
       nodes: pf.flow[main_flow_id].map((id) => pf.nodes[id]),
     };
+
+    if (opt?.init) {
+      opt.init({
+        stop: () => {
+          opt.forced_stop = true;
+        },
+      });
+    }
     const result = await flowRuntime(pf, runtime, opt);
     return { status: "ok", visited: result.visited, vars: result.vars };
   }
@@ -56,7 +68,7 @@ const flowRuntime = async (
 
   // Global execution count initialized here
   const executionCount = new Map<string, number>(); // Track execution counts globally
-
+  const runningNodes = new Set<PFRunVisited>(); // Track running nodes globally
   const state = {};
   for (const current of runtime.nodes) {
     if (
@@ -68,6 +80,7 @@ const flowRuntime = async (
         opt,
         state,
         executionCount,
+        runningNodes,
       }))
     ) {
       break;
@@ -85,10 +98,22 @@ const runSingleNode = async (arg: {
   state: any;
   opt?: RunFlowOpt;
   executionCount: Map<string, number>;
+  runningNodes: Set<PFRunVisited>;
 }) => {
-  const { pf, visited, vars, current, branch, opt, executionCount, state } =
-    arg;
-  const { capture_console, after_node, before_node } = opt || {};
+  const {
+    pf,
+    visited,
+    vars,
+    current,
+    branch,
+    opt,
+    executionCount,
+    state,
+    runningNodes,
+  } = arg;
+  const { capture_console, visit_node, before_node, forced_stop } = opt || {};
+  if (forced_stop) return;
+
   const def = (allNodeDefinitions as any)[
     current.type
   ] as PFNodeDefinition<any>;
@@ -106,6 +131,7 @@ const runSingleNode = async (arg: {
     error: null,
   };
   visited.push(run_visit);
+  runningNodes.add(run_visit);
 
   if (current.vars) {
     Object.assign(vars, current.vars);
@@ -116,10 +142,6 @@ const runSingleNode = async (arg: {
       async (resolve, reject) => {
         if (current.branches) {
           run_visit.branching = true;
-
-          if (after_node) {
-            after_node({ visited: visited, node: current });
-          }
         }
 
         try {
@@ -134,9 +156,20 @@ const runSingleNode = async (arg: {
             },
             processBranch: async (branch) => {
               // Delay execution if the node has branches
+
               if (opt?.delay) {
                 await new Promise((done) => setTimeout(done, opt.delay));
               }
+
+              if (visit_node) {
+                visit_node({
+                  visited: visited,
+                  node: current,
+                  runningNodes,
+                  stopping: !!forced_stop,
+                });
+              }
+              if (forced_stop) return;
 
               for (const id of branch.flow) {
                 if (current.id === id) continue; // Prevent re-visiting the current node
@@ -154,6 +187,7 @@ const runSingleNode = async (arg: {
 
                 const new_current = pf.nodes[id];
                 if (!new_current) break;
+                if (forced_stop) return;
 
                 // Call runSingleNode recursively
                 await runSingleNode({
@@ -164,6 +198,17 @@ const runSingleNode = async (arg: {
                   opt,
                   state,
                   executionCount,
+                  runningNodes,
+                });
+                if (forced_stop) return;
+              }
+
+              if (visit_node) {
+                visit_node({
+                  visited: visited,
+                  node: current,
+                  runningNodes,
+                  stopping: !!forced_stop,
                 });
               }
             },
@@ -191,10 +236,17 @@ const runSingleNode = async (arg: {
     if (opt?.delay) {
       await new Promise((done) => setTimeout(done, opt.delay));
     }
+    if (forced_stop) return;
 
-    if (after_node) {
-      after_node({ visited: visited, node: current });
+    if (visit_node) {
+      visit_node({
+        visited: visited,
+        node: current,
+        runningNodes,
+        stopping: !!forced_stop,
+      });
     }
+    runningNodes.delete(run_visit);
 
     if (execute_node) {
       for (const id of execute_node.flow) {
@@ -214,6 +266,7 @@ const runSingleNode = async (arg: {
             opt,
             executionCount,
             state,
+            runningNodes,
           });
         }
       }

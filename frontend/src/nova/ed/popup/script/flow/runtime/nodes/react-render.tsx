@@ -3,11 +3,15 @@ import { defineNode } from "../lib/define-node";
 
 export const nodeReactRender = defineNode({
   type: "react.re-render",
-  has_branches: true,
   fields: {
     class_name: { idx: 0, type: "string", label: "CSS Class" },
   },
+  has_branches: false,
   is_async: true,
+  width: 160,
+  className: css`
+    border: 1px solid purple;
+  `,
   process: async ({ next, runtime: node, vars, state }) => {
     next();
     const react = state.react;

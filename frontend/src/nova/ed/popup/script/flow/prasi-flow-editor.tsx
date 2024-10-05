@@ -33,14 +33,14 @@ import { NodeTypePicker } from "./utils/type-picker";
 
 export function PrasiFlowEditor({
   pflow,
-  should_relayout,
   resetDefault,
   has_flow,
+  bind,
 }: {
   pflow: RPFlow;
-  should_relayout: boolean;
   resetDefault: (relayout: boolean) => void;
   has_flow: boolean;
+  bind: (arg: { relayout: () => void }) => void;
 }) {
   const local = useLocal({
     reactflow: null as null | ReactFlowInstance<Node, Edge>,
@@ -100,22 +100,16 @@ export function PrasiFlowEditor({
       });
     }
 
-    if (should_relayout) {
-      relayoutNodes({
-        nodes: [...parsed.nodes, ...unflowed],
-        edges: parsed.edges,
-      });
-    } else {
-      setNodes([...parsed.nodes, ...unflowed]);
-      setEdges(parsed.edges);
-      restoreViewport({ pflow, local });
-    }
+    setNodes([...parsed.nodes, ...unflowed]);
+    setEdges(parsed.edges);
+    restoreViewport({ pflow, local });
+
     const sel = fg.prop?.selection;
     if (sel) {
       fg.main?.action.addSelectedEdges(sel.edges?.map((e) => e.id) || []);
       fg.main?.action.addSelectedNodes(sel.nodes?.map((e) => e.id) || []);
     }
-  }, [pflow, should_relayout]);
+  }, [pflow]);
 
   const relayoutNodes = (arg?: { nodes: Node[]; edges: Edge[] }) => {
     try {
@@ -151,6 +145,7 @@ export function PrasiFlowEditor({
       console.error(e);
     }
   };
+  bind({ relayout: relayoutNodes });
 
   if (local.refresh.executing) {
     local.refresh.executing = false;
@@ -351,9 +346,9 @@ export function PrasiFlowEditor({
                     to {
                       background-position:
                         100% 0,
-                        /* Top border (moves to the right) */ 100% 100%,
-                        /* Right border (moves downward) */ 0 100%,
-                        /* Bottom border (moves to the left) */ 0 0; /* Left border (moves upward) */
+                        100% 100%,
+                        0 100%,
+                        0 0;
                     }
                   }
 

@@ -58,7 +58,11 @@ export const pflowConnectEnd = ({
         position.x -= 70;
         fg.pointer_to = null;
 
-        if (fg.pointer_up_pos) {
+        if (fg.pointer_up_pos && from_id) {
+          const from = pflow.nodes[from_id];
+          const from_dev = (allNodeDefinitions as any)[
+            from.type
+          ] as PFNodeDefinition<any>;
 
           fg.pickNodeType = {
             x: fg.pointer_up_pos.x,
@@ -70,7 +74,12 @@ export const pflowConnectEnd = ({
                 "Flow Create Node",
                 ({ pflow }) => {
                   const from = pflow.nodes[from_id];
-
+                  if (from_dev.has_branches) {
+                    if (!from.branches) {
+                      from.branches = [];
+                    }
+                  }
+                  
                   on_before_connect(pflow, { node: from, is_new: true });
 
                   const to_node = {
@@ -80,6 +89,7 @@ export const pflowConnectEnd = ({
                   };
                   to_id = to_node.id;
                   pflow.nodes[to_node.id] = to_node;
+
 
                   if (from.branches) {
                     const empty_branch = from.branches.find(

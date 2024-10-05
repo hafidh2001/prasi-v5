@@ -52,6 +52,7 @@ export const RenderNode = function (arg: {
 
   const has_error = Object.keys(node._codeError || {}).length > 0;
 
+  const width = node.size?.w || def.width;
   return (
     <div
       tabIndex={0}
@@ -71,9 +72,9 @@ export const RenderNode = function (arg: {
         "border border-slate-600  rounded-sm",
         def?.className,
         !node?.name && "items-center justify-center flex",
-        node?.size?.w &&
+        width &&
           css`
-            width: ${node.size.w}px;
+            width: ${width}px;
           `,
         node?.size?.h &&
           css`

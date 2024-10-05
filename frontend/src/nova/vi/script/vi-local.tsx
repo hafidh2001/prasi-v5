@@ -5,7 +5,7 @@ import { useVi } from "vi/lib/store";
 
 export const createViLocal = (
   item: DeepReadonly<IItem>,
-  ref_comp_props: Record<string, any>
+  local_parents: Record<string, any>
 ) => {
   return (opt: {
     name: string;
@@ -19,10 +19,10 @@ export const createViLocal = (
     }));
 
     if (!local.ts[item.id]) {
-      if (!ref_comp_props[item.id]) {
-        ref_comp_props[item.id] = {};
+      if (!local_parents[item.id]) {
+        local_parents[item.id] = {};
       }
-      ref_comp_props[item.id][opt.name] = local.value[item.id];
+      local_parents[item.id][opt.name] = local.value[item.id];
 
       local.value[item.id] = {
         ...opt.value,

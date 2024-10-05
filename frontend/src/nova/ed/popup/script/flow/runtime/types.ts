@@ -67,11 +67,13 @@ export type PFNodeDefinition<
   vars?: Record<string, any>;
   is_async?: boolean;
   icon: string;
+  width?: number,
   default?: G;
   render_edge_label?: (arg: {
     node: DeepReadonly<PFNode<G>>;
     branch?: PFNodeBranch;
   }) => ReactElement;
+  node_picker?: (def: PFNodeDefinition<any>) => void | { hidden: boolean };
   on_before_connect?: (arg: {
     node: PFNode<G>;
     is_new: boolean;
