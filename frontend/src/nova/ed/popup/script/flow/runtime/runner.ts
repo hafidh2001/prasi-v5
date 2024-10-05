@@ -117,11 +117,6 @@ const runSingleNode = async (arg: {
         if (current.branches) {
           run_visit.branching = true;
 
-          // Delay execution if the node has branches
-          if (opt?.delay) {
-            await new Promise((done) => setTimeout(done, opt.delay));
-          }
-
           if (after_node) {
             after_node({ visited: visited, node: current });
           }
@@ -138,6 +133,11 @@ const runSingleNode = async (arg: {
               visited,
             },
             processBranch: async (branch) => {
+              // Delay execution if the node has branches
+              if (opt?.delay) {
+                await new Promise((done) => setTimeout(done, opt.delay));
+              }
+
               for (const id of branch.flow) {
                 if (current.id === id) continue; // Prevent re-visiting the current node
 

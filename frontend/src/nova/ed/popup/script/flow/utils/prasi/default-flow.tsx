@@ -10,7 +10,6 @@ export const defaultFlow = (type: "item", name: string, start_id: string) => {
           type: "start",
           branches: [
             { flow: [start_id, a], name: "Render", mode: "sync-only" },
-            { flow: [], name: "Effect" },
           ],
           jsx: true,
         },

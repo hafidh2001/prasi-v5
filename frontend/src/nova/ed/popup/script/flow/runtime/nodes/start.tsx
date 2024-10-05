@@ -9,19 +9,23 @@ export const nodeStart = defineNode({
     if (node.jsx) {
       const render = node.branches?.find((e) => e.name === "Render");
       state.react = {
-        render() {
-          if (render) return processBranch(render);
+        async render() {
+          if (this.status === "rendered") {
+            this.status = "rendering";
+            if (render) await processBranch(render);
+          }
         },
-        effects() {
-          return node.branches
-            ?.filter((e) => e.name !== "Render")
-            .map((e) => processBranch(e));
+        async effects() {
+          await Promise.all(
+            node.branches
+              ?.filter((e) => e.name !== "Render")
+              .map((e) => processBranch(e)) || []
+          );
         },
+        status: "init",
       };
 
-      if (render) {
-        await processBranch(render);
-      }
+      if (render) processBranch(render);
     } else {
       const branches: Promise<void>[] = [];
       if (runtime.node.branches) {

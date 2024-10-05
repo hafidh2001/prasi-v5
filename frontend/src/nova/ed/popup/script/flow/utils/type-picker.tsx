@@ -84,6 +84,7 @@ export const NodeTypePicker: React.FC<{
       }
     }
   }
+  console.log(branch_mode);
 
   return (
     <PFDropdown

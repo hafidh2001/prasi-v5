@@ -100,9 +100,9 @@ export type PFNodeDefinition<
     console: typeof console;
     state: {
       react?: {
-        effects: () => void;
-        render: () => void;
-        rendered?: boolean;
+        effects: () => Promise<void>;
+        render: () => Promise<void>;
+        status?: "rendering" | "rendered" | "init";
       };
     };
   }) => void | Promise<void>;
