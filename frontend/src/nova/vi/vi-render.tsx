@@ -10,7 +10,8 @@ export const ViRender: FC<{
   item: DeepReadonly<IItem>;
   is_layout: boolean;
   div_props?: (item: IItem) => DIV_PROPS;
-}> = ({ item, is_layout, div_props }) => {
+  __idx?: string | number;
+}> = ({ item, is_layout, div_props, __idx }) => {
   const { wrapper } = useVi(({ ref }) => ({
     wrapper: ref.wrapper,
   }));
@@ -21,13 +22,29 @@ export const ViRender: FC<{
       <Wrapper
         item={item as any}
         is_layout={is_layout}
+        __idx={__idx}
         ViRender={item.component?.id ? ViComp : ViItem}
       />
     );
   }
+  
   if (item.component?.id) {
-    return <ViComp item={item} is_layout={is_layout} div_props={div_props} />;
+    return (
+      <ViComp
+        item={item}
+        __idx={__idx}
+        is_layout={is_layout}
+        div_props={div_props}
+      />
+    );
   } else {
-    return <ViItem item={item} is_layout={is_layout} div_props={div_props} />;
+    return (
+      <ViItem
+        item={item}
+        __idx={__idx}
+        is_layout={is_layout}
+        div_props={div_props}
+      />
+    );
   }
 };

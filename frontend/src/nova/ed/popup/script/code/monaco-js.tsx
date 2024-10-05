@@ -12,6 +12,8 @@ import { foldRegionVState } from "./js/fold-region-vstate";
 import { jsxColorScheme } from "./js/jsx-style";
 import { registerPrettier } from "./js/register-prettier";
 import { registerReact } from "./js/register-react";
+import { monacoCleanModel } from "./js/clean-models";
+import { waitUntil } from "prasi-utils";
 
 export const MonacoJS: FC<{
   highlightJsx?: boolean;
@@ -27,8 +29,17 @@ export const MonacoJS: FC<{
   }) => void;
   className?: string;
   nolib?: boolean;
-  onMount?: (editor: MonacoEditor, monaco: Monaco) => void;
-}> = ({ models, activeModel, className, nolib, onMount, onChange }) => {
+  onAfterMount?: (editor: MonacoEditor, monaco: Monaco) => void;
+  onReloadModels?: (editor: MonacoEditor, monaco: Monaco) => Promise<any[]>;
+}> = ({
+  models,
+  activeModel,
+  className,
+  nolib,
+  onAfterMount,
+  onReloadModels,
+  onChange,
+}) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({
     editor: null as null | MonacoEditor,
@@ -105,23 +116,30 @@ export const MonacoJS: FC<{
             },
       }}
       onMount={async (editor, monaco) => {
+        let _models = models;
+        if (onReloadModels) {
+          _models = await onReloadModels(editor, monaco);
+        }
+
         local.editor = editor;
-        // monacoCleanModel(monaco);
         registerPrettier(monaco);
         await registerReact(monaco);
 
         const monacoModels = monaco.editor.getModels();
-        for (const m of models) {
+
+        for (const m of _models) {
           if (!m.source) continue;
 
           const model = monacoModels.find(
             (e) => e === m.model || e.uri.toString() === m.name
           );
+
           if (model) {
             if (m.model && !m.model.isDisposed) {
               m.model.dispose();
             }
             m.model = model;
+            m.model.setValue(m.source);
           } else {
             m.model = monacoRegisterSource(monaco, m.source, m.name || "");
             m.model.onDidChangeContent((e) => {
@@ -171,8 +189,8 @@ export const MonacoJS: FC<{
           }
         }
 
-        if (onMount) {
-          onMount(editor, monaco);
+        if (onAfterMount) {
+          onAfterMount(editor, monaco);
         }
       }}
     />

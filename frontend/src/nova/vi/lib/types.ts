@@ -23,11 +23,13 @@ export type ViProp = {
     pages: (ids: string[]) => Promise<void>;
     comps: (ids: string[]) => Promise<void>;
   };
-  enablePreload?: boolean;
+  enable_preload?: boolean;
+  cache_js?: boolean;
 };
 
 export type ViWrapperComp = FC<{
   item: IItem;
   is_layout: boolean;
   ViRender: typeof ViRender;
+  __idx?: string | number;
 }>;

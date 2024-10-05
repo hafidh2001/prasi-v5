@@ -7,7 +7,8 @@ import { useVi } from "./lib/store";
 export const ViChilds: FC<{
   item: DeepReadonly<{ id: string; childs: IItem[] }>;
   is_layout: boolean;
-}> = ({ item, is_layout }) => {
+  __idx?: string | number;
+}> = ({ item, is_layout, __idx }) => {
   const { parents } = useVi(({ state, ref }) => ({
     parents: ref.item_parents,
   }));
@@ -15,6 +16,13 @@ export const ViChilds: FC<{
   const childs = item.childs;
   return childs.map((child) => {
     parents[child.id] = item.id;
-    return <ViRender key={child.id} item={child} is_layout={is_layout} />;
+    return (
+      <ViRender
+        key={child.id}
+        __idx={__idx}
+        item={child}
+        is_layout={is_layout}
+      />
+    );
   });
 };

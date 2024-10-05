@@ -71,6 +71,17 @@ export const EdPrasiCode = () => {
                 },
                 ...Object.values(models),
               ]}
+              onReloadModels={async () => {
+                const tree = getActiveTree(p);
+                await tree.reloadScriptModels();
+                return [
+                  {
+                    name: "file:///typings-item.ts",
+                    source: typingsItem,
+                  },
+                  ...Object.values(tree.script_models),
+                ];
+              }}
               onChange={({ model, value, editor, monaco }) => {
                 if (model.id) {
                   model.source = value;
@@ -189,21 +200,25 @@ const update = {
               replace.start = node.start;
               replace.end = node.end;
               if (node.declaration?.body) {
-                replace.replacement = `render${cutCode(source, node.declaration.body)}`;
+                replace.replacement = `render(${cutCode(source, node.declaration.body)})`;
               }
             },
           });
 
           const replaced = replaceString(source, [replace]);
           if (replaced.trim()) {
-            q.source_built = (
-              await jscript.transform?.(replaced, {
-                jsx: "transform",
-                format: "cjs",
-                logLevel: "silent",
-                loader: "tsx",
-              })
-            )?.code;
+            try {
+              q.source_built = (
+                await jscript.transform?.(replaced, {
+                  jsx: "transform",
+                  format: "cjs",
+                  logLevel: "silent",
+                  loader: "tsx",
+                })
+              )?.code;
+            } catch (e) {
+              console.log(replaced, e, q);
+            }
           } else {
             q.source_built = undefined;
           }
@@ -215,7 +230,7 @@ const update = {
       getActiveTree(this.p).update("Update Code", ({ findNode }) => {
         for (const q of Object.values(this.queue)) {
           const n = findNode(q.id);
-          if (n && n.item.adv) {
+          if (n && n.item.adv && !n.item.component?.id) {
             if (!q.prop_name) {
               n.item.adv.js = q.source;
               if (q.source_built !== null) {

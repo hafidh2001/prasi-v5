@@ -70,6 +70,7 @@ export const loadPageTree = (
     script_models: {} as Record<string, ScriptModel>,
     async reloadScriptModels() {
       const content_tree = immer.get();
+      tree.script_models = {};
       await loadScriptModels(content_tree.childs, tree.script_models);
     },
     before_update: null as null | ((do_update: () => void) => void),

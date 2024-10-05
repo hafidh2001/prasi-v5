@@ -10,7 +10,8 @@ export const ViItem: FC<{
   item: DeepReadonly<IItem>;
   is_layout: boolean;
   div_props?: (item: IItem) => DIV_PROPS;
-}> = ({ item, is_layout, div_props }) => {
+  __idx?: string | number;
+}> = ({ item, is_layout, div_props, __idx }) => {
   const { page, mode, ts } = useVi(({ state, ref }) => ({
     page: state.page,
     db: ref.db,
@@ -23,10 +24,10 @@ export const ViItem: FC<{
 
   let childs = null;
   if (is_layout && item.name === "children" && page) {
-    childs = <ViChilds item={page.root} is_layout={is_layout} />;
+    childs = <ViChilds __idx={__idx} item={page.root} is_layout={is_layout} />;
   } else {
     if (item.childs) {
-      childs = <ViChilds item={item} is_layout={is_layout} />;
+      childs = <ViChilds __idx={__idx} item={item} is_layout={is_layout} />;
     } else {
       childs = null;
       if (item.html) {
@@ -36,7 +37,15 @@ export const ViItem: FC<{
   }
 
   if (item.adv?.js) {
-    return <ViScript item={item} childs={childs} props={props} ts={ts} />;
+    return (
+      <ViScript
+        __idx={__idx}
+        item={item}
+        childs={childs}
+        props={props}
+        ts={ts}
+      />
+    );
   }
 
   return <div {...props}>{childs ? childs : null}</div>;

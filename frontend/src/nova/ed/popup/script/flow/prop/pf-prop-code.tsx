@@ -85,7 +85,7 @@ export const PFPropCode: FC<{
             source: value,
           },
         ]}
-        onMount={(editor) => {
+        onAfterMount={(editor) => {
           editor.focus();
         }}
       />

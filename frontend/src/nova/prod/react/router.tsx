@@ -72,7 +72,7 @@ export const ProdRouter = memo(() => {
                   });
                 },
               }}
-              enablePreload
+              enable_preload
             />
           </>
         );

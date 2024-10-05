@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useGlobal } from "../../../../../utils/react/use-global";
 import { useLocal } from "../../../../../utils/react/use-local";
 import { Tooltip } from "../../../../../utils/ui/tooltip";
-import { active } from "../../../logic/active";
+import { activateItem, active } from "../../../logic/active";
 import { EDGlobal } from "../../../logic/ed-global";
 import { PNode } from "../../../logic/types";
 import { EdTreeCtxMenu } from "../ctx-menu";
@@ -85,9 +85,7 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
           p.render();
         }}
         onClick={() => {
-          active.item_id = item.id;
-
-          p.render();
+          activateItem(p, item.id);
         }}
         className={cx(
           "tree-item",

@@ -36,7 +36,7 @@ export const createViLocal = (
 
     useEffect(() => {
       opt.effect(local.value[item.id]);
-    });
+    }, []);
 
     return opt.children;
   };

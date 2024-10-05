@@ -18,6 +18,7 @@ export const useVi = defineStore({
     item_parents: {} as Record<string, string>,
     comp_props: {} as Record<string, any>,
     wrapper: null as null | ViWrapperComp,
+    cache_js: true as boolean,
   },
   state: {
     mode: "desktop" as "mobile" | "desktop",

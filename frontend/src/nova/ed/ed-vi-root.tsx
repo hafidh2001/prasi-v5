@@ -58,8 +58,9 @@ export const EdViRoot = memo(() => {
             comps={ref.comps}
             loader={{ async comps(ids) {}, async pages(ids) {} }}
             mode={p.mode}
-            enablePreload={false}
+            enable_preload={false}
             wrapper={ref.wrapper}
+            cache_js={false}
           />
         </StoreProvider>
       )}
@@ -68,11 +69,12 @@ export const EdViRoot = memo(() => {
 });
 
 const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
-  (({ item, is_layout, ViRender }) => {
+  (({ item, is_layout, ViRender, __idx }) => {
     return (
       <ViRender
         item={item}
         is_layout={is_layout}
+        __idx={__idx}
         div_props={(item) => ({
           onPointerEnter(e) {
             active.hover.id = item.id;

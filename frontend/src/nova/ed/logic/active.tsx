@@ -7,7 +7,7 @@ export const getActiveTree = (p: PG) => {
 };
 
 export const activateItem = (p: PG, id: string) => {
-  setTimeout(() => {
+  setTimeout(async () => {
     active.item_id = id;
     p.render();
     setTimeout(() => {

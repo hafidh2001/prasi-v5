@@ -12,7 +12,8 @@ export const ViComp: FC<{
   item: DeepReadonly<IItem>;
   is_layout: boolean;
   div_props?: (item: IItem) => DIV_PROPS;
-}> = ({ item, is_layout, div_props }) => {
+  __idx?: string | number;
+}> = ({ item, is_layout, div_props, __idx }) => {
   const { comps, instances, instantiate, ref_comp_props, parents, db, api } =
     useVi(({ state, ref, action }) => ({
       comps: ref.comps,
@@ -41,5 +42,12 @@ export const ViComp: FC<{
   const instance = instances[item.id];
   if (!instance) return loading_component;
 
-  return <ViItem item={item} is_layout={is_layout} div_props={div_props} />;
+  return (
+    <ViItem
+      item={item}
+      __idx={__idx}
+      is_layout={is_layout}
+      div_props={div_props}
+    />
+  );
 };
