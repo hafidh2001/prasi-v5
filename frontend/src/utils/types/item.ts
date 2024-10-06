@@ -1,3 +1,4 @@
+import { PFlow } from "popup/script/flow/runtime/types";
 import { BasicItem, MetaItem } from "./meta";
 import { FNAdv, FNComponent, FNLayout, FNLinkTag } from "./meta-fn";
 
@@ -11,6 +12,7 @@ export type IItem = {
   tree_hidden?: boolean;
   text?: string;
   html?: string;
+  events?: Record<string, { flow: PFlow; idx: number }>;
   childs: IItem[];
 } & MetaItem &
   BasicItem;

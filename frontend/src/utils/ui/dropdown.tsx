@@ -17,13 +17,7 @@ type DropdownExtProp = {
 };
 
 export const Dropdown: FC<
-  Omit<
-    React.DetailedHTMLProps<
-      React.HTMLAttributes<HTMLDivElement>,
-      HTMLDivElement
-    >,
-    keyof DropdownExtProp
-  > &
+  Omit<React.HTMLAttributes<HTMLInputElement>, keyof DropdownExtProp> &
     DropdownExtProp
 > = (prop) => {
   const local = useLocal({
@@ -69,7 +63,7 @@ export const Dropdown: FC<
     resetInputValue();
   }
 
-  const elProp = { ...prop };
+  const elProp: any = { ...prop };
   delete elProp["value"];
   delete elProp["items"];
   delete elProp["onChange"];
@@ -120,10 +114,10 @@ export const Dropdown: FC<
                 items.length > 3
                   ? "min-h-[140px] max-h-[350px]"
                   : items.length === 3
-                  ? "min-h-[85px]"
-                  : items.length === 1
-                  ? "min-h-[30px]"
-                  : "min-h-[57px]"
+                    ? "min-h-[85px]"
+                    : items.length === 1
+                      ? "min-h-[30px]"
+                      : "min-h-[57px]"
               } min-w-[200px] flex-1 w-full`}
               data={items}
               ref={(el) => {
@@ -164,8 +158,8 @@ export const Dropdown: FC<
                     {prop.popover?.renderItem
                       ? prop.popover.renderItem(e, idx)
                       : typeof e === "string"
-                      ? e
-                      : e.label}
+                        ? e
+                        : e.label}
                   </div>
                 );
               }}

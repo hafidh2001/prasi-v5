@@ -1,24 +1,18 @@
 import capitalize from "lodash.capitalize";
 import get from "lodash.get";
+import set from "lodash.set";
 import { ChevronDown, Trash2, TriangleAlert } from "lucide-react";
 import { FC, useEffect, useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { useLocal } from "utils/react/use-local";
-import { Combobox } from "utils/shadcn/comps/ui/combobox";
 import { Popover } from "utils/ui/popover";
 import { Tooltip } from "utils/ui/tooltip";
-import { allNodeDefinitions } from "../runtime/nodes";
-import {
-  DeepReadonly,
-  PFField,
-  PFNode,
-  PFNodeDefinition,
-  RPFlow,
-} from "../runtime/types";
+import { DeepReadonly, PFField, PFNode, RPFlow } from "../runtime/types";
 import { fg } from "../utils/flow-global";
-import { PFPropCode } from "./pf-prop-code";
-import set from "lodash.set";
 import { getNodeDef } from "../utils/get-node-def";
+import { PFDropdown } from "../utils/type-picker";
+import { PFPropCode } from "./pf-prop-code";
+import { Combobox } from "utils/shadcn/comps/ui/combobox";
 
 export type FieldChangedAction =
   | "text-changed"
@@ -171,38 +165,12 @@ export const PFPropNodeField: FC<{
               update("option-picked", path || [], value);
             }}
           >
-            {({ setOpen }) => {
-              let selected = <></>;
-              if (field.multiple) {
-                const counts = local.options.filter((e) => {
-                  return e.value === value;
-                });
-
-                if (counts.length === 1) {
-                  selected = <>{counts[0].el || counts[0].label}</>;
-                } else {
-                  selected = (
-                    <>{counts.length ? `${counts.length} selected` : ``}</>
-                  );
-                }
-              } else {
-                const current = local.options.find((e) => {
-                  return e.value === value;
-                });
-                selected = <> {current?.el || current?.label}</>;
-              }
-
-              return (
-                <div className="flex flex-1 border-l items-stretch cursor-pointer hover:bg-blue-50">
-                  <div className="flex-1 flex px-1 items-center">
-                    {selected}
-                  </div>
-                  <div className="flex w-[25px] items-center justify-center">
-                    <ChevronDown size={12} />
-                  </div>
-                </div>
-              );
-            }}
+            <div className="flex flex-1 border-l items-stretch cursor-pointer hover:bg-blue-50">
+              <div className="flex-1 flex px-1 items-center"></div>
+              <div className="flex w-[25px] items-center justify-center">
+                <ChevronDown size={12} />
+              </div>
+            </div>
           </Combobox>
         )}
         {field.type === "buttons" && (

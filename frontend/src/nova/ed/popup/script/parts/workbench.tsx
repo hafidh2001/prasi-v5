@@ -1,25 +1,20 @@
 import { getNodeById } from "crdt/node/get-node-by-id";
-import { active, getActiveTree } from "logic/active";
+import { active } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import {
-  Code,
-  GitFork,
   PanelTopClose,
   PictureInPicture2,
   ScrollText,
-  Trash,
-  X,
+  X
 } from "lucide-react";
 import { FC, ReactNode, useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { Tooltip } from "utils/ui/tooltip";
-import { TopBtn } from "../../../ui/top-btn";
-import { fg } from "../flow/utils/flow-global";
 import { EdScriptSnippet } from "./snippet";
 
 export const EdScriptWorkbench: FC<{
-  children: (arg: { mode: "script" | "flow" }) => ReactNode;
+  children: ReactNode;
 }> = ({ children }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({ active_id: "" });
@@ -46,26 +41,6 @@ export const EdScriptWorkbench: FC<{
   };
 
   const is_error = popup.typings.status === "error" && popup.mode === "js";
-
-  let script_mode = "flow" as "flow" | "script";
-  if (!item?.adv?.scriptMode && item?.adv?.js && !item.adv.flow) {
-    script_mode = "script";
-  }
-  if (item?.adv?.scriptMode) {
-    script_mode = item.adv.scriptMode;
-  }
-  if (p.script.monaco_selection) {
-    if (script_mode === "flow") {
-      getActiveTree(p).update("Switch to script mode", ({ findNode }) => {
-        const n = findNode(active.item_id);
-        if (n) {
-          if (!n.item.adv) n.item.adv = {};
-          n.item.adv.scriptMode = "script";
-        }
-      });
-    }
-    script_mode = "script";
-  }
 
   if (
     node &&
@@ -95,7 +70,7 @@ export const EdScriptWorkbench: FC<{
             {popup.type === "prop-instance" && <CompTitleInstance />}
             {popup.type === "item" && (
               <>
-                <div className="flex p-2 space-x-1">
+                <div className="flex p-2 space-x-1 border-r">
                   {[
                     { type: "js", color: "#e9522c" },
                     { type: "css", color: "#188228" },
@@ -128,10 +103,11 @@ export const EdScriptWorkbench: FC<{
                     );
                   })}
                 </div>
-                {(popup.mode === "js" || popup.mode === "flow") && (
+                {popup.mode === "js" && (
                   <>
                     {popup.type === "item" && (
                       <>
+                        {/* 
                         <div className="border-l flex items-center pl-2 p-1 text-xs">
                           <div
                             className={cx(
@@ -194,10 +170,10 @@ export const EdScriptWorkbench: FC<{
                               <div>Script</div>
                             </div>
                           </div>
-                        </div>
+                        </div> */}
 
-                        {script_mode !== "flow" && <EdScriptSnippet />}
-                        {script_mode === "flow" && (
+                        <EdScriptSnippet />
+                        {/* {script_mode === "flow" && (
                           <div className="flex items-center pl-2 border-l ml-1">
                             <Tooltip
                               content="Reset Flow"
@@ -212,7 +188,7 @@ export const EdScriptWorkbench: FC<{
                               </TopBtn>
                             </Tooltip>
                           </div>
-                        )}
+                        )} */}
                       </>
                     )}
                   </>
@@ -261,7 +237,7 @@ export const EdScriptWorkbench: FC<{
           </div>
         </div>
 
-        {children({ mode: script_mode })}
+        {children}
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { DeepReadonly } from "popup/script/flow/runtime/types";
+import { DeepReadonly } from "popup/flow/runtime/types";
 import { useEffect } from "react";
 import { IItem } from "utils/types/item";
 import { useVi } from "vi/lib/store";

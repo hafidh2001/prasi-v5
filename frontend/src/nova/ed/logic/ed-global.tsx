@@ -1,7 +1,7 @@
 import { NodeModel, TreeMethods } from "@minoru/react-dnd-treeview";
-import { PFlow, RPFlow } from "popup/script/flow/runtime/types";
+import { RPFlow } from "popup/flow/runtime/types";
 import { createClient } from "utils/sync/client";
-import { loadPageTree, PageTree } from "../crdt/load-page-tree";
+import { PageTree } from "../crdt/load-page-tree";
 import { CompPickerNode } from "../popup/comp/comp-picker/render-picker-node";
 import { EComp, EPage, ESite, PropFieldKind } from "./types";
 
@@ -66,6 +66,7 @@ export const EDGlobal = {
       },
     },
     left: { mode: "tree" as "tree" | "history" },
+    right: { tab: localStorage.getItem("prasi-panel-right-tab") || "style" },
     popup: {
       site: null as null | ((id_site: string) => any),
       site_form: null as null | {
@@ -87,7 +88,7 @@ export const EDGlobal = {
           );
         },
         paned: localStorage.getItem("prasi-popup-script-mode") === "paned",
-        mode: "js" as "flow" | "js" | "css" | "html",
+        mode: "js" as "js" | "css" | "html",
         last_mode: "js" as "js" | "css" | "html",
         type: "item" as "item" | "prop-master" | "prop-instance" | "comp-types",
         prop_kind: "" as PropFieldKind,

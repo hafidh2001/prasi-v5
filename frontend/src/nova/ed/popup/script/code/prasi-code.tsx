@@ -1,5 +1,5 @@
 import { getActiveNode } from "crdt/node/get-node-by-id";
-import { getActiveTree } from "logic/active";
+import { active, getActiveTree } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import { waitUntil } from "prasi-utils";
 import { useEffect } from "react";
@@ -37,16 +37,6 @@ export const EdPrasiCode = () => {
   const mode = p.ui.popup.script.mode;
 
   const id = node?.item.id || "";
-  const models = getActiveTree(p).script_models;
-  const model = models[id];
-
-  if (model && !model.source) {
-    model.extracted_content = itemJsDefault;
-    jscript.prettier.format(migrateCode(model, models)).then((formatted) => {
-      model.source = formatted;
-      local.render();
-    });
-  }
 
   return (
     <div
@@ -59,21 +49,25 @@ export const EdPrasiCode = () => {
         `
       )}
     >
-      {local.ready && model && model.source && (
+      {local.ready && (
         <>
-          {(mode === "js" || mode === "flow") && (
+          {mode === "js" && (
             <MonacoJS
               highlightJsx
-              models={[
-                {
-                  name: "file:///typings-item.ts",
-                  source: typingsItem,
-                },
-                ...Object.values(models),
-              ]}
+              models={[]}
               onReloadModels={async () => {
                 const tree = getActiveTree(p);
                 await tree.reloadScriptModels();
+
+                const models = tree.script_models;
+                const model = models[id];
+                if (model && !model.source) {
+                  model.extracted_content = itemJsDefault;
+                  model.source = await jscript.prettier.format(
+                    migrateCode(model, models)
+                  );
+                }
+
                 return [
                   {
                     name: "file:///typings-item.ts",
@@ -90,7 +84,7 @@ export const EdPrasiCode = () => {
                   update.push(p, model.id, value);
                 }
               }}
-              activeModel={model.name}
+              activeModel={`file:///${active.item_id}.tsx`}
             />
           )}
 

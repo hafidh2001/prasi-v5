@@ -1,6 +1,6 @@
 import { NodeModel } from "@minoru/react-dnd-treeview";
 import { EBaseComp, EComp, PNode, SyncUndoItem } from "logic/types";
-import { fg } from "popup/script/flow/utils/flow-global";
+import { fg } from "popup/flow/utils/flow-global";
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "utils/sync/client";
 import { IItem } from "utils/types/item";

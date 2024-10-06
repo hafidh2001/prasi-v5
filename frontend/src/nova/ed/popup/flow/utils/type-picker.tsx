@@ -2,7 +2,7 @@
 
 import { Command as CommandPrimitive } from "cmdk";
 import { Check } from "lucide-react";
-import { allNodeDefinitions } from "popup/script/flow/runtime/nodes";
+import { allNodeDefinitions } from "popup/flow/runtime/nodes";
 import * as React from "react";
 
 import { useLocal } from "utils/react/use-local";

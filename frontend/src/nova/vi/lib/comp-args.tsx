@@ -1,4 +1,4 @@
-import { DeepReadonly } from "popup/script/flow/runtime/types";
+import { DeepReadonly } from "popup/flow/runtime/types";
 import { FC, lazy, Suspense } from "react";
 import { IItem } from "utils/types/item";
 import { ViRender } from "vi/vi-render";

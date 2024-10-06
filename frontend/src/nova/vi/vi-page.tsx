@@ -1,4 +1,4 @@
-import { DeepReadonly } from "popup/script/flow/runtime/types";
+import { DeepReadonly } from "popup/flow/runtime/types";
 import { ErrorBox } from "./lib/error-box";
 import { useVi } from "./lib/store";
 import { ViRender } from "./vi-render";

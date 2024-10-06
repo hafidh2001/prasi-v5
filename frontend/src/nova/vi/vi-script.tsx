@@ -1,5 +1,5 @@
 import { rapidhash_fast } from "crdt/node/rapidhash";
-import { DeepReadonly } from "popup/script/flow/runtime/types";
+import { DeepReadonly } from "popup/flow/runtime/types";
 import React, { FC, ReactElement, useRef } from "react";
 import { IItem } from "utils/types/item";
 import { compArgs } from "./lib/comp-args";

@@ -35,10 +35,7 @@ export function Combobox({
   onChange: (value: string) => void;
   defaultValue: string;
   onOpenChange?: (open: boolean) => void;
-  children: (opt: {
-    setOpen: (open: boolean) => void;
-    open: boolean;
-  }) => React.ReactElement;
+  children: React.ReactElement;
 }) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState(defaultValue);
@@ -56,7 +53,7 @@ export function Combobox({
         setOpen(value);
       }}
     >
-      <PopoverTrigger asChild>{children({ setOpen, open })}</PopoverTrigger>
+      <PopoverTrigger asChild>{children }</PopoverTrigger>
       <PopoverContent className={cx("w-[200px] p-0", className)}>
         <Command>
           <CommandInput

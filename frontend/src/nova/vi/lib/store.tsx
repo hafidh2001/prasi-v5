@@ -1,4 +1,4 @@
-import { DeepReadonly } from "popup/script/flow/runtime/types";
+import { DeepReadonly } from "popup/flow/runtime/types";
 import { IItem } from "utils/types/item";
 import { defineStore } from "../../../utils/react/define-store";
 import { ViComps, ViPage, ViWrapperComp } from "./types";

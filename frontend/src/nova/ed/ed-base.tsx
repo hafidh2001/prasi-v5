@@ -1,6 +1,6 @@
 import { loadPageTree } from "crdt/load-page-tree";
 import { loadPendingComponent } from "crdt/node/load-child-comp";
-import { fg } from "popup/script/flow/utils/flow-global";
+import { fg } from "popup/flow/utils/flow-global";
 import { EdPopItemScript } from "popup/script/item-script";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useGlobal } from "../../utils/react/use-global";
@@ -116,7 +116,7 @@ export const EdBase = () => {
                 <>
                   <div
                     className={cx(
-                      "w-full h-full flex flex-1 relative overflow-auto border-r",
+                      "w-full h-full flex flex-1 relative overflow-auto",
                       p.mode === "mobile" ? "flex-col items-center" : ""
                     )}
                   >

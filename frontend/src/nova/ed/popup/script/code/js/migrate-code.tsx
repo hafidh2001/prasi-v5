@@ -51,7 +51,10 @@ const generateRegion = (
 
   return `\
 // #region generated⠀
+// Do not modify code inside region, any modification will be lost.
+
 import React from "react";\
 ${imports}${passprop}
+
 // #endregion`;
 };

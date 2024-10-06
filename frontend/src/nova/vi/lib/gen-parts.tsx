@@ -1,4 +1,4 @@
-import { DeepReadonly } from "popup/script/flow/runtime/types";
+import { DeepReadonly } from "popup/flow/runtime/types";
 import { produceCSS } from "utils/css/gen";
 import { IItem } from "utils/types/item";
 

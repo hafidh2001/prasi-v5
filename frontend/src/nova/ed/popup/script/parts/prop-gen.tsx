@@ -1,10 +1,8 @@
 import { getNodeById } from "crdt/node/get-node-by-id";
 import { active } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
-import { PNode } from "logic/types";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
-import { IItem } from "utils/types/item";
 
 export const EdPropGen = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
