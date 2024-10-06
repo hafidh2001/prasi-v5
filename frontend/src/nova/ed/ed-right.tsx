@@ -11,8 +11,9 @@ import {
   Variable,
 } from "lucide-react";
 import { useGlobal } from "utils/react/use-global";
-import { EdEvents } from "./attrs/events/ed-events";
+import { EdEvents } from "./right/events/ed-events";
 import { active } from "logic/active";
+import { EdVars } from "./right/vars/ed-vars";
 
 export const EdRight = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -68,10 +69,24 @@ export const EdRight = () => {
                   }}
                   key={tab}
                 >
-                  {tab === "style" && <SquareChartGantt />}
-                  {tab === "events" && <AudioWaveform />}
-                  {tab === "vars" && <Library />}
-                  <div>{tab}</div>
+                  {tab === "style" && (
+                    <>
+                      <SquareChartGantt />
+                      Style
+                    </>
+                  )}
+                  {tab === "events" && (
+                    <>
+                      <AudioWaveform />
+                      Events
+                    </>
+                  )}
+                  {tab === "vars" && (
+                    <>
+                      <Library />
+                      Variables
+                    </>
+                  )}
                 </div>
               );
             })}
@@ -83,6 +98,7 @@ export const EdRight = () => {
         {!is_comp && (
           <div className="absolute inset-0">
             {p.ui.right.tab === "events" && <EdEvents />}
+            {p.ui.right.tab === "vars" && <EdVars />}
           </div>
         )}
         {/* <code className="monospace whitespace-pre-wrap text-[8px] absolute inset-0">
