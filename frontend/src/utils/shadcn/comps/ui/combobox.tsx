@@ -1,7 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { allNodeDefinitions } from "popup/script/flow/runtime/nodes";
+import { allNodeDefinitions } from "popup/flow/runtime/nodes";
 import * as React from "react";
 
 import {

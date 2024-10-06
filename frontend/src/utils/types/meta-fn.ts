@@ -1,4 +1,4 @@
-import { PFlow } from "popup/script/flow/runtime/types";
+import { PFlow } from "popup/flow/runtime/types";
 import { IItem } from "./item";
 export type FNLayout = {
   dir: "row" | "col" | "row-reverse" | "col-reverse";

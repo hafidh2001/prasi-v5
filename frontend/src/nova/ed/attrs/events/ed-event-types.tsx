@@ -1,7 +1,7 @@
-export const EventTypes = {
+export const EdEventTypes = {
   "On Init": {
     vars: {},
-    desc: "Dipanggil ketika pertama kali halaman dimuat.",
+    desc: "Dipanggil ketika pertama kali halaman dimuat.\nBiasanya digunakan untuk loading data dari server/database.",
   },
   "On Click": {
     vars: {},
