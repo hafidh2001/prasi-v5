@@ -18,8 +18,3 @@ export const ed = {
   url: "/ed/:site_id/:page_id",
   page: () => import("./page/ed"),
 };
-
-export const coba = {
-  url: "/coba",
-  page: () => import("./page/coba"),
-};

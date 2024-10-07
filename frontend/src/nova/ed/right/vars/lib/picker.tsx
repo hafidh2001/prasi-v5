@@ -1,5 +1,4 @@
 import { FC } from "react";
-import { useLocal } from "utils/react/use-local";
 import {
   Command,
   CommandEmpty,
