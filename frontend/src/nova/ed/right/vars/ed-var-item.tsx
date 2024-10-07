@@ -116,6 +116,21 @@ const Wrapper: FC<{
       content={
         <EdVarEdit
           variable={variable}
+          setValue={(path, value) => {
+            const rpath = path.join(".").replace("~~", "default");
+
+            getActiveTree(p).update(`Update var ${name}`, ({ findNode }) => {
+              const n = findNode(node.item.id);
+              if (n) {
+                if (!n.item.vars) {
+                  n.item.vars = {};
+                }
+                if (n.item.vars[name]) {
+                  set(n.item.vars[name], rpath, value);
+                }
+              }
+            });
+          }}
           onChange={({ path, type }) => {
             getActiveTree(p).update(`Update var ${name}`, ({ findNode }) => {
               const n = findNode(node.item.id);

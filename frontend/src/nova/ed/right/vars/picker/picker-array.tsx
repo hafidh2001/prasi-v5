@@ -15,9 +15,9 @@ export const RenderArray: FC<{
   children: EVChildren;
   path: string[];
   className?: string;
+  value: any;
   onChange: (path: string[], type: EType | EObjectEntry) => void;
-}> = ({ type, children, path, onChange, className }) => {
-  console.log(type, path);
+}> = ({ type, children, path, onChange, value }) => {
   return (
     <div
       className={cx("flex flex-col")}
@@ -33,6 +33,7 @@ export const RenderArray: FC<{
         }}
         path={[...path, "0"]}
         children={children}
+        value={value[0]}
       />
     </div>
   );

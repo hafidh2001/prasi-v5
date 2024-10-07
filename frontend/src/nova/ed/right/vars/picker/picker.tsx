@@ -14,8 +14,21 @@ export const EdVarPicker: FC<{
   type: EType;
   onChange: (path: string[], type: EType | EObjectEntry) => void;
   path: string[];
+  valuePath?: string[];
+  value: any;
   name?: string;
-}> = ({ children, type, onChange, path, name }) => {
+  markChanged?: (path: string[]) => void;
+  changed?: number;
+}> = ({
+  children,
+  type,
+  onChange,
+  path,
+  name,
+  value,
+  markChanged,
+  valuePath,
+}) => {
   const local = useLocal({
     open: false,
     type: null as any,
@@ -24,10 +37,12 @@ export const EdVarPicker: FC<{
       return <></>;
     },
     item_len: 0,
+    value,
     Rename: null as unknown as typeof EdPickerRename,
   });
 
   const base_type = getBaseType(type);
+
   if (
     type !== local.type ||
     (typeof type === "object" &&
@@ -57,10 +72,25 @@ export const EdVarPicker: FC<{
               focus.path = path.join(".");
               local.render();
             }}
+            valuePath={valuePath || path}
             focus={path.join(".") === focus.path}
             onFocus={() => {
               focus.path = "";
               local.render();
+            }}
+            value={value}
+            markChanged={(p) => {
+              if (valuePath) {
+                if (p.length - 1 === valuePath.length) {
+                  local.type = null;
+                }
+              } else {
+                local.type = null;
+              }
+
+              if (markChanged) {
+                markChanged(p.slice(0, -1));
+              }
             }}
           />
         );
@@ -74,6 +104,7 @@ export const EdVarPicker: FC<{
             path={path}
             className={className}
             type={local.type}
+            value={value}
           />
         );
       };
@@ -96,5 +127,12 @@ export const EdVarPicker: FC<{
     name,
     Rename: local.Rename,
     path,
+    value,
+    valuePath: valuePath || path,
+    markChanged(p) {
+      if (markChanged) {
+        markChanged(p);
+      }
+    },
   });
 };

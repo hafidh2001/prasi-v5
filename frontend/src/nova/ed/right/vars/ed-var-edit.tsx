@@ -6,6 +6,7 @@ import { Tooltip } from "utils/ui/tooltip";
 import { EdTypeLabel } from "./lib/label";
 import { EObjectEntry, EType } from "./lib/type";
 import { EdVarPicker } from "./picker/picker";
+import { EdPickerBoolean } from "./picker/picker-boolean";
 
 const DEPTH_PX = 6;
 export const EdVarEdit: FC<{
@@ -19,7 +20,8 @@ export const EdVarEdit: FC<{
     new_name: string;
     old_name: string;
   }) => void;
-}> = ({ variable, onChange, onRename }) => {
+  setValue: (path: string[], value: any) => void;
+}> = ({ variable, onChange, onRename, setValue }) => {
   const size = localStorage.getItem("prasi-var-edit-size") || "400*700";
   const [height, width] = size.split("*").map(Number);
   return (
@@ -54,8 +56,21 @@ export const EdVarEdit: FC<{
               onChange({ path: path.join("."), type });
             }}
             path={["~~"]}
+            value={variable.default}
           >
-            {({ Item, open, type, Lines, depth, name, Rename, path }) => (
+            {({
+              Item,
+              open,
+              type,
+              Lines,
+              depth,
+              name,
+              Rename,
+              path,
+              value,
+              valuePath,
+              markChanged,
+            }) => (
               <div className={cx("flex flex-1 flex-col items-stretch")}>
                 <div
                   className={cx(
@@ -89,11 +104,29 @@ export const EdVarEdit: FC<{
                           </div>
                         </>
                       )}
+
+                      <div
+                        className="flex items-center mr-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                      >
+                        {type === "boolean" && (
+                          <EdPickerBoolean
+                            value={value}
+                            onChange={(v) => {
+                              markChanged(valuePath);
+                              setValue(valuePath, v);
+                            }}
+                          />
+                        )}
+                      </div>
                       {path.length > 1 && (
                         <Tooltip
                           content="Delete Property"
                           onClick={(e) => {
                             e.stopPropagation();
+                            setValue(valuePath, undefined);
                             onChange({
                               path: path.slice(0, path.length - 1).join("."),
                               type: undefined,

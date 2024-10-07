@@ -10,8 +10,6 @@ export type EObjectType = {
 };
 export type EObjectEntry = { type: EType; idx: number; optional?: boolean };
 
-export type EValue<T extends EType> = { value: any; type: T; valid?: boolean };
-
 export type EVChildren = (arg: {
   open: () => void;
   type: EType;
@@ -21,4 +19,7 @@ export type EVChildren = (arg: {
   name?: string;
   Rename: typeof EdPickerRename;
   path: string[];
+  value: any;
+  valuePath: string[];
+  markChanged: (path: string[]) => void;
 }) => ReactElement;
