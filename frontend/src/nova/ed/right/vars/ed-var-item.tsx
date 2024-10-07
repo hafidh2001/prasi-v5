@@ -167,12 +167,20 @@ const Wrapper: FC<{
                   }
 
                   const new_base_type = getBaseType(get(curvar, path_type));
-                  if (["object"].includes(new_base_type)) {
-                    const old_type = get(
-                      curvar.history.type,
-                      path.replace("~~", new_base_type)
-                    );
-                    const old_base_type = getBaseType(old_type);
+
+                  const old_type = get(
+                    curvar.history.type,
+                    path.replace("~~", new_base_type)
+                  );
+                  const old_base_type = getBaseType(old_type);
+
+                  if (new_base_type === "array") {
+                    if (old_base_type === "object") {
+                      set(curvar, path_type + ".0", old_base_type);
+                    } else {
+                      set(curvar, path_type + ".0", cur_type);
+                    }
+                  } else if (new_base_type === "object") {
                     if (old_base_type === new_base_type) {
                       set(curvar, path_type, old_type);
                     }

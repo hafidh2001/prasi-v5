@@ -66,25 +66,30 @@ export const EdVarEdit: FC<{
                   )}
                   onClick={open}
                 >
-                  {name ? (
-                    <div className="flex justify-between flex-1">
-                      <div className="flex items-stretch text-sm flex-1">
-                        <Item
-                          className={cx(
-                            "flex h-[30px]",
-                            css`
-                              .text {
-                                font-size: 90%;
-                                margin-left: 3px;
-                              }
-                            `
-                          )}
-                        >
-                          <EdTypeLabel type={type} />
-                        </Item>
-                        <div className="flex-1 flex items-center">
-                          <Rename name={name} onRename={onRename} />
-                        </div>
+                  <div className="flex justify-between flex-1">
+                    <div className="flex items-stretch text-sm flex-1">
+                      <Item
+                        className={cx(
+                          "flex h-[30px]",
+                          css`
+                            .text {
+                              font-size: 90%;
+                              margin-left: 3px;
+                            }
+                          `,
+                          !name && "flex-1"
+                        )}
+                      >
+                        <EdTypeLabel type={type} show_label={!name} />
+                      </Item>
+                      {name && (
+                        <>
+                          <div className="flex-1 flex items-center">
+                            <Rename name={name} onRename={onRename} />
+                          </div>
+                        </>
+                      )}
+                      {path.length > 1 && (
                         <Tooltip
                           content="Delete Property"
                           onClick={(e) => {
@@ -98,23 +103,9 @@ export const EdVarEdit: FC<{
                         >
                           <Trash2 size={14} />
                         </Tooltip>
-                      </div>
-                    </div>
-                  ) : (
-                    <Item
-                      className={cx(
-                        "px-1 flex pr-2 h-[30px]",
-                        css`
-                          .text {
-                            font-size: 90%;
-                            margin-left: 3px;
-                          }
-                        `
                       )}
-                    >
-                      <EdTypeLabel type={type} show_label />
-                    </Item>
-                  )}
+                    </div>
+                  </div>
                 </div>
                 <div className={cx("flex flex-col")}>
                   <Lines

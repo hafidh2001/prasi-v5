@@ -73,7 +73,7 @@ export const RenderObject: FC<{
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               let final_path = [...path, local.new_property.text];
-              if (path.length === 2) {
+              if (path.length === 2 && path[1] !== "0") {
                 final_path = [...path, "type", local.new_property.text];
               }
 
