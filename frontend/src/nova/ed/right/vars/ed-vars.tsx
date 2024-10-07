@@ -74,7 +74,7 @@ export const EdVars = () => {
                         const vars = n.item.vars;
 
                         vars[text] = {
-                          type: { type: "string" },
+                          type: 'null',
                           promise: false,
                         };
                       }

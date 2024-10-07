@@ -232,23 +232,24 @@ export const PFPropNodeField: FC<{
           >
             <Popover
               placement="left"
-              popoverClassName={
+              popoverClassName={cx(
                 node._codeError && node._codeError[varpath]
                   ? css`
-                      border: 2px solid red;
-                      background: white;
+                      border: 1px solid red;
                       .arrow {
-                        border: 2px solid red;
+                        border: 1px solid red;
                       }
                     `
                   : css`
-                      border: 2px solid black;
-                      background: white;
+                      border: 1px solid black;
                       .arrow {
-                        border: 2px solid black;
+                        border: 1px solid black;
                       }
-                    `
-              }
+                    `,
+                css`
+                  background: white;
+                `
+              )}
               asChild
               backdrop={false}
               content={

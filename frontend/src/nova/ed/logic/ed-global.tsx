@@ -68,6 +68,9 @@ export const EDGlobal = {
     left: { mode: "tree" as "tree" | "history" },
     right: { tab: localStorage.getItem("prasi-panel-right-tab") || "style" },
     popup: {
+      vars: {
+        name: "",
+      },
       site: null as null | ((id_site: string) => any),
       site_form: null as null | {
         id: string;
