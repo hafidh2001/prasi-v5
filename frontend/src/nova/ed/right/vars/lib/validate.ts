@@ -1,9 +1,19 @@
-import { EType } from "./type";
+import { EBaseType, ESimpleType, EType } from "./type";
 
 interface ValidationResult {
   valid: boolean;
   errorMessage?: string;
 }
+
+export const getBaseType = (type: EType): EBaseType => {
+  if (typeof type === "object") {
+    if (Array.isArray(type)) {
+      return "array";
+    }
+    return "object";
+  }
+  return type;
+};
 
 export function validateValue<T extends EType>(
   value: any,

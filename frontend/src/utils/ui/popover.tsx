@@ -27,6 +27,7 @@ interface PopoverOptions {
   onOpenChange?: (open: boolean) => void;
   autoFocus?: boolean;
   backdrop?: boolean | "self";
+  border?: string;
   root?: HTMLElement;
 }
 
@@ -216,6 +217,7 @@ export function Popover({
   modal = false,
   popoverClassName,
   arrow,
+  border,
   ...restOptions
 }: {
   className?: string;
@@ -256,7 +258,16 @@ export function Popover({
                 box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.15);
                 font-size: 12px;
                 user-select: none;
-              `
+              `,
+          border &&
+            css`
+              border: ${border};
+              background: white;
+              padding: 0px;
+              .arrow {
+                border: ${border};
+              }
+            `
         )}
       >
         {_content}

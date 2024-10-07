@@ -13,7 +13,7 @@ import {
 import { useGlobal } from "utils/react/use-global";
 import { EdEvents } from "./right/events/ed-events";
 import { active } from "logic/active";
-import { EdVars } from "./right/vars/ed-vars";
+import { EdVarList } from "./right/vars/ed-var-list";
 
 export const EdRight = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -98,7 +98,7 @@ export const EdRight = () => {
         {!is_comp && (
           <div className="absolute inset-0">
             {p.ui.right.tab === "events" && <EdEvents />}
-            {p.ui.right.tab === "vars" && <EdVars />}
+            {p.ui.right.tab === "vars" && <EdVarList />}
           </div>
         )}
         {/* <code className="monospace whitespace-pre-wrap text-[8px] absolute inset-0">

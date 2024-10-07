@@ -1,13 +1,18 @@
+import set from "lodash.set";
 import { getActiveTree } from "logic/active";
-import { EDGlobal } from "logic/ed-global";
+import { EDGlobal, PG } from "logic/ed-global";
 import { PNode } from "logic/types";
 import { Trash2 } from "lucide-react";
 import { FC, ReactNode } from "react";
 import { useGlobal } from "utils/react/use-global";
+import { IVar } from "utils/types/item";
 import { Popover } from "utils/ui/popover";
 import { Tooltip } from "utils/ui/tooltip";
 import { EdVarEdit } from "./ed-var-edit";
 import { EdTypeLabel } from "./lib/label";
+import { EObjectEntry, EType } from "./lib/type";
+import { getBaseType } from "./lib/validate";
+import get from "lodash.get";
 
 export const EdVarItem: FC<{ name: string; node: PNode }> = ({
   name,
@@ -35,6 +40,9 @@ export const EdVarItem: FC<{ name: string; node: PNode }> = ({
           p.ui.popup.vars.name = "";
           p.render();
         }}
+        variable={_var}
+        node={node}
+        p={p}
       >
         <div
           className={cx(
@@ -83,8 +91,11 @@ const Wrapper: FC<{
   children: ReactNode;
   opened: boolean;
   name: string;
+  variable: IVar<any>;
+  node: PNode;
   close: () => void;
-}> = ({ children, opened, name, close }) => {
+  p: PG;
+}> = ({ children, opened, name, close, variable, node, p }) => {
   if (!opened) return children;
   return (
     <Popover
@@ -102,7 +113,94 @@ const Wrapper: FC<{
       onOpenChange={() => {
         close();
       }}
-      content={<EdVarEdit name={name} />}
+      content={
+        <EdVarEdit
+          variable={variable}
+          onChange={({ path, type }) => {
+            getActiveTree(p).update(`Update var ${name}`, ({ findNode }) => {
+              const n = findNode(node.item.id);
+              if (n) {
+                if (!n.item.vars) {
+                  n.item.vars = {};
+                }
+                if (!n.item.vars[name])
+                  n.item.vars[name] = {
+                    history: { type: {}, value: {} },
+                    type,
+                  };
+                const curvar = n.item.vars[name];
+                if (curvar) {
+                  const path_type = path.replace("~~", "type");
+                  const old_root_type = getBaseType(curvar.type);
+                  const cur_type = get(curvar, path_type);
+                  const cur_base_type = getBaseType(cur_type);
+
+                  if (["object"].includes(old_root_type)) {
+                    if (!curvar.history.type[old_root_type])
+                      curvar.history.type[old_root_type] = {};
+
+                    if (["object"].includes(cur_base_type)) {
+                      set(
+                        curvar.history.type,
+                        path.replace("~~", old_root_type),
+                        cur_type
+                      );
+                    }
+                  }
+
+                  if (type === undefined) {
+                    const cur_path = path_type.split(".");
+                    const name = cur_path.pop();
+                    const cur = get(curvar, cur_path.join("."));
+                    if (name) {
+                      delete cur[name];
+                    }
+                  } else {
+                    set(curvar, path_type, type);
+
+                    if (
+                      typeof type === "object" &&
+                      typeof (type as any).idx === "number"
+                    ) {
+                      return;
+                    }
+                  }
+
+                  const new_base_type = getBaseType(get(curvar, path_type));
+                  if (["object"].includes(new_base_type)) {
+                    const old_type = get(
+                      curvar.history.type,
+                      path.replace("~~", new_base_type)
+                    );
+                    const old_base_type = getBaseType(old_type);
+                    if (old_base_type === new_base_type) {
+                      set(curvar, path_type, old_type);
+                    }
+                  }
+                }
+              }
+            });
+          }}
+          onRename={({ path, new_name, old_name }) => {
+            const rpath = path
+              .slice(0, path.length - 2)
+              .join(".")
+              .replace("~~", "type");
+            getActiveTree(p).update(`Update var ${name}`, ({ findNode }) => {
+              const n = findNode(node.item.id);
+              if (n) {
+                const curvar = n.item.vars?.[name];
+                if (curvar) {
+                  const base = get(curvar, rpath);
+                  const old = base[old_name];
+                  delete base[old_name];
+                  base[new_name] = old;
+                }
+              }
+            });
+          }}
+        />
+      }
       placement="left-start"
     >
       {children}

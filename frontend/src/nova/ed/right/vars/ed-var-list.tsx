@@ -6,7 +6,7 @@ import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { EdVarItem } from "./ed-var-item";
 
-export const EdVars = () => {
+export const EdVarList = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const node = getActiveNode(p);
   const local = useLocal({ add: { focus: false, text: "" } });
@@ -74,15 +74,17 @@ export const EdVars = () => {
                         const vars = n.item.vars;
 
                         vars[text] = {
-                          type: 'null',
+                          type: {},
                           promise: false,
+                          history: { type: {}, value: {} },
                         };
                       }
                     }
                   );
 
+                  p.ui.popup.vars.name = text;
                   local.add.text = "";
-                  local.render();
+                  p.render();
                 }
               }
             }}
