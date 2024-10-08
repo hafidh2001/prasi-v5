@@ -1,13 +1,5 @@
-import { PlusCircle } from "lucide-react";
 import { FC } from "react";
-import { useLocal } from "utils/react/use-local";
-import {
-  EArrayType,
-  EObjectEntry,
-  EObjectType,
-  EType,
-  EVChildren,
-} from "../lib/type";
+import { EArrayType, EObjectEntry, EType, EVChildren } from "../lib/type";
 import { EdVarPicker } from "./picker";
 
 export const RenderArray: FC<{
@@ -16,16 +8,22 @@ export const RenderArray: FC<{
   path: string[];
   className?: string;
   value: any;
+  valuePath: string[];
   onChange: (path: string[], type: EType | EObjectEntry) => void;
-}> = ({ type, children, path, onChange, value }) => {
-  return (
-    <div
-      className={cx("flex flex-col")}
-      onClick={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-      }}
-    >
+  setValue: (path: string[], value: any) => void;
+  markChanged: (path: string[]) => void;
+}> = ({
+  type,
+  children,
+  path,
+  onChange,
+  className,
+  value,
+  valuePath,
+  markChanged,
+}) => {
+  if (value || path.length === 1) {
+    return (
       <EdVarPicker
         type={type[0]}
         onChange={(path, type) => {
@@ -33,8 +31,14 @@ export const RenderArray: FC<{
         }}
         path={[...path, "0"]}
         children={children}
-        value={value[0]}
+        value={value ? value[0] : undefined}
+        valuePath={[...valuePath, "0"]}
+        markChanged={(p) => {
+          markChanged(p);
+        }}
       />
-    </div>
-  );
+    );
+  }
+
+  return null;
 };

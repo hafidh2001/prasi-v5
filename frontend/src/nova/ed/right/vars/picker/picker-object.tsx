@@ -17,6 +17,7 @@ export const RenderObject: FC<{
   value: any;
   valuePath: string[];
   markChanged: (path: string[]) => void;
+  setValue: (path: string[], value: any) => void;
 }> = ({
   type,
   children,
@@ -29,6 +30,7 @@ export const RenderObject: FC<{
   value,
   markChanged,
   valuePath,
+  setValue,
 }) => {
   const local = useLocal({ new_property: { text: "" }, ts: Date.now() });
   const addNew = () => {
@@ -38,6 +40,8 @@ export const RenderObject: FC<{
     }
 
     const now = Date.now();
+
+    setValue([...valuePath, local.new_property.text], "");
 
     onChange(final_path, {
       type: "string",
@@ -67,7 +71,8 @@ export const RenderObject: FC<{
           <EdVarPicker
             key={key}
             type={val.type}
-            onChange={(path, type) => {
+            onChange={(path, type, valuePath) => {
+              if (valuePath) setValue(valuePath, type);
               onChange(path, type);
             }}
             path={[...path, key, "type"]}

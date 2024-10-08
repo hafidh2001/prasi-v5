@@ -8,9 +8,9 @@ import { EdTypeLabel } from "./lib/label";
 import { EObjectEntry, EType } from "./lib/type";
 import { EdVarPicker } from "./picker/picker";
 import { EdPickerBoolean } from "./picker/picker-boolean";
+import { EdPickerLines } from "./picker/picker-lines";
 import { EdPickerNumber } from "./picker/picker-number";
 import { EdPickerString } from "./picker/picker-string";
-import { EdPickerLines } from "./picker/picker-lines";
 
 const DEPTH_PX = 6;
 export const EdVarEdit: FC<{
@@ -111,7 +111,7 @@ export const EdVarEdit: FC<{
                                   margin-left: 3px;
                                 }
                               `,
-                              !name && "flex-1"
+                              !name && "mr-2"
                             )}
                           >
                             <EdTypeLabel type={type} show_label={!name} />
@@ -125,7 +125,7 @@ export const EdVarEdit: FC<{
                           )}
 
                           <div
-                            className="flex items-center mr-1"
+                            className={cx("flex items-center mr-1 flex-1")}
                             onClick={(e) => {
                               e.stopPropagation();
                             }}
@@ -194,6 +194,7 @@ export const EdVarEdit: FC<{
                         path={path}
                         type={type}
                         value={value}
+                        setValue={setValue}
                         valuePath={valuePath}
                         markChanged={markChanged}
                         className={css`

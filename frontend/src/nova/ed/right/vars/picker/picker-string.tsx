@@ -31,6 +31,7 @@ export const EdPickerString: FC<{
       onBlur={() => {
         onChange(local.value);
       }}
+      placeholder="Value"
       onKeyDown={(e) => {
         if (e.key === "Enter") {
           onChange(local.value);

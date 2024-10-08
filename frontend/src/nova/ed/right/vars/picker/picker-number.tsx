@@ -17,6 +17,7 @@ export const EdPickerNumber: FC<{
       type="text"
       tabIndex={0}
       value={local.value}
+      placeholder="Value"
       onChange={(event) => {
         local.value = (event.target as HTMLInputElement).value.replace(
           /\D/g,

@@ -1,5 +1,5 @@
 import { EPage } from "logic/types";
-import { FC, ReactElement } from "react";
+import { FC } from "react";
 import { IItem } from "utils/types/item";
 import { ViRender } from "vi/vi-render";
 

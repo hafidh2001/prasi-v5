@@ -1,3 +1,4 @@
+import get from "lodash.get";
 import set from "lodash.set";
 import { getActiveTree } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
@@ -10,10 +11,7 @@ import { Popover } from "utils/ui/popover";
 import { Tooltip } from "utils/ui/tooltip";
 import { EdVarEdit } from "./ed-var-edit";
 import { EdTypeLabel } from "./lib/label";
-import { EObjectEntry, EType } from "./lib/type";
 import { getBaseType } from "./lib/validate";
-import get from "lodash.get";
-import { current } from "immer";
 
 export const EdVarItem: FC<{ name: string; node: PNode }> = ({
   name,

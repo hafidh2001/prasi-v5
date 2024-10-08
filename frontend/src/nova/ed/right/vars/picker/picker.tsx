@@ -2,10 +2,8 @@ import { FC } from "react";
 import { useLocal } from "utils/react/use-local";
 import { EObjectEntry, EType, EVChildren } from "../lib/type";
 import { getBaseType } from "../lib/validate";
-import { RenderObject } from "./picker-object";
 import { definePickerPopup } from "./picker-popup";
 import { definePickerRename, EdPickerRename } from "./picker-rename";
-import { RenderArray } from "./picker-array";
 
 export const EdVarPicker: FC<{
   children: EVChildren;
@@ -55,27 +53,6 @@ export const EdVarPicker: FC<{
     });
 
     local.Rename = definePickerRename({ path });
-
-    // if (base_type === "object") {
-    //   local.item_len = Object.keys(type).length;
-    // } else if (base_type === "array") {
-    //   local.Lines = ({ className }) => {
-    //     return (
-    //       <RenderArray
-    //         children={children}
-    //         onChange={onChange}
-    //         path={path}
-    //         className={className}
-    //         type={local.type}
-    //         value={value}
-    //       />
-    //     );
-    //   };
-    // } else {
-    //   local.Lines = () => {
-    //     return <></>;
-    //   };
-    // }
   }
 
   return children({

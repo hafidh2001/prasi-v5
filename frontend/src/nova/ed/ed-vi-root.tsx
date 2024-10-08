@@ -71,6 +71,7 @@ export const EdViRoot = memo(() => {
 const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
   (({ item, is_layout, ViRender, __idx }) => {
     return (
+      // @ts-ignore
       <ViRender
         item={item}
         is_layout={is_layout}
