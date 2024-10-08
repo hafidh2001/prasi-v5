@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { EArrayType, EObjectEntry, EType, EVChildren } from "../lib/type";
-import { EdVarPicker } from "./picker";
+import { EdTypePicker } from "./picker-type";
 
 export const RenderArray: FC<{
   type: EArrayType;
@@ -24,7 +24,7 @@ export const RenderArray: FC<{
 }) => {
   if (value || path.length === 1) {
     return (
-      <EdVarPicker
+      <EdTypePicker
         type={type[0]}
         onChange={(path, type) => {
           onChange(path, type);

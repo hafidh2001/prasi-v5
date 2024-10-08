@@ -5,7 +5,7 @@ import { getBaseType } from "../lib/validate";
 import { definePickerPopup } from "./picker-popup";
 import { definePickerRename, EdPickerRename } from "./picker-rename";
 
-export const EdVarPicker: FC<{
+export const EdTypePicker: FC<{
   children: EVChildren;
   type: EType;
   onChange: (

@@ -6,7 +6,7 @@ import { IVar } from "utils/types/item";
 import { Tooltip } from "utils/ui/tooltip";
 import { EdTypeLabel } from "./lib/label";
 import { EObjectEntry, EType } from "./lib/type";
-import { EdVarPicker } from "./picker/picker";
+import { EdTypePicker } from "./picker/picker-type";
 import { EdPickerBoolean } from "./picker/picker-boolean";
 import { EdPickerLines } from "./picker/picker-lines";
 import { EdPickerNumber } from "./picker/picker-number";
@@ -34,7 +34,7 @@ export const EdVarEdit: FC<{
   const mainContent = (
     <div className="flex flex-1 relative overflow-auto">
       <div className="absolute inset-0 flex flex-col flex-1 select-none">
-        <EdVarPicker
+        <EdTypePicker
           type={variable.type}
           onChange={(path, type, valuePath) => {
             onChange({
@@ -169,7 +169,7 @@ export const EdVarEdit: FC<{
               </div>
             </div>
           )}
-        </EdVarPicker>
+        </EdTypePicker>
       </div>
     </div>
   );

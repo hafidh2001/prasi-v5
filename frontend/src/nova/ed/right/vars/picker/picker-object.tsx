@@ -2,7 +2,7 @@ import { PlusCircle } from "lucide-react";
 import { FC } from "react";
 import { useLocal } from "utils/react/use-local";
 import { EObjectEntry, EObjectType, EType, EVChildren } from "../lib/type";
-import { EdVarPicker } from "./picker";
+import { EdTypePicker } from "./picker-type";
 import { Tooltip } from "utils/ui/tooltip";
 
 export const RenderObject: FC<{
@@ -68,7 +68,7 @@ export const RenderObject: FC<{
         })
         .sort((a, b) => a[1].idx - b[1].idx)
         .map(([key, val]) => (
-          <EdVarPicker
+          <EdTypePicker
             key={key}
             type={val.type}
             onChange={(path, type, valuePath) => {
