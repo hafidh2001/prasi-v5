@@ -71,10 +71,10 @@ export const EDGlobal = {
     right: { tab: localStorage.getItem("prasi-panel-right-tab") || "style" },
     popup: {
       vars: {
-        get name() {
+        get id() {
           return localStorage.getItem("prasi-panel-var-name") || "";
         },
-        set name(value) {
+        set id(value) {
           localStorage.setItem("prasi-panel-var-name", value);
         },
       },

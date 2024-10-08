@@ -6,6 +6,7 @@ import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { EdVarItem } from "./ed-var-item";
 import { Tooltip } from "utils/ui/tooltip";
+import { createId } from "utils/script/create-id";
 
 export const EdVarList = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -29,8 +30,8 @@ export const EdVarList = () => {
       )}
     >
       {item.vars &&
-        Object.keys(item.vars).map((name) => {
-          return <EdVarItem key={name} name={name} node={node} />;
+        Object.entries(item.vars).map(([id, ivar]) => {
+          return <EdVarItem key={id} id={id} name={ivar.name} node={node} />;
         })}
       <Tooltip
         content={
@@ -70,9 +71,11 @@ export const EdVarList = () => {
               }}
               onBlur={() => {
                 if (local.add.text) {
-                  const text = local.add.text;
+                  const name = local.add.text;
+                  const id = createId();
+
                   getActiveTree(p).update(
-                    "Add Variable: " + text,
+                    "Add Variable: " + name,
                     ({ findNode }) => {
                       const n = findNode(item.id);
                       if (n) {
@@ -81,8 +84,11 @@ export const EdVarList = () => {
                         }
                         const vars = n.item.vars;
 
-                        vars[text] = {
+                        vars[id] = {
+                          name,
+                          id,
                           type: {},
+                          usage: {},
                           promise: false,
                           history: { type: {}, value: {} },
                         };
@@ -90,7 +96,7 @@ export const EdVarList = () => {
                     }
                   );
 
-                  p.ui.popup.vars.name = text;
+                  p.ui.popup.vars.id = id;
                   local.add.text = "";
                   local.add.focus = false;
                   p.render();

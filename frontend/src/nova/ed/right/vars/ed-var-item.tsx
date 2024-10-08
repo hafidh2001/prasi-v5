@@ -13,17 +13,20 @@ import { EdVarEdit } from "./ed-var-edit";
 import { EdTypeLabel } from "./lib/label";
 import { getBaseType } from "./lib/validate";
 import JsonView from "@uiw/react-json-view";
+import { useLocal } from "utils/react/use-local";
 
-export const EdVarItem: FC<{ name: string; node: PNode }> = ({
+export const EdVarItem: FC<{ id: string; name: string; node: PNode }> = ({
+  id,
   name,
   node,
 }) => {
   const p = useGlobal(EDGlobal, "GLOBAL");
   const vars = node.item.vars || {};
-  const _var = vars[name];
+  const _var = vars[id];
   if (!_var) return null;
+  const local = useLocal({ name });
 
-  const opened = p.ui.popup.vars.name === name;
+  const opened = p.ui.popup.vars.id === id;
   return (
     <div
       className={cx(
@@ -34,10 +37,11 @@ export const EdVarItem: FC<{ name: string; node: PNode }> = ({
       )}
     >
       <Wrapper
+        id={id}
         name={name}
         opened={opened}
         close={() => {
-          p.ui.popup.vars.name = "";
+          p.ui.popup.vars.id = "";
           p.render();
         }}
         variable={_var}
@@ -52,11 +56,44 @@ export const EdVarItem: FC<{ name: string; node: PNode }> = ({
               : "hover:bg-blue-600 hover:text-white"
           )}
           onClick={() => {
-            p.ui.popup.vars.name = name;
+            p.ui.popup.vars.id = id;
             p.render();
           }}
         >
-          <div className="flex-1 my-1">{name}</div>
+          <input
+            className={cx(
+              "flex-1 my-1 outline-none bg-transparent ",
+              opened ? "cursor-text" : "cursor-pointer"
+            )}
+            spellCheck={false}
+            value={local.name}
+            onChange={(e) => {
+              local.name = e.target.value;
+              local.render();
+            }}
+            onFocus={(e) => {
+              e.currentTarget.select();
+            }}
+            onBlur={() => {
+              if (local.name) {
+                getActiveTree(p).update(
+                  `Rename var ${name}`,
+                  ({ findNode }) => {
+                    const n = findNode(node.item.id);
+                    if (n && n.item.vars && n.item.vars[id]) {
+                      n.item.vars[id].name = local.name;
+                    }
+                  }
+                );
+              } else {
+                local.name = name;
+                local.render();
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.currentTarget.blur();
+            }}
+          />
           <EdTypeLabel type={_var.type} />
         </div>
       </Wrapper>
@@ -65,18 +102,15 @@ export const EdVarItem: FC<{ name: string; node: PNode }> = ({
         <Tooltip
           content="Delete Variable"
           onClick={() => {
-            getActiveTree(p).update(
-              `Remove Variable ${name}`,
-              ({ findNode }) => {
-                const n = findNode(node.item.id);
-                if (n) {
-                  if (!n.item.vars) {
-                    n.item.vars = {};
-                  }
-                  delete n.item.vars[name];
+            getActiveTree(p).update(`Remove Variable ${id}`, ({ findNode }) => {
+              const n = findNode(node.item.id);
+              if (n) {
+                if (!n.item.vars) {
+                  n.item.vars = {};
                 }
+                delete n.item.vars[id];
               }
-            );
+            });
           }}
           className="del flex items-center justify-center w-[25px] border-l cursor-pointer hover:bg-red-500 hover:text-white"
         >
@@ -90,12 +124,13 @@ export const EdVarItem: FC<{ name: string; node: PNode }> = ({
 const Wrapper: FC<{
   children: ReactNode;
   opened: boolean;
+  id: string;
   name: string;
   variable: IVar<any>;
   node: PNode;
   close: () => void;
   p: PG;
-}> = ({ children, opened, name, close, variable, node, p }) => {
+}> = ({ children, opened, id, name, close, variable, node, p }) => {
   if (!opened) return children;
   const value = undefined;
   return (
@@ -137,31 +172,35 @@ const Wrapper: FC<{
           setValue={(path, value) => {
             const rpath = path.join(".").replace("~~", "default");
 
-            getActiveTree(p).update(`Update var ${name}`, ({ findNode }) => {
+            getActiveTree(p).update(`Update var ${id}`, ({ findNode }) => {
               const n = findNode(node.item.id);
               if (n) {
                 if (!n.item.vars) {
                   n.item.vars = {};
                 }
-                if (n.item.vars[name]) {
-                  set(n.item.vars[name], rpath, value);
+                if (n.item.vars[id]) {
+                  set(n.item.vars[id], rpath, value);
                 }
               }
             });
           }}
           onChange={({ path, type, valuePath }) => {
-            getActiveTree(p).update(`Update var ${name}`, ({ findNode }) => {
+            getActiveTree(p).update(`Update var ${id}`, ({ findNode }) => {
               const n = findNode(node.item.id);
               if (n) {
                 if (!n.item.vars) {
                   n.item.vars = {};
                 }
-                if (!n.item.vars[name])
-                  n.item.vars[name] = {
+                if (!n.item.vars[id])
+                  n.item.vars[id] = {
+                    id,
+                    name,
+                    usage: {},
                     history: { type: {}, value: {} },
                     type,
                   };
-                const curvar = n.item.vars[name];
+
+                const curvar = n.item.vars[id];
                 if (curvar) {
                   const path_type = path.replace("~~", "type");
                   const old_root_type = getBaseType(curvar.type);
@@ -243,10 +282,10 @@ const Wrapper: FC<{
               .slice(0, path.length - 2)
               .join(".")
               .replace("~~", "default");
-            getActiveTree(p).update(`Update var ${name}`, ({ findNode }) => {
+            getActiveTree(p).update(`Update var ${id}`, ({ findNode }) => {
               const n = findNode(node.item.id);
               if (n) {
-                const curvar = n.item.vars?.[name];
+                const curvar = n.item.vars?.[id];
                 if (curvar) {
                   const base = get(curvar, rpath);
                   const old = base[old_name];

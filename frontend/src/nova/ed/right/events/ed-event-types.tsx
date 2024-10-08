@@ -16,3 +16,5 @@ export const EdEventTypes = {
     desc: "Dipanggil ketika item ini keluar dari hover",
   },
 };
+
+export type EventType = keyof typeof EdEventTypes;
