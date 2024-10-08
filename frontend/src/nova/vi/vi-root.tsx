@@ -10,12 +10,12 @@ export const ViRoot: FC<ViProp> = ({
   comps,
   layout,
   loader,
-  enable_preload: enablePreload,
   db,
   api,
   mode,
   wrapper,
-  cache_js,
+  enable_cache_js,
+  enable_preload,
 }) => {
   const { init, ref } = useVi(({ action, ref, state }) => ({
     init: action.init,
@@ -24,15 +24,15 @@ export const ViRoot: FC<ViProp> = ({
     ref,
   }));
 
-  if (typeof cache_js !== "undefined") {
-    ref.cache_js = cache_js;
+  if (typeof enable_cache_js !== "undefined") {
+    ref.cache_js = enable_cache_js;
   }
 
   if (!ref.init) {
     ref.init = true;
     ref.loader.comps = loader.comps as any;
     if (wrapper) ref.wrapper = wrapper;
-    viInit({ loader, enablePreload: !!enablePreload });
+    viInit({ loader, enablePreload: !!enable_preload });
   }
 
   init({ page, comps, layout, db, api, mode });

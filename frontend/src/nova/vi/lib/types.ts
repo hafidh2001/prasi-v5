@@ -24,7 +24,7 @@ export type ViProp = {
     comps: (ids: string[]) => Promise<void>;
   };
   enable_preload?: boolean;
-  cache_js?: boolean;
+  enable_cache_js?: boolean;
 };
 
 export type ViWrapperComp = FC<{

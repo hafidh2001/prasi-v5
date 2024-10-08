@@ -60,7 +60,7 @@ export const EdViRoot = memo(() => {
             mode={p.mode}
             enable_preload={false}
             wrapper={ref.wrapper}
-            cache_js={false}
+            enable_cache_js={false}
           />
         </StoreProvider>
       )}

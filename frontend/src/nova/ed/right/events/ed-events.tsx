@@ -11,8 +11,6 @@ export const EdEvents = () => {
   const item = node?.item;
   if (!item) return null;
 
-  const events = item.events || {};
-
   return (
     <div className="flex flex-col flex-1 select-none">
       <div className="text-sm flex flex-1 m-1 my-2 flex-col space-y-1">

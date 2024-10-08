@@ -9,20 +9,15 @@ import { useLocal } from "../../utils/react/use-local";
 import { Loading } from "../../utils/ui/loading";
 import { jscript } from "utils/script/jscript";
 
+jscript.init();
+
 export default page({
   url: "/ed/:site_id/:page_id",
   component: ({}) => {
     const p = useGlobal(EDGlobal, "EDITOR");
-    const local = useLocal(
-      {
-        new_site: false,
-      },
-      () => {
-        jscript.init().then(() => {
-          p.render();
-        });
-      }
-    );
+    const local = useLocal({
+      new_site: false,
+    });
 
     const w = window as any;
 
@@ -114,39 +109,9 @@ export default page({
   },
 });
 
-const navSitePage = async (p: PG) => {
-  loadSession(p);
-  const e = await _db.page.findFirst({
-    where: {
-      is_deleted: false,
-      is_default_layout: false,
-      site: validate(params.site_id)
-        ? { id: params.site_id }
-        : {
-            org: {
-              org_user: {
-                some: {
-                  id_user: p.user.id,
-                },
-              },
-            },
-          },
-      name: {
-        contains: "root",
-        mode: "insensitive",
-      },
-    },
-    select: { id: true, id_site: true },
-    orderBy: {
-      site: {
-        name: "asc",
-      },
-    },
-  });
-
-  if (e && e.id && e.id_site) {
-    location.href = `/ed/${e.id_site}/${e.id}`;
-  } else {
+const navSitePage = (p: PG) => {
+  setTimeout(async () => {
+    loadSession(p);
     const e = await _db.page.findFirst({
       where: {
         is_deleted: false,
@@ -163,11 +128,16 @@ const navSitePage = async (p: PG) => {
               },
             },
         name: {
-          contains: "home",
+          contains: "root",
           mode: "insensitive",
         },
       },
       select: { id: true, id_site: true },
+      orderBy: {
+        site: {
+          name: "asc",
+        },
+      },
     });
 
     if (e && e.id && e.id_site) {
@@ -188,36 +158,63 @@ const navSitePage = async (p: PG) => {
                   },
                 },
               },
+          name: {
+            contains: "home",
+            mode: "insensitive",
+          },
         },
         select: { id: true, id_site: true },
       });
-      if (e) {
-        if (e.id && e.id_site) location.href = `/ed/${e.id_site}/${e.id}`;
-        else {
-          p.status = "no-site";
-          p.render();
-        }
+
+      if (e && e.id && e.id_site) {
+        location.href = `/ed/${e.id_site}/${e.id}`;
       } else {
-        if (validate(params.site_id)) {
-          const page = await _db.page.create({
-            data: {
-              content_tree: {
-                childs: [],
-                id: "root",
-                type: "root",
-              },
-              name: "home",
-              url: "/",
-              id_site: params.site_id,
-            },
-          });
-          location.href = `/ed/${params.site_id}/${page.id}`;
-          return;
+        const e = await _db.page.findFirst({
+          where: {
+            is_deleted: false,
+            is_default_layout: false,
+            site: validate(params.site_id)
+              ? { id: params.site_id }
+              : {
+                  org: {
+                    org_user: {
+                      some: {
+                        id_user: p.user.id,
+                      },
+                    },
+                  },
+                },
+          },
+          select: { id: true, id_site: true },
+        });
+        if (e) {
+          if (e.id && e.id_site) location.href = `/ed/${e.id_site}/${e.id}`;
+          else {
+            p.status = "no-site";
+            p.render();
+          }
         } else {
-          p.status = "no-site";
-          p.render();
+          if (validate(params.site_id)) {
+            const page = await _db.page.create({
+              data: {
+                content_tree: {
+                  childs: [],
+                  id: "root",
+                  type: "root",
+                },
+                name: "home",
+                url: "/",
+                id_site: params.site_id,
+              },
+            });
+            location.href = `/ed/${params.site_id}/${page.id}`;
+            return;
+          } else {
+            p.status = "no-site";
+            p.render();
+          }
         }
       }
     }
-  }
+  });
 };
