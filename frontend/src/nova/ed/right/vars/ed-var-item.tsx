@@ -13,6 +13,7 @@ import { EdTypeLabel } from "./lib/label";
 import { EObjectEntry, EType } from "./lib/type";
 import { getBaseType } from "./lib/validate";
 import get from "lodash.get";
+import { current } from "immer";
 
 export const EdVarItem: FC<{ name: string; node: PNode }> = ({
   name,

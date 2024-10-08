@@ -6,6 +6,10 @@ export const EdPickerBoolean: FC<{
   value: boolean;
   onChange: (value: boolean) => void;
 }> = ({ value, onChange }) => {
+  if (typeof value === "boolean") {
+    onChange(!!value);
+  }
+
   return (
     <label className="flex items-center">
       <Switch

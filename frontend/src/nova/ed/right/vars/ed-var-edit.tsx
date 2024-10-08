@@ -7,6 +7,8 @@ import { EdTypeLabel } from "./lib/label";
 import { EObjectEntry, EType } from "./lib/type";
 import { EdVarPicker } from "./picker/picker";
 import { EdPickerBoolean } from "./picker/picker-boolean";
+import { EdPickerString } from "./picker/picker-string";
+import { EdPickerNumber } from "./picker/picker-number";
 
 const DEPTH_PX = 6;
 export const EdVarEdit: FC<{
@@ -111,6 +113,24 @@ export const EdVarEdit: FC<{
                           e.stopPropagation();
                         }}
                       >
+                        {type === "string" && (
+                          <EdPickerString
+                            value={value}
+                            onChange={(v) => {
+                              markChanged(valuePath);
+                              setValue(valuePath, v);
+                            }}
+                          />
+                        )}
+                        {type === "number" && (
+                          <EdPickerNumber
+                            value={value}
+                            onChange={(v) => {
+                              markChanged(valuePath);
+                              setValue(valuePath, v);
+                            }}
+                          />
+                        )}
                         {type === "boolean" && (
                           <EdPickerBoolean
                             value={value}
