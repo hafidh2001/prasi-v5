@@ -7,12 +7,14 @@ import { definePickerPopup } from "./picker-popup";
 import { definePickerRename, EdPickerRename } from "./picker-rename";
 import { RenderArray } from "./picker-array";
 
-const focus = { path: "" };
-
 export const EdVarPicker: FC<{
   children: EVChildren;
   type: EType;
-  onChange: (path: string[], type: EType | EObjectEntry) => void;
+  onChange: (
+    path: string[],
+    type: EType | EObjectEntry,
+    valuePath?: string[]
+  ) => void;
   path: string[];
   valuePath?: string[];
   value: any;
@@ -33,9 +35,6 @@ export const EdVarPicker: FC<{
     open: false,
     type: null as any,
     Item: null as any,
-    Lines: (arg: { className?: string }) => {
-      return <></>;
-    },
     item_len: 0,
     value,
     Rename: null as unknown as typeof EdPickerRename,
@@ -52,67 +51,31 @@ export const EdVarPicker: FC<{
     local.type = type;
     local.item_len = -1;
     local.Item = definePickerPopup(local, base_type, (t) => {
-      onChange(path, t);
+      onChange(path, t, valuePath || path);
     });
 
     local.Rename = definePickerRename({ path });
 
-    if (base_type === "object") {
-      local.item_len = Object.keys(type).length;
-
-      local.Lines = ({ className }) => {
-        return (
-          <RenderObject
-            children={children}
-            onChange={onChange}
-            path={path}
-            className={className}
-            type={local.type}
-            onAdded={() => {
-              focus.path = path.join(".");
-              local.render();
-            }}
-            valuePath={valuePath || path}
-            focus={path.join(".") === focus.path}
-            onFocus={() => {
-              focus.path = "";
-              local.render();
-            }}
-            value={value}
-            markChanged={(p) => {
-              if (valuePath) {
-                if (p.length - 1 === valuePath.length) {
-                  local.type = null;
-                }
-              } else {
-                local.type = null;
-              }
-
-              if (markChanged) {
-                markChanged(p.slice(0, -1));
-              }
-            }}
-          />
-        );
-      };
-    } else if (base_type === "array") {
-      local.Lines = ({ className }) => {
-        return (
-          <RenderArray
-            children={children}
-            onChange={onChange}
-            path={path}
-            className={className}
-            type={local.type}
-            value={value}
-          />
-        );
-      };
-    } else {
-      local.Lines = () => {
-        return <></>;
-      };
-    }
+    // if (base_type === "object") {
+    //   local.item_len = Object.keys(type).length;
+    // } else if (base_type === "array") {
+    //   local.Lines = ({ className }) => {
+    //     return (
+    //       <RenderArray
+    //         children={children}
+    //         onChange={onChange}
+    //         path={path}
+    //         className={className}
+    //         type={local.type}
+    //         value={value}
+    //       />
+    //     );
+    //   };
+    // } else {
+    //   local.Lines = () => {
+    //     return <></>;
+    //   };
+    // }
   }
 
   return children({
@@ -121,13 +84,13 @@ export const EdVarPicker: FC<{
       local.render();
     },
     type,
-    Lines: local.Lines,
     Item: local.Item,
     depth: path.length,
     name,
     Rename: local.Rename,
     path,
     value,
+    children,
     valuePath: valuePath || path,
     markChanged(p) {
       if (markChanged) {

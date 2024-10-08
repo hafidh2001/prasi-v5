@@ -17,6 +17,7 @@ export const EdPickerBoolean: FC<{
         onClick={() => {
           onChange(!value);
         }}
+        tabIndex={0}
       />
       <div className="capitalize ml-1">{JSON.stringify(!!value)}</div>
     </label>

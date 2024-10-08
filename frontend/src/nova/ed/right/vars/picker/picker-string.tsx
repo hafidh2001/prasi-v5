@@ -1,25 +1,21 @@
-import { ToggleLeft, ToggleRight } from "lucide-react";
 import { FC, useEffect } from "react";
 import { useLocal } from "utils/react/use-local";
-import { Switch } from "utils/shadcn/comps/ui/switch";
 
 export const EdPickerString: FC<{
   value: string;
   onChange: (value: string) => void;
 }> = ({ value, onChange }) => {
-  const local = useLocal({ value: value || "" });
+  const local = useLocal({ value: value || "", focus: false });
 
   useEffect(() => {
-    local.value = value || "";
-    if (value + "" !== local.value) {
-      onChange(local.value);
-    } else {
-      local.render();
+    if (!local.focus) {
+      local.value = value || "";
     }
   }, [value]);
 
   return (
     <input
+      tabIndex={0}
       className="outline-none flex-1 focus:border-blue-500 border px-1 mr-1"
       type="text"
       value={local.value}
@@ -28,14 +24,16 @@ export const EdPickerString: FC<{
         local.render();
       }}
       spellCheck={false}
-      onBlur={(e) => {
-        if (value !== local.value) {
-          onChange(local.value);
-        }
+      onFocus={() => {
+        local.focus = true;
+        local.render();
+      }}
+      onBlur={() => {
+        onChange(local.value);
       }}
       onKeyDown={(e) => {
         if (e.key === "Enter") {
-          e.currentTarget.blur();
+          onChange(local.value);
         }
       }}
     />

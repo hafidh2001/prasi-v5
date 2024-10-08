@@ -9,7 +9,7 @@ export const EdPickerRename: FC<{
     old_name: string;
   }) => void;
 }> = function (this: { path: string[] }, { name, onRename }) {
-  const local = useLocal({ name });
+  const local = useLocal({ name, disabled: true });
 
   useEffect(() => {
     local.name = name;
@@ -25,14 +25,33 @@ export const EdPickerRename: FC<{
         local.name = (event.target as HTMLInputElement).value;
         local.render();
       }}
+      disabled={local.disabled}
       spellCheck={false}
+      onMouseOver={() => {
+        local.disabled = false;
+        local.render();
+      }}
+      onMouseOut={(e) => {
+        if (e.currentTarget !== document.activeElement) {
+          local.disabled = true;
+          local.render();
+        }
+      }}
       onClick={(e) => {
         e.stopPropagation();
       }}
       onBlur={(e) => {
         if (name !== local.name) {
-          onRename({ path: this.path, new_name: local.name, old_name: name });
+          if (local.name) {
+            onRename({ path: this.path, new_name: local.name, old_name: name });
+          } else {
+            local.name = name;
+            local.render();
+          }
         }
+
+        local.disabled = true;
+        local.render();
       }}
       onKeyDown={(e) => {
         if (e.key === "Enter") {

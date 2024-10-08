@@ -14,12 +14,12 @@ export type EVChildren = (arg: {
   open: () => void;
   type: EType;
   Item: FC<{ children: any; className?: string }>;
-  Lines: FC<{ className?: string }>;
   depth: number;
   name?: string;
   Rename: typeof EdPickerRename;
   path: string[];
   value: any;
   valuePath: string[];
+  children: any;
   markChanged: (path: string[]) => void;
 }) => ReactElement;

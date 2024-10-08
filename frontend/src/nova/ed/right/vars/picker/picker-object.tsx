@@ -28,7 +28,7 @@ export const RenderObject: FC<{
   onFocus,
   value,
   markChanged,
-  valuePath
+  valuePath,
 }) => {
   const local = useLocal({ new_property: { text: "" }, ts: Date.now() });
   const addNew = () => {

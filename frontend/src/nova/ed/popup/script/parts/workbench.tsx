@@ -1,12 +1,7 @@
 import { getNodeById } from "crdt/node/get-node-by-id";
 import { active } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
-import {
-  PanelTopClose,
-  PictureInPicture2,
-  ScrollText,
-  X
-} from "lucide-react";
+import { PanelTopClose, PictureInPicture2, ScrollText, X } from "lucide-react";
 import { FC, ReactNode, useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
@@ -57,57 +52,56 @@ export const EdScriptWorkbench: FC<{
   }
 
   return (
-    <div className="flex flex-1 items-stretch select-none">
-      <div className="flex flex-1 flex-col ">
-        <div
-          className={cx(
-            "flex border-b items-stretch justify-between",
-            is_error && "bg-red-100"
-          )}
-        >
-          <div className={cx("flex items-stretch")}>
-            {popup.type === "prop-master" && <CompTitleMaster />}
-            {popup.type === "prop-instance" && <CompTitleInstance />}
-            {popup.type === "item" && (
-              <>
-                <div className="flex p-2 space-x-1 border-r">
-                  {[
-                    { type: "js", color: "#e9522c" },
-                    { type: "css", color: "#188228" },
-                    { type: "html", color: "#2c3e83" },
-                  ].map((e) => {
-                    return (
-                      <div
-                        key={e.type}
-                        className={cx(
-                          css`
-                            color: ${e.color};
-                            border: 1px solid ${e.color};
-                          `,
-                          "uppercase text-white text-[12px] cursor-pointer flex items-center justify-center transition-all hover:opacity-100 w-[40px] text-center",
-                          popup.last_mode === e.type
-                            ? css`
-                                background: ${e.color};
-                                color: white;
-                              `
-                            : "opacity-30"
-                        )}
-                        onClick={() => {
-                          popup.mode = e.type as any;
-                          popup.last_mode = e.type as any;
-                          p.render();
-                        }}
-                      >
-                        {e.type}
-                      </div>
-                    );
-                  })}
-                </div>
-                {popup.mode === "js" && (
-                  <>
-                    {popup.type === "item" && (
-                      <>
-                        {/* 
+    <div className="flex flex-1 flex-col select-none">
+      <div
+        className={cx(
+          "flex border-b items-stretch justify-between",
+          is_error && "bg-red-100"
+        )}
+      >
+        <div className={cx("flex items-stretch")}>
+          {popup.type === "prop-master" && <CompTitleMaster />}
+          {popup.type === "prop-instance" && <CompTitleInstance />}
+          {popup.type === "item" && (
+            <>
+              <div className="flex p-2 space-x-1 border-r">
+                {[
+                  { type: "js", color: "#e9522c" },
+                  { type: "css", color: "#188228" },
+                  { type: "html", color: "#2c3e83" },
+                ].map((e) => {
+                  return (
+                    <div
+                      key={e.type}
+                      className={cx(
+                        css`
+                          color: ${e.color};
+                          border: 1px solid ${e.color};
+                        `,
+                        "uppercase text-white text-[12px] cursor-pointer flex items-center justify-center transition-all hover:opacity-100 w-[40px] text-center",
+                        popup.last_mode === e.type
+                          ? css`
+                              background: ${e.color};
+                              color: white;
+                            `
+                          : "opacity-30"
+                      )}
+                      onClick={() => {
+                        popup.mode = e.type as any;
+                        popup.last_mode = e.type as any;
+                        p.render();
+                      }}
+                    >
+                      {e.type}
+                    </div>
+                  );
+                })}
+              </div>
+              {popup.mode === "js" && (
+                <>
+                  {popup.type === "item" && (
+                    <>
+                      {/* 
                         <div className="border-l flex items-center pl-2 p-1 text-xs">
                           <div
                             className={cx(
@@ -172,8 +166,8 @@ export const EdScriptWorkbench: FC<{
                           </div>
                         </div> */}
 
-                        <EdScriptSnippet />
-                        {/* {script_mode === "flow" && (
+                      <EdScriptSnippet />
+                      {/* {script_mode === "flow" && (
                           <div className="flex items-center pl-2 border-l ml-1">
                             <Tooltip
                               content="Reset Flow"
@@ -189,56 +183,55 @@ export const EdScriptWorkbench: FC<{
                             </Tooltip>
                           </div>
                         )} */}
-                      </>
-                    )}
-                  </>
-                )}
-              </>
-            )}
-          </div>
-          <div className="flex items-stretch text-xs">
-            {!popup.paned && (
-              <Tooltip content="Switch to Panned Mode" asChild>
-                <div
-                  onClick={() => {
-                    localStorage.setItem("prasi-popup-script-mode", "paned");
-                    popup.paned = true;
-                    p.render();
-                  }}
-                  className="flex items-center justify-center px-2 cursor-pointer hover:text-blue-600"
-                >
-                  <PanelTopClose size={13} />
-                </div>
-              </Tooltip>
-            )}
-            {popup.paned && (
-              <Tooltip content="Switch to Popup Mode" asChild>
-                <div
-                  onClick={() => {
-                    localStorage.setItem("prasi-popup-script-mode", "popup");
-                    popup.paned = false;
-                    p.render();
-                  }}
-                  className="flex items-center justify-center px-2 cursor-pointer hover:text-blue-600"
-                >
-                  <PictureInPicture2 size={13} />
-                </div>
-              </Tooltip>
-            )}
-            <div
-              onClick={() => {
-                popup.open = false;
-                p.render();
-              }}
-              className="flex items-center justify-center px-1 pr-2 cursor-pointer hover:text-red-600"
-            >
-              <X size={13} />
-            </div>
+                    </>
+                  )}
+                </>
+              )}
+            </>
+          )}
+        </div>
+        <div className="flex items-stretch text-xs">
+          {!popup.paned && (
+            <Tooltip content="Switch to Panned Mode" asChild>
+              <div
+                onClick={() => {
+                  localStorage.setItem("prasi-popup-script-mode", "paned");
+                  popup.paned = true;
+                  p.render();
+                }}
+                className="flex items-center justify-center px-2 cursor-pointer hover:text-blue-600"
+              >
+                <PanelTopClose size={13} />
+              </div>
+            </Tooltip>
+          )}
+          {popup.paned && (
+            <Tooltip content="Switch to Popup Mode" asChild>
+              <div
+                onClick={() => {
+                  localStorage.setItem("prasi-popup-script-mode", "popup");
+                  popup.paned = false;
+                  p.render();
+                }}
+                className="flex items-center justify-center px-2 cursor-pointer hover:text-blue-600"
+              >
+                <PictureInPicture2 size={13} />
+              </div>
+            </Tooltip>
+          )}
+          <div
+            onClick={() => {
+              popup.open = false;
+              p.render();
+            }}
+            className="flex items-center justify-center px-1 pr-2 cursor-pointer hover:text-red-600"
+          >
+            <X size={13} />
           </div>
         </div>
-
-        {children}
       </div>
+
+      {children}
     </div>
   );
 };

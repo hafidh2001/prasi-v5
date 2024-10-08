@@ -19,7 +19,7 @@ export const EdPopItemScript = () => {
 
   if (popup.paned)
     return (
-      <div className="w-full h-full bg-white flex flex-col flex-1">
+      <div className="w-full relative h-full bg-white flex flex-col flex-1">
         {content}
       </div>
     );

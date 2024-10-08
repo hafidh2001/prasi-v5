@@ -132,7 +132,7 @@ const Wrapper: FC<{
               }
             });
           }}
-          onChange={({ path, type }) => {
+          onChange={({ path, type, valuePath }) => {
             getActiveTree(p).update(`Update var ${name}`, ({ findNode }) => {
               const n = findNode(node.item.id);
               if (n) {
@@ -184,6 +184,18 @@ const Wrapper: FC<{
 
                   const new_base_type = getBaseType(get(curvar, path_type));
 
+                  if (valuePath) {
+                    let value = undefined;
+                    if (new_base_type === "array") value = [];
+                    if (new_base_type === "object") value = {};
+                    if (new_base_type === "boolean") value = false;
+                    if (new_base_type === "string") value = "";
+                    if (new_base_type === "number") value = 0;
+                    if (new_base_type === "null") value = null;
+                    set(curvar, valuePath.replace("~~", "default"), value);
+                    console.log(curvar, value, valuePath);
+                  }
+
                   const old_type = get(
                     curvar.history.type,
                     path.replace("~~", new_base_type)
@@ -210,12 +222,22 @@ const Wrapper: FC<{
               .slice(0, path.length - 2)
               .join(".")
               .replace("~~", "type");
+            const bpath = path
+              .slice(0, path.length - 2)
+              .join(".")
+              .replace("~~", "default");
             getActiveTree(p).update(`Update var ${name}`, ({ findNode }) => {
               const n = findNode(node.item.id);
               if (n) {
                 const curvar = n.item.vars?.[name];
                 if (curvar) {
                   const base = get(curvar, rpath);
+                  const old = base[old_name];
+                  delete base[old_name];
+                  base[new_name] = old;
+                }
+                if (curvar) {
+                  const base = get(curvar, bpath);
                   const old = base[old_name];
                   delete base[old_name];
                   base[new_name] = old;

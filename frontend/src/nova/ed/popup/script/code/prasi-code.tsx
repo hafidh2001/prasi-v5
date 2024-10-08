@@ -34,7 +34,9 @@ export const EdPrasiCode = () => {
     local.ready = false;
   }
 
-  const mode = p.ui.popup.script.mode;
+  const mode = ["js", "css", "html"].includes(p.ui.popup.script.mode)
+    ? p.ui.popup.script.mode
+    : "js";
 
   const id = node?.item.id || "";
 
