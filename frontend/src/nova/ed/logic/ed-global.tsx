@@ -4,6 +4,7 @@ import { createClient } from "utils/sync/client";
 import { PageTree } from "../crdt/load-page-tree";
 import { CompPickerNode } from "../popup/comp/comp-picker/render-picker-node";
 import { EComp, EPage, ESite, PropFieldKind } from "./types";
+import { ViRef } from "vi/lib/store";
 
 export const EDGlobal = {
   mode: "" as "desktop" | "mobile",
@@ -21,6 +22,7 @@ export const EDGlobal = {
     cur: null as unknown as EPage,
     tree: null as unknown as PageTree,
   },
+  viref: {} as ViRef,
   comp: {
     pending: new Set<string>(),
     loaded: {} as Record<string, EComp>,

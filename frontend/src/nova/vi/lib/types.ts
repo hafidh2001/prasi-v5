@@ -2,6 +2,7 @@ import { EPage } from "logic/types";
 import { FC } from "react";
 import { IItem } from "utils/types/item";
 import { ViRender } from "vi/vi-render";
+import { ViRef } from "./store";
 
 export type ViPage = {
   id: string;
@@ -25,6 +26,7 @@ export type ViProp = {
   };
   enable_preload?: boolean;
   enable_cache_js?: boolean;
+  set_ref?: (ref: ViRef) => void;
 };
 
 export type ViWrapperComp = FC<{

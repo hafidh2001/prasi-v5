@@ -9,7 +9,7 @@ export const compArgs = (
   db: any,
   api: any
 ) => {
-  const args: any = { ...existing };
+  const args: Record<string, any> = { ...existing };
   if (item.component?.props) {
     for (const [k, prop] of Object.entries(item.component.props)) {
       let js = prop.valueBuilt || "";

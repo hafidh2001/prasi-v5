@@ -3,23 +3,32 @@ import { IItem } from "utils/types/item";
 import { defineStore } from "../../../utils/react/define-store";
 import { ViComps, ViPage, ViWrapperComp } from "./types";
 
+type ITEM_ID = string;
+type VAR_NAME = string;
+
+const viRef = {
+  init: false,
+  loader: {
+    comps: (ids: string[]) => Promise<void>,
+  },
+  comps: {} as ViComps,
+  db: null as any,
+  api: null as any,
+  item_parents: {} as Record<ITEM_ID, ITEM_ID>,
+  comp_props: {} as Record<ITEM_ID, Record<VAR_NAME, any>>,
+
+  vars_value: {} as Record<ITEM_ID, Record<VAR_NAME, any>>,
+  local_value: {} as Record<ITEM_ID, Record<VAR_NAME, any>>,
+  pass_prop_value: {} as Record<ITEM_ID, Record<string | number, any>>,
+
+  wrapper: null as null | ViWrapperComp,
+  cache_js: true as boolean,
+};
+export type ViRef = typeof viRef;
+
 export const useVi = defineStore({
   name: "vi-store",
-  ref: {
-    init: false,
-    loader: {
-      comps: (ids: string[]) => Promise<void>,
-    },
-    comps: {} as ViComps,
-    local_value: {} as Record<string, any>,
-    pass_prop_value: {} as Record<string, Record<string | number, any>>,
-    db: null as any,
-    api: null as any,
-    item_parents: {} as Record<string, string>,
-    comp_props: {} as Record<string, any>,
-    wrapper: null as null | ViWrapperComp,
-    cache_js: true as boolean,
-  },
+  ref: viRef,
   state: {
     mode: "desktop" as "mobile" | "desktop",
     page: null as null | ViPage,

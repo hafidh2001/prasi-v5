@@ -16,6 +16,7 @@ export const ViRoot: FC<ViProp> = ({
   wrapper,
   enable_cache_js,
   enable_preload,
+  set_ref,
 }) => {
   const { init, ref } = useVi(({ action, ref, state }) => ({
     init: action.init,
@@ -23,6 +24,8 @@ export const ViRoot: FC<ViProp> = ({
     state_comps: ref.comps,
     ref,
   }));
+
+  if (set_ref) set_ref(ref);
 
   if (typeof enable_cache_js !== "undefined") {
     ref.cache_js = enable_cache_js;

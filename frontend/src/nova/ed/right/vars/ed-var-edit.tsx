@@ -1,6 +1,6 @@
 import { Trash2 } from "lucide-react";
 import { Resizable } from "re-resizable";
-import { FC } from "react";
+import { FC, ReactElement } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { IVar } from "utils/types/item";
 import { Tooltip } from "utils/ui/tooltip";
@@ -26,9 +26,154 @@ export const EdVarEdit: FC<{
     old_name: string;
   }) => void;
   setValue: (path: string[], value: any) => void;
-}> = ({ variable, onChange, onRename, setValue }) => {
+  leftContent?: ReactElement;
+}> = ({ variable, onChange, onRename, setValue, leftContent }) => {
   const size = localStorage.getItem("prasi-var-edit-size") || "400*700";
   const [height, width] = size.split("*").map(Number);
+
+  const mainContent = (
+    <div className="flex flex-1 relative overflow-auto">
+      <div className="absolute inset-0 flex flex-col flex-1 select-none">
+        <EdVarPicker
+          type={variable.type}
+          onChange={(path, type, valuePath) => {
+            onChange({
+              path: path.join("."),
+              type,
+              valuePath: valuePath ? valuePath.join(".") : undefined,
+            });
+          }}
+          path={["~~"]}
+          value={variable.default}
+        >
+          {({
+            Item,
+            open,
+            type,
+            depth,
+            name,
+            Rename,
+            path,
+            value,
+            valuePath,
+            markChanged,
+            children,
+          }) => (
+            <div className={cx("flex flex-1 flex-col items-stretch")}>
+              <div
+                className={cx(
+                  "flex items-stretch relative cursor-pointer border-b ",
+                  css`
+                    padding-left: ${(depth - 1) * DEPTH_PX}px;
+                  `
+                )}
+                onClick={open}
+              >
+                <div className="flex justify-between flex-1">
+                  <div className="flex items-stretch text-sm flex-1">
+                    <Item
+                      className={cx(
+                        "flex h-[30px]",
+                        css`
+                          .text {
+                            font-size: 90%;
+                            margin-left: 3px;
+                          }
+                        `,
+                        !name && "mr-2"
+                      )}
+                    >
+                      <EdTypeLabel type={type} show_label={!name} />
+                    </Item>
+                    {name && (
+                      <>
+                        <div className="flex-1 flex items-center">
+                          <Rename name={name} onRename={onRename} />
+                        </div>
+                      </>
+                    )}
+
+                    <div
+                      className={cx("flex items-center mr-1 flex-1")}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                    >
+                      {type === "string" && (
+                        <EdPickerString
+                          value={value}
+                          onChange={(v) => {
+                            markChanged(valuePath);
+                            setValue(valuePath, v);
+                          }}
+                        />
+                      )}
+                      {type === "number" && (
+                        <EdPickerNumber
+                          value={value}
+                          onChange={(v) => {
+                            markChanged(valuePath);
+                            setValue(valuePath, v);
+                          }}
+                        />
+                      )}
+                      {type === "boolean" && (
+                        <EdPickerBoolean
+                          value={value}
+                          onChange={(v) => {
+                            markChanged(valuePath);
+                            setValue(valuePath, v);
+                          }}
+                        />
+                      )}
+                    </div>
+                    {path.length > 1 && (
+                      <Tooltip
+                        content="Delete Property"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setValue(valuePath, undefined);
+                          onChange({
+                            path: path.slice(0, path.length - 1).join("."),
+                            type: undefined,
+                          });
+                        }}
+                        className="del flex items-center justify-center w-[25px] border-l cursor-pointer hover:bg-red-500 hover:text-white"
+                      >
+                        <Trash2 size={14} />
+                      </Tooltip>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className={cx("flex flex-col")}>
+                <EdPickerLines
+                  children={children}
+                  onChange={(path, type, valuePath) => {
+                    onChange({
+                      path: path.join("."),
+                      type,
+                      valuePath: valuePath ? valuePath.join(".") : undefined,
+                    });
+                  }}
+                  path={path}
+                  type={type}
+                  value={value}
+                  setValue={setValue}
+                  valuePath={valuePath}
+                  markChanged={markChanged}
+                  className={css`
+                    padding-left: ${depth * DEPTH_PX}px;
+                  `}
+                />
+              </div>
+            </div>
+          )}
+        </EdVarPicker>
+      </div>
+    </div>
+  );
+
   return (
     <Resizable
       defaultSize={{
@@ -48,167 +193,20 @@ export const EdVarEdit: FC<{
         );
       }}
     >
-      <PanelGroup autoSaveId="prasi-var-edit" direction="horizontal">
-        <Panel className="flex flex-col">
-          <div className="border-b text-xs bg-slate-50 p-1 border-r">
-            Current Value:
-          </div>
-
-          <div className="flex flex-1 relative overflow-auto border-r ">
-            <pre className="absolute inset-0 whitespace-pre-wrap text-[7px] monospace leading-3">
-              {JSON.stringify(variable, null, 2)}
-            </pre>
-          </div>
-        </Panel>
-        <PanelResizeHandle />
-        <Panel className="flex flex-col">
-          <div className="border-b text-xs bg-slate-50 p-1">Default Value:</div>
-          <div className="flex flex-1 relative overflow-auto">
-            <div className="absolute inset-0 flex flex-col flex-1 select-none">
-              <EdVarPicker
-                type={variable.type}
-                onChange={(path, type, valuePath) => {
-                  onChange({
-                    path: path.join("."),
-                    type,
-                    valuePath: valuePath ? valuePath.join(".") : undefined,
-                  });
-                }}
-                path={["~~"]}
-                value={variable.default}
-              >
-                {({
-                  Item,
-                  open,
-                  type,
-                  depth,
-                  name,
-                  Rename,
-                  path,
-                  value,
-                  valuePath,
-                  markChanged,
-                  children,
-                }) => (
-                  <div className={cx("flex flex-1 flex-col items-stretch")}>
-                    <div
-                      className={cx(
-                        "flex items-stretch relative cursor-pointer border-b ",
-                        css`
-                          padding-left: ${(depth - 1) * DEPTH_PX}px;
-                        `
-                      )}
-                      onClick={open}
-                    >
-                      <div className="flex justify-between flex-1">
-                        <div className="flex items-stretch text-sm flex-1">
-                          <Item
-                            className={cx(
-                              "flex h-[30px]",
-                              css`
-                                .text {
-                                  font-size: 90%;
-                                  margin-left: 3px;
-                                }
-                              `,
-                              !name && "mr-2"
-                            )}
-                          >
-                            <EdTypeLabel type={type} show_label={!name} />
-                          </Item>
-                          {name && (
-                            <>
-                              <div className="flex-1 flex items-center">
-                                <Rename name={name} onRename={onRename} />
-                              </div>
-                            </>
-                          )}
-
-                          <div
-                            className={cx("flex items-center mr-1 flex-1")}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                            }}
-                          >
-                            {type === "string" && (
-                              <EdPickerString
-                                value={value}
-                                onChange={(v) => {
-                                  markChanged(valuePath);
-                                  setValue(valuePath, v);
-                                }}
-                              />
-                            )}
-                            {type === "number" && (
-                              <EdPickerNumber
-                                value={value}
-                                onChange={(v) => {
-                                  markChanged(valuePath);
-                                  setValue(valuePath, v);
-                                }}
-                              />
-                            )}
-                            {type === "boolean" && (
-                              <EdPickerBoolean
-                                value={value}
-                                onChange={(v) => {
-                                  markChanged(valuePath);
-                                  setValue(valuePath, v);
-                                }}
-                              />
-                            )}
-                          </div>
-                          {path.length > 1 && (
-                            <Tooltip
-                              content="Delete Property"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setValue(valuePath, undefined);
-                                onChange({
-                                  path: path
-                                    .slice(0, path.length - 1)
-                                    .join("."),
-                                  type: undefined,
-                                });
-                              }}
-                              className="del flex items-center justify-center w-[25px] border-l cursor-pointer hover:bg-red-500 hover:text-white"
-                            >
-                              <Trash2 size={14} />
-                            </Tooltip>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className={cx("flex flex-col")}>
-                      <EdPickerLines
-                        children={children}
-                        onChange={(path, type, valuePath) => {
-                          onChange({
-                            path: path.join("."),
-                            type,
-                            valuePath: valuePath
-                              ? valuePath.join(".")
-                              : undefined,
-                          });
-                        }}
-                        path={path}
-                        type={type}
-                        value={value}
-                        setValue={setValue}
-                        valuePath={valuePath}
-                        markChanged={markChanged}
-                        className={css`
-                          padding-left: ${depth * DEPTH_PX}px;
-                        `}
-                      />
-                    </div>
-                  </div>
-                )}
-              </EdVarPicker>
+      {leftContent ? (
+        <PanelGroup autoSaveId="prasi-var-edit" direction="horizontal">
+          <Panel className="flex flex-col">{leftContent}</Panel>
+          <PanelResizeHandle />
+          <Panel className="flex flex-col">
+            <div className="border-b text-xs bg-slate-50 p-1">
+              Default Value:
             </div>
-          </div>
-        </Panel>
-      </PanelGroup>
+            {mainContent}
+          </Panel>
+        </PanelGroup>
+      ) : (
+        mainContent
+      )}
     </Resizable>
   );
 };

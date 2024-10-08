@@ -12,6 +12,7 @@ import { Tooltip } from "utils/ui/tooltip";
 import { EdVarEdit } from "./ed-var-edit";
 import { EdTypeLabel } from "./lib/label";
 import { getBaseType } from "./lib/validate";
+import JsonView from "@uiw/react-json-view";
 
 export const EdVarItem: FC<{ name: string; node: PNode }> = ({
   name,
@@ -96,6 +97,7 @@ const Wrapper: FC<{
   p: PG;
 }> = ({ children, opened, name, close, variable, node, p }) => {
   if (!opened) return children;
+  const value = undefined;
   return (
     <Popover
       backdrop={false}
@@ -115,6 +117,23 @@ const Wrapper: FC<{
       content={
         <EdVarEdit
           variable={variable}
+          leftContent={
+            <>
+              <div className="border-b text-xs bg-slate-50 p-1 border-r">
+                Current Value:
+              </div>
+
+              <div className="flex flex-1 relative overflow-auto border-r ">
+                <pre className="absolute inset-0 whitespace-pre-wrap p-2 text-xs monospace leading-3">
+                  {typeof value === "object" && value ? (
+                    <JsonView value={value} />
+                  ) : (
+                    JSON.stringify(value) || <>&mdash; Empty &mdash;</>
+                  )}
+                </pre>
+              </div>
+            </>
+          }
           setValue={(path, value) => {
             const rpath = path.join(".").replace("~~", "default");
 

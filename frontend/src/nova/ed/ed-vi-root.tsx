@@ -61,6 +61,9 @@ export const EdViRoot = memo(() => {
             enable_preload={false}
             wrapper={ref.wrapper}
             enable_cache_js={false}
+            set_ref={(ref) => {
+              p.viref = ref;
+            }}
           />
         </StoreProvider>
       )}
