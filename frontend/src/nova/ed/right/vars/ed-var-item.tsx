@@ -60,6 +60,7 @@ export const EdVarItem: FC<{ id: string; name: string; node: PNode }> = ({
             p.render();
           }}
         >
+          <EdTypeLabel type={_var.type} />
           <input
             className={cx(
               "flex-1 my-1 outline-none bg-transparent ",
@@ -94,7 +95,6 @@ export const EdVarItem: FC<{ id: string; name: string; node: PNode }> = ({
               if (e.key === "Enter") e.currentTarget.blur();
             }}
           />
-          <EdTypeLabel type={_var.type} />
         </div>
       </Wrapper>
 
@@ -231,6 +231,7 @@ const Wrapper: FC<{
                     set(curvar, path_type, type);
 
                     if (
+                      !!type &&
                       typeof type === "object" &&
                       typeof (type as any).idx === "number"
                     ) {
@@ -249,7 +250,6 @@ const Wrapper: FC<{
                     if (new_base_type === "number") value = 0;
                     if (new_base_type === "null") value = null;
                     set(curvar, valuePath.replace("~~", "default"), value);
-                    console.log(curvar, value, valuePath);
                   }
 
                   const old_type = get(
@@ -288,15 +288,19 @@ const Wrapper: FC<{
                 const curvar = n.item.vars?.[id];
                 if (curvar) {
                   const base = get(curvar, rpath);
-                  const old = base[old_name];
-                  delete base[old_name];
-                  base[new_name] = old;
+                  if (base) {
+                    const old = base[old_name];
+                    delete base[old_name];
+                    base[new_name] = old;
+                  }
                 }
                 if (curvar) {
                   const base = get(curvar, bpath);
-                  const old = base[old_name];
-                  delete base[old_name];
-                  base[new_name] = old;
+                  if (base) {
+                    const old = base[old_name];
+                    delete base[old_name];
+                    base[new_name] = old;
+                  }
                 }
               }
             });

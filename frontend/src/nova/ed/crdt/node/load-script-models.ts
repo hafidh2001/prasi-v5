@@ -7,6 +7,7 @@ import { jscript } from "utils/script/jscript";
 import { IItem } from "utils/types/item";
 import { loopItem } from "./loop-item";
 import { SingleExportVar } from "popup/script/code/js/parse-item-types";
+import { TreeVarItems } from "./var-items";
 
 const source_sym = Symbol("source");
 
@@ -30,6 +31,7 @@ export type ScriptModel = {
 export const loadScriptModels = async (
   items: IItem[],
   result: Record<string, ScriptModel>,
+  var_items: TreeVarItems,
   opt?: {
     exclude_comp_ids?: string[];
   }
@@ -78,6 +80,23 @@ export const loadScriptModels = async (
           }
         }
       } else {
+        if (item.vars) {
+          const vars = Object.entries(item.vars);
+          if (vars.length > 0) {
+            for (const [k, v] of vars) {
+              var_items[k] = {
+                item_id: item.id,
+                get item() {
+                  return item;
+                },
+                get var() {
+                  return v;
+                },
+              };
+            }
+          }
+        }
+
         const value = item.adv?.js || "";
         const source_hash = hash(value).toString();
         if (result[item.id]?.source_hash !== source_hash) {

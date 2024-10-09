@@ -8,8 +8,12 @@ import { EPage, EPageContentTree, PNode, SyncUndoItem } from "../logic/types";
 import { bind } from "./lib/immer-yjs";
 import { findNodeById, flattenTree } from "./node/flatten-tree";
 import { loadScriptModels, ScriptModel } from "./node/load-script-models";
+import { TreeVarItems } from "./node/var-items";
 
 export type PageTree = ReturnType<typeof loadPageTree>;
+
+type ITEM_ID = string;
+type VAR_ID = string;
 
 export const loadPageTree = (
   sync: ReturnType<typeof createClient>,
@@ -37,7 +41,11 @@ export const loadPageTree = (
         }
       },
     });
-    await loadScriptModels(content_tree.childs, tree.script_models);
+    await loadScriptModels(
+      content_tree.childs,
+      tree.script_models,
+      tree.var_items
+    );
     arg?.loaded(content_tree);
   });
 
@@ -67,11 +75,16 @@ export const loadPageTree = (
     listen: (fn: () => void) => {
       return immer.subscribe(fn);
     },
-    script_models: {} as Record<string, ScriptModel>,
+    script_models: {} as Record<ITEM_ID, ScriptModel>,
+    var_items: {} as TreeVarItems,
     async reloadScriptModels() {
       const content_tree = immer.get();
       tree.script_models = {};
-      await loadScriptModels(content_tree.childs, tree.script_models);
+      await loadScriptModels(
+        content_tree.childs,
+        tree.script_models,
+        tree.var_items
+      );
     },
     before_update: null as null | ((do_update: () => void) => void),
     update(

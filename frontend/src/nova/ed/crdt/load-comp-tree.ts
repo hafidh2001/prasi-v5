@@ -9,6 +9,7 @@ import { Doc } from "yjs";
 import { bind } from "./lib/immer-yjs";
 import { findNodeById, flattenTree } from "./node/flatten-tree";
 import { loadScriptModels, ScriptModel } from "./node/load-script-models";
+import { TreeVarItems } from "./node/var-items";
 
 export type CompTree = ReturnType<typeof internalLoadCompTree>;
 
@@ -53,9 +54,14 @@ export const internalLoadCompTree = (
     });
 
     fg.prasi.updated_outside = true;
-    await loadScriptModels([content_tree], component.script_models, {
-      exclude_comp_ids: [comp_id],
-    });
+    await loadScriptModels(
+      [content_tree],
+      component.script_models,
+      component.var_items,
+      {
+        exclude_comp_ids: [comp_id],
+      }
+    );
     console.log(content_tree, component.script_models);
 
     opt.on_update(content_tree);
@@ -93,11 +99,17 @@ export const internalLoadCompTree = (
       return immer.subscribe(fn);
     },
     script_models: {} as Record<string, ScriptModel>,
+    var_items: {} as TreeVarItems,
     async reloadScriptModels() {
       const content_tree = immer.get();
-      await loadScriptModels([content_tree], component.script_models, {
-        exclude_comp_ids: [comp_id],
-      });
+      await loadScriptModels(
+        [content_tree],
+        component.script_models,
+        component.var_items,
+        {
+          exclude_comp_ids: [comp_id],
+        }
+      );
     },
     before_update: null as null | ((do_update: () => void) => void),
     update(

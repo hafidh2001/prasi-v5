@@ -18,7 +18,15 @@ export const EdEvents = () => {
       <div className="text-sm flex flex-1 m-1 my-2 flex-col space-y-1">
         <div className="flex items-center">
           <div className="w-[90px]">Loop Items</div>
-          <EdVarPicker>
+          <EdVarPicker
+            onChange={(value) => {
+              console.log(value);
+            }}
+            value={{
+              var_id: "xyrqryekp4vkwhoqsxei5ize",
+              path: ["~~", "magona", "0"],
+            }}
+          >
             <div className="border pl-2 pr-[5px] cursor-pointer hover:bg-blue-600 hover:text-white flex items-center space-x-1">
               <div>None</div>
               <ChevronDown size={12} />
@@ -26,9 +34,9 @@ export const EdEvents = () => {
           </EdVarPicker>
         </div>
         <div className="flex items-center">
-          <div className="w-[90px]">Visible</div>
+          <div className="w-[90px]">Content</div>
           <div className="border pl-2 pr-[5px] cursor-pointer hover:bg-blue-600 hover:text-white flex items-center space-x-1">
-            <div>Yes</div>
+            <div>Children</div>
             <ChevronDown size={12} />
           </div>
         </div>

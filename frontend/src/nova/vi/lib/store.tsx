@@ -1,10 +1,11 @@
 import { DeepReadonly } from "popup/flow/runtime/types";
-import { IItem } from "utils/types/item";
+import { IItem, IVar } from "utils/types/item";
 import { defineStore } from "../../../utils/react/define-store";
 import { ViComps, ViPage, ViWrapperComp } from "./types";
 
 type ITEM_ID = string;
 type VAR_NAME = string;
+type VAR_ID = string;
 
 const viRef = {
   init: false,
@@ -16,8 +17,8 @@ const viRef = {
   api: null as any,
   item_parents: {} as Record<ITEM_ID, ITEM_ID>,
   comp_props: {} as Record<ITEM_ID, Record<VAR_NAME, any>>,
+  var_items: {} as Record<VAR_ID, { var: IVar<any>; item: IItem }>,
 
-  vars_value: {} as Record<ITEM_ID, Record<VAR_NAME, any>>,
   local_value: {} as Record<ITEM_ID, Record<VAR_NAME, any>>,
   pass_prop_value: {} as Record<ITEM_ID, Record<string | number, any>>,
 

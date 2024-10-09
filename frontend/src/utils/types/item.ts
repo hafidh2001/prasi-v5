@@ -16,6 +16,10 @@ export type IItem = {
   html?: string;
   events?: Record<EventType, { flow: PFlow }>;
   vars?: Record<string, IVar<any>>;
+  use_var?: {
+    loop?: VarUsage;
+    content?: VarUsage;
+  };
   childs: IItem[];
 } & MetaItem &
   BasicItem;
@@ -35,9 +39,8 @@ export type IVar<T extends EType> = {
     ITEM_ID,
     Partial<{
       event: Record<EventType, FLOW_NODE_ID[]>;
-      visible: boolean;
       loop: boolean;
-      children: FLOW_NODE_ID[];
+      content: boolean;
       props: Record<PROP_NAME, FLOW_NODE_ID[]>;
     }>
   >;
@@ -45,4 +48,9 @@ export type IVar<T extends EType> = {
     type: Partial<Record<EBaseType, Record<VAR_PATH, EType>>>;
     value: Partial<Record<EBaseType, any>>;
   };
+};
+
+export type VarUsage = {
+  var_id: string;
+  path?: VAR_PATH[];
 };
