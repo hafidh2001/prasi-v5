@@ -35,6 +35,11 @@ export const EDGlobal = {
     },
     monaco_selection: null as any,
   },
+  nav: {
+    navigating: false,
+    cursor: 0,
+    history: [] as { comp_id?: string; item_id: string; ui?: any }[],
+  },
   ui: {
     panel: {
       left: localStorage.getItem("prasi-panel-left") !== "n",
@@ -68,8 +73,16 @@ export const EDGlobal = {
       },
     },
     left: { mode: "tree" as "tree" | "history" },
-    right: { tab: localStorage.getItem("prasi-panel-right-tab") || "style" },
+    right: {
+      tab: (localStorage.getItem("prasi-panel-right-tab") || "style") as
+        | "style"
+        | "vars"
+        | "events",
+    },
     popup: {
+      events: {
+        open: "" as "" | "content" | "loop",
+      },
       vars: {
         get id() {
           return localStorage.getItem("prasi-panel-var-name") || "";

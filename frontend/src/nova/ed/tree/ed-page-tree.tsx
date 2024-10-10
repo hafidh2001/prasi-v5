@@ -9,8 +9,9 @@ import { DragPreview, Placeholder } from "./parts/drag-preview";
 import { nodeRender } from "./parts/node/node-render";
 import { treeCanDrop, treeOnDrop } from "./parts/on-drop";
 import { doTreeSearch } from "./parts/search";
-import { useTreeIndent } from "./parts/use-indent";
+import { indentTree, useTreeIndent } from "./parts/use-indent";
 
+const t = { out: null as any };
 export const EdPageTree: FC<{ tree: PageTree }> = ({ tree }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
 
@@ -30,7 +31,14 @@ export const EdPageTree: FC<{ tree: PageTree }> = ({ tree }) => {
           <TypedTree
             tree={models}
             ref={(ref) => {
+              let open_all = p.ui.tree.ref !== ref;
               p.ui.tree.ref = ref;
+              if (open_all && ref) {
+                clearTimeout(t.out);
+                t.out = setTimeout(() => {
+                  indentTree(p);
+                }, 10);
+              }
             }}
             rootId={"root"}
             render={nodeRender}

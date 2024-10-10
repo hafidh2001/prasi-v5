@@ -1,5 +1,5 @@
 import { Popover } from "utils/ui/popover";
-import { EdTypeLabel } from "../lib/label";
+import { EdTypeLabel } from "../lib/type-label";
 import { getBaseType } from "../lib/validate";
 
 export const definePickerPopup = (

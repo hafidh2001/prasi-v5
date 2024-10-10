@@ -1,8 +1,8 @@
 import { Placement } from "@floating-ui/react";
 import { TreeVarItems } from "crdt/node/var-items";
-import { getActiveTree } from "logic/active";
+import { active, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Pencil } from "lucide-react";
 import { Resizable } from "re-resizable";
 import { FC, ReactNode, useCallback, useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
@@ -10,8 +10,8 @@ import { useLocal } from "utils/react/use-local";
 import { VarUsage } from "utils/types/item";
 import { Popover } from "utils/ui/popover";
 import { Tooltip } from "utils/ui/tooltip";
-import { EdTypeLabel } from "../lib/label";
 import { EBaseType, EType } from "../lib/type";
+import { EdTypeLabel } from "../lib/type-label";
 import { getBaseType } from "../lib/validate";
 
 export const EdVarPicker: FC<{
@@ -21,7 +21,10 @@ export const EdVarPicker: FC<{
   add_options?: { label: ReactNode; onClick: () => void }[];
   value?: VarUsage;
   onChange?: (value: VarUsage) => void;
-}> = ({ children, value, onChange }) => {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  item_id: string;
+}> = ({ children, value, onChange, open, onOpenChange, item_id }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({
     var_id: "",
@@ -36,12 +39,33 @@ export const EdVarPicker: FC<{
     tree_vars: null as null | TreeVarItems,
   });
 
+  useEffect(() => {
+    if (typeof open !== "undefined") {
+      local.opened = open;
+      local.render();
+    }
+  }, [open]);
+
   const reload = useCallback(
     (from_value?: boolean) => {
       if (!local.opened) return;
-      const vars = getActiveTree(p).var_items;
+      const tree = getActiveTree(p);
+      const vars: TreeVarItems = {};
       local.tree_vars = vars;
       local.render();
+
+      let cur = tree.nodes.map[item_id];
+      while (cur) {
+        if (cur && cur.item.vars) {
+          for (const [k, v] of Object.entries(cur.item.vars)) {
+            if (tree.var_items[k]) {
+              vars[k] = tree.var_items[k];
+            }
+          }
+        }
+        cur = tree.nodes.map[cur.parent?.id || ""];
+      }
+
       let rendered_vars = Object.entries(vars).map(([k, v]) => {
         return {
           name: v.var.name,
@@ -109,8 +133,10 @@ export const EdVarPicker: FC<{
   if (!local.opened)
     return (
       <div
+        className="flex flex-1 flex-row"
         onClick={() => {
           local.opened = true;
+          onOpenChange?.(true);
           local.render();
         }}
       >
@@ -129,9 +155,18 @@ export const EdVarPicker: FC<{
       border="1px solid black"
       open={local.opened}
       onOpenChange={(open) => {
-        local.opened = open;
-        local.var_id = "";
-        local.render();
+        if (onOpenChange) {
+          local.opened = open;
+          onOpenChange(open);
+          if (!open) {
+            local.var_id = "";
+            local.render();
+          }
+        } else {
+          local.opened = open;
+          local.var_id = "";
+          local.render();
+        }
       }}
       placement="left-start"
       content={
@@ -155,50 +190,71 @@ export const EdVarPicker: FC<{
           className={cx("flex flex-col text-sm")}
         >
           {local.path.length > 0 && (
-            <div className="border-b border-b-[#aaa] flex bg-slate-100 h-[25px] overflow-auto relative">
-              <div className="absolute inset-0 pl-2 flex">
-                {local.path.map((item, i) => {
-                  let name = item.name;
-                  if (i === 0 && local.var_id) {
-                    name = local.tree_vars?.[local.var_id].var.name || "";
-                  }
+            <div className="border-b border-b-[#aaa] h-[25px] flex">
+              <div className="flex flex-1 bg-slate-100 overflow-auto relative">
+                <div className="absolute inset-0 pl-2 flex">
+                  {local.path.map((item, i) => {
+                    let name = item.name;
+                    if (i === 0 && local.var_id) {
+                      name = local.tree_vars?.[local.var_id].var.name || "";
+                    }
 
-                  if (
-                    i === local.path.length - 1 &&
-                    !["array", "object"].includes(last_path.type)
-                  ) {
-                    return null;
-                  }
+                    if (
+                      i === local.path.length - 1 &&
+                      !["array", "object"].includes(last_path.type)
+                    ) {
+                      return null;
+                    }
 
-                  return (
-                    <Tooltip
-                      content={name}
-                      key={i}
-                      className={cx(
-                        "flex cursor-pointer items-center whitespace-nowrap",
-                        i > 0 && "-ml-[3px]"
-                      )}
-                      delay={0}
-                      onClick={() => {
-                        local.val_path = local.val_path.slice(0, i);
-                        if (local.val_path.length === 0) {
-                          local.var_id = "";
-                        }
-                        reload(false);
-                      }}
-                    >
-                      {name.substring(0, 4)} {name.length > 4 && "…"}
-                      <div className="h-[25px] overflow-hidden flex items-center -ml-4 -mr-2">
-                        <ChevronRight
-                          strokeWidth={1}
-                          size={60}
-                          color="#aaa"
-                          absoluteStrokeWidth
-                        />
-                      </div>
-                    </Tooltip>
-                  );
-                })}
+                    return (
+                      <Tooltip
+                        content={name}
+                        key={i}
+                        className={cx(
+                          "flex cursor-pointer items-center whitespace-nowrap",
+                          i > 0 && "-ml-[3px]",
+                          "hover:text-blue-600"
+                        )}
+                        delay={0}
+                        onClick={() => {
+                          local.val_path = local.val_path.slice(0, i);
+                          if (local.val_path.length === 0) {
+                            local.var_id = "";
+                          }
+                          reload(false);
+                        }}
+                      >
+                        {name.substring(0, 4)} {name.length > 4 && "…"}
+                        <div className="h-[25px] overflow-hidden flex items-center -ml-4 -mr-2">
+                          <ChevronRight
+                            strokeWidth={1}
+                            size={60}
+                            color="#aaa"
+                            absoluteStrokeWidth
+                          />
+                        </div>
+                      </Tooltip>
+                    );
+                  })}
+                </div>
+              </div>
+              <div
+                onClick={() => {
+                  const var_id = local.var_id;
+                  if (var_id) {
+                    const var_item = local.tree_vars?.[var_id];
+                    if (var_item) {
+                      active.item_id = var_item.item_id;
+                      p.ui.right.tab = "vars";
+                      p.ui.popup.vars.id = var_id;
+
+                      p.render();
+                    }
+                  }
+                }}
+                className="border-l flex items-center justify-center w-[30px] cursor-pointer hover:bg-blue-600 hover:text-white"
+              >
+                <Pencil size={13} />
               </div>
             </div>
           )}
@@ -238,7 +294,7 @@ export const EdVarPicker: FC<{
                   }}
                 >
                   <EdTypeLabel type={item.type} show_label={false} />
-                  <div>{item.name}</div>
+                  <div className="leading-3">{item.name}</div>
                 </div>
                 {["object", "array"].includes(getBaseType(item.type)) && (
                   <div

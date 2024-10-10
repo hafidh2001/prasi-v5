@@ -10,8 +10,36 @@ import { bind } from "./lib/immer-yjs";
 import { findNodeById, flattenTree } from "./node/flatten-tree";
 import { loadScriptModels, ScriptModel } from "./node/load-script-models";
 import { TreeVarItems } from "./node/var-items";
+import { PG } from "logic/ed-global";
+import { active } from "logic/active";
+import { waitUntil } from "prasi-utils";
 
 export type CompTree = ReturnType<typeof internalLoadCompTree>;
+
+export const activateComp = async (p: PG, comp_id: string) => {
+  if (active.comp) {
+    active.comp.destroy();
+    active.comp = null;
+    const id = comp_id;
+    if (p.ui.comp.last_edit_ids.length > 0 && p.sync) {
+      active.comp = await loadCompTree({
+        sync: p.sync,
+        id: id,
+        async on_update(ctree) {
+          if (!p.comp.loaded[id]) {
+            await waitUntil(() => p.comp.loaded[id]);
+          }
+
+          p.comp.loaded[id].content_tree = ctree;
+          p.render();
+        },
+      });
+      p.ui.comp.loading_id = "";
+      p.render();
+    }
+    p.render();
+  }
+};
 
 export const loadCompTree = (opt: {
   sync: ReturnType<typeof createClient>;

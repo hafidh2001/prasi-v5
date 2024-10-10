@@ -4,7 +4,7 @@ import { FC, ReactElement } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { IVar } from "utils/types/item";
 import { Tooltip } from "utils/ui/tooltip";
-import { EdTypeLabel } from "./lib/label";
+import { EdTypeLabel } from "./lib/type-label";
 import { EObjectEntry, EType } from "./lib/type";
 import { EdTypePicker } from "./picker/picker-type";
 import { EdPickerBoolean } from "./picker/picker-boolean";

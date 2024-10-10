@@ -10,16 +10,16 @@ import { IVar } from "utils/types/item";
 import { Popover } from "utils/ui/popover";
 import { Tooltip } from "utils/ui/tooltip";
 import { EdVarEdit } from "./ed-var-edit";
-import { EdTypeLabel } from "./lib/label";
+import { EdTypeLabel } from "./lib/type-label";
 import { getBaseType } from "./lib/validate";
 import JsonView from "@uiw/react-json-view";
 import { useLocal } from "utils/react/use-local";
 
-export const EdVarItem: FC<{ id: string; name: string; node: PNode }> = ({
-  id,
-  name,
-  node,
-}) => {
+export const EdVarItem: FC<{
+  id: string;
+  name: string;
+  node: PNode;
+}> = ({ id, name, node }) => {
   const p = useGlobal(EDGlobal, "GLOBAL");
   const vars = node.item.vars || {};
   const _var = vars[id];

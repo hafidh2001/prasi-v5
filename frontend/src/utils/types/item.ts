@@ -16,10 +16,8 @@ export type IItem = {
   html?: string;
   events?: Record<EventType, { flow: PFlow }>;
   vars?: Record<string, IVar<any>>;
-  use_var?: {
-    loop?: VarUsage;
-    content?: VarUsage;
-  };
+  loop?: IFlowOrVar;
+  content?: IFlowOrVar;
   childs: IItem[];
 } & MetaItem &
   BasicItem;
@@ -29,6 +27,7 @@ type PROP_NAME = string;
 type VAR_PATH = string;
 type FLOW_NODE_ID = string;
 
+export type IFlowOrVar = { mode: "var" | "flow"; flow?: PFlow; var?: VarUsage };
 export type IVar<T extends EType> = {
   id: string;
   name: string;

@@ -46,7 +46,6 @@ export const indentTree = (p: PG) => {
 
   if (should_open.size > 0 && p.ui.tree.ref) {
     p.ui.tree.ref.open([...should_open]);
-    p.render();
   }
 
   scrollTreeActiveItem();
