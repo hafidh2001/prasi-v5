@@ -73,7 +73,7 @@ export const EdTopBar = () => {
           <Tooltip
             content="Previous item"
             className={cx(
-              "cursor-pointer p-2 pl-1 rotate-180",
+              "cursor-pointer pl-2",
               can_back ? "hover:text-blue-600" : "text-slate-400"
             )}
             onClick={async () => {
@@ -98,12 +98,12 @@ export const EdTopBar = () => {
               }
             }}
           >
-            <Play size={14} strokeWidth={3} />
+            <TriangleIcon />
           </Tooltip>
           <Tooltip
             content="Next item"
             className={cx(
-              "cursor-pointer p-2 pl-1",
+              "cursor-pointer rotate-180",
               can_next ? "hover:text-blue-600" : "text-slate-400"
             )}
             onClick={async () => {
@@ -129,7 +129,7 @@ export const EdTopBar = () => {
               }
             }}
           >
-            <Play size={14} strokeWidth={3} />
+            <TriangleIcon />
           </Tooltip>
         </div>
       </div>
@@ -154,5 +154,24 @@ export const EdTopBar = () => {
         )}
       </div>
     </div>
+  );
+};
+
+const TriangleIcon = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="22"
+      height="22"
+      fill="none"
+      viewBox="0 0 16 16"
+    >
+      <path
+        fill="currentColor"
+        fillRule="evenodd"
+        d="M9.295 4.177a.73.73 0 011.205.552v6.542a.73.73 0 01-1.205.552L5.786 8.8a1 1 0 01-.347-.757v-.084a1 1 0 01.347-.757z"
+        clipRule="evenodd"
+      ></path>
+    </svg>
   );
 };

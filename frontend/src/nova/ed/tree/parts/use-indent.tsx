@@ -11,7 +11,6 @@ export const useTreeIndent = (p: PG) => {
 };
 
 export const indentTree = (p: PG) => {
-  p.ui.tree.rename_id = "";
   if (p.ui.tree.prevent_indent) {
     p.ui.tree.prevent_indent = false;
     return;

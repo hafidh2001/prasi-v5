@@ -32,6 +32,11 @@ export const EdTreeNodeName: FC<{
             autoFocus
             spellCheck={false}
             value={local.rename}
+            ref={(ref) => {
+              if (ref) {
+                ref.focus();
+              }
+            }}
             onFocus={(e) => {
               if (node.parent?.component?.is_jsx_root) {
                 p.ui.tree.rename_id = "";
@@ -39,6 +44,9 @@ export const EdTreeNodeName: FC<{
               } else {
                 e.currentTarget.select();
               }
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
             }}
             onBlur={() => {
               if (node.parent?.component?.is_jsx_root) {
