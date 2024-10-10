@@ -1,7 +1,7 @@
 import { NodeModel, RenderParams } from "@minoru/react-dnd-treeview";
 import { loadCompTree } from "crdt/load-comp-tree";
 import { getNodeById, updateNodeById } from "crdt/node/get-node-by-id";
-import { Scroll } from "lucide-react";
+import { AudioWaveform, Scroll } from "lucide-react";
 import { waitUntil } from "prasi-utils";
 import { useGlobal } from "../../../../../utils/react/use-global";
 import { Tooltip } from "../../../../../utils/ui/tooltip";
@@ -53,9 +53,17 @@ export const EdTreeAction = ({
   const no_adv = !(item.adv?.js || item.adv?.css || item.adv?.html);
 
   const has_content = !!item.content;
+  const has_loop = !!item.loop;
+  const has_event = has_content || has_loop;
 
   return (
     <div className="flex items-center pr-1 space-x-1">
+      {has_event && (
+        <Tooltip content="Content / Loop defined, JS disabled">
+          <AudioWaveform size={9} className="mr-1" />
+        </Tooltip>
+      )}
+
       {!!item.hidden && (
         <Tooltip content="Hidden: All">
           <div
@@ -80,7 +88,7 @@ export const EdTreeAction = ({
           <div
             className={cx(
               "node-action border rounded-sm text-[9px] flex w-[20px] h-[15px] items-center cursor-pointer justify-center uppercase",
-              item.adv?.js || item.adv?.css || item.adv?.html
+              !no_adv
                 ? `opacity-100`
                 : cx(
                     `opacity-0 action-script transition-all`,
@@ -91,7 +99,7 @@ export const EdTreeAction = ({
                     `
                   ),
 
-              !has_content &&
+              !has_event &&
                 cx(
                   no_adv &&
                     `bg-orange-100  border-orange-200 hover:border-orange-500 hover:text-orange-900 hover:bg-orange-300`,
@@ -102,7 +110,7 @@ export const EdTreeAction = ({
                   mode === "html" &&
                     `bg-blue-400 text-white border-blue-400 hover:border-blue-500 hover:bg-blue-300`
                 ),
-              has_content &&
+              has_event &&
                 cx(
                   no_adv &&
                     `bg-orange-100 border-green-200 hover:border-green-500 hover:text-green-900 hover:bg-green-300`,

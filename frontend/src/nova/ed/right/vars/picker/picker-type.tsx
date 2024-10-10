@@ -50,7 +50,6 @@ export const EdTypePicker: FC<{
 
   return children({
     open: () => {
-      console.log(local.open);
       local.open = true;
       local.render();
     },

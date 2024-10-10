@@ -64,7 +64,7 @@ export const EdRight = () => {
                   )}
                   onClick={() => {
                     localStorage.setItem("prasi-panel-right-tab", tab);
-                    p.ui.right.tab = tab;
+                    p.ui.right.tab = tab as any;
                     p.render();
                   }}
                   key={tab}

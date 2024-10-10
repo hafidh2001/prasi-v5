@@ -39,14 +39,16 @@ export const EdEvents = () => {
                   tree.update("Edit Item Content", ({ findNode }) => {
                     const n = findNode(item.id);
                     if (n) {
-                      const var_id = n.item.loop!.var?.var_id;
+                      if (n.item.loop) {
+                        clearUsage(
+                          tree,
+                          findNode,
+                          { id: item.id, mode: "loop" },
+                          n.item.loop
+                        );
+                      }
+
                       n.item.loop = undefined;
-                      updateUsage(
-                        tree,
-                        findNode,
-                        { id: item.id, mode: "loop", var_id },
-                        undefined
-                      );
                     }
                   });
                 }}
@@ -63,17 +65,27 @@ export const EdEvents = () => {
                 tree.update("Edit Item Content", ({ findNode }) => {
                   const n = findNode(item.id);
                   if (n) {
+                    if (n.item.content && n.item.content.var) {
+                      clearUsage(
+                        tree,
+                        findNode,
+                        { id: item.id, mode: "content" },
+                        n.item.content
+                      );
+                    }
+
                     n.item.content = value;
-                    updateUsage(
-                      tree,
-                      findNode,
-                      {
-                        id: item.id,
-                        mode: "content",
-                        var_id: n.item.content?.var?.var_id,
-                      },
-                      value?.var
-                    );
+                    if (value && value.var) {
+                      setUsage(
+                        tree,
+                        findNode,
+                        {
+                          id: item.id,
+                          mode: "content",
+                        },
+                        value
+                      );
+                    }
                   }
                 });
               }}
@@ -97,17 +109,27 @@ export const EdEvents = () => {
               tree.update("Edit Item loop", ({ findNode }) => {
                 const n = findNode(item.id);
                 if (n) {
+                  if (n.item.loop && n.item.loop.var) {
+                    clearUsage(
+                      tree,
+                      findNode,
+                      { id: item.id, mode: "loop" },
+                      n.item.loop
+                    );
+                  }
+
                   n.item.loop = value;
-                  updateUsage(
-                    tree,
-                    findNode,
-                    {
-                      id: item.id,
-                      mode: "loop",
-                      var_id: n.item.content?.var?.var_id,
-                    },
-                    value?.var
-                  );
+                  if (value && value.var) {
+                    setUsage(
+                      tree,
+                      findNode,
+                      {
+                        id: item.id,
+                        mode: "loop",
+                      },
+                      value
+                    );
+                  }
                 }
               });
             }}
@@ -130,13 +152,41 @@ export const EdEvents = () => {
   );
 };
 
-const updateUsage = (
+const clearUsage = (
   tree: ActiveTree,
   findNode: (id: string) => null | PNode,
-  used_by: { id: string; mode: "content" | "loop"; var_id?: string },
-  usage?: VarUsage
+  used_by: { id: string; mode: "content" | "loop" },
+  usage: { var?: VarUsage }
 ) => {
-  const var_id = usage?.var_id || used_by.var_id;
+  const var_id = usage.var?.var_id;
+  if (var_id) {
+    const source = tree.var_items[var_id];
+    if (source?.item.id) {
+      const n = findNode(source.item.id);
+      if (n && n.item.vars) {
+        const _var = n.item.vars[var_id];
+        if (_var) {
+          if (!_var.usage[used_by.id]) {
+            _var.usage[used_by.id] = {};
+          }
+          delete _var.usage[used_by.id][used_by.mode];
+
+          if (Object.keys(_var.usage[used_by.id]).length === 0) {
+            delete _var.usage[used_by.id];
+          }
+        }
+      }
+    }
+  }
+};
+
+const setUsage = (
+  tree: ActiveTree,
+  findNode: (id: string) => null | PNode,
+  used_by: { id: string; mode: "content" | "loop" },
+  usage: { var?: VarUsage }
+) => {
+  const var_id = usage.var?.var_id;
   if (var_id) {
     const source = tree.var_items[var_id];
     if (source?.item.id) {

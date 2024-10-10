@@ -275,14 +275,9 @@ const Wrapper: FC<{
             });
           }}
           onRename={({ path, new_name, old_name }) => {
-            const rpath = path
-              .slice(0, path.length - 2)
-              .join(".")
-              .replace("~~", "type");
-            const bpath = path
-              .slice(0, path.length - 2)
-              .join(".")
-              .replace("~~", "default");
+            const spath = path.slice(0, path.length - 2);
+            const rpath = spath.join(".").replace("~~", "type");
+            const bpath = spath.join(".").replace("~~", "default");
             getActiveTree(p).update(`Update var ${id}`, ({ findNode }) => {
               const n = findNode(node.item.id);
               if (n) {
@@ -306,13 +301,11 @@ const Wrapper: FC<{
 
                 if (curvar) {
                   const usage = getVarUsage(curvar, findNode);
-                  console.log(
-                    "todo: validate usage map",
-                    usage.map((e) => ({
-                      ...e,
-                      usage: current(e.usage),
-                    }))
-                  );
+                  usage.map((e) => {
+                    if (e.usage.path?.join(".").startsWith(spath.join("."))) {
+                      e.usage.path[spath.length] = new_name;
+                    }
+                  }); 
                 }
               }
             });
