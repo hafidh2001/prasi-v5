@@ -52,6 +52,10 @@ export const EdScriptWorkbench: FC<{
   }
 
   const has_content = !!node?.item.content;
+
+  if (has_content) {
+    popup.mode = "css";
+  }
   return (
     <div className="flex flex-1 flex-col select-none">
       <div
@@ -101,6 +105,21 @@ export const EdScriptWorkbench: FC<{
                   );
                 })}
               </div>
+              {has_content && (
+                <div className="flex items-center text-sm pl-2 text-slate-400">
+                  JS is disabled because this item has content{" "}
+                  <div
+                    onClick={() => {
+                      p.ui.right.tab = "events";
+                      p.ui.popup.events.open = "content";
+                      p.render();
+                    }}
+                    className="border border-blue-600 px-2 ml-2 text-blue-600 cursor-pointer hover:bg-blue-600 hover:text-white"
+                  >
+                    Edit Content
+                  </div>
+                </div>
+              )}
               {popup.mode === "js" && (
                 <>
                   {popup.type === "item" && (

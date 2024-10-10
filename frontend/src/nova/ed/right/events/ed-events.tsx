@@ -279,6 +279,7 @@ const Picker: FC<{
         value={value?.var}
         onChange={(_var) => {
           onChange({ ...value, var: _var, mode });
+          onOpenChange(false);
         }}
         open={open}
         onOpenChange={(open) => {

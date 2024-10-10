@@ -119,6 +119,9 @@ export const EdBase = () => {
                       "w-full h-full flex flex-1 relative overflow-auto",
                       p.mode === "mobile" ? "flex-col items-center" : ""
                     )}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                    }}
                   >
                     <div className={mainStyle(p)}>
                       <EdViRoot />
