@@ -31,16 +31,18 @@ export const EdPageTree: FC<{ tree: PageTree }> = ({ tree }) => {
           <TypedTree
             tree={models}
             ref={(ref) => {
-              let open_all = p.ui.tree.ref !== ref;
-              p.ui.tree.ref = ref;
-              if (open_all && ref) {
+              if (!p.ui.tree.ref) {
                 clearTimeout(t.out);
                 t.out = setTimeout(() => {
-                  if (document.activeElement?.classList.contains("tree-item")) {
-                  } else {
+                  if (
+                    !document.activeElement?.classList.contains("tree-item")
+                  ) {
                     indentTree(p);
                   }
                 }, 10);
+              }
+              if (ref) {
+                p.ui.tree.ref = ref;
               }
             }}
             rootId={"root"}

@@ -1,4 +1,5 @@
 import JsonView from "@uiw/react-json-view";
+import { current } from "immer";
 import get from "lodash.get";
 import set from "lodash.set";
 import { getActiveTree } from "logic/active";
@@ -13,6 +14,7 @@ import { Tooltip } from "utils/ui/tooltip";
 import { EdVarEdit } from "./ed-var-edit";
 import { EdTypeLabel } from "./lib/type-label";
 import { getBaseType } from "./lib/validate";
+import { getVarUsage } from "./lib/usage";
 
 export const EdVarItem: FC<{
   id: string;
@@ -300,6 +302,16 @@ const Wrapper: FC<{
                     delete base[old_name];
                     base[new_name] = old;
                   }
+                }
+
+                if (curvar) {
+                  const usage = getVarUsage(curvar, findNode);
+                  console.log(
+                    usage.map((e) => ({
+                      place: e.place,
+                      usage: current(e.usage),
+                    }))
+                  );
                 }
               }
             });

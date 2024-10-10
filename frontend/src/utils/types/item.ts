@@ -52,4 +52,5 @@ export type IVar<T extends EType> = {
 export type VarUsage = {
   var_id: string;
   path?: VAR_PATH[];
+  error?: string;
 };

@@ -6,6 +6,8 @@ export const getActiveTree = (p: PG) => {
   return active.comp ? active.comp : p.page.tree;
 };
 
+export type ActiveTree = ReturnType<typeof getActiveTree>;
+
 export const activateItem = (p: PG, id: string) => {
   setTimeout(async () => {
     active.item_id = id;

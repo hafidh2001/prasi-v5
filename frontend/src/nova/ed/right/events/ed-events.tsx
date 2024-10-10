@@ -1,6 +1,6 @@
 import { getActiveNode } from "crdt/node/get-node-by-id";
-import { active, getActiveTree } from "logic/active";
-import { EDGlobal } from "logic/ed-global";
+import { active, ActiveTree, getActiveTree } from "logic/active";
+import { EDGlobal, PG } from "logic/ed-global";
 import {
   Bolt,
   ChevronDown,
@@ -10,12 +10,14 @@ import {
 } from "lucide-react";
 import { FC, ReactNode } from "react";
 import { useGlobal } from "utils/react/use-global";
-import { IFlowOrVar } from "utils/types/item";
+import { IFlowOrVar, IItem, VarUsage } from "utils/types/item";
 import { Popover } from "utils/ui/popover";
 import { EdVarLabel } from "../vars/lib/var-label";
 import { EdVarPicker } from "../vars/picker/picker-var";
 import { EdEventItem } from "./ed-event-item";
 import { EdEventTypes } from "./ed-event-types";
+import { PNode } from "logic/types";
+import { current } from "immer";
 
 export const EdEvents = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -37,10 +39,19 @@ export const EdEvents = () => {
             <Picker
               value={node.item.content}
               onChange={(value) => {
-                getActiveTree(p).update("Edit Item Content", ({ findNode }) => {
+                const tree = getActiveTree(p);
+                tree.update("Edit Item Content", ({ findNode }) => {
                   const n = findNode(item.id);
                   if (n) {
                     n.item.content = value;
+                    if (value?.var) {
+                      updateUsage(
+                        tree,
+                        findNode,
+                        { id: item.id, mode: "content" },
+                        value.var
+                      );
+                    }
                   }
                 });
               }}
@@ -60,10 +71,19 @@ export const EdEvents = () => {
           <Picker
             value={node.item.loop}
             onChange={(value) => {
-              getActiveTree(p).update("Edit Item Content", ({ findNode }) => {
+              const tree = getActiveTree(p);
+              tree.update("Edit Item loop", ({ findNode }) => {
                 const n = findNode(item.id);
                 if (n) {
                   n.item.loop = value;
+                  if (value?.var) {
+                    updateUsage(
+                      tree,
+                      findNode,
+                      { id: item.id, mode: "loop" },
+                      value.var
+                    );
+                  }
                 }
               });
             }}
@@ -84,6 +104,27 @@ export const EdEvents = () => {
       </div>
     </div>
   );
+};
+
+const updateUsage = (
+  tree: ActiveTree,
+  findNode: (id: string) => null | PNode,
+  used_by: { id: string; mode: "content" | "loop" },
+  usage: VarUsage
+) => {
+  const source = tree.var_items[usage.var_id];
+  if (source?.item.id) {
+    const n = findNode(source.item.id);
+    if (n && n.item.vars) {
+      const _var = n.item.vars[usage.var_id];
+      if (_var) {
+        if (!_var.usage[used_by.id]) {
+          _var.usage[used_by.id] = {};
+        }
+        _var.usage[used_by.id][used_by.mode] = true;
+      }
+    }
+  }
 };
 
 const Picker: FC<{
@@ -111,7 +152,10 @@ const Picker: FC<{
         >
           {value.mode === "var" && (
             <>
-              <EdVarLabel value={value.var} empty={<>Edit Variable</>} />
+              <EdVarLabel
+                value={value.var}
+                empty={<div className="pl-2 pr-1">Edit Variable</div>}
+              />
             </>
           )}
           {value.mode === "flow" && (
@@ -133,7 +177,7 @@ const Picker: FC<{
                 icon: <RectangleEllipsis size={12} className="mr-1" />,
                 active: value?.mode === "var",
                 onClick: () => {
-                  onOpenChange(false);
+                  onOpenChange(true);
                   onChange({ ...value, mode: "var" });
                 },
               },

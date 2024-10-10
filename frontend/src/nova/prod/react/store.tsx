@@ -134,7 +134,7 @@ export const useProdState = defineStore({
             const tree = result[page.id];
             if (tree && s.page) {
               s.page.root = tree;
-              
+
               let mode = (
                 s.site.responsive !== "all" ? s.site.responsive : "desktop"
               ) as "mobile" | "desktop";

@@ -1,5 +1,6 @@
 import { css, extractCss } from "goober";
 import { waitUntil } from "prasi-utils";
+import { snapshot } from "valtio";
 
 export const defineWindow = async (awaitServerUrl = true) => {
   let w = typeof window === "object" ? window : (globalThis as any);

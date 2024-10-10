@@ -1,5 +1,5 @@
-import { PrismaClient } from "prasi-db";
-
+import type { PrismaClient } from "prasi-db";
+import type { snapshot } from "valtio";
 export type PageProps = {
   pathname: string;
   domain: string;

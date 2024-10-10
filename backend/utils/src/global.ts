@@ -1,4 +1,4 @@
-import goober from "goober";
+import type * as goober from "goober";
 declare global {
   const navigate: (path: string) => void;
   const params: any;
