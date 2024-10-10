@@ -8,6 +8,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   PanelRightOpen,
+  Play,
 } from "lucide-react";
 import { useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
@@ -72,7 +73,7 @@ export const EdTopBar = () => {
           <Tooltip
             content="Previous item"
             className={cx(
-              "cursor-pointer p-2 pr-1",
+              "cursor-pointer p-2 pl-1 rotate-180",
               can_back ? "hover:text-blue-600" : "text-slate-400"
             )}
             onClick={async () => {
@@ -97,7 +98,7 @@ export const EdTopBar = () => {
               }
             }}
           >
-            <ChevronLeft size={20} />
+            <Play size={14} strokeWidth={3} />
           </Tooltip>
           <Tooltip
             content="Next item"
@@ -128,7 +129,7 @@ export const EdTopBar = () => {
               }
             }}
           >
-            <ChevronRight size={20} />
+            <Play size={14} strokeWidth={3} />
           </Tooltip>
         </div>
       </div>

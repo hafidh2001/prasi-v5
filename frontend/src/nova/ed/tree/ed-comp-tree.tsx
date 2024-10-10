@@ -71,14 +71,11 @@ export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
               tree={models}
               ref={(ref) => {
                 if (!p.ui.tree.ref) {
-                  clearTimeout(t.out);
-                  t.out = setTimeout(() => {
-                    if (
-                      !document.activeElement?.classList.contains("tree-item")
-                    ) {
-                      indentTree(p);
-                    }
-                  }, 10);
+                  waitUntil(async () => {
+                    return document.querySelector(".tree-item");
+                  }).then(() => {
+                    indentTree(p);
+                  });
                 }
                 if (ref) {
                   p.ui.tree.ref = ref;

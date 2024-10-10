@@ -175,8 +175,9 @@ export const EdVarPicker: FC<{
             height:
               parseInt(localStorage.getItem("prasi-var-picker-h") || "") || 250,
             width:
-              parseInt(localStorage.getItem("prasi-var-picker-w") || "") || 200,
+              parseInt(localStorage.getItem("prasi-var-picker-w") || "") || 250,
           }}
+          minWidth={250}
           onResizeStop={(_, __, div) => {
             localStorage.setItem(
               "prasi-var-picker-w",
@@ -272,6 +273,26 @@ export const EdVarPicker: FC<{
                 key={item.name}
                 className="flex border-b items-stretch h-[30px]"
               >
+                {local.val_path.length === 0 && (
+                  <div
+                    onClick={() => {
+                      const var_id = item.id;
+                      if (var_id) {
+                        const var_item = local.tree_vars?.[var_id];
+                        if (var_item) {
+                          active.item_id = var_item.item_id;
+                          p.ui.right.tab = "vars";
+                          p.ui.popup.vars.id = var_id;
+
+                          p.render();
+                        }
+                      }
+                    }}
+                    className="border-r flex items-center justify-center w-[30px] cursor-pointer hover:bg-blue-600 hover:text-white"
+                  >
+                    <Pencil size={13} />
+                  </div>
+                )}
                 <div
                   className={cx(
                     "flex flex-1 items-center hover:bg-blue-500 hover:text-white cursor-pointer",
@@ -296,6 +317,7 @@ export const EdVarPicker: FC<{
                   <EdTypeLabel type={item.type} show_label={false} />
                   <div className="leading-3">{item.name}</div>
                 </div>
+
                 {["object", "array"].includes(getBaseType(item.type)) && (
                   <div
                     onClick={() => {

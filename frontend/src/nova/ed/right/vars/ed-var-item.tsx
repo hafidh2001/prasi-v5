@@ -307,8 +307,9 @@ const Wrapper: FC<{
                 if (curvar) {
                   const usage = getVarUsage(curvar, findNode);
                   console.log(
+                    "todo: validate usage map",
                     usage.map((e) => ({
-                      place: e.place,
+                      ...e,
                       usage: current(e.usage),
                     }))
                   );

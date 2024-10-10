@@ -10,8 +10,8 @@ import { nodeRender } from "./parts/node/node-render";
 import { treeCanDrop, treeOnDrop } from "./parts/on-drop";
 import { doTreeSearch } from "./parts/search";
 import { indentTree, useTreeIndent } from "./parts/use-indent";
+import { waitUntil } from "prasi-utils";
 
-const t = { out: null as any };
 export const EdPageTree: FC<{ tree: PageTree }> = ({ tree }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
 
@@ -32,14 +32,11 @@ export const EdPageTree: FC<{ tree: PageTree }> = ({ tree }) => {
             tree={models}
             ref={(ref) => {
               if (!p.ui.tree.ref) {
-                clearTimeout(t.out);
-                t.out = setTimeout(() => {
-                  if (
-                    !document.activeElement?.classList.contains("tree-item")
-                  ) {
-                    indentTree(p);
-                  }
-                }, 10);
+                waitUntil(async () => {
+                  return document.querySelector(".tree-item");
+                }).then(() => {
+                  indentTree(p);
+                });
               }
               if (ref) {
                 p.ui.tree.ref = ref;

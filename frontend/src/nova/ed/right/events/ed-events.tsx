@@ -1,6 +1,7 @@
 import { getActiveNode } from "crdt/node/get-node-by-id";
 import { active, ActiveTree, getActiveTree } from "logic/active";
-import { EDGlobal, PG } from "logic/ed-global";
+import { EDGlobal } from "logic/ed-global";
+import { PNode } from "logic/types";
 import {
   Bolt,
   ChevronDown,
@@ -10,14 +11,12 @@ import {
 } from "lucide-react";
 import { FC, ReactNode } from "react";
 import { useGlobal } from "utils/react/use-global";
-import { IFlowOrVar, IItem, VarUsage } from "utils/types/item";
+import { IFlowOrVar, VarUsage } from "utils/types/item";
 import { Popover } from "utils/ui/popover";
 import { EdVarLabel } from "../vars/lib/var-label";
 import { EdVarPicker } from "../vars/picker/picker-var";
 import { EdEventItem } from "./ed-event-item";
 import { EdEventTypes } from "./ed-event-types";
-import { PNode } from "logic/types";
-import { current } from "immer";
 
 export const EdEvents = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -32,8 +31,29 @@ export const EdEvents = () => {
         <div className="flex items-center">
           <div className="w-[90px] mr-1">Content</div>
           {node.item.loop ? (
-            <div className=" text-slate-500 flex items-center h-[25px]">
-              Using Loop Items
+            <div className=" text-slate-500 flex items-center h-[25px] justify-between flex-1">
+              <div>Using Loop</div>
+              <span
+                onClick={() => {
+                  const tree = getActiveTree(p);
+                  tree.update("Edit Item Content", ({ findNode }) => {
+                    const n = findNode(item.id);
+                    if (n) {
+                      const var_id = n.item.loop!.var?.var_id;
+                      n.item.loop = undefined;
+                      updateUsage(
+                        tree,
+                        findNode,
+                        { id: item.id, mode: "loop", var_id },
+                        undefined
+                      );
+                    }
+                  });
+                }}
+                className="text-red-600 cursor-pointer px-1 border border-red-100 hover:border-red-500 ml-1"
+              >
+                Clear
+              </span>
             </div>
           ) : (
             <Picker
@@ -44,14 +64,16 @@ export const EdEvents = () => {
                   const n = findNode(item.id);
                   if (n) {
                     n.item.content = value;
-                    if (value?.var) {
-                      updateUsage(
-                        tree,
-                        findNode,
-                        { id: item.id, mode: "content" },
-                        value.var
-                      );
-                    }
+                    updateUsage(
+                      tree,
+                      findNode,
+                      {
+                        id: item.id,
+                        mode: "content",
+                        var_id: n.item.content?.var?.var_id,
+                      },
+                      value?.var
+                    );
                   }
                 });
               }}
@@ -76,14 +98,16 @@ export const EdEvents = () => {
                 const n = findNode(item.id);
                 if (n) {
                   n.item.loop = value;
-                  if (value?.var) {
-                    updateUsage(
-                      tree,
-                      findNode,
-                      { id: item.id, mode: "loop" },
-                      value.var
-                    );
-                  }
+                  updateUsage(
+                    tree,
+                    findNode,
+                    {
+                      id: item.id,
+                      mode: "loop",
+                      var_id: n.item.content?.var?.var_id,
+                    },
+                    value?.var
+                  );
                 }
               });
             }}
@@ -109,19 +133,22 @@ export const EdEvents = () => {
 const updateUsage = (
   tree: ActiveTree,
   findNode: (id: string) => null | PNode,
-  used_by: { id: string; mode: "content" | "loop" },
-  usage: VarUsage
+  used_by: { id: string; mode: "content" | "loop"; var_id?: string },
+  usage?: VarUsage
 ) => {
-  const source = tree.var_items[usage.var_id];
-  if (source?.item.id) {
-    const n = findNode(source.item.id);
-    if (n && n.item.vars) {
-      const _var = n.item.vars[usage.var_id];
-      if (_var) {
-        if (!_var.usage[used_by.id]) {
-          _var.usage[used_by.id] = {};
+  const var_id = usage?.var_id || used_by.var_id;
+  if (var_id) {
+    const source = tree.var_items[var_id];
+    if (source?.item.id) {
+      const n = findNode(source.item.id);
+      if (n && n.item.vars) {
+        const _var = n.item.vars[var_id];
+        if (_var) {
+          if (!_var.usage[used_by.id]) {
+            _var.usage[used_by.id] = {};
+          }
+          _var.usage[used_by.id][used_by.mode] = true;
         }
-        _var.usage[used_by.id][used_by.mode] = true;
       }
     }
   }
@@ -154,7 +181,7 @@ const Picker: FC<{
             <>
               <EdVarLabel
                 value={value.var}
-                empty={<div className="pl-2 pr-1">Edit Variable</div>}
+                empty={<div className="pl-2 pr-1">Pick Variable</div>}
               />
             </>
           )}
