@@ -6,9 +6,12 @@ import { waitUntil } from "prasi-utils";
 import { memo, useRef, useState } from "react";
 import { StoreProvider } from "utils/react/define-store";
 import { useGlobal } from "utils/react/use-global";
+import { useLocal } from "utils/react/use-local";
 import { Loading } from "utils/ui/loading";
 import { ViComps, ViWrapperComp } from "vi/lib/types";
 import { ViRoot } from "vi/vi-root";
+import { EdTreeCtxMenu } from "./tree/parts/ctx-menu";
+import { IItem } from "utils/types/item";
 
 export const EdViRoot = memo(() => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -73,28 +76,54 @@ export const EdViRoot = memo(() => {
 
 const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
   (({ item, is_layout, ViRender, __idx }) => {
+    const local = useLocal({
+      ctx_menu: null as any,
+      item: null as null | IItem,
+    });
     return (
-      // @ts-ignore
-      <ViRender
-        item={item}
-        is_layout={is_layout}
-        __idx={__idx}
-        div_props={(item) => ({
-          onPointerEnter(e) {
-            active.hover.id = item.id;
-            render();
-          },
-          onPointerLeave(e) {
-            active.hover.id = "";
-            render();
-          },
-          onPointerDown(e) {
-            e.stopPropagation();
-            e.preventDefault();
-            activateItem(p, item.id);
-            render();
-          },
-        })}
-      />
+      <>
+        {/* @ts-ignore */}
+        <ViRender
+          item={item}
+          is_layout={is_layout}
+          __idx={__idx}
+          div_props={(item) => ({
+            onPointerEnter(e) {
+              active.hover.id = item.id;
+              render();
+            },
+            onPointerLeave(e) {
+              active.hover.id = "";
+              render();
+            },
+            onPointerDown(e) {
+              e.stopPropagation();
+              e.preventDefault();
+              activateItem(p, item.id);
+              render();
+            },
+            onContextMenu(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              if (item) {
+                local.ctx_menu = e;
+                local.item = JSON.parse(JSON.stringify(item));
+                //@ts-ignore
+                local.render();
+              }
+            },
+          })}
+        />
+        {local.ctx_menu && local.item && (
+          <EdTreeCtxMenu
+            event={local.ctx_menu}
+            onClose={() => {
+              local.ctx_menu = null;
+              local.render();
+            }}
+            raw={{ data: { item: local.item } } as any}
+          />
+        )}
+      </>
     );
   }) as ViWrapperComp;

@@ -90,7 +90,6 @@ export const internalLoadCompTree = (
         exclude_comp_ids: [comp_id],
       }
     );
-    console.log(content_tree, component.script_models);
 
     opt.on_update(content_tree);
     if (!state.loaded) {

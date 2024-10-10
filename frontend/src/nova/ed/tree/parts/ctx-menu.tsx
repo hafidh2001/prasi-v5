@@ -26,7 +26,7 @@ export const EdTreeCtxMenu = ({
   onClose,
 }: {
   event: React.MouseEvent<HTMLDivElement, MouseEvent>;
-  raw: NodeModel<PNode>;
+  raw?: NodeModel<PNode>;
   onClose: () => void;
 }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -50,12 +50,12 @@ export const EdTreeCtxMenu = ({
         .catch(() => {});
     }
   });
-  const item = raw.data?.item as IItem;
+  const item = raw?.data?.item as IItem;
   const type = item?.type;
   const comp = (item as IItem).component as FNComponent | undefined;
   const isComponent = comp?.id;
   const isActiveComponent = active.comp && active.comp?.id === comp?.id;
-  const isJSXProp = raw.data?.parent?.component?.is_jsx_root;
+  const isJSXProp = raw?.data?.parent?.component?.is_jsx_root;
   if (!item) {
     return (
       <Menu mouseEvent={event} onClose={onClose}>
