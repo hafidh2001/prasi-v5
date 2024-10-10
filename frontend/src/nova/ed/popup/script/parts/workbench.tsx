@@ -51,6 +51,7 @@ export const EdScriptWorkbench: FC<{
     );
   }
 
+  const has_content = !!node?.item.content;
   return (
     <div className="flex flex-1 flex-col select-none">
       <div
@@ -65,11 +66,14 @@ export const EdScriptWorkbench: FC<{
           {popup.type === "item" && (
             <>
               <div className="flex p-2 space-x-1 border-r">
-                {[
-                  { type: "js", color: "#e9522c" },
-                  { type: "css", color: "#188228" },
-                  { type: "html", color: "#2c3e83" },
-                ].map((e) => {
+                {(!has_content
+                  ? [
+                      { type: "js", color: "#e9522c" },
+                      { type: "css", color: "#188228" },
+                      { type: "html", color: "#2c3e83" },
+                    ]
+                  : [{ type: "css", color: "#188228" }]
+                ).map((e) => {
                   return (
                     <div
                       key={e.type}

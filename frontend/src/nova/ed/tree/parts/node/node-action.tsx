@@ -52,6 +52,8 @@ export const EdTreeAction = ({
 
   const no_adv = !(item.adv?.js || item.adv?.css || item.adv?.html);
 
+  const has_content = !!item.content;
+
   return (
     <div className="flex items-center pr-1 space-x-1">
       {!!item.hidden && (
@@ -88,14 +90,25 @@ export const EdTreeAction = ({
                       }
                     `
                   ),
-              no_adv &&
-                `bg-orange-100  border-orange-200 hover:border-orange-500 hover:text-orange-900 hover:bg-orange-300`,
-              mode === "js" &&
-                `bg-orange-100 border-orange-200 hover:border-orange-500 hover:text-orange-900 hover:bg-orange-300`,
-              mode === "css" &&
-                `bg-green-100  border-green-200 hover:border-green-500 hover:text-green-900 hover:bg-green-300`,
-              mode === "html" &&
-                `bg-blue-400 text-white border-blue-400 hover:border-blue-500 hover:bg-blue-300`
+
+              !has_content &&
+                cx(
+                  no_adv &&
+                    `bg-orange-100  border-orange-200 hover:border-orange-500 hover:text-orange-900 hover:bg-orange-300`,
+                  mode === "js" &&
+                    `bg-orange-100 border-orange-200 hover:border-orange-500 hover:text-orange-900 hover:bg-orange-300`,
+                  mode === "css" &&
+                    `bg-green-100  border-green-200 hover:border-green-500 hover:text-green-900 hover:bg-green-300`,
+                  mode === "html" &&
+                    `bg-blue-400 text-white border-blue-400 hover:border-blue-500 hover:bg-blue-300`
+                ),
+              has_content &&
+                cx(
+                  no_adv &&
+                    `bg-orange-100 border-green-200 hover:border-green-500 hover:text-green-900 hover:bg-green-300`,
+                  mode === "css" &&
+                    `bg-green-100  border-green-200 hover:border-green-500 hover:text-green-900 hover:bg-green-300`
+                )
             )}
             onClick={(e) => {
               e.preventDefault();
@@ -104,6 +117,8 @@ export const EdTreeAction = ({
                 p.ui.popup.script.open = false;
                 p.render();
               } else {
+                if (has_content) mode = "css";
+
                 if (
                   item.component?.props?.child?.content?.id &&
                   child_jsx_has_script

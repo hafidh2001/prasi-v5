@@ -10,8 +10,16 @@ export const definePickerPopup = (
   base_type: string,
   onChange: (type: any) => void
 ) => {
-  return ({ children, className }: { className: string; children: any }) => (
-    <div className={className}>
+  return ({
+    children,
+    className,
+    onClick,
+  }: {
+    className: string;
+    children: any;
+    onClick?: () => void;
+  }) => (
+    <div className={className} onClick={onClick}>
       <Popover
         open={local.open}
         onOpenChange={(open) => {

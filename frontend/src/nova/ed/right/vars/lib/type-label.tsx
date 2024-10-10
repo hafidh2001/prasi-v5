@@ -91,6 +91,7 @@ export const EdTypeLabel = forwardRef<
       content={<div className="capitalize">{type}</div>}
       delay={0}
       className={class_name}
+      asChild
     >
       {content}
     </Tooltip>

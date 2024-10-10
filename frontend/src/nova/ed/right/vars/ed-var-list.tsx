@@ -31,7 +31,16 @@ export const EdVarList = () => {
     >
       {item.vars &&
         Object.entries(item.vars).map(([id, ivar]) => {
-          return <EdVarItem key={id} id={id} name={ivar.name} node={node} />;
+          return (
+            <EdVarItem
+              key={id}
+              id={id}
+              name={ivar.name}
+              node={node}
+              opened={p.ui.popup.vars.id === id}
+              p={p}
+            />
+          );
         })}
       <Tooltip
         content={

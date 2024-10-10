@@ -1,32 +1,31 @@
+import JsonView from "@uiw/react-json-view";
 import get from "lodash.get";
 import set from "lodash.set";
 import { getActiveTree } from "logic/active";
-import { EDGlobal, PG } from "logic/ed-global";
+import { PG } from "logic/ed-global";
 import { PNode } from "logic/types";
 import { Trash2 } from "lucide-react";
-import { FC, ReactNode } from "react";
-import { useGlobal } from "utils/react/use-global";
+import { FC, memo, ReactNode } from "react";
+import { useLocal } from "utils/react/use-local";
 import { IVar } from "utils/types/item";
 import { Popover } from "utils/ui/popover";
 import { Tooltip } from "utils/ui/tooltip";
 import { EdVarEdit } from "./ed-var-edit";
 import { EdTypeLabel } from "./lib/type-label";
 import { getBaseType } from "./lib/validate";
-import JsonView from "@uiw/react-json-view";
-import { useLocal } from "utils/react/use-local";
 
 export const EdVarItem: FC<{
   id: string;
   name: string;
   node: PNode;
-}> = ({ id, name, node }) => {
-  const p = useGlobal(EDGlobal, "GLOBAL");
+  opened: boolean;
+  p: PG;
+}> = memo(({ p, id, name, node, opened }) => {
   const vars = node.item.vars || {};
   const _var = vars[id];
   if (!_var) return null;
   const local = useLocal({ name });
 
-  const opened = p.ui.popup.vars.id === id;
   return (
     <div
       className={cx(
@@ -119,7 +118,7 @@ export const EdVarItem: FC<{
       )}
     </div>
   );
-};
+});
 
 const Wrapper: FC<{
   children: ReactNode;

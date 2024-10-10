@@ -36,7 +36,10 @@ export const EdPageTree: FC<{ tree: PageTree }> = ({ tree }) => {
               if (open_all && ref) {
                 clearTimeout(t.out);
                 t.out = setTimeout(() => {
-                  indentTree(p);
+                  if (document.activeElement?.classList.contains("tree-item")) {
+                  } else {
+                    indentTree(p);
+                  }
                 }, 10);
               }
             }}

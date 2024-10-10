@@ -1,14 +1,15 @@
-import { FC, useEffect } from "react";
+import { FC, memo, useEffect } from "react";
 import { useLocal } from "utils/react/use-local";
 
 export const EdPickerRename: FC<{
   name: string;
+  path: string[];
   onRename: (arg: {
     path: string[];
     new_name: string;
     old_name: string;
   }) => void;
-}> = function (this: { path: string[] }, { name, onRename }) {
+}> = memo(function ({ name, onRename, path }) {
   const local = useLocal({ name, disabled: true });
 
   useEffect(() => {
@@ -25,6 +26,9 @@ export const EdPickerRename: FC<{
         local.name = (event.target as HTMLInputElement).value;
         local.render();
       }}
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
       disabled={local.disabled}
       spellCheck={false}
       onMouseOver={() => {
@@ -37,13 +41,14 @@ export const EdPickerRename: FC<{
           local.render();
         }
       }}
-      onClick={(e) => {
-        e.stopPropagation();
-      }}
       onBlur={(e) => {
         if (name !== local.name) {
           if (local.name) {
-            onRename({ path: this.path, new_name: local.name, old_name: name });
+            onRename({
+              path: path,
+              new_name: local.name,
+              old_name: name,
+            });
           } else {
             local.name = name;
             local.render();
@@ -60,7 +65,7 @@ export const EdPickerRename: FC<{
       }}
     />
   );
-};
+});
 
 export const definePickerRename = (arg: { path: string[] }) => {
   return EdPickerRename.bind(arg);

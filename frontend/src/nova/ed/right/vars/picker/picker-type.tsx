@@ -40,23 +40,17 @@ export const EdTypePicker: FC<{
 
   const base_type = getBaseType(type);
 
-  if (
-    type !== local.type ||
-    (typeof type === "object" &&
-      !!type &&
-      local.item_len !== Object.keys(type).length)
-  ) {
+  if (type !== local.type) {
     local.type = type;
     local.item_len = -1;
     local.Item = definePickerPopup(local, base_type, (t) => {
       onChange(path, t, valuePath || path);
     });
-
-    local.Rename = definePickerRename({ path });
   }
 
   return children({
     open: () => {
+      console.log(local.open);
       local.open = true;
       local.render();
     },
@@ -64,7 +58,6 @@ export const EdTypePicker: FC<{
     Item: local.Item,
     depth: path.length,
     name,
-    Rename: local.Rename,
     path,
     value,
     children,
