@@ -3,16 +3,16 @@ import { dirAsync } from "fs-jetpack";
 import * as decoding from "lib0/decoding";
 import * as encoding from "lib0/encoding";
 import { bind } from "prasi-frontend/src/nova/ed/crdt/lib/immer-yjs";
+import { waitUntil } from "prasi-utils";
 import { applyAwarenessUpdate, Awareness } from "y-protocols/awareness.js";
 import * as syncProtocol from "y-protocols/sync.js";
 import { readSyncMessage } from "y-protocols/sync.js";
 import { applyUpdate, Doc, encodeStateAsUpdate, UndoManager } from "yjs";
 import { dir } from "../../utils/dir";
+import { editor } from "../../utils/editor";
 import type { WSContext } from "../../utils/server/ctx";
 import BunORM from "../../utils/sqlite";
 import { crdt_comps } from "./shared";
-import { editor } from "../../utils/editor";
-import { waitUntil } from "prasi-utils";
 
 const crdt_loading = new Set<string>();
 await dirAsync(dir.data(`/crdt`));
@@ -200,7 +200,7 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
 
   comp_ws.add(ws);
   const encoder = encoding.createEncoder();
-  const decoder = decoding.createDecoder(raw);
+  const decoder = decoding.createDecoder(new Uint8Array(raw));
   const messageType = decoding.readVarUint(decoder);
 
   switch (messageType) {
