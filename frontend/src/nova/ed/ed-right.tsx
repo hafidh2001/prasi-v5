@@ -13,7 +13,7 @@ import {
 import { useGlobal } from "utils/react/use-global";
 import { EdEvents } from "./right/events/ed-events";
 import { active } from "logic/active";
-import { EdVarList } from "./right/vars/ed-var-list";
+import { EdVarList } from "./popup/vars/ed-var-list";
 
 export const EdRight = () => {
   const p = useGlobal(EDGlobal, "EDITOR");

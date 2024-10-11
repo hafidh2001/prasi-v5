@@ -13,8 +13,8 @@ import { FC, ReactNode } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { IFlowOrVar, VarUsage } from "utils/types/item";
 import { Popover } from "utils/ui/popover";
-import { EdVarLabel } from "../vars/lib/var-label";
-import { EdVarPicker } from "../vars/picker/picker-var";
+import { EdVarLabel } from "../../popup/vars/lib/var-label";
+import { EdVarPicker } from "../../popup/vars/picker/picker-var";
 import { EdEventItem } from "./ed-event-item";
 import { EdEventTypes } from "./ed-event-types";
 
@@ -165,10 +165,7 @@ const clearUsage = (
       const n = findNode(source.item.id);
       if (n && n.item.vars) {
         const _var = n.item.vars[var_id];
-        if (_var) {
-          if (!_var.usage[used_by.id]) {
-            _var.usage[used_by.id] = {};
-          }
+        if (_var && _var.usage && _var.usage[used_by.id]) {
           delete _var.usage[used_by.id][used_by.mode];
 
           if (Object.keys(_var.usage[used_by.id]).length === 0) {
@@ -194,6 +191,7 @@ const setUsage = (
       if (n && n.item.vars) {
         const _var = n.item.vars[var_id];
         if (_var) {
+          if (!_var.usage) _var.usage = {};
           if (!_var.usage[used_by.id]) {
             _var.usage[used_by.id] = {};
           }
