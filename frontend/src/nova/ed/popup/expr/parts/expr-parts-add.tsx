@@ -10,7 +10,7 @@ export const ExprPartAdd = forwardRef<
     onChange: (value: PExpr) => void;
     bind?: (arg: { focus: () => void }) => void;
   }
->(({ bind }, ref) => {
+>(({ bind, onChange }, ref) => {
   const local = useLocal({
     open: false,
     filter: { text: "" },
@@ -44,10 +44,12 @@ export const ExprPartAdd = forwardRef<
             local.action = action;
           }}
           onChange={(expr) => {
+            console.log("expr", expr);
             if (local.open) {
               local.open = false;
               local.render();
             }
+            onChange({ name: expr.name, expr: {}, kind: "expr" });
           }}
         />
       }
@@ -87,12 +89,6 @@ export const ExprPartAdd = forwardRef<
         }}
         onBlur={(e) => {
           e.currentTarget.innerHTML = "";
-
-          setTimeout(() => {
-            local.filter.text = "";
-            local.open = false;
-            local.render();
-          });
         }}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " " || e.key === "Tab") {
@@ -100,6 +96,8 @@ export const ExprPartAdd = forwardRef<
             if (e.key === "Enter") {
               if (local.action?.pick()) {
                 e.currentTarget.blur();
+                local.open = false;
+                local.render();
               }
             }
           }

@@ -67,7 +67,7 @@ export const ExprPartList: FC<{
                 const idx = local.filtered.indexOf(e);
                 return (
                   <div
-                    key={e.name}
+                    key={group + e.name}
                     className={cx(
                       "flex items-center py-1 px-2 cursor-pointer",
                       idx > 0 && "border-t",
@@ -75,11 +75,14 @@ export const ExprPartList: FC<{
                         ? "bg-blue-600 text-white"
                         : "hover:bg-blue-600 hover:text-white"
                     )}
-                    onClick={() => {
+                    onClick={(ev) => {
+                      ev.stopPropagation();
+                      ev.preventDefault();
+
                       action.pick(idx);
                     }}
                   >
-                    <div>{e.name}</div>
+                    <div> {e.name}</div>
                   </div>
                 );
               })}
