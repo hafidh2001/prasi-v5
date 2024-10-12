@@ -294,6 +294,7 @@ const Picker: FC<{
                 icon: iconExpr,
                 active: value?.mode === "expr",
                 onClick: () => {
+                  onOpenChange(true);
                   onChange({ ...value, mode: "expr" });
                 },
               },

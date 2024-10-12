@@ -11,6 +11,7 @@ export type PExprFields = Record<
 export type PExprDefinition<T extends PExprFields> = {
   name: string;
   fields: T;
+  group: string;
   Component: FC<{ props: T }>;
   evaluate: (current: PTypedExpr<T>) => { value: any; type: EType };
 };
