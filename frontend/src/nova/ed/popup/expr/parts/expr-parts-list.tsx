@@ -1,11 +1,11 @@
-import { FC } from "react";
-import { allExpression } from "../list/all-expr";
-import { fuzzy } from "utils/ui/fuzzy";
-import { useLocal } from "utils/react/use-local";
-import { PExpr, PExprDefinition } from "../lib/types";
 import { Sticker } from "lucide-react";
+import { FC } from "react";
+import { useLocal } from "utils/react/use-local";
+import { fuzzy } from "utils/ui/fuzzy";
+import { PExprDefinition } from "../lib/types";
+import { allExpression } from "../list/all-expr";
 
-export const EdExprList: FC<{
+export const ExprPartList: FC<{
   filter: string;
   bind?: (arg: {
     selectNext: () => void;

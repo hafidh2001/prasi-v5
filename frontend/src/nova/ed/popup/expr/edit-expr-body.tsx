@@ -1,20 +1,23 @@
-import { FC, forwardRef, useRef } from "react";
+import { FC } from "react";
 import { useLocal } from "utils/react/use-local";
-import { PExpr } from "./lib/types";
-import { EXTrigger } from "./parts/expr-parts-trigger";
+import { ExprPartAdd } from "./parts/expr-parts-add";
 
 export const EdExprEditorBody: FC<{}> = () => {
-  const local = useLocal({});
-  const add_ref = useRef<HTMLDivElement>(null);
+  const local = useLocal({ add_focus: () => {} });
   return (
     <div
       className="w-full h-full cursor-pointer flex flex-start justify-start flex-wrap content-start items-center"
       onClick={() => {
-        add_ref.current?.focus();
+        local.add_focus();
       }}
     >
       <div className="w-[200px] h-[30px] bg-red-500"></div>
-      <EXTrigger ref={add_ref} onChange={(value) => {}} />
+      <ExprPartAdd
+        bind={(action) => {
+          local.add_focus = action.focus;
+        }}
+        onChange={(value) => {}}
+      />
     </div>
   );
 };

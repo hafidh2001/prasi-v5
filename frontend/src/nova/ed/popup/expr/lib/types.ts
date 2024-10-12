@@ -2,14 +2,21 @@ import { EBaseType, ESimpleType, EType } from "popup/vars/lib/type";
 import { FC } from "react";
 import { VarUsage } from "utils/types/item";
 
+type EXPR_NAME = string;
+
 export type PExprFields = Record<
   string,
-  | { kind: "expression"; type?: EBaseType }
-  | { kind: "options"; options: string[] }
+  | {
+      kind: "expression";
+      output_type?: EBaseType;
+      optional?: boolean;
+      only_expr?: EXPR_NAME[];
+    }
+  | { kind: "options"; options: string[]; optional?: boolean }
 >;
 
 export type PExprDefinition<T extends PExprFields> = {
-  name: string;
+  name: EXPR_NAME;
   fields: T;
   group: string;
   Component: FC<{ props: T }>;
@@ -23,7 +30,7 @@ export const defineExpression = <T extends PExprFields>(
 };
 
 export type PExpr =
-  | ESimpleType
+  | { kind: "static"; value: any }
   | { kind: "var"; var: VarUsage }
   | {
       kind: "expr";

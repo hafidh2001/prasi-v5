@@ -2,15 +2,18 @@ import { forwardRef } from "react";
 import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
 import { PExpr } from "../lib/types";
-import { EdExprList } from "./expr-parts-list";
+import { ExprPartList } from "./expr-parts-list";
 
-export const EXTrigger = forwardRef<
+export const ExprPartAdd = forwardRef<
   HTMLDivElement,
-  { onChange: (value: PExpr) => void }
->((props, ref) => {
+  {
+    onChange: (value: PExpr) => void;
+    bind?: (arg: { focus: () => void }) => void;
+  }
+>(({ bind }, ref) => {
   const local = useLocal({
     open: false,
-    filter: "",
+    filter: { text: "" },
     action: undefined as
       | {
           selectNext: () => void;
@@ -18,19 +21,29 @@ export const EXTrigger = forwardRef<
           pick: () => void;
         }
       | undefined,
-    placeholder: "",
+    placeholder: "Empty",
+    div_ref: null as null | HTMLDivElement,
   });
+
+  if (bind) {
+    bind({
+      focus() {
+        if (local.div_ref) {
+          local.div_ref.focus();
+        }
+      },
+    });
+  }
+
   return (
     <Popover
       content={
-        <EdExprList
-          filter={local.filter}
+        <ExprPartList
+          filter={local.filter.text}
           bind={(action) => {
             local.action = action;
           }}
           onChange={(expr) => {
-            console.log(expr);
-
             if (local.open) {
               local.open = false;
               local.render();
@@ -46,7 +59,15 @@ export const EXTrigger = forwardRef<
       }}
     >
       <div
-        ref={ref}
+        ref={(r) => {
+          if (typeof ref === "function") {
+            ref(r);
+          } else if (typeof ref === "object" && ref) {
+            ref.current = r;
+          }
+
+          if (r) local.div_ref = r;
+        }}
         className={cx(
           "input outline-none m-1 border-transparent border-2 min-w-[50px] focus:border-blue-600 px-1 rounded-sm",
           !local.open && "cursor-pointer hover:border-blue-600"
@@ -61,14 +82,14 @@ export const EXTrigger = forwardRef<
           }
         }}
         onInput={(e) => {
-          local.filter = e.currentTarget.textContent || "";
+          local.filter.text = e.currentTarget.textContent || "";
           local.render();
         }}
         onBlur={(e) => {
           e.currentTarget.innerHTML = "";
 
           setTimeout(() => {
-            local.filter = "";
+            local.filter.text = "";
             local.open = false;
             local.render();
           });

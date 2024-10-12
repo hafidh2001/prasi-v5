@@ -8,6 +8,8 @@ export default defineExpression({
   fields: {
     condition: { kind: "expression" },
     then: { kind: "expression" },
+    else_if: { kind: "expression", only_expr: ["if"], optional: true },
+    else: { kind: "expression", optional: true },
   },
   evaluate(current) {
     const condition = evalExpr(current.expr.condition);
