@@ -5,7 +5,6 @@ import { PExpr } from "./lib/types";
 
 export const EdExprEditorRoot: FC<{}> = () => {
   const local = useLocal({ add_focus: () => {}, value: null as null | PExpr });
-  console.log(local.value)
   return (
     <div
       className="w-full h-full cursor-pointer flex flex-start justify-start flex-wrap content-start items-center"

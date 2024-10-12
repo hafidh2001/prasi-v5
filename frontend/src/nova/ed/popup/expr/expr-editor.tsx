@@ -40,7 +40,6 @@ export const EdExprEditor: FC<{
     <Popover
       border="1px solid black"
       open={local.opened}
-      backdrop={false}
       onOpenChange={(open) => {
         if (onOpenChange) {
           local.opened = open;
