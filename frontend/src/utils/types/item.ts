@@ -3,6 +3,7 @@ import { EventType } from "../../nova/ed/right/events/ed-event-types";
 import { EBaseType, EType } from "../../nova/ed/popup/vars/lib/type";
 import { BasicItem, MetaItem } from "./meta";
 import { FNAdv, FNComponent, FNLayout, FNLinkTag } from "./meta-fn";
+import { PExpr } from "popup/expr/lib/types";
 
 export type IItem = {
   layout?: FNLayout;
@@ -27,7 +28,7 @@ type PROP_NAME = string;
 type VAR_PATH = string;
 type FLOW_NODE_ID = string;
 
-export type IFlowOrVar = { mode: "var" | "flow"; flow?: PFlow; var?: VarUsage };
+export type IFlowOrVar = { mode: "var" | "expr"; expr?: PExpr; var?: VarUsage };
 export type IVar<T extends EType> = {
   id: string;
   name: string;

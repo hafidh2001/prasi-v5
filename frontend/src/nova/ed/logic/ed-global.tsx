@@ -81,7 +81,7 @@ export const EDGlobal = {
     },
     popup: {
       events: {
-        open: "" as "" | "content" | "loop",
+        open: "content" as "" | "content" | "loop",
       },
       vars: {
         get id() {

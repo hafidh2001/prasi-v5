@@ -217,7 +217,7 @@ export function Popover({
   modal = false,
   popoverClassName,
   arrow,
-  border,
+  border = "1px solid black",
   ...restOptions
 }: {
   className?: string;

@@ -75,7 +75,9 @@ export const useLocal = <T extends object>(
           return;
         }
 
-        _render({});
+        if (local.ready) {
+          _render({});
+        }
       }
     };
   } else {

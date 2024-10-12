@@ -1,5 +1,5 @@
 import { createRouter } from "radix3";
-import { FC, Suspense, lazy } from "react";
+import { FC, Suspense, lazy, useEffect } from "react";
 import { w } from "../utils/types/general";
 import { Loading } from "../utils/ui/loading";
 import * as pages from "./pages";
@@ -13,8 +13,11 @@ export const Root: FC<{}> = ({}) => {
         strictTrailingSlash: true,
       }),
       Page: null as any,
+      rendering: false,
+      should_rerender: false,
     },
     async () => {
+      local.rendering = true;
       for (const [_, v] of Object.entries(pages)) {
         local.router.insert(v.url, {
           url: v.url,
@@ -26,8 +29,21 @@ export const Root: FC<{}> = ({}) => {
       local.render();
     }
   );
+  local.rendering = true;
+  useEffect(() => {
+    local.rendering = false;
+    if (local.should_rerender) {
+      local.should_rerender = false;
+      local.render();
+    }
+  });
 
-  prasiContext.render = local.render;
+  prasiContext.render = () => {
+    if (!local.rendering) local.render();
+    else {
+      local.should_rerender = true;
+    }
+  };
 
   const Provider = GlobalContext.Provider as FC<{ value: any; children: any }>;
   const found = local.router.lookup(location.pathname);

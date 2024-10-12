@@ -1,6 +1,5 @@
 import { ReactElement } from "react";
 import { definePickerPopup } from "../picker/picker-popup";
-import { EdPickerRename } from "../picker/picker-rename";
 
 export type EType = ESimpleType | EArrayType | EObjectType;
 export type ESimpleType = "string" | "number" | "boolean" | "null";
