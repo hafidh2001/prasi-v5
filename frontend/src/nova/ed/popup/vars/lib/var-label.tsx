@@ -11,7 +11,8 @@ export const EdVarLabel: FC<{
   value?: VarUsage;
   mode?: "short" | "long";
   empty?: ReactNode;
-}> = ({ value, empty, mode }) => {
+  className?: string;
+}> = ({ value, empty, mode, className }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const vars = getActiveTree(p).var_items;
 
@@ -21,7 +22,7 @@ export const EdVarLabel: FC<{
   if (found) {
     const type = getTypeForPath(found.var.type, value?.path || []);
     return (
-      <>
+      <div className={className}>
         <EdTypeLabel type={type} show_label={false} />
         {value?.path
           ?.map((e, idx) => {
@@ -39,7 +40,7 @@ export const EdVarLabel: FC<{
             }
           })
           .join(".")}
-      </>
+      </div>
     );
   }
   return empty;

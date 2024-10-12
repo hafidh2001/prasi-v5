@@ -1,9 +1,9 @@
+import { Resizable } from "re-resizable";
 import { FC, useEffect } from "react";
-import { PExpr } from "./lib/types";
 import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
-import { Resizable } from "re-resizable";
-import { EdExprEditorBody } from "./edit-expr-body";
+import { EdExprEditorRoot } from "./expr-editor-root";
+import { PExpr } from "./lib/types";
 
 export const EdExprEditor: FC<{
   children: any;
@@ -40,6 +40,7 @@ export const EdExprEditor: FC<{
     <Popover
       border="1px solid black"
       open={local.opened}
+      backdrop={false}
       onOpenChange={(open) => {
         if (onOpenChange) {
           local.opened = open;
@@ -74,7 +75,7 @@ export const EdExprEditor: FC<{
           }}
           className={cx("text-sm")}
         >
-          <EdExprEditorBody />
+          <EdExprEditorRoot />
         </Resizable>
       }
     >

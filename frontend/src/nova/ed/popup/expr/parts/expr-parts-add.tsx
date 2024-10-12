@@ -44,15 +44,16 @@ export const ExprPartAdd = forwardRef<
             local.action = action;
           }}
           onChange={(expr) => {
-            console.log("expr", expr);
             if (local.open) {
               local.open = false;
               local.render();
             }
+            console.log(expr.name);
             onChange({ name: expr.name, expr: {}, kind: "expr" });
           }}
         />
       }
+      backdrop={false}
       asChild
       open={local.open}
       onOpenChange={(open) => {

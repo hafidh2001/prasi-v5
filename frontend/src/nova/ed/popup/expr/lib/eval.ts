@@ -18,8 +18,15 @@ export const evalExpr = (expr: PExpr): { value: any; type: EType } => {
       return { value: null, type: "null" };
     }
 
-    const found = allExpression.find((e) => e.name === expr.name);
-    if (found) return found.evaluate(expr as any);
+    if (expr.kind === "expr") {
+      const found = allExpression.find((e) => e.name === expr.name);
+      if (found) return found.evaluate(expr as any);
+      return { value: null, type: "null" };
+    }
+
+    if (expr.kind === "static") {
+      return { value: expr.value, type: "null" };
+    }
   }
 
   if (typeof expr === "number") return { value: expr, type: "number" };

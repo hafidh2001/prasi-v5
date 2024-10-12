@@ -3,8 +3,9 @@ import { useLocal } from "utils/react/use-local";
 import { ExprPartAdd } from "./parts/expr-parts-add";
 import { PExpr } from "./lib/types";
 
-export const EdExprEditorBody: FC<{}> = () => {
+export const EdExprEditorRoot: FC<{}> = () => {
   const local = useLocal({ add_focus: () => {}, value: null as null | PExpr });
+  console.log(local.value)
   return (
     <div
       className="w-full h-full cursor-pointer flex flex-start justify-start flex-wrap content-start items-center"
@@ -24,7 +25,7 @@ export const EdExprEditorBody: FC<{}> = () => {
           }}
         />
       )}
-      {local.value && JSON.stringify(local.value)}
+      {local.value && <>asda</>}
     </div>
   );
 };

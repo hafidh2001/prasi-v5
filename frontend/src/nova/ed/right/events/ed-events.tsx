@@ -2,14 +2,8 @@ import { getActiveNode } from "crdt/node/get-node-by-id";
 import { active, ActiveTree, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import { PNode } from "logic/types";
-import {
-  Bolt,
-  ChevronDown,
-  Network,
-  RectangleEllipsis,
-  SquareFunction,
-  Trash,
-} from "lucide-react";
+import { Bolt, ChevronDown, Trash, TriangleAlert } from "lucide-react";
+import { EdExprEditor } from "popup/expr/expr-editor";
 import { FC, ReactNode } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { IFlowOrVar, VarUsage } from "utils/types/item";
@@ -18,7 +12,6 @@ import { EdVarLabel } from "../../popup/vars/lib/var-label";
 import { EdVarPicker } from "../../popup/vars/picker/picker-var";
 import { EdEventItem } from "./ed-event-item";
 import { EdEventTypes } from "./ed-event-types";
-import { EdExprEditor } from "popup/expr/edit-expr";
 
 export const EdEvents = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -217,13 +210,19 @@ const Picker: FC<{
     <div
       className={cx(
         "flex items-stretch flex-row  flex-nowrap h-[25px]",
-        value && "border border-blue-500"
+        value && "border border-blue-500",
+        css`
+          svg {
+            width: 15px;
+            height: 15px;
+          }
+        `
       )}
     >
       {value && (
         <div
           className={cx(
-            "pr-[5px] cursor-pointer hover:bg-blue-600 hover:text-white flex items-center space-x-1",
+            "cursor-pointer flex items-center space-x-1 pr-[1px]",
             "border overflow-hidden"
           )}
         >
@@ -231,45 +230,41 @@ const Picker: FC<{
             <>
               <EdVarLabel
                 value={value.var}
+                className="flex hover:bg-blue-600 hover:text-white items-center space-x-1 pr-[5px]"
                 empty={
-                  <>
-                    <div
-                      className={cx(
-                        "mx-1 flex justify-center",
-                        css`
-                          svg {
-                            width: 15px;
-                            height: 15px;
-                          }
-                        `
-                      )}
-                    >
-                      {iconVar}
+                  <div className="bg-red-600 text-white hover:text-red-600 hover:bg-red-200 pr-[5px] flex items-center">
+                    <div className={cx("mx-1 flex justify-center ")}>
+                      <TriangleAlert />
                     </div>
                     <div className="whitespace-nowrap text-sm">
                       Pick Variable
                     </div>
-                  </>
+                  </div>
                 }
               />
             </>
           )}
           {value.mode === "expr" && (
             <>
-              <div
-                className={cx(
-                  "mx-1 flex justify-center",
-                  css`
-                    svg {
-                      width: 15px;
-                      height: 15px;
-                    }
-                  `
-                )}
-              >
-                {iconExpr}
-              </div>
-              <div className="whitespace-nowrap text-xs">Edit Expression</div>
+              {value.expr ? (
+                <div className="hover:bg-blue-600 hover:text-white text-blue-600 flex items-center pr-[5px]">
+                  <div className={cx("mx-1 flex justify-center")}>
+                    {iconExpr}
+                  </div>
+                  <div className="whitespace-nowrap text-xs">
+                    Edit Expression
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-red-600 text-white hover:text-red-600 hover:bg-red-200 flex items-center pr-[5px]">
+                  <div className={cx("mx-1 flex justify-center ")}>
+                    <TriangleAlert />
+                  </div>
+                  <div className="whitespace-nowrap text-sm">
+                    Blank Expression
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
