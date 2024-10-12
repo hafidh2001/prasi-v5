@@ -208,15 +208,13 @@ export const EdVarPicker: FC<{
                     }
 
                     return (
-                      <Tooltip
-                        content={name}
-                        key={i}
+                      <div
                         className={cx(
                           "flex cursor-pointer items-center whitespace-nowrap",
                           i > 0 && "-ml-[3px]",
                           "hover:text-blue-600"
                         )}
-                        delay={0}
+                        key={i}
                         onClick={() => {
                           local.val_path = local.val_path.slice(0, i);
                           if (local.val_path.length === 0) {
@@ -225,7 +223,9 @@ export const EdVarPicker: FC<{
                           reload(false);
                         }}
                       >
-                        {name.substring(0, 4)} {name.length > 4 && "…"}
+                        <Tooltip content={name} delay={0}>
+                          {name.substring(0, 4)} {name.length > 4 && "…"}
+                        </Tooltip>
                         <div className="h-[25px] overflow-hidden flex items-center -ml-4 -mr-2">
                           <ChevronRight
                             strokeWidth={1}
@@ -234,7 +234,7 @@ export const EdVarPicker: FC<{
                             absoluteStrokeWidth
                           />
                         </div>
-                      </Tooltip>
+                      </div>
                     );
                   })}
                 </div>
