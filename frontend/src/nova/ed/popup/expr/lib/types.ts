@@ -2,7 +2,7 @@ import { EBaseType, ESimpleType, EType } from "popup/vars/lib/type";
 import { FC } from "react";
 import { VarUsage } from "utils/types/item";
 
-type EXPR_NAME = string;
+export type EXPR_NAME = string;
 
 export type PExprFields = Record<
   string,
@@ -10,6 +10,7 @@ export type PExprFields = Record<
       kind: "expression";
       output_type?: EBaseType;
       optional?: boolean;
+      multiple?: boolean;
       only_expr?: EXPR_NAME[];
     }
   | { kind: "options"; options: string[]; optional?: boolean }
@@ -17,9 +18,10 @@ export type PExprFields = Record<
 
 export type PExprDefinition<T extends PExprFields> = {
   name: EXPR_NAME;
+  label: string;
   fields: T;
   group: string;
-  Component: FC<{ props: T }>;
+  Component: FC<{ name: EXPR_NAME; expr: PTypedExpr<T>["expr"] }>;
   evaluate: (current: PTypedExpr<T>) => { value: any; type: EType };
 };
 

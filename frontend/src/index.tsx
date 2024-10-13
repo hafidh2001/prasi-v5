@@ -2,10 +2,10 @@ import { Root as ReactRoot, createRoot } from "react-dom/client";
 import { apiProxy } from "./base/load/api/api-proxy";
 import { loadApiProxyDef } from "./base/load/api/api-proxy-def";
 import { dbProxy } from "./base/load/db/db-proxy";
-import { Root } from "./base/root";
 import { w } from "./utils/types/general";
 
 import "@fontsource/source-sans-3";
+import { EdExprEditorRoot } from "popup/expr/expr-editor-root";
 import { StrictMode } from "react";
 import "./index.css";
 import { defineReact } from "./utils/react/define-react";
@@ -40,7 +40,11 @@ const start = async () => {
     react.root = createRoot(el);
     react.root.render(
       <StrictMode>
-        <Root />
+        <EdExprEditorRoot
+          value={{ kind: "expr", expr: {}, name: "if" }}
+          onChange={() => {}}
+        />
+        {/* <Root /> */}
       </StrictMode>
     );
   }

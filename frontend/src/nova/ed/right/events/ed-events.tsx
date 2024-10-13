@@ -210,7 +210,10 @@ const Picker: FC<{
     <div
       className={cx(
         "flex items-stretch flex-row  flex-nowrap h-[25px]",
-        value && "border border-blue-500",
+        value &&
+          (value.var || value.expr
+            ? "border border-blue-500"
+            : "border border-red-500"),
         css`
           svg {
             width: 15px;
@@ -222,7 +225,7 @@ const Picker: FC<{
       {value && (
         <div
           className={cx(
-            "cursor-pointer flex items-center space-x-1 pr-[1px]",
+            "cursor-pointer flex items-stretch space-x-1 pr-[1px]",
             "border overflow-hidden"
           )}
         >
@@ -230,7 +233,7 @@ const Picker: FC<{
             <>
               <EdVarLabel
                 value={value.var}
-                className="flex hover:bg-blue-600 hover:text-white items-center space-x-1 pr-[5px]"
+                className="flex hover:bg-blue-600 hover:text-white text-blue-600 items-center space-x-1 pr-[5px]"
                 empty={
                   <div className="bg-red-600 text-white hover:text-red-600 hover:bg-red-200 pr-[5px] flex items-center">
                     <div className={cx("mx-1 flex justify-center ")}>
@@ -251,7 +254,7 @@ const Picker: FC<{
                   <div className={cx("mx-1 flex justify-center")}>
                     {iconExpr}
                   </div>
-                  <div className="whitespace-nowrap text-xs">
+                  <div className="whitespace-nowrap text-sm">
                     Edit Expression
                   </div>
                 </div>

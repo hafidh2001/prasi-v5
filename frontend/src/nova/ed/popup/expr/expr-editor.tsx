@@ -12,7 +12,7 @@ export const EdExprEditor: FC<{
   item_id: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-}> = ({ children, open, onOpenChange }) => {
+}> = ({ children, open, onOpenChange, value, onChange }) => {
   const local = useLocal({ opened: false });
 
   useEffect(() => {
@@ -74,7 +74,7 @@ export const EdExprEditor: FC<{
           }}
           className={cx("text-sm")}
         >
-          <EdExprEditorRoot />
+          <EdExprEditorRoot value={value} onChange={onChange} />
         </Resizable>
       }
     >

@@ -1,19 +1,16 @@
 import { getActiveNode } from "crdt/node/get-node-by-id";
+import { active } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import {
   AudioWaveform,
-  BookAudio,
   Library,
   PanelRightClose,
   PanelRightOpen,
-  RectangleEllipsis,
-  SquareChartGantt,
-  Variable,
+  SquareChartGantt
 } from "lucide-react";
 import { useGlobal } from "utils/react/use-global";
-import { EdEvents } from "./right/events/ed-events";
-import { active } from "logic/active";
 import { EdVarList } from "./popup/vars/ed-var-list";
+import { EdEvents } from "./right/events/ed-events";
 
 export const EdRight = () => {
   const p = useGlobal(EDGlobal, "EDITOR");

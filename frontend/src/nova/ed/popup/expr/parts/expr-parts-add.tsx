@@ -48,7 +48,6 @@ export const ExprPartAdd = forwardRef<
               local.open = false;
               local.render();
             }
-            console.log(expr.name);
             onChange({ name: expr.name, expr: {}, kind: "expr" });
           }}
         />

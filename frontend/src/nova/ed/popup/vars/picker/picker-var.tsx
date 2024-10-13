@@ -37,6 +37,7 @@ export const EdVarPicker: FC<{
       type: any;
     }[],
     tree_vars: null as null | TreeVarItems,
+    base_type: "" as EBaseType,
   });
 
   useEffect(() => {
@@ -95,6 +96,10 @@ export const EdVarPicker: FC<{
             i === 0 ? v.id === local.var_id : v.name === cur_path
           );
           if (cur_var) {
+            if (i === 0 && cur_path === "~~") {
+              local.base_type = getBaseType(cur_var.type);
+            }
+
             if (cur_var.name === cur_path || (i === 0 && cur_path === "~~")) {
               parsed_path.push({ name: cur_var.name, type: cur_var.type });
 
@@ -190,75 +195,76 @@ export const EdVarPicker: FC<{
           }}
           className={cx("flex flex-col text-sm")}
         >
-          {local.path.length > 0 && (
-            <div className="border-b border-b-[#aaa] h-[25px] flex">
-              <div className="flex flex-1 bg-slate-100 overflow-auto relative">
-                <div className="absolute inset-0 pl-2 flex">
-                  {local.path.map((item, i) => {
-                    let name = item.name;
-                    if (i === 0 && local.var_id) {
-                      name = local.tree_vars?.[local.var_id].var.name || "";
-                    }
+          {local.path.length > 0 &&
+            ["object", "array"].includes(local.base_type) && (
+              <div className="border-b border-b-[#aaa] h-[25px] flex">
+                <div className="flex flex-1 bg-slate-100 overflow-auto relative">
+                  <div className="absolute inset-0 pl-2 flex">
+                    {local.path.map((item, i) => {
+                      let name = item.name;
+                      if (i === 0 && local.var_id) {
+                        name = local.tree_vars?.[local.var_id].var.name || "";
+                      }
 
-                    if (
-                      i === local.path.length - 1 &&
-                      !["array", "object"].includes(last_path.type)
-                    ) {
-                      return null;
-                    }
+                      if (
+                        i === local.path.length - 1 &&
+                        !["array", "object"].includes(last_path.type)
+                      ) {
+                        return null;
+                      }
 
-                    return (
-                      <div
-                        className={cx(
-                          "flex cursor-pointer items-center whitespace-nowrap",
-                          i > 0 && "-ml-[3px]",
-                          "hover:text-blue-600"
-                        )}
-                        key={i}
-                        onClick={() => {
-                          local.val_path = local.val_path.slice(0, i);
-                          if (local.val_path.length === 0) {
-                            local.var_id = "";
-                          }
-                          reload(false);
-                        }}
-                      >
-                        <Tooltip content={name} delay={0}>
-                          {name.substring(0, 4)} {name.length > 4 && "…"}
-                        </Tooltip>
-                        <div className="h-[25px] overflow-hidden flex items-center -ml-4 -mr-2">
-                          <ChevronRight
-                            strokeWidth={1}
-                            size={60}
-                            color="#aaa"
-                            absoluteStrokeWidth
-                          />
+                      return (
+                        <div
+                          className={cx(
+                            "flex cursor-pointer items-center whitespace-nowrap",
+                            i > 0 && "-ml-[3px]",
+                            "hover:text-blue-600"
+                          )}
+                          key={i}
+                          onClick={() => {
+                            local.val_path = local.val_path.slice(0, i);
+                            if (local.val_path.length === 0) {
+                              local.var_id = "";
+                            }
+                            reload(false);
+                          }}
+                        >
+                          <Tooltip content={name} delay={0}>
+                            {name.substring(0, 4)} {name.length > 4 && "…"}
+                          </Tooltip>
+                          <div className="h-[25px] overflow-hidden flex items-center -ml-4 -mr-2">
+                            <ChevronRight
+                              strokeWidth={1}
+                              size={60}
+                              color="#aaa"
+                              absoluteStrokeWidth
+                            />
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
+                </div>
+                <div
+                  onClick={() => {
+                    const var_id = local.var_id;
+                    if (var_id) {
+                      const var_item = local.tree_vars?.[var_id];
+                      if (var_item) {
+                        active.item_id = var_item.item_id;
+                        p.ui.right.tab = "vars";
+                        p.ui.popup.vars.id = var_id;
+
+                        p.render();
+                      }
+                    }
+                  }}
+                  className="border-l flex items-center justify-center w-[30px] cursor-pointer hover:bg-blue-600 hover:text-white"
+                >
+                  <Pencil size={13} />
                 </div>
               </div>
-              <div
-                onClick={() => {
-                  const var_id = local.var_id;
-                  if (var_id) {
-                    const var_item = local.tree_vars?.[var_id];
-                    if (var_item) {
-                      active.item_id = var_item.item_id;
-                      p.ui.right.tab = "vars";
-                      p.ui.popup.vars.id = var_id;
-
-                      p.render();
-                    }
-                  }
-                }}
-                className="border-l flex items-center justify-center w-[30px] cursor-pointer hover:bg-blue-600 hover:text-white"
-              >
-                <Pencil size={13} />
-              </div>
-            </div>
-          )}
+            )}
           {local.vars.map((item) => {
             let is_active = false;
 

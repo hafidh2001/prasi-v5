@@ -1,14 +1,21 @@
 import { evalExpr } from "../lib/eval";
 import { ExprGroup } from "../lib/group";
 import { defineExpression } from "../lib/types";
+import { ExprPartKind } from "../parts/expr-parts-kind";
 
 export default defineExpression({
   name: "if",
+  label: "IF ... THEN ...",
   group: ExprGroup.Condition,
   fields: {
     condition: { kind: "expression" },
     then: { kind: "expression" },
-    else_if: { kind: "expression", only_expr: ["if"], optional: true },
+    else_if: {
+      kind: "expression",
+      only_expr: ["if"],
+      optional: true,
+      multiple: true,
+    },
     else: { kind: "expression", optional: true },
   },
   evaluate(current) {
@@ -20,9 +27,11 @@ export default defineExpression({
 
     return { value: null, type: "null" };
   },
-  Component({}) {
-    return <>
-      
-    </>;
+  Component({ name, expr }) {
+    return (
+      <>
+        <ExprPartKind name={name} />
+      </>
+    );
   },
 });
