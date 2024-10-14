@@ -4,19 +4,20 @@ import { VarUsage } from "utils/types/item";
 
 export type EXPR_NAME = string;
 
-export type PExprFields = Record<
-  string,
+export type PExprField =
   | {
       kind: "expression";
       expected_type?: EBaseType;
       optional?: boolean;
       multiple?: boolean;
+      label: string;
+      desc?: string;
       only_expr?: EXPR_NAME[];
     }
-  | { kind: "options"; options: string[]; optional?: boolean }
->;
+  | { kind: "options"; options: string[]; optional?: boolean };
+export type PExprFields = Record<string, PExprField>;
 
-export type EOutputType = ESimpleType | "any"
+export type EOutputType = ESimpleType | "any";
 export type PExprDefinition<T extends PExprFields> = {
   name: EXPR_NAME;
   label: string;

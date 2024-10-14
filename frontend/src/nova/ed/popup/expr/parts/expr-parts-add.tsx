@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { forwardRef, useEffect } from "react";
 import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
 import { PExpr } from "../lib/types";
@@ -9,8 +9,9 @@ export const ExprPartAdd = forwardRef<
   {
     onChange: (value: PExpr) => void;
     bind?: (arg: { focus: () => void }) => void;
+    content?: string;
   }
->(({ bind, onChange }, ref) => {
+>(({ bind, onChange, content }, ref) => {
   const local = useLocal({
     open: false,
     filter: { text: "" },
@@ -21,9 +22,14 @@ export const ExprPartAdd = forwardRef<
           pick: () => void;
         }
       | undefined,
-    placeholder: "Empty",
     div_ref: null as null | HTMLDivElement,
   });
+
+  useEffect(() => {
+    if (content && local.div_ref) {
+      local.div_ref.innerHTML = content;
+    }
+  }, [content]);
 
   if (bind) {
     bind({
@@ -39,16 +45,14 @@ export const ExprPartAdd = forwardRef<
     <Popover
       content={
         <ExprPartList
-          filter={local.filter.text}
+          search={local.filter.text}
           bind={(action) => {
             local.action = action;
           }}
-          onChange={(expr) => {
-            if (local.open) {
-              local.open = false;
-              local.render();
-            }
-            onChange({ name: expr.name, expr: {}, kind: "expr" });
+          onChange={(item) => {
+            onChange({ name: item.name, expr: {}, kind: "expr" });
+            local.open = false;
+            local.render();
           }}
         />
       }
@@ -56,9 +60,19 @@ export const ExprPartAdd = forwardRef<
       asChild
       open={local.open}
       onOpenChange={(open) => {
+        if (!open && local.div_ref === document.activeElement) {
+          setTimeout(() => {
+            if (local.div_ref !== document.activeElement) {
+              local.open = false;
+              local.render();
+            }
+          });
+          return;
+        }
         local.open = open;
         local.render();
       }}
+      className={cx("expr expr-add", local.open && "focus")}
     >
       <div
         ref={(r) => {
@@ -70,10 +84,6 @@ export const ExprPartAdd = forwardRef<
 
           if (r) local.div_ref = r;
         }}
-        className={cx(
-          "input outline-none m-1 border-transparent border-2 min-w-[50px] focus:border-blue-600 px-1 rounded-sm",
-          !local.open && "cursor-pointer hover:border-blue-600"
-        )}
         spellCheck={false}
         role="textbox"
         contentEditable
@@ -88,7 +98,7 @@ export const ExprPartAdd = forwardRef<
           local.render();
         }}
         onBlur={(e) => {
-          e.currentTarget.innerHTML = "";
+          e.currentTarget.innerHTML = content || "";
         }}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " " || e.key === "Tab") {

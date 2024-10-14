@@ -1,6 +1,6 @@
 import { EType } from "popup/vars/lib/type";
 import { PExpr } from "./types";
-import { allExpression } from "../list/all-expr";
+import { allExpression } from "../parts/all-expr";
 
 export const evalExpr = (expr: PExpr): { value: any; type: EType } => {
   if (typeof expr === "object") {

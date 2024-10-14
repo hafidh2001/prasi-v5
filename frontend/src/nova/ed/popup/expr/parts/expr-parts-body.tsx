@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { EXPR_NAME, PExpr } from "../lib/types";
-import { allExpression } from "../list/all-expr";
+import { allExpression } from "./all-expr";
 
 export const ExprPartBody: FC<{
   name: EXPR_NAME;
@@ -12,7 +12,7 @@ export const ExprPartBody: FC<{
     return <>ERROR: Expression Defintion not found for {name} </>;
   }
 
-  const Component = def.Component;
+  const Component = def.Component.bind(def);
   return (
     <div
       className={cx(

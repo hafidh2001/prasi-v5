@@ -6,18 +6,24 @@ import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
 import { ExprGroupDefinition } from "../lib/group";
 import { PExprDefinition } from "../lib/types";
-import { allExpression } from "../list/all-expr";
+import { allExpression } from "./all-expr";
 
-export const ExprPartList: FC<{
-  filter?: string;
+export const ExprPartList = ({
+  bind,
+  filter,
+  onChange,
+  selected,
+}: {
+  selected?: string;
+  search?: string;
   bind?: (arg: {
     selectNext: () => void;
     selectPrev: () => void;
     pick: () => void;
   }) => void;
-  onChange?: (value: PExprDefinition<any>) => void;
-  allow_value?: boolean;
-}> = ({ bind, onChange, allow_value }) => {
+  filter?: (item: SingleGroup | SingleItem | SingleParent) => boolean;
+  onChange?: (item: { name: string; group: string }, opt: SingleItem) => void;
+}) => {
   const local = useLocal({
     active: {
       group: -1,
@@ -34,7 +40,7 @@ export const ExprPartList: FC<{
         const group = g[a.group];
         const item = group?.items[a.item];
 
-        if (a.item_open >= 0 && item.type === "group") {
+        if (a.item_open >= 0 && item.type === "parent") {
           a.sub = a.sub + 1;
           let should_return = false;
           if (item.items && a.sub >= item.items.length) {
@@ -67,7 +73,7 @@ export const ExprPartList: FC<{
           }
         }
 
-        if (group?.items[a.item]?.type === "group") {
+        if (group?.items[a.item]?.type === "parent") {
           a.item_open = a.item;
           a.sub = 0;
         }
@@ -82,7 +88,7 @@ export const ExprPartList: FC<{
         const group = g[a.group];
         const item = group?.items[a.item];
 
-        if (a.item_open >= 0 && item.type === "group") {
+        if (a.item_open >= 0 && item.type === "parent") {
           a.sub = a.sub - 1;
           let should_return = false;
           if (item.items && a.sub < 0) {
@@ -116,7 +122,7 @@ export const ExprPartList: FC<{
           a.item = g[a.group].items.length - 1;
         }
 
-        if (group?.items[a.item]?.type === "group") {
+        if (group?.items[a.item]?.type === "parent") {
           a.item_open = a.item;
           a.sub = group?.items.length;
         }
@@ -127,25 +133,34 @@ export const ExprPartList: FC<{
         const a = local.active;
         const g = local.groups;
 
-        let item = get(
-          g,
-          `${a.group}.items.${a.item}`
-        ) as unknown as SingleGroup;
+        let item = get(g, `${a.group}.items.${a.item}`) as unknown as
+          | SingleParent
+          | SingleItem;
 
-        if (item.items && local.active.item_open !== a.item) {
-          local.active.item_open = a.item;
-          local.render();
-          return false;
+        let sub = "";
+        if (
+          item.type === "parent" &&
+          item.items &&
+          local.active.item_open === a.item &&
+          local.active.sub >= 0
+        ) {
+          sub = item.key;
+          item = item.items[local.active.sub];
         }
 
-        if (local.active.item_open === a.item) {
-          item = get(item, `items.${a.sub}`) as unknown as SingleGroup;
+        if (item.type === "item") {
+          onChange?.(
+            {
+              name: item.name,
+              group: g[a.group].name,
+            },
+            item
+          );
         }
 
         local.active.item_open = -1;
+        local.active.sub = -1;
         local.render();
-
-        console.log(item);
 
         return true;
       },
@@ -171,9 +186,11 @@ export const ExprPartList: FC<{
 
         return {
           name: group,
+          type: "group",
           icon: gdef?.icon,
           items: items.map((e) => {
             return {
+              name: e.name,
               key: group + e.name,
               label: e.label,
               type: "item",
@@ -184,39 +201,72 @@ export const ExprPartList: FC<{
       }
     );
 
-    if (allow_value !== false) {
-      groups.unshift({
-        name: "Value",
-        icon: <Binary />,
-        items: [
-          {
-            key: "static",
-            type: "group",
-            label: "Static",
-            items: [
-              {
-                label: <EdTypeLabel type="string" show_label />,
-              },
-              {
-                label: <EdTypeLabel type="number" show_label />,
-              },
-              {
-                label: <EdTypeLabel type="boolean" show_label />,
-              },
-            ],
-          },
-          {
-            key: "var",
-            type: "item",
-            label: "Variable",
-            data: {},
-          },
-        ],
+    groups.unshift({
+      name: "Value",
+      type: "group",
+      icon: <Binary />,
+      items: [
+        {
+          key: "static",
+          type: "parent",
+          label: "Static",
+          items: [
+            {
+              name: "string",
+              key: "string",
+              type: "item",
+              label: <EdTypeLabel type="string" show_label />,
+            },
+            {
+              name: "number",
+              key: "number",
+              type: "item",
+              label: <EdTypeLabel type="number" show_label />,
+            },
+            {
+              name: "boolean",
+              key: "boolean",
+              type: "item",
+              label: <EdTypeLabel type="boolean" show_label />,
+            },
+          ],
+        },
+        {
+          key: "var",
+          name: "var",
+          type: "item",
+          label: "Variable",
+          data: {},
+        },
+      ],
+    });
+    local.groups = groups;
+
+    if (filter) {
+      local.groups = local.groups.filter((item) => {
+        if (filter(item)) {
+          return item.items.filter((item) => filter(item));
+        }
+        return false;
       });
     }
-    local.groups = groups;
+
+    if (selected) {
+      for (let i = 0; i < local.groups.length; i++) {
+        const group = local.groups[i];
+        for (let j = 0; j < group.items.length; j++) {
+          const item = group.items[j];
+          if (item.data?.name === selected) {
+            local.active.group = i;
+            local.active.item = j;
+            local.active.item_open = -1;
+          }
+        }
+      }
+    }
+
     local.render();
-  }, [allow_value]);
+  }, [selected]);
 
   return (
     <div className="flex flex-col min-w-[100px] select-none">
@@ -247,6 +297,7 @@ export const ExprPartList: FC<{
             }}
             hover={(gidx, idx, sidx) => {
               let should_render = false;
+
               if (
                 sidx !== local.active.sub &&
                 local.active.item_open >= 0 &&
@@ -259,6 +310,18 @@ export const ExprPartList: FC<{
               if (local.active.group !== gidx || local.active.item !== idx) {
                 local.active.group = gidx;
                 local.active.item = idx;
+                should_render = true;
+              }
+
+              const a = local.active;
+              const g = local.groups;
+
+              let item = get(g, `${a.group}.items.${a.item}`) as unknown as
+                | SingleParent
+                | SingleItem;
+
+              if (item.type === "parent" && item.items) {
+                local.active.item_open = a.item;
                 should_render = true;
               }
 
@@ -277,26 +340,26 @@ export const ExprPartList: FC<{
   );
 };
 
+type SingleItem = {
+  key: any;
+  name: string;
+  label: ReactNode;
+  type: "item";
+  data?: any;
+};
+type SingleParent = {
+  key: any;
+  label: ReactNode;
+  type: "parent";
+  data?: any;
+  items: SingleItem[];
+};
+
 type SingleGroup = {
   name: string;
+  type: "group";
   icon?: ReactNode;
-  items: (
-    | {
-        key: any;
-        label: ReactNode;
-        type: "item";
-        data?: any;
-      }
-    | {
-        key: any;
-        label: ReactNode;
-        type: "group";
-        data?: any;
-        items: {
-          label: ReactNode;
-        }[];
-      }
-  )[];
+  items: (SingleItem | SingleParent)[];
 };
 
 const GroupItem: FC<{
@@ -333,14 +396,14 @@ const GroupItem: FC<{
               margin-right: 4px;
             }
           `,
-          "text-xs border-b mt-[10px] pb-1 text-slate-400 flex items-center"
+          "text-xs border-b pl-1 pb-1 text-slate-400 flex items-center"
         )}
       >
         {icon}
         {name}
       </div>
 
-      <div className="flex flex-col border-b">
+      <div className="flex pl-1 flex-col border-b">
         {items.map((e, idx) => {
           const content = (
             <div
@@ -355,19 +418,16 @@ const GroupItem: FC<{
               }}
               onMouseEnter={(ev) => {
                 hover(gidx, idx);
-                if (e.type === "group") {
-                  click(ev, e);
-                }
               }}
             >
               <div className="flex items-center">{e.label}</div>
-              {e.type === "group" && (
+              {e.type === "parent" && (
                 <ChevronRight size={14} className="min-w-[20px] ml-2 mr-1" />
               )}
             </div>
           );
 
-          if (e.type === "group") {
+          if (e.type === "parent") {
             return (
               <Popover
                 key={e.key}

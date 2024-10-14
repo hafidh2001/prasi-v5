@@ -1,9 +1,14 @@
 import { FC, useEffect } from "react";
-import { ExprPartList } from "./expr-parts-list";
 import { useLocal } from "utils/react/use-local";
+import { Popover } from "utils/ui/popover";
+import { ExprPartList } from "./expr-parts-list";
 
-export const ExprPartKind: FC<{ name: string }> = ({ name }) => {
+export const ExprPartsKind: FC<{ name: string; label?: string }> = ({
+  name,
+  label,
+}) => {
   const local = useLocal({
+    open: false,
     action: {} as
       | {
           selectNext: () => void;
@@ -13,39 +18,28 @@ export const ExprPartKind: FC<{ name: string }> = ({ name }) => {
       | undefined,
   });
 
-  useEffect(() => {
-    const fn = (e: any) => {
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-
-        local.action?.selectNext();
-      }
-      if (e.key === "ArrowUp") {
-        e.preventDefault();
-
-        local.action?.selectPrev();
-      }
-
-      if (e.key === "Enter") {
-        e.preventDefault();
-
-        local.action?.pick();
-      }
-    };
-    window.addEventListener("keydown", fn);
-    return () => {
-      window.removeEventListener("keydown", fn);
-    };
-  }, []);
+  if (!local.open) {
+    return <div className={cx("expr expr-kind", name)}>{label || name}</div>;
+  }
 
   return (
-    <div className={cx("expr expr-kind", name)}>
-      {name}
-
-      <div onClick={() => local.action?.selectNext()}>NEXT</div>
-      <div onClick={() => local.action?.selectPrev()}>PREV</div>
-
-      <ExprPartList bind={(act) => (local.action = act)} />
-    </div>
+    <Popover
+      className={cx("expr expr-kind", name)}
+      content={
+        <ExprPartList
+          selected={name}
+          onChange={(e) => {
+            console.log(e);
+          }}
+          bind={(act) => (local.action = act)}
+          // filter={(item) => {
+          //   if (item.type === "group" && item.name === "Value") return false;
+          //   return true;
+          // }}
+        />
+      }
+    >
+      {label || name}
+    </Popover>
   );
 };

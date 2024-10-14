@@ -18,8 +18,49 @@ export const EdExprEditorRoot: FC<{
             &.hover {
               border: 1px solid #ccc;
             }
-            .expr-kind {
+            .expr-kind,
+            .expr-add,
+            .expr-static {
+              display: flex;
+              align-items: center;
               padding: 0px 5px;
+              border: 1px solid transparent;
+              justify-content: center;
+              border-radius: 2px;
+              outline: none;
+              margin: 0px 5px;
+            }
+
+            .expr-kind,
+            .expr-add {
+              &:hover {
+                border: 1px solid purple;
+              }
+
+              &.focus {
+                border: 1px solid blue;
+              }
+            }
+
+            .expr-field {
+              border-radius: 2px;
+
+              &.empty {
+                border: 1px solid #ccc;
+                color: #999;
+              }
+
+              & > {
+                &:hover {
+                  border: 1px solid blue;
+                  outline: 1px solid blue;
+                }
+                .expr-kind,
+                .expr-add,
+                .expr-static {
+                  margin: 0px;
+                }
+              }
             }
           }
         `
