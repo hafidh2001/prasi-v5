@@ -27,12 +27,28 @@ export const ExprPartList: FC<{
     },
     action: {
       selectNext() {
-        console.log("next");
         const a = local.active;
         const g = local.groups;
 
         let next_group = true;
         const group = g[a.group];
+        const item = group?.items[a.item];
+
+        if (a.item_open >= 0 && item.type === "group") {
+          a.sub = a.sub + 1;
+          let should_return = false;
+          if (item.items && a.sub >= item.items.length) {
+            a.sub = -1;
+            a.item_open = -1;
+          } else {
+            should_return = true;
+          }
+          if (should_return) {
+            local.render();
+            return;
+          }
+        }
+
         if (group) {
           const item = group.items[a.item + 1];
           if (item) {
@@ -50,16 +66,37 @@ export const ExprPartList: FC<{
             a.group = 0;
           }
         }
+
+        if (group?.items[a.item]?.type === "group") {
+          a.item_open = a.item;
+          a.sub = 0;
+        }
+
         local.render();
       },
       selectPrev() {
-        console.log("prev");
-
         const a = local.active;
         const g = local.groups;
 
         let prev_group = true;
         const group = g[a.group];
+        const item = group?.items[a.item];
+
+        if (a.item_open >= 0 && item.type === "group") {
+          a.sub = a.sub - 1;
+          let should_return = false;
+          if (item.items && a.sub < 0) {
+            a.sub = -1;
+            a.item_open = -1;
+          } else {
+            should_return = true;
+          }
+          if (should_return) {
+            local.render();
+            return;
+          }
+        }
+
         if (group) {
           const item = group.items[a.item - 1];
           if (item) {
@@ -78,27 +115,39 @@ export const ExprPartList: FC<{
           }
           a.item = g[a.group].items.length - 1;
         }
+
+        if (group?.items[a.item]?.type === "group") {
+          a.item_open = a.item;
+          a.sub = group?.items.length;
+        }
+
         local.render();
       },
       pick() {
         const a = local.active;
         const g = local.groups;
 
-        const item = get(
+        let item = get(
           g,
           `${a.group}.items.${a.item}`
         ) as unknown as SingleGroup;
 
-        if (item.items) {
+        if (item.items && local.active.item_open !== a.item) {
           local.active.item_open = a.item;
           local.render();
           return false;
-        } else {
-          local.active.item_open = -1;
-          local.render();
         }
 
-        return false;
+        if (local.active.item_open === a.item) {
+          item = get(item, `items.${a.sub}`) as unknown as SingleGroup;
+        }
+
+        local.active.item_open = -1;
+        local.render();
+
+        console.log(item);
+
+        return true;
       },
     },
     groups: [] as SingleGroup[],
