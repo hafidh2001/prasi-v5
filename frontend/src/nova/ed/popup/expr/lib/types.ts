@@ -25,7 +25,11 @@ export type PExprDefinition<T extends PExprFields> = {
   group: string;
   desc: string;
   output_type: Readonly<EOutputType>;
-  Component: FC<{ name: EXPR_NAME; expr: PTypedExpr<T>["expr"] }>;
+  Component: FC<{
+    name: EXPR_NAME;
+    expr: PTypedExpr<T>["expr"];
+    expected_type?: EOutputType[];
+  }>;
   evaluate: (current: PTypedExpr<T>) => { value: any; type: EType };
 };
 

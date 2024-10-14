@@ -32,11 +32,16 @@ export default defineExpression({
 
     return { value: null, type: "null" };
   },
-  Component({ name, expr }) {
+  Component({ name, expr, expected_type }) {
     return (
       <>
-        <ExprPartsKind name={name} label="IF" />
-        <ExprPartsField name="condition" value={expr.condition} def={this} />
+        <ExprPartsKind name={name} label="IF" expected_type={expected_type} />
+        <ExprPartsField
+          name="condition"
+          value={expr.condition}
+          def={this}
+          expected_type={["boolean"]}
+        />
         <span>THEN</span>
         <ExprPartsField name="then" value={expr.then} def={this} />
       </>

@@ -366,6 +366,7 @@ type SingleGroup = {
   name: string;
   type: "group";
   icon?: ReactNode;
+  data?: any;
   items: (SingleItem | SingleParent)[];
 };
 

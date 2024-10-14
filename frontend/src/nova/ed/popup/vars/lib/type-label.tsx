@@ -8,8 +8,9 @@ export const EdTypeLabel = forwardRef<
   {
     type: EType;
     show_label?: boolean;
+    onClick?: () => void;
   }
->(({ type: _type, show_label }, ref) => {
+>(({ type: _type, show_label, onClick }, ref) => {
   let type = typeof _type === "string" ? _type : "unknown";
 
   if (type === "unknown" && typeof _type === "object") {
@@ -18,7 +19,7 @@ export const EdTypeLabel = forwardRef<
   }
 
   const class_name = cx(
-    "flex text-sm items-center",
+    "type-label flex text-sm items-center",
     css`
       .icon {
         border-radius: 2px;
@@ -92,6 +93,7 @@ export const EdTypeLabel = forwardRef<
       delay={0}
       className={class_name}
       asChild
+      onClick={onClick}
     >
       {content}
     </Tooltip>

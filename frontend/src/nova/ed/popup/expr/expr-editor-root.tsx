@@ -11,14 +11,13 @@ export const EdExprEditorRoot: FC<{
   const local = useLocal({ add_focus: () => {} });
   return (
     <div
+      onContextMenu={(e) => {
+        e.preventDefault();
+      }}
       className={cx(
         "w-full select-none text-sm h-full cursor-pointer flex flex-start justify-start flex-wrap content-start items-center",
         css`
           font-family: "Liga Menlo", monospace;
-
-          .expr-static {
-            color: purple;
-          }
 
           span {
             padding: 0px 5px;
@@ -26,7 +25,6 @@ export const EdExprEditorRoot: FC<{
 
           .expr-kind,
           .expr-add,
-          .expr-static,
           .expr-field,
           .expr-body {
             display: flex;
@@ -34,7 +32,6 @@ export const EdExprEditorRoot: FC<{
             flex-direction: row;
             border: 1px solid transparent;
             justify-content: center;
-            align-content: start;
             flex-wrap: wrap;
             border-radius: 2px;
             outline: none;
@@ -55,17 +52,19 @@ export const EdExprEditorRoot: FC<{
           }
 
           .expr-body {
-            border: 1px solid #ccc;
+            border: 1px solid #ececeb;
             width: 100%;
             height: 100%;
             flex: 1;
-            padding: 0px;
-            padding-right: 1px;
+            padding: 1px;
+            align-items: stretch;
           }
 
           > .expr-body {
             border: 0;
             justify-content: flex-start;
+            align-items: center;
+            align-content: start;
           }
 
           .expr-field {
@@ -73,10 +72,19 @@ export const EdExprEditorRoot: FC<{
             &.empty {
               border: 1px solid #ccc;
               color: #999;
+              > * {
+                flex: 1;
+                height: 100%;
+              }
             }
             > .expr-body {
               > .empty {
                 border-color: transparent;
+
+                > * {
+                  flex: 1;
+                  height: 100%;
+                }
               }
             }
 
@@ -94,6 +102,26 @@ export const EdExprEditorRoot: FC<{
               }
             }
           }
+
+          .expr-static {
+            border: 1px solid #ccc;
+            display: flex;
+            .type-label {
+              border-right: 1px solid #ccc;
+              color: #999;
+            }
+            &:hover,
+            .focus {
+              .type-label {
+                background: blue;
+                color: white;
+              }
+            }
+            .input {
+              flex: 1;
+              padding: 2px;
+            }
+          }
         `
       )}
       onClick={() => {
@@ -101,16 +129,20 @@ export const EdExprEditorRoot: FC<{
       }}
     >
       {!value && (
-        <ExprPartAdd
-          bind={(action) => {
-            local.add_focus = action.focus;
-          }}
-          onChange={(value) => {
-            if (onChange) {
-              onChange(value);
-            }
-          }}
-        />
+        <div className="p-1">
+          <ExprPartAdd
+            bind={(action) => {
+              local.add_focus = action.focus;
+            }}
+            onChange={(value) => {
+              if (onChange) {
+                onChange(value);
+              }
+            }}
+            disabled
+            content="<div style='color:#999;'>Add Expression</div>"
+          />
+        </div>
       )}
       {value && value.kind === "expr" && (
         <ExprPartBody name={value.name} expr={value.expr} />

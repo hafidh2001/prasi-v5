@@ -1,11 +1,13 @@
+import { ESimpleType } from "popup/vars/lib/type";
+import { EdTypeLabel } from "popup/vars/lib/type-label";
 import { FC } from "react";
 import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
 import { ExprPartList } from "./expr-parts-list";
 
-export const ExprPartsStatic: FC<{ children: any; type: string }> = ({
-  children,
+export const ExprPartsStatic: FC<{ type: ESimpleType; value: any }> = ({
   type,
+  value,
 }) => {
   const local = useLocal({
     open: false,
@@ -18,23 +20,26 @@ export const ExprPartsStatic: FC<{ children: any; type: string }> = ({
       | undefined,
   });
 
-  if (!local.open) {
-    return (
-      <div
-        className={cx("expr expr-kind expr-static")}
+  const content = (
+    <>
+      <EdTypeLabel
+        type={type}
         onClick={() => {
           local.open = true;
           local.render();
         }}
-      >
-        {children}
-      </div>
-    );
+      />
+      <input value={value} className="outline-none input" onChange={() => {}} />
+    </>
+  );
+
+  if (!local.open) {
+    return <div className={cx("expr expr-static")}>{content}</div>;
   }
 
   return (
     <Popover
-      className={cx("expr expr-kind expr-static focus")}
+      className={cx("expr expr-static focus")}
       open
       onOpenChange={(open) => {
         local.open = open;
@@ -53,7 +58,7 @@ export const ExprPartsStatic: FC<{ children: any; type: string }> = ({
         />
       }
     >
-      {children}
+      {content}
     </Popover>
   );
 };

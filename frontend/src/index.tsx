@@ -40,28 +40,28 @@ const start = async () => {
     react.root = createRoot(el);
     react.root.render(
       <StrictMode>
-        <div className="w-[300px] h-[400px] border-2 border-blue-600">
+        <div className="h-[400px] border-2 border-blue-600">
           <EdExprEditorRoot
-            value={{
-              kind: "expr",
-              expr: {
-                condition: {
-                  kind: "expr",
-                  name: "and",
-                  expr: {
-                    left: {
-                      kind: "expr",
-                      name: "is-exists",
-                      expr: {
-                        value: { kind: "static", value: "123", type: "number" },
-                      },
-                    },
-                  },
-                },
-              },
-              name: "if",
-            }}
-            onChange={() => {}}
+            // value={{
+            //   kind: "expr",
+            //   expr: {
+            //     condition: {
+            //       kind: "expr",
+            //       name: "and",
+            //       expr: {
+            //         left: {
+            //           kind: "expr",
+            //           name: "is-exists",
+            //           expr: {
+            //             value: { kind: "static", value: "123", type: "number" },
+            //           },
+            //         },
+            //       },
+            //     },
+            //   },
+            //   name: "if",
+            // }}
+            // onChange={() => {}}
           />
         </div>
         {/* <Root /> */}

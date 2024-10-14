@@ -17,11 +17,15 @@ export default defineExpression({
     const value = evalExpr(current.expr.value);
     return { value: !!value, type: "boolean" };
   },
-  Component({ name, expr }) {
+  Component({ name, expr, expected_type }) {
     return (
       <>
         <ExprPartsField name="value" value={expr.value} def={this} />
-        <ExprPartsKind name={name} label="IS EXISTS" />
+        <ExprPartsKind
+          name={name}
+          label="IS EXISTS"
+          expected_type={expected_type}
+        />
       </>
     );
   },

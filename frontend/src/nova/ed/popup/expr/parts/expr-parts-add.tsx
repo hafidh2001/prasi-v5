@@ -3,6 +3,7 @@ import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
 import { PExpr } from "../lib/types";
 import { ExprPartList } from "./expr-parts-list";
+import { ESimpleType } from "popup/vars/lib/type";
 
 export const ExprPartAdd = forwardRef<
   HTMLDivElement,
@@ -11,6 +12,7 @@ export const ExprPartAdd = forwardRef<
     bind?: (arg: { focus: () => void }) => void;
     content?: string;
     open?: boolean;
+    expected_type?: (ESimpleType | "any")[];
     disabled?: boolean;
     onOpenChange?: (open: boolean) => void;
   }
