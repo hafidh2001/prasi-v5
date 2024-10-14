@@ -6,12 +6,12 @@ import { ExprPartsKind } from "../../parts/expr-parts-kind";
 
 export default defineExpression({
   name: "is-exists",
-  label: "... IS EXISTS",
+  label: "… IS EXISTS",
   group: ExprGroup.Condition,
   desc: "",
   output_type: "boolean",
   fields: {
-    value: {kind: "expression"}
+    value: { kind: "expression", label: "Value" },
   },
   evaluate(current) {
     const value = evalExpr(current.expr.value);
@@ -20,8 +20,8 @@ export default defineExpression({
   Component({ name, expr }) {
     return (
       <>
-        <ExprPartsField name="value" value={expr.value} />  
-        <ExprPartsKind name={name} />
+        <ExprPartsField name="value" value={expr.value} def={this} />
+        <ExprPartsKind name={name} label="IS EXISTS" />
       </>
     );
   },

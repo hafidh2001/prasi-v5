@@ -269,7 +269,14 @@ export const ExprPartList = ({
   }, [selected]);
 
   return (
-    <div className="flex flex-col min-w-[100px] select-none">
+    <div
+      className={cx(
+        "flex flex-col min-w-[100px] select-none",
+        css`
+          /* font-family: "Liga Menlo", monospace; */
+        `
+      )}
+    >
       {local.groups.map((group, gidx) => {
         return (
           <GroupItem
@@ -403,7 +410,7 @@ const GroupItem: FC<{
         {name}
       </div>
 
-      <div className="flex pl-1 flex-col border-b">
+      <div className="flex flex-col border-b">
         {items.map((e, idx) => {
           const content = (
             <div
@@ -420,7 +427,7 @@ const GroupItem: FC<{
                 hover(gidx, idx);
               }}
             >
-              <div className="flex items-center">{e.label}</div>
+              <div className="flex items-center pr-[15px]">{e.label}</div>
               {e.type === "parent" && (
                 <ChevronRight size={14} className="min-w-[20px] ml-2 mr-1" />
               )}
@@ -432,19 +439,31 @@ const GroupItem: FC<{
               <Popover
                 key={e.key}
                 asChild
-                backdrop={false}
                 open={sub_open}
+                backdrop={false}
                 onOpenChange={onSubOpenChange}
                 placement="right-start"
                 content={
-                  <div className="flex flex-col text-sm">
+                  <div
+                    className={cx(
+                      "flex flex-col text-sm",
+                      css`
+                        /* font-family: "Liga Menlo", monospace; */
+                      `
+                    )}
+                  >
                     {e.items.map((child, cidx) => {
                       return (
                         <div
                           key={cidx}
                           className={cx(
                             "flex items-center py-1 px-[10px] cursor-pointer justify-between",
-                            sidx === cidx && "bg-blue-600 text-white"
+                            sidx === cidx && "bg-blue-600 text-white",
+                            css`
+                              .icon {
+                                margin-right: 5px !important;
+                              }
+                            `
                           )}
                           onClick={(ev) => {
                             click(ev, child);

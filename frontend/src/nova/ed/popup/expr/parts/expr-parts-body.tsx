@@ -11,14 +11,10 @@ export const ExprPartBody: FC<{
   if (!def) {
     return <>ERROR: Expression Defintion not found for {name} </>;
   }
-
   const Component = def.Component.bind(def);
   return (
     <div
-      className={cx(
-        `expr-body expr-name-${def.name} expr-group-${def.group}`,
-        "p-[1px] ml-1 mt-1 flex flex-stretch"
-      )}
+      className={cx(`expr expr-body`)}
     >
       <Component expr={expr as any} name={name} />
     </div>

@@ -10,8 +10,11 @@ export const ExprPartAdd = forwardRef<
     onChange: (value: PExpr) => void;
     bind?: (arg: { focus: () => void }) => void;
     content?: string;
+    open?: boolean;
+    disabled?: boolean;
+    onOpenChange?: (open: boolean) => void;
   }
->(({ bind, onChange, content }, ref) => {
+>(({ bind, onChange, content, open, onOpenChange, disabled }, ref) => {
   const local = useLocal({
     open: false,
     filter: { text: "" },
@@ -24,6 +27,13 @@ export const ExprPartAdd = forwardRef<
       | undefined,
     div_ref: null as null | HTMLDivElement,
   });
+
+  useEffect(() => {
+    if (local.open !== open && typeof open === "boolean") {
+      local.open = open;
+      local.render();
+    }
+  }, [open]);
 
   useEffect(() => {
     if (content && local.div_ref) {
@@ -43,6 +53,7 @@ export const ExprPartAdd = forwardRef<
 
   return (
     <Popover
+      backdrop={false}
       content={
         <ExprPartList
           search={local.filter.text}
@@ -51,26 +62,35 @@ export const ExprPartAdd = forwardRef<
           }}
           onChange={(item) => {
             onChange({ name: item.name, expr: {}, kind: "expr" });
-            local.open = false;
-            local.render();
+            if (onOpenChange) {
+              onOpenChange(false);
+            } else {
+              local.open = false;
+              local.render();
+            }
           }}
         />
       }
-      backdrop={false}
       asChild
       open={local.open}
       onOpenChange={(open) => {
         if (!open && local.div_ref === document.activeElement) {
           setTimeout(() => {
             if (local.div_ref !== document.activeElement) {
-              local.open = false;
-              local.render();
+              if (onOpenChange) onOpenChange(false);
+              else {
+                local.open = false;
+                local.render();
+              }
             }
           });
           return;
         }
-        local.open = open;
-        local.render();
+        if (onOpenChange) onOpenChange(open);
+        else {
+          local.open = open;
+          local.render();
+        }
       }}
       className={cx("expr expr-add", local.open && "focus")}
     >
@@ -85,8 +105,7 @@ export const ExprPartAdd = forwardRef<
           if (r) local.div_ref = r;
         }}
         spellCheck={false}
-        role="textbox"
-        contentEditable
+        contentEditable={disabled !== true}
         onFocus={() => {
           if (!local.open) {
             local.open = true;

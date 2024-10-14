@@ -12,54 +12,85 @@ export const EdExprEditorRoot: FC<{
   return (
     <div
       className={cx(
-        "w-full h-full cursor-pointer flex flex-start justify-start flex-wrap content-start items-center",
+        "w-full select-none text-sm h-full cursor-pointer flex flex-start justify-start flex-wrap content-start items-center",
         css`
+          font-family: "Liga Menlo", monospace;
+
+          .expr-static {
+            color: purple;
+          }
+
+          span {
+            padding: 0px 5px;
+          }
+
+          .expr-kind,
+          .expr-add,
+          .expr-static,
+          .expr-field,
           .expr-body {
-            &.hover {
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            border: 1px solid transparent;
+            justify-content: center;
+            align-content: start;
+            flex-wrap: wrap;
+            border-radius: 2px;
+            outline: none;
+            padding: 0px 5px;
+          }
+
+          .expr-kind,
+          .expr-add {
+            white-space: nowrap;
+            &:hover {
+              border: 1px solid blue;
+            }
+
+            &.focus {
+              border: 1px solid blue;
+              outline: 1px solid blue;
+            }
+          }
+
+          .expr-body {
+            border: 1px solid #ccc;
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            padding: 0px;
+            padding-right: 1px;
+          }
+
+          > .expr-body {
+            border: 0;
+            justify-content: flex-start;
+          }
+
+          .expr-field {
+            padding: 0px;
+            &.empty {
               border: 1px solid #ccc;
+              color: #999;
             }
-            .expr-kind,
-            .expr-add,
-            .expr-static {
-              display: flex;
-              align-items: center;
-              padding: 0px 5px;
-              border: 1px solid transparent;
-              justify-content: center;
-              border-radius: 2px;
-              outline: none;
-              margin: 0px 5px;
-            }
-
-            .expr-kind,
-            .expr-add {
-              &:hover {
-                border: 1px solid purple;
+            > .expr-body {
+              > .empty {
+                border-color: transparent;
               }
+            }
 
-              &.focus {
+            & > {
+              &:hover {
                 border: 1px solid blue;
               }
-            }
-
-            .expr-field {
-              border-radius: 2px;
-
-              &.empty {
-                border: 1px solid #ccc;
-                color: #999;
+              &.focus {
+                outline: 1px solid blue;
               }
-
-              & > {
-                &:hover {
-                  border: 1px solid blue;
-                  outline: 1px solid blue;
-                }
-                .expr-kind,
-                .expr-add,
-                .expr-static {
-                  margin: 0px;
-                }
+              .expr-kind,
+              .expr-add,
+              .expr-static {
+                margin: 0px;
               }
             }
           }

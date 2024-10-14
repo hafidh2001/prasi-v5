@@ -6,24 +6,32 @@ import { ExprPartsKind } from "../../parts/expr-parts-kind";
 
 export default defineExpression({
   name: "and",
-  label: "... AND ...",
+  label: "… AND …",
   group: ExprGroup.Condition,
   desc: "",
   output_type: "boolean",
   fields: {
-    condition_1: {kind: "expression"},
-    condition_2: {kind: "expression"}
+    left: { kind: "expression", label: "Left Condition " },
+    right: { kind: "expression", label: "Right Condition " },
   },
   evaluate(current) {
-    const value = evalExpr(current.expr.condition_1);
+    const value = evalExpr(current.expr.left);
     return { value: !!value, type: "boolean" };
   },
   Component({ name, expr }) {
     return (
       <>
-        <ExprPartsField name="condition_1" value={expr.condition_1} />  
+        <ExprPartsField
+          name="left"
+          value={expr.left}
+          def={this}
+        />
         <ExprPartsKind name={name} />
-        <ExprPartsField name="condition_2" value={expr.condition_2} />  
+        <ExprPartsField
+          name="right"
+          value={expr.right}
+          def={this}
+        />
       </>
     );
   },

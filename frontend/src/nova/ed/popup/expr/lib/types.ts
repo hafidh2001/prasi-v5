@@ -36,7 +36,7 @@ export const defineExpression = <T extends PExprFields>(
 };
 
 export type PExpr =
-  | { kind: "static"; value: any }
+  | { kind: "static"; value: any; type: ESimpleType }
   | { kind: "var"; var: VarUsage }
   | {
       kind: "expr";

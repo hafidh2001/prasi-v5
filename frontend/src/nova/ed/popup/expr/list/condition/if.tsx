@@ -7,7 +7,7 @@ import { ExprPartsStatic } from "../../parts/expr-parts-static";
 
 export default defineExpression({
   name: "if",
-  label: "IF ... THEN ...",
+  label: "IF … THEN …",
   group: ExprGroup.Condition,
   desc: "",
   output_type: "any",
@@ -37,7 +37,7 @@ export default defineExpression({
       <>
         <ExprPartsKind name={name} label="IF" />
         <ExprPartsField name="condition" value={expr.condition} def={this} />
-        <ExprPartsStatic>THEN</ExprPartsStatic>
+        <span>THEN</span>
         <ExprPartsField name="then" value={expr.then} def={this} />
       </>
     );
