@@ -1,12 +1,14 @@
 import { evalExpr } from "../lib/eval";
 import { ExprGroup } from "../lib/group";
-import { defineExpression } from "../lib/types";
+import { defineExpression, EOutputType } from "../lib/types";
 import { ExprPartKind } from "../parts/expr-parts-kind";
 
 export default defineExpression({
   name: "if",
   label: "IF ... THEN ...",
   group: ExprGroup.Condition,
+  desc: "",
+  output_type: "any",
   fields: {
     condition: { kind: "expression" },
     then: { kind: "expression" },

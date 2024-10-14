@@ -8,7 +8,7 @@ export type PExprFields = Record<
   string,
   | {
       kind: "expression";
-      output_type?: EBaseType;
+      expected_type?: EBaseType;
       optional?: boolean;
       multiple?: boolean;
       only_expr?: EXPR_NAME[];
@@ -16,11 +16,14 @@ export type PExprFields = Record<
   | { kind: "options"; options: string[]; optional?: boolean }
 >;
 
+export type EOutputType = ESimpleType | "any"
 export type PExprDefinition<T extends PExprFields> = {
   name: EXPR_NAME;
   label: string;
   fields: T;
   group: string;
+  desc: string;
+  output_type: Readonly<EOutputType>;
   Component: FC<{ name: EXPR_NAME; expr: PTypedExpr<T>["expr"] }>;
   evaluate: (current: PTypedExpr<T>) => { value: any; type: EType };
 };

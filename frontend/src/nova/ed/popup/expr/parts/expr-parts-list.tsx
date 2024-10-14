@@ -1,13 +1,13 @@
-import { ChevronRight, Sticker } from "lucide-react";
-import { FC, ReactNode } from "react";
+import get from "lodash.get";
+import { Binary, ChevronRight } from "lucide-react";
+import { EdTypeLabel } from "popup/vars/lib/type-label";
+import { FC, ReactNode, useEffect } from "react";
 import { useLocal } from "utils/react/use-local";
-import { fuzzy } from "utils/ui/fuzzy";
+import { Popover } from "utils/ui/popover";
 import { ExprGroupDefinition } from "../lib/group";
 import { PExprDefinition } from "../lib/types";
 import { allExpression } from "../list/all-expr";
-import { Binary } from "lucide-react";
-import { EdTypeLabel } from "popup/vars/lib/type-label";
-import { Popover } from "utils/ui/popover";
+
 export const ExprPartList: FC<{
   filter?: string;
   bind?: (arg: {
@@ -17,141 +17,218 @@ export const ExprPartList: FC<{
   }) => void;
   onChange?: (value: PExprDefinition<any>) => void;
   allow_value?: boolean;
-}> = ({ filter, bind, onChange, allow_value }) => {
+}> = ({ bind, onChange, allow_value }) => {
   const local = useLocal({
-    sel_idx: 0,
-    filtered: [] as typeof allExpression,
+    active: {
+      group: -1,
+      item: -1,
+      item_open: -1,
+      sub: 0,
+    },
     action: {
       selectNext() {
-        local.sel_idx++;
+        console.log("next");
+        const a = local.active;
+        const g = local.groups;
+
+        let next_group = true;
+        const group = g[a.group];
+        if (group) {
+          const item = group.items[a.item + 1];
+          if (item) {
+            a.item = a.item + 1;
+            next_group = false;
+          } else {
+            a.item = 0;
+            next_group = true;
+          }
+        }
+
+        if (next_group) {
+          a.group = a.group + 1;
+          if (a.group >= g.length) {
+            a.group = 0;
+          }
+        }
         local.render();
       },
       selectPrev() {
-        local.sel_idx--;
+        console.log("prev");
+
+        const a = local.active;
+        const g = local.groups;
+
+        let prev_group = true;
+        const group = g[a.group];
+        if (group) {
+          const item = group.items[a.item - 1];
+          if (item) {
+            a.item = a.item - 1;
+            prev_group = false;
+          } else {
+            a.item = group.items.length;
+            prev_group = true;
+          }
+        }
+
+        if (prev_group) {
+          a.group = a.group - 1;
+          if (a.group < 0) {
+            a.group = g.length - 1;
+          }
+          a.item = g[a.group].items.length - 1;
+        }
         local.render();
       },
-      pick(idx?: number) {
-        if (typeof idx === "number") {
-          local.sel_idx = idx;
+      pick() {
+        const a = local.active;
+        const g = local.groups;
+
+        const item = get(
+          g,
+          `${a.group}.items.${a.item}`
+        ) as unknown as SingleGroup;
+
+        if (item.items) {
+          local.active.item_open = a.item;
+          local.render();
+          return false;
+        } else {
+          local.active.item_open = -1;
+          local.render();
         }
-        const expr = local.filtered[local.sel_idx];
-        if (expr && onChange) {
-          onChange(expr);
-          return true;
-        }
+
         return false;
       },
     },
+    groups: [] as SingleGroup[],
   });
-  if (filter) {
-    local.filtered = fuzzy(allExpression, "name", filter);
-  } else {
-    local.filtered = allExpression;
-  }
   const action = local.action;
   if (bind) bind(action);
 
-  if (local.sel_idx >= local.filtered.length || local.sel_idx < 0) {
-    local.sel_idx = 0;
-  }
-
-  const raw_groups: Record<string, PExprDefinition<any>[]> = {};
-  for (const expr of local.filtered) {
-    if (!raw_groups[expr.group]) {
-      raw_groups[expr.group] = [];
+  useEffect(() => {
+    const raw_groups: Record<string, PExprDefinition<any>[]> = {};
+    for (const expr of allExpression) {
+      if (!raw_groups[expr.group]) {
+        raw_groups[expr.group] = [];
+      }
+      raw_groups[expr.group].push(expr);
     }
-    raw_groups[expr.group].push(expr);
-  }
-  const groups = Object.entries(raw_groups);
-
-  return (
-    <div className="flex flex-col min-w-[100px] select-none">
-      {allow_value !== false && (
-        <GroupItem
-          name="Value"
-          icon={<Binary />}
-          items={[
-            {
-              key: "static",
-              type: "group",
-              label: "Static",
-              items: [
-                {
-                  label: <EdTypeLabel type="string" show_label />,
-                  onClick(e) {},
-                },
-                {
-                  label: <EdTypeLabel type="number" show_label />,
-                  onClick(e) {},
-                },
-                {
-                  label: <EdTypeLabel type="boolean" show_label />,
-                  onClick(e) {},
-                },
-              ],
-            },
-            {
-              key: "var",
-              type: "item",
-              label: "Variable",
-              data: {},
-              onClick(e) {},
-            },
-          ]}
-          isItemActive={() => {
-            return false;
-          }}
-        />
-      )}
-      {groups.map(([group, group_items]) => {
+    const groups: SingleGroup[] = Object.entries(raw_groups).map(
+      ([group, items]) => {
         const gdef = (ExprGroupDefinition as any)[group] as
           | undefined
           | { icon: ReactNode };
 
+        return {
+          name: group,
+          icon: gdef?.icon,
+          items: items.map((e) => {
+            return {
+              key: group + e.name,
+              label: e.label,
+              type: "item",
+              data: e,
+            };
+          }),
+        };
+      }
+    );
+
+    if (allow_value !== false) {
+      groups.unshift({
+        name: "Value",
+        icon: <Binary />,
+        items: [
+          {
+            key: "static",
+            type: "group",
+            label: "Static",
+            items: [
+              {
+                label: <EdTypeLabel type="string" show_label />,
+              },
+              {
+                label: <EdTypeLabel type="number" show_label />,
+              },
+              {
+                label: <EdTypeLabel type="boolean" show_label />,
+              },
+            ],
+          },
+          {
+            key: "var",
+            type: "item",
+            label: "Variable",
+            data: {},
+          },
+        ],
+      });
+    }
+    local.groups = groups;
+    local.render();
+  }, [allow_value]);
+
+  return (
+    <div className="flex flex-col min-w-[100px] select-none">
+      {local.groups.map((group, gidx) => {
         return (
           <GroupItem
-            key={group}
-            name={group}
-            icon={gdef?.icon}
-            items={group_items.map((e) => {
-              return {
-                key: group + e.name,
-                label: e.label,
-                type: "item",
-                onClick(ev) {
-                  ev.stopPropagation();
-                  ev.preventDefault();
-                  const idx = local.filtered.indexOf(e);
-                  action.pick(idx);
-                },
-                data: e,
-              };
-            })}
-            isItemActive={(item) => {
-              // if (item.data) {
-              //   const idx = local.filtered.indexOf(item.data);
-              //   if (local.sel_idx === idx) return true;
-              // }
+            key={group.name}
+            gidx={gidx}
+            sidx={local.active.sub}
+            {...group}
+            isItemActive={(item, idx) => {
+              if (local.active.group === gidx && local.active.item === idx) {
+                return true;
+              }
+
               return false;
+            }}
+            open={
+              local.active.item_open >= 0 &&
+              local.active.group === gidx &&
+              local.active.item_open === local.active.item
+            }
+            onOpenChange={(open) => {
+              if (!open) {
+                local.active.item_open = -1;
+                local.render();
+              }
+            }}
+            hover={(gidx, idx, sidx) => {
+              let should_render = false;
+              if (
+                sidx !== local.active.sub &&
+                local.active.item_open >= 0 &&
+                typeof sidx === "number"
+              ) {
+                local.active.sub = sidx;
+                should_render = true;
+              }
+
+              if (local.active.group !== gidx || local.active.item !== idx) {
+                local.active.group = gidx;
+                local.active.item = idx;
+                should_render = true;
+              }
+
+              if (should_render) {
+                local.render();
+              }
+            }}
+            click={(ev, item) => {
+              ev.stopPropagation();
+              local.action.pick();
             }}
           />
         );
       })}
-
-      {local.filtered.length === 0 && (
-        <div className="p-1 text-slate-600 flex items-center justify-center flex-col">
-          <Sticker size={30} strokeWidth={1.5} absoluteStrokeWidth />
-          <div className="text-xs mt-1">
-            Expression <br />
-            Not Found
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
-const GroupItem: FC<{
+type SingleGroup = {
   name: string;
   icon?: ReactNode;
   items: (
@@ -159,22 +236,43 @@ const GroupItem: FC<{
         key: any;
         label: ReactNode;
         type: "item";
-        onClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
-        data: any;
+        data?: any;
       }
     | {
         key: any;
         label: ReactNode;
         type: "group";
+        data?: any;
         items: {
           label: ReactNode;
-          onClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
         }[];
       }
   )[];
-  isItemActive: (item: { data: any }) => boolean;
-}> = ({ name, icon, items, isItemActive }) => {
-  const local = useLocal({ open: null as any });
+};
+
+const GroupItem: FC<{
+  name: SingleGroup["name"];
+  icon?: SingleGroup["icon"];
+  items: SingleGroup["items"];
+  gidx: number;
+  sidx: number;
+  isItemActive: (item: { data?: any }, idx: number) => boolean;
+  hover: (gidx: number, idx: number, sidx?: number) => void;
+  click: (ev: React.MouseEvent<HTMLDivElement, MouseEvent>, item: any) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}> = ({
+  name,
+  icon,
+  items,
+  isItemActive,
+  hover,
+  gidx,
+  click,
+  sidx,
+  open: sub_open,
+  onOpenChange: onSubOpenChange,
+}) => {
   return (
     <div className="flex flex-col pt-1 text-sm">
       <div
@@ -186,7 +284,7 @@ const GroupItem: FC<{
               margin-right: 4px;
             }
           `,
-          "text-xs border-b mt-[10px] pb-1 text-slate-600 flex items-center"
+          "text-xs border-b mt-[10px] pb-1 text-slate-400 flex items-center"
         )}
       >
         {icon}
@@ -201,11 +299,17 @@ const GroupItem: FC<{
               className={cx(
                 "flex items-center py-1 pl-[15px] cursor-pointer justify-between",
                 idx > 0 && "border-t",
-                e.type === "item" && isItemActive(e)
-                  ? "bg-blue-600 text-white"
-                  : "hover:bg-blue-600 hover:text-white"
+                isItemActive(e, idx) && "bg-blue-600 text-white"
               )}
-              onClick={e.type === "item" ? e.onClick : undefined}
+              onClick={(ev) => {
+                click(ev, e);
+              }}
+              onMouseEnter={(ev) => {
+                hover(gidx, idx);
+                if (e.type === "group") {
+                  click(ev, e);
+                }
+              }}
             >
               <div className="flex items-center">{e.label}</div>
               {e.type === "group" && (
@@ -218,20 +322,27 @@ const GroupItem: FC<{
             return (
               <Popover
                 key={e.key}
-                backdrop={false}
                 asChild
+                backdrop={false}
+                open={sub_open}
+                onOpenChange={onSubOpenChange}
                 placement="right-start"
                 content={
                   <div className="flex flex-col text-sm">
-                    {e.items.map((child, idx) => {
+                    {e.items.map((child, cidx) => {
                       return (
                         <div
-                          key={idx}
+                          key={cidx}
                           className={cx(
                             "flex items-center py-1 px-[10px] cursor-pointer justify-between",
-                            "hover:bg-blue-600 hover:text-white"
+                            sidx === cidx && "bg-blue-600 text-white"
                           )}
-                          onClick={child.onClick}
+                          onClick={(ev) => {
+                            click(ev, child);
+                          }}
+                          onMouseEnter={() => {
+                            hover(gidx, idx, cidx);
+                          }}
                         >
                           {child.label}
                         </div>
