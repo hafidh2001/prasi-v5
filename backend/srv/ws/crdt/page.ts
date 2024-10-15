@@ -11,7 +11,12 @@ import { applyUpdate, Doc, encodeStateAsUpdate, UndoManager } from "yjs";
 import { dir } from "../../utils/dir";
 import { editor } from "../../utils/editor";
 import type { WSContext } from "../../utils/server/ctx";
-import { crdt_pages, crdt_site, createSiteCrdt } from "./shared";
+import {
+  crdt_pages,
+  crdt_site,
+  createSiteCrdt,
+  MAX_HISTORY_SIZE,
+} from "./shared";
 
 const crdt_loading = new Set<string>();
 
@@ -55,10 +60,25 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
 
       const actionHistory = {} as Record<number, string>;
       let undoManager: UndoManager | undefined;
-      const updates = site.page.tables.page_updates.find({
-        where: { page_id },
-        sort: { ts: "asc" },
+
+      const checkpoint = site.page.tables.page_updates.find({
+        select: ["ts"],
+        where: { checkpoint: 1 },
+        sort: { ts: "desc" },
+        limit: 1,
       });
+
+      const updates =
+        checkpoint.length === 0
+          ? []
+          : site.page.tables.page_updates.find({
+              where: {
+                page_id,
+                ts: [`>=`, checkpoint[0].ts],
+              },
+              sort: { ts: "asc" },
+            });
+
       if (updates.length > 0) {
         undoManager = new UndoManager(data, { captureTimeout: 0 });
         const pending_ids: number[] = [];
@@ -81,6 +101,7 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
           page_id,
           update,
           ts: Date.now(),
+          checkpoint: 1,
         });
         undoManager = new UndoManager(data);
       }
@@ -166,6 +187,7 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
                 action: "Redo",
                 page_id,
                 update: encodeStateAsUpdate(doc),
+                checkpoint: 0,
                 ts,
               });
             }
@@ -175,15 +197,39 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
             ] as unknown as { id: number; action: string };
             const action_name = stack.action || "";
 
-            const res = site.page.tables.page_updates.save({
-              action: action_name,
-              page_id,
-              update,
-              ts,
+            const checkpoint = site.page.tables.page_updates.find({
+              select: ["ts"],
+              where: { checkpoint: 1 },
+              limit: 1,
+              sort: { ts: "desc" },
+            });
+            const checkpoint_counts = site.page.tables.page_updates.count({
+              where: { ts: [`>=`, checkpoint[0].ts] },
             });
 
-            stack.id = res[0].id;
-            actionHistory[res[0].id] = action_name;
+            if (checkpoint_counts >= MAX_HISTORY_SIZE) {
+              const update = encodeStateAsUpdate(doc);
+              const res = site.page.tables.page_updates.save({
+                action: "init",
+                page_id,
+                update,
+                ts: Date.now(),
+                checkpoint: 1,
+              });
+
+              stack.id = res[0].id;
+              actionHistory[res[0].id] = action_name;
+            } else {
+              const res = site.page.tables.page_updates.save({
+                action: action_name,
+                page_id,
+                update,
+                checkpoint: 0,
+                ts,
+              });
+              stack.id = res[0].id;
+              actionHistory[res[0].id] = action_name;
+            }
           }
         }
       });

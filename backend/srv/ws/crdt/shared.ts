@@ -6,6 +6,8 @@ import { dir } from "../../utils/dir";
 import type { WSContext } from "../../utils/server/ctx";
 import BunORM from "../../utils/sqlite";
 
+export const MAX_HISTORY_SIZE = 750;
+
 const createPageDb = (site_id: string) => {
   return new BunORM(dir.data(`/crdt/site/${site_id}/page.db`), {
     tables: {
@@ -14,6 +16,7 @@ const createPageDb = (site_id: string) => {
           page_id: { type: "TEXT" },
           action: { type: "TEXT" },
           update: { type: "BLOB" },
+          checkpoint: { type: "INTEGER" },
           ts: { type: "INTEGER" },
         },
       },

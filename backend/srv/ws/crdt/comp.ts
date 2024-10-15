@@ -12,7 +12,7 @@ import { dir } from "../../utils/dir";
 import { editor } from "../../utils/editor";
 import type { WSContext } from "../../utils/server/ctx";
 import BunORM from "../../utils/sqlite";
-import { crdt_comps } from "./shared";
+import { crdt_comps, MAX_HISTORY_SIZE } from "./shared";
 
 const crdt_loading = new Set<string>();
 await dirAsync(dir.data(`/crdt`));
@@ -24,6 +24,7 @@ const internal = {
           comp_id: { type: "TEXT" },
           action: { type: "TEXT" },
           update: { type: "BLOB" },
+          checkpoint: { type: "INTEGER" },
           ts: { type: "INTEGER" },
         },
       },
@@ -63,10 +64,25 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
 
       const actionHistory = {} as Record<number, string>;
       let undoManager: UndoManager | undefined;
-      const updates = internal.db.tables.comp_updates.find({
-        where: { comp_id },
-        sort: { ts: "asc" },
+
+      const checkpoint = internal.db.tables.comp_updates.find({
+        select: ["ts"],
+        where: { checkpoint: 1 },
+        sort: { ts: "desc" },
+        limit: 1,
       });
+
+      const updates =
+        checkpoint.length === 0
+          ? []
+          : internal.db.tables.comp_updates.find({
+              where: {
+                comp_id,
+                ts: [`>=`, checkpoint[0].ts],
+              },
+              sort: { ts: "asc" },
+            });
+
       if (updates.length > 0) {
         undoManager = new UndoManager(data, { captureTimeout: 0 });
         const pending_ids: number[] = [];
@@ -88,6 +104,7 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
           action: "init",
           comp_id,
           update,
+          checkpoint: 1,
           ts: Date.now(),
         });
         undoManager = new UndoManager(data);
@@ -151,6 +168,7 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
           syncProtocol.writeUpdate(encoder, update);
           const message = encoding.toUint8Array(encoder);
           comp.ws.forEach((w) => w.send(message));
+          const ts = Date.now();
 
           if (origin === undoManager) {
             if (undoManager.undoing) {
@@ -171,6 +189,7 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
               internal.db.tables.comp_updates.save({
                 action: "Redo",
                 comp_id,
+                checkpoint: 0,
                 update: encodeStateAsUpdate(doc),
                 ts: Date.now(),
               });
@@ -181,15 +200,39 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
             ] as unknown as { id: number; action: string };
             const action_name = stack.action || "";
 
-            const res = internal.db.tables.comp_updates.save({
-              action: action_name,
-              comp_id,
-              update,
-              ts: Date.now(),
+            const checkpoint = internal.db.tables.comp_updates.find({
+              select: ["ts"],
+              where: { checkpoint: 1 },
+              limit: 1,
+              sort: { ts: "desc" },
+            });
+            const checkpoint_counts = internal.db.tables.comp_updates.count({
+              where: { ts: [`>=`, checkpoint[0].ts] },
             });
 
-            stack.id = res[0].id;
-            actionHistory[res[0].id] = action_name;
+            if (checkpoint_counts >= MAX_HISTORY_SIZE) {
+              const update = encodeStateAsUpdate(doc);
+              const res = internal.db.tables.comp_updates.save({
+                action: "init",
+                comp_id,
+                update,
+                ts: Date.now(),
+                checkpoint: 1,
+              });
+
+              stack.id = res[0].id;
+              actionHistory[res[0].id] = action_name;
+            } else {
+              const res = internal.db.tables.comp_updates.save({
+                action: action_name,
+                comp_id,
+                update,
+                checkpoint: 0,
+                ts,
+              });
+              stack.id = res[0].id;
+              actionHistory[res[0].id] = action_name;
+            }
           }
         }
       });

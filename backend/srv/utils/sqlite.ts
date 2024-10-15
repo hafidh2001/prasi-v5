@@ -182,14 +182,18 @@ interface _TableFunctions<TT extends Tables, T extends Tables[string]> {
     sort?: Partial<Record<keyof T["columns"], "asc" | "desc">>;
     limit?: number;
   }) => void;
-  count: (opts: { where?: Partial<_Columns<TT, T>> }) => number;
+  count: (opts: {
+    where?: Partial<{ [K in keyof _Columns<TT, T>]: any }>;
+  }) => number;
   find: <
     S extends (keyof T["columns"])[] | undefined,
     R extends Narrow<
       (keyof SortOut<T["columns"], { type: "REL" }>)[] | undefined
     >,
   >(opts?: {
-    where?: string | Partial<AddColumnDefaults<_Columns<TT, T>>>;
+    where?:
+      | string
+      | Partial<{ [K in keyof AddColumnDefaults<_Columns<TT, T>>]: any }>;
     sort?: Partial<Record<keyof T["columns"], "asc" | "desc">>;
     limit?: number;
     select?: S;
@@ -429,53 +433,73 @@ export class BunORM<T extends Narrow<Tables>> {
         const sql = `SELECT COUNT(*) FROM ${table}${
           opts.where
             ? ` WHERE ${Object.keys(opts.where)
-                .map((x, i) => `${x} = ?${i + 1}`)
+                .map((x, i) => {
+                  const val = (opts?.where as any)?.[x];
+                  if (Array.isArray(val)) {
+                    return `${x} ${val[0]} ?${i + 1}`;
+                  }
+                  return `${x} = ?${i + 1}`;
+                })
                 .join(" AND ")}`
             : ""
         };`;
+
         return (
-          this.db
-            .query(sql)
-            .all(...(Object.values(opts.where || {}) as any))[0] as any
+          this.db.query(sql).all(
+            ...(Object.values(opts.where as any).map((e) => {
+              if (Array.isArray(e)) return e[1];
+              return e;
+            }) as any)
+          )[0] as any
         )?.["COUNT(*)"] as number;
       },
-      find: (opts) =>
-        resolveRelations(
+      find: (opts) => {
+        const sql = !opts
+          ? `SELECT * FROM ${table};`
+          : `SELECT ${
+              opts.select
+                ? opts.select.length === 0
+                  ? ""
+                  : opts.select.join()
+                : "*"
+            } FROM ${table}${
+              opts.where
+                ? typeof opts.where === "string"
+                  ? ` WHERE ${opts.where}`
+                  : ` WHERE ${Object.keys(opts.where)
+                      .map((x, i) => {
+                        const val = (opts?.where as any)?.[x];
+                        if (Array.isArray(val)) {
+                          return `${x} ${val[0]} ?${i + 1}`;
+                        }
+                        return `${x} = ?${i + 1}`;
+                      })
+                      .join(" AND ")}`
+                : ""
+            }${
+              opts.sort
+                ? ` ORDER BY "${Object.keys(opts.sort)[0]}" ${Object.values(opts.sort)[0]}`
+                : ""
+            }${opts.limit ? ` LIMIT ${opts.limit}` : ""};`;
+
+        return resolveRelations(
           executeGetMiddleware(
             injectFx(
               parseJSON(
-                this.db
-                  .query(
-                    !opts
-                      ? `SELECT * FROM ${table};`
-                      : `SELECT ${
-                          opts.select
-                            ? opts.select.length === 0
-                              ? ""
-                              : opts.select.join()
-                            : "*"
-                        } FROM ${table}${
-                          opts.where
-                            ? typeof opts.where === "string"
-                              ? ` WHERE ${opts.where}`
-                              : ` WHERE ${Object.keys(opts.where)
-                                  .map((x, i) => `${x} = ?${i + 1}`)
-                                  .join(" AND ")}`
-                            : ""
-                        }${
-                          opts.sort
-                            ? ` ORDER BY "${Object.keys(opts.sort)[0]}" ${Object.values(opts.sort)[0]}`
-                            : ""
-                        }${opts.limit ? ` LIMIT ${opts.limit}` : ""};`
-                  )
-                  .all(
-                    ...((opts?.where ? Object.values(opts.where) : []) as any[])
-                  ) as any[]
+                this.db.query(sql).all(
+                  ...((opts?.where
+                    ? Object.values(opts.where).map((e) => {
+                        if (Array.isArray(e)) return e[1];
+                        return e;
+                      })
+                    : []) as any[])
+                ) as any[]
               )
             )
           ),
           opts?.resolve || ([] as any)
-        ),
+        );
+      },
     };
   };
 
