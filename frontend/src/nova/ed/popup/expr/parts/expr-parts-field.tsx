@@ -34,8 +34,8 @@ export const ExprPartsField: FC<{
       if (value.kind === "expr") {
         content = (
           <ExprPartBody
-            expr={value.expr}
-            name={value.name}
+            value={value}
+            onChange={() => {}}
             expected_type={expected_type}
           />
         );

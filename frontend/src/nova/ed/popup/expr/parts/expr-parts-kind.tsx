@@ -2,13 +2,15 @@ import { FC } from "react";
 import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
 import { ExprPartList } from "./expr-parts-list";
-import { EOutputType } from "../lib/types";
+import { EOutputType, PExpr, PTypedExpr } from "../lib/types";
 
 export const ExprPartsKind: FC<{
   name: string;
   label?: string;
   expected_type?: EOutputType[];
-}> = ({ name, label, expected_type }) => {
+  value: PTypedExpr<any>;
+  onChange: (value: PTypedExpr<any>) => void;
+}> = ({ name, label, expected_type, value, onChange }) => {
   const local = useLocal({
     open: false,
     action: {} as
@@ -47,7 +49,24 @@ export const ExprPartsKind: FC<{
         <ExprPartList
           selected={name}
           onChange={(e) => {
-            console.log(e);
+            let kind = "expr";
+            if (e.group === "value") {
+              kind = "value";
+            }
+
+            let history = { ...value.history };
+            if (e.name !== value.name) {
+              history[kind + "|" + value.name] = JSON.parse(
+                JSON.stringify(value)
+              );
+
+              onChange({
+                kind: "expr",
+                name: e.name,
+                expr: {},
+                history,
+              });
+            }
             local.open = false;
             local.render();
           }}

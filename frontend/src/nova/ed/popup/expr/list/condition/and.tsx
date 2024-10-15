@@ -18,7 +18,8 @@ export default defineExpression({
     const value = evalExpr(current.expr.left);
     return { value: !!value, type: "boolean" };
   },
-  Component({ name, expr, expected_type }) {
+  Component({ value, expected_type, onChange }) {
+    const { name, expr } = value;
     return (
       <>
         <ExprPartsField
@@ -27,7 +28,13 @@ export default defineExpression({
           def={this}
           expected_type={["boolean"]}
         />
-        <ExprPartsKind name={name} label="AND" expected_type={expected_type} />
+        <ExprPartsKind
+          name={name}
+          value={value}
+          onChange={onChange}
+          label="AND"
+          expected_type={expected_type}
+        />
         <ExprPartsField
           name="right"
           value={expr.right}

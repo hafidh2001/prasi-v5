@@ -152,7 +152,7 @@ export const ExprPartList = ({
           onChange?.(
             {
               name: item.name,
-              group: g[a.group].name,
+              group: g[a.group].name.toLowerCase(),
             },
             item
           );

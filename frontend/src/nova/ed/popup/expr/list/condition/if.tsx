@@ -32,10 +32,17 @@ export default defineExpression({
 
     return { value: null, type: "null" };
   },
-  Component({ name, expr, expected_type }) {
+  Component({ value, expected_type, onChange }) {
+    const { name, expr } = value;
     return (
       <>
-        <ExprPartsKind name={name} label="IF" expected_type={expected_type} />
+        <ExprPartsKind
+          name={name}
+          label="IF"
+          value={value}
+          expected_type={expected_type}
+          onChange={onChange}
+        />
         <ExprPartsField
           name="condition"
           value={expr.condition}

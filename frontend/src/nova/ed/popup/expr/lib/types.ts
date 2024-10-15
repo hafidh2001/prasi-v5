@@ -25,13 +25,15 @@ export type PExprDefinition<T extends PExprFields> = {
   group: string;
   desc: string;
   output_type: Readonly<EOutputType>;
-  Component: FC<{
-    name: EXPR_NAME;
-    expr: PTypedExpr<T>["expr"];
-    expected_type?: EOutputType[];
-  }>;
+  Component: ExprComponent<T>;
   evaluate: (current: PTypedExpr<T>) => { value: any; type: EType };
 };
+
+export type ExprComponent<T extends PExprFields> = FC<{
+  value: PTypedExpr<T>;
+  expected_type?: EOutputType[];
+  onChange: (expr: PExpr) => void;
+}>;
 
 export const defineExpression = <T extends PExprFields>(
   expr: PExprDefinition<T>
@@ -50,7 +52,9 @@ export type PExpr =
 
 export type PTypedExpr<T extends PExprFields> = {
   name: string;
+  kind: "expr";
   expr: {
     [K in keyof T]: T[K]["kind"] extends "expression" ? PExpr : any;
   };
+  history?: Record<string, PExpr>;
 };

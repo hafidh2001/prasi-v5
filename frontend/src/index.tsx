@@ -10,6 +10,7 @@ import { StrictMode } from "react";
 import "./index.css";
 import { defineReact } from "./utils/react/define-react";
 import { defineWindow } from "./utils/react/define-window";
+import { Root } from "base/root";
 
 const start = async () => {
   let react = {
@@ -40,31 +41,7 @@ const start = async () => {
     react.root = createRoot(el);
     react.root.render(
       <StrictMode>
-        <div className="h-[400px] border-2 border-blue-600">
-          <EdExprEditorRoot
-            // value={{
-            //   kind: "expr",
-            //   expr: {
-            //     condition: {
-            //       kind: "expr",
-            //       name: "and",
-            //       expr: {
-            //         left: {
-            //           kind: "expr",
-            //           name: "is-exists",
-            //           expr: {
-            //             value: { kind: "static", value: "123", type: "number" },
-            //           },
-            //         },
-            //       },
-            //     },
-            //   },
-            //   name: "if",
-            // }}
-            // onChange={() => {}}
-          />
-        </div>
-        {/* <Root /> */}
+        <Root />
       </StrictMode>
     );
   }

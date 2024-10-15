@@ -1,13 +1,19 @@
 import { FC } from "react";
-import { EOutputType, EXPR_NAME, PExpr } from "../lib/types";
+import {
+  EOutputType,
+  EXPR_NAME,
+  ExprComponent,
+  PExpr,
+  PTypedExpr,
+} from "../lib/types";
 import { allExpression } from "./all-expr";
-import { ESimpleType } from "popup/vars/lib/type";
 
 export const ExprPartBody: FC<{
-  name: EXPR_NAME;
-  expr: Record<string, PExpr>;
+  value: PTypedExpr<any>;
+  onChange: (value: PExpr) => void;
   expected_type?: EOutputType[];
-}> = ({ name, expr, expected_type }) => {
+}> = ({ value, expected_type, onChange }) => {
+  const { name, expr } = value;
   const def = allExpression.find((d) => {
     if (d.name === name) {
       if (expected_type && expected_type.length > 0 && d.output_type) {
@@ -24,10 +30,14 @@ export const ExprPartBody: FC<{
   if (!def) {
     return <>ERROR: Expression Defintion not found for {name} </>;
   }
-  const Component = def.Component.bind(def);
+  const Component = (def.Component as ExprComponent<any>).bind(def);
   return (
-    <div className={cx(`expr expr-body`)}>
-      <Component expr={expr as any} name={name} expected_type={expected_type} />
+    <div className={cx(`expr expr-body space-x-[2px]`)}>
+      <Component
+        value={value}
+        onChange={onChange}
+        expected_type={expected_type}
+      />
     </div>
   );
 };

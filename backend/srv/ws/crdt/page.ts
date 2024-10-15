@@ -194,7 +194,7 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
 
   page_ws.add(ws);
   const encoder = encoding.createEncoder();
-  const decoder = decoding.createDecoder(raw);
+  const decoder = decoding.createDecoder(new Uint8Array(raw));
   const messageType = decoding.readVarUint(decoder);
 
   switch (messageType) {

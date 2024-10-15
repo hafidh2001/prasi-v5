@@ -15,7 +15,7 @@ export const EdExprEditorRoot: FC<{
         e.preventDefault();
       }}
       className={cx(
-        "w-full select-none text-sm h-full cursor-pointer flex flex-start justify-start flex-wrap content-start items-center",
+        "w-full select-none text-sm h-full cursor-pointer flex flex-start justify-start flex-wrap content-start items-center p-1",
         css`
           font-family: "Liga Menlo", monospace;
 
@@ -129,23 +129,26 @@ export const EdExprEditorRoot: FC<{
       }}
     >
       {!value && (
-        <div className="p-1">
-          <ExprPartAdd
-            bind={(action) => {
-              local.add_focus = action.focus;
-            }}
-            onChange={(value) => {
-              if (onChange) {
-                onChange(value);
-              }
-            }}
-            disabled
-            content="<div style='color:#999;'>Add Expression</div>"
-          />
-        </div>
+        <ExprPartAdd
+          bind={(action) => {
+            local.add_focus = action.focus;
+          }}
+          onChange={(value) => {
+            if (onChange) {
+              onChange(value);
+            }
+          }}
+          disabled
+          content="<div style='color:#999;'>Add Expression</div>"
+        />
       )}
       {value && value.kind === "expr" && (
-        <ExprPartBody name={value.name} expr={value.expr} />
+        <ExprPartBody
+          value={value}
+          onChange={(value) => {
+            onChange?.(value);
+          }}
+        />
       )}
     </div>
   );
