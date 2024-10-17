@@ -1,16 +1,17 @@
 import { FC } from "react";
 import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
+import { EOutputType, ExprBackdrop, PExpr, PTypedExpr } from "../lib/types";
 import { ExprPartList } from "./expr-parts-list";
-import { EOutputType, PExpr, PTypedExpr } from "../lib/types";
 
 export const ExprPartsKind: FC<{
   name: string;
   label?: string;
   expected_type?: EOutputType[];
   value: PTypedExpr<any>;
-  onChange: (value: PTypedExpr<any>) => void;
-}> = ({ name, label, expected_type, value, onChange }) => {
+  onChange: (value: PExpr) => void;
+  onFocusChange?: (focus: boolean) => void;
+}> = ({ name, label, expected_type, value, onFocusChange, onChange }) => {
   const local = useLocal({
     open: false,
     action: {} as
@@ -26,9 +27,14 @@ export const ExprPartsKind: FC<{
     return (
       <div
         className={cx("expr expr-kind", name)}
-        onClick={() => {
-          local.open = true;
-          local.render();
+        onClick={(e) => {
+          e.stopPropagation();
+          if (onFocusChange) {
+            onFocusChange?.(true);
+          } else {
+            local.open = true;
+            local.render();
+          }
         }}
       >
         {label || name}
@@ -41,32 +47,25 @@ export const ExprPartsKind: FC<{
       className={cx("expr expr-kind focus", name)}
       open
       onOpenChange={(open) => {
+        onFocusChange?.(open);
         local.open = open;
         local.render();
       }}
-      backdrop={false}
+      backdrop={ExprBackdrop}
       content={
         <ExprPartList
           selected={name}
           onChange={(e) => {
-            let kind = "expr";
-            if (e.group === "value") {
-              kind = "value";
-            }
-
             let history = { ...value.history };
-            if (e.name !== value.name) {
-              history[kind + "|" + value.name] = JSON.parse(
-                JSON.stringify(value)
-              );
-
-              onChange({
-                kind: "expr",
-                name: e.name,
-                expr: {},
-                history,
-              });
+            if (value.kind === "expr") {
+              history["expr|" + value.name] = JSON.parse(JSON.stringify(value));
             }
+
+            onChange({
+              ...e,
+              history,
+            });
+
             local.open = false;
             local.render();
           }}

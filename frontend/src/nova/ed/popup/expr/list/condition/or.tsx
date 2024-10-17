@@ -18,15 +18,16 @@ export default defineExpression({
     const value = evalExpr(current.expr.left);
     return { value: !!value, type: "boolean" };
   },
-  Component({ value, onChange, expected_type }) {
+  Component({ value, onChange, expected_type, onFocusChange }) {
     const { name, expr } = value;
     return (
       <>
         <ExprPartsField
           name="left"
-          value={expr.left}
+          value={value}
           def={this}
           expected_type={["boolean"]}
+          onChange={onChange}
         />
         <ExprPartsKind
           name={name}
@@ -34,12 +35,14 @@ export default defineExpression({
           value={value}
           label="OR"
           expected_type={expected_type}
+          onFocusChange={onFocusChange}
         />
         <ExprPartsField
           name="right"
-          value={expr.right}
+          value={value}
           def={this}
           expected_type={["boolean"]}
+          onChange={onChange}
         />
       </>
     );

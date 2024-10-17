@@ -1,9 +1,9 @@
+import { ESimpleType } from "popup/vars/lib/type";
 import { forwardRef, useEffect } from "react";
 import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
-import { PExpr } from "../lib/types";
+import { ExprBackdrop, PExpr } from "../lib/types";
 import { ExprPartList } from "./expr-parts-list";
-import { ESimpleType } from "popup/vars/lib/type";
 
 export const ExprPartAdd = forwardRef<
   HTMLDivElement,
@@ -55,7 +55,7 @@ export const ExprPartAdd = forwardRef<
 
   return (
     <Popover
-      backdrop={false}
+      backdrop={ExprBackdrop}
       content={
         <ExprPartList
           search={local.filter.text}
@@ -63,7 +63,7 @@ export const ExprPartAdd = forwardRef<
             local.action = action;
           }}
           onChange={(item) => {
-            onChange({ name: item.name, expr: {}, kind: "expr" });
+            onChange(item);
             if (onOpenChange) {
               onOpenChange(false);
             } else {
@@ -94,7 +94,11 @@ export const ExprPartAdd = forwardRef<
           local.render();
         }
       }}
-      className={cx("expr expr-add", local.open && "focus")}
+      className={cx(
+        "expr expr-add",
+        local.open && "focus",
+        disabled && "text-slate-400",
+      )}
     >
       <div
         ref={(r) => {
@@ -108,6 +112,15 @@ export const ExprPartAdd = forwardRef<
         }}
         spellCheck={false}
         contentEditable={disabled !== true}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (disabled) {
+            if (!local.open) {
+              local.open = true;
+              local.render();
+            }
+          }
+        }}
         onFocus={() => {
           if (!local.open) {
             local.open = true;

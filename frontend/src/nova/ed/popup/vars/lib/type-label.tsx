@@ -8,7 +8,7 @@ export const EdTypeLabel = forwardRef<
   {
     type: EType;
     show_label?: boolean;
-    onClick?: () => void;
+    onClick?: (e: React.MouseEvent) => void;
   }
 >(({ type: _type, show_label, onClick }, ref) => {
   let type = typeof _type === "string" ? _type : "unknown";

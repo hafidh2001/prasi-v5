@@ -4,13 +4,16 @@ import { FC } from "react";
 import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
 import { ExprPartList } from "./expr-parts-list";
+import { ExprBackdrop, PExpr } from "../lib/types";
 
-export const ExprPartsStatic: FC<{ type: ESimpleType; value: any }> = ({
-  type,
-  value,
-}) => {
+export const ExprPartsStatic: FC<{
+  type: ESimpleType;
+  value: any;
+  onChange: (value: PExpr) => void;
+}> = ({ type, value, onChange }) => {
   const local = useLocal({
     open: false,
+    value: "",
     action: {} as
       | {
           selectNext: () => void;
@@ -29,7 +32,16 @@ export const ExprPartsStatic: FC<{ type: ESimpleType; value: any }> = ({
           local.render();
         }}
       />
-      <input value={value} className="outline-none input" onChange={() => {}} />
+      <input
+        value={local.value}
+        className="outline-none input"
+        spellCheck={false}
+        onChange={(e) => {
+          const text = e.currentTarget.value;
+          local.value = text;
+          local.render();
+        }}
+      />
     </>
   );
 
@@ -45,12 +57,12 @@ export const ExprPartsStatic: FC<{ type: ESimpleType; value: any }> = ({
         local.open = open;
         local.render();
       }}
-      backdrop={false}
+      backdrop={ExprBackdrop}
       content={
         <ExprPartList
-          selected={type}
+          selected={"static"}
           onChange={(e) => {
-            console.log(e);
+            onChange(e);
             local.open = false;
             local.render();
           }}

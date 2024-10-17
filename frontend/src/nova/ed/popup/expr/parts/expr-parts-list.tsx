@@ -5,7 +5,7 @@ import { FC, ReactNode, useEffect } from "react";
 import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
 import { ExprGroupDefinition } from "../lib/group";
-import { PExprDefinition } from "../lib/types";
+import { PExpr, PExprDefinition } from "../lib/types";
 import { allExpression } from "./all-expr";
 
 export const ExprPartList = ({
@@ -22,7 +22,7 @@ export const ExprPartList = ({
     pick: () => void;
   }) => void;
   filter?: (item: SingleGroup | SingleItem | SingleParent) => boolean;
-  onChange?: (item: { name: string; group: string }, opt: SingleItem) => void;
+  onChange?: (expr: PExpr, opt: SingleItem) => void;
 }) => {
   const local = useLocal({
     active: {
@@ -137,25 +137,31 @@ export const ExprPartList = ({
           | SingleParent
           | SingleItem;
 
-        let sub = "";
         if (
           item.type === "parent" &&
           item.items &&
           local.active.item_open === a.item &&
           local.active.sub >= 0
         ) {
-          sub = item.key;
           item = item.items[local.active.sub];
         }
 
         if (item.type === "item") {
-          onChange?.(
-            {
-              name: item.name,
-              group: g[a.group].name.toLowerCase(),
-            },
-            item
-          );
+          const group = g[a.group].name.toLowerCase();
+          const name = item.name;
+
+          if (group === "value") {
+            if (name !== "var") {
+              onChange?.(
+                { kind: "static", type: name as any, value: undefined },
+                item
+              );
+            } else {
+              onChange?.({ kind: "var", var: undefined }, item);
+            }
+          } else {
+            onChange?.({ kind: "expr", name, expr: {} }, item);
+          }
         }
 
         local.active.item_open = -1;
@@ -256,7 +262,8 @@ export const ExprPartList = ({
         const group = local.groups[i];
         for (let j = 0; j < group.items.length; j++) {
           const item = group.items[j];
-          if (item.data?.name === selected) {
+
+          if (item.data?.name === selected || item.key === selected) {
             local.active.group = i;
             local.active.item = j;
             local.active.item_open = -1;

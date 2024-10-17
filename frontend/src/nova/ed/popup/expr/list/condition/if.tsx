@@ -1,9 +1,8 @@
 import { evalExpr } from "../../lib/eval";
 import { ExprGroup } from "../../lib/group";
-import { defineExpression, EOutputType } from "../../lib/types";
+import { defineExpression } from "../../lib/types";
 import { ExprPartsField } from "../../parts/expr-parts-field";
 import { ExprPartsKind } from "../../parts/expr-parts-kind";
-import { ExprPartsStatic } from "../../parts/expr-parts-static";
 
 export default defineExpression({
   name: "if",
@@ -32,7 +31,7 @@ export default defineExpression({
 
     return { value: null, type: "null" };
   },
-  Component({ value, expected_type, onChange }) {
+  Component({ value, expected_type, onChange, onFocusChange }) {
     const { name, expr } = value;
     return (
       <>
@@ -42,15 +41,22 @@ export default defineExpression({
           value={value}
           expected_type={expected_type}
           onChange={onChange}
+          onFocusChange={onFocusChange}
         />
         <ExprPartsField
           name="condition"
-          value={expr.condition}
+          value={value}
           def={this}
           expected_type={["boolean"]}
+          onChange={onChange}
         />
         <span>THEN</span>
-        <ExprPartsField name="then" value={expr.then} def={this} />
+        <ExprPartsField
+          name="then"
+          value={value}
+          def={this}
+          onChange={onChange}
+        />
       </>
     );
   },

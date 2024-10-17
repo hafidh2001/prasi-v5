@@ -25,6 +25,7 @@ interface PopoverOptions {
   open?: boolean;
   offset?: number;
   onOpenChange?: (open: boolean) => void;
+  onChange?: (open: boolean) => void;
   autoFocus?: boolean;
   backdrop?: boolean | "self";
   border?: string;
@@ -218,6 +219,7 @@ export function Popover({
   popoverClassName,
   arrow,
   border = "1px solid black",
+  onChange,
   ...restOptions
 }: {
   className?: string;
@@ -229,9 +231,18 @@ export function Popover({
   asChild?: boolean;
 } & PopoverOptions) {
   const popover = usePopover({ modal, ...restOptions });
-
+  const last = React.useRef({ open: popover.open });
   let _content = content;
   if (!content) _content = <div className={"w-[300px] h-[150px]"}></div>;
+
+  if (onChange) {
+    React.useEffect(() => {
+      if (popover.open !== last.current.open) {
+        last.current.open = popover.open;
+        onChange(popover.open);
+      }
+    }, [popover.open]);
+  }
 
   return (
     <PopoverContext.Provider value={popover}>

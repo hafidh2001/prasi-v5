@@ -44,7 +44,7 @@ export const staticFile = async (
           if (ctx.req.headers.get("accept-encoding")?.includes("gz")) {
             let gz = store.get(fullpath);
             if (!gz) {
-              gz = gzipSync(readFileSync(fullpath));
+              gz = gzipSync(new Uint8Array(readFileSync(fullpath)));
               store.set(fullpath, gz);
             }
 

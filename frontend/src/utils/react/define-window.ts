@@ -64,7 +64,11 @@ export const defineWindow = async (awaitServerUrl = true) => {
               result.push(f.trim());
             }
           }
-        } else result.push(e.trim());
+        } else {
+          if (typeof e === "string") {
+            result.push(e.trim());
+          }
+        }
       });
     return result.join(" ");
   };

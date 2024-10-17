@@ -33,6 +33,7 @@ export type ExprComponent<T extends PExprFields> = FC<{
   value: PTypedExpr<T>;
   expected_type?: EOutputType[];
   onChange: (expr: PExpr) => void;
+  onFocusChange?: (focus: boolean) => void;
 }>;
 
 export const defineExpression = <T extends PExprFields>(
@@ -41,14 +42,17 @@ export const defineExpression = <T extends PExprFields>(
   return expr;
 };
 
-export type PExpr =
-  | { kind: "static"; value: any; type: ESimpleType }
-  | { kind: "var"; var: VarUsage }
+export type PExpr = (
+  | { kind: "static"; value?: any; type: ESimpleType }
+  | { kind: "var"; var?: VarUsage }
   | {
       kind: "expr";
       name: string;
       expr: Record<string, PExpr>;
-    };
+    }
+) & {
+  history?: Record<string, PExpr>;
+};
 
 export type PTypedExpr<T extends PExprFields> = {
   name: string;
@@ -58,3 +62,5 @@ export type PTypedExpr<T extends PExprFields> = {
   };
   history?: Record<string, PExpr>;
 };
+
+export const ExprBackdrop = true;

@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { useLocal } from "utils/react/use-local";
-import { ExprPartAdd } from "./parts/expr-parts-add";
 import { PExpr } from "./lib/types";
+import { ExprPartAdd } from "./parts/expr-parts-add";
 import { ExprPartBody } from "./parts/expr-parts-body";
 
 export const EdExprEditorRoot: FC<{
@@ -15,7 +15,7 @@ export const EdExprEditorRoot: FC<{
         e.preventDefault();
       }}
       className={cx(
-        "w-full select-none text-sm h-full cursor-pointer flex flex-start justify-start flex-wrap content-start items-center p-1",
+        "w-full select-none text-sm h-full cursor-pointer flex flex-start justify-start flex-wrap content-start items-center p-1 overflow-auto",
         css`
           font-family: "Liga Menlo", monospace;
 
@@ -58,6 +58,18 @@ export const EdExprEditorRoot: FC<{
             flex: 1;
             padding: 1px;
             align-items: stretch;
+            justify-content: flex-start;
+
+            > span {
+              display: flex;
+              align-items: center;
+            }
+
+            &.focus {
+              border: 1px solid blue;
+              outline: 1px solid blue;
+              background: #f0f3ff;
+            }
           }
 
           > .expr-body {

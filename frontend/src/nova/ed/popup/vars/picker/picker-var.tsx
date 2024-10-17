@@ -159,6 +159,7 @@ export const EdVarPicker: FC<{
     <Popover
       border="1px solid black"
       open={local.opened}
+      asChild
       onOpenChange={(open) => {
         if (onOpenChange) {
           local.opened = open;

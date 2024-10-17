@@ -1,106 +1,60 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createId } from "utils/script/create-id";
 
-export const useLocal = <T extends object>(
+export const useLocal = <T extends Record<string, any>>(
   data: T,
-  effect?: (arg: {
-    init: boolean;
-    setDelayedRender: (arg: boolean) => void;
-  }) => Promise<void | (() => void)> | void | (() => void),
+  effect?: () => Promise<void>,
   deps?: any[]
 ): {
-  [K in keyof T]: T[K] extends Promise<any> ? null | Awaited<T[K]> : T[K];
+  [K in keyof T]: T[K];
 } & { render: () => void } => {
-  const [, _render] = useState({});
-  const _ = useRef({
-    data: data as unknown as T & {
-      render: () => void;
-    },
-    deps: (deps || []) as any[],
-    ready: false,
-    _loading: {} as any,
-    lastRender: 0,
-    lastRenderCount: 0,
-    delayedRender: false,
-    delayedRenderTimeout: null as any,
-    overRenderTimeout: null as any,
-  });
-  const local = _.current;
-
-  useEffect(() => {
-    local.ready = true;
-    if (effect)
-      effect({
-        init: true,
-        setDelayedRender(arg) {
-          local.delayedRender = arg;
-        },
-      });
-  }, []);
-
-  if (local.ready === false) {
-    local._loading = {};
-
-    local.data.render = () => {
-      if (local.ready) {
-        if (local.delayedRender) {
-          if (Date.now() - local.lastRender > 100) {
-            local.lastRender = Date.now();
-            _render({});
+  const [_, render] = useState(0);
+  const ref = useRef({
+    id: createId(),
+    render_count: 0,
+    rendering: true,
+    render_pending: false,
+    mounted: true,
+    data: {
+      ...data,
+      render() {
+        if (local.mounted) {
+          if (!local.rendering) {
+            if (local.render_count === Number.MAX_SAFE_INTEGER) {
+              local.render_count = 0;
+            }
+            local.render_count++;
+            render(local.render_count);
           } else {
-            clearTimeout(local.delayedRenderTimeout);
-            local.delayedRenderTimeout = setTimeout(local.data.render, 50);
+            local.render_pending = true;
           }
-          return;
         }
+      },
+    } as T & { render: () => void },
+  });
+  const local = ref.current;
 
-        if (Date.now() - local.lastRender < 500) {
-          local.lastRenderCount++;
-        } else {
-          local.lastRenderCount = 0;
-        }
-
-        local.lastRender = Date.now();
-
-        if (local.lastRenderCount > 1000) {
-          clearTimeout(local.overRenderTimeout);
-          local.overRenderTimeout = setTimeout(() => {
-            local.lastRenderCount = 0;
-            local.lastRender = Date.now();
-            _render({});
-          }, 1000);
-
-          console.error(
-            `local.render executed ${local.lastRenderCount} times in less than 300ms`
-          );
-          return;
-        }
-
-        if (local.ready) {
-          _render({});
-        }
-      }
-    };
-  } else {
-    if (local.deps.length > 0 && deps) {
-      for (const [k, dep] of Object.entries(deps) as any) {
-        if (local.deps[k] !== dep) {
-          local.deps[k] = dep;
-
-          if (effect) {
-            setTimeout(() => {
-              effect({
-                init: false,
-                setDelayedRender(arg) {
-                  local.delayedRender = arg;
-                },
-              });
-            });
-          }
-          break;
-        }
-      }
+  local.mounted = true;
+  local.rendering = true;
+  useEffect(() => {
+    local.rendering = false;
+    local.mounted = true;
+    if (local.render_pending) {
+      local.render_pending = false;
+      local.data.render();
     }
+  });
+
+  if (effect) {
+    useEffect(() => {
+      effect();
+    }, deps || []);
   }
+  useEffect(() => {
+    return () => {
+      local.mounted = false;
+    };
+  }, []);
 
   return local.data as any;
 };
