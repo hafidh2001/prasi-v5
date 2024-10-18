@@ -74,6 +74,9 @@ export const defineWindow = async (awaitServerUrl = true) => {
   };
 
   w.navigate = (href: string) => {
+    if (w.isEditor) {
+      return;
+    }
     let _href = href;
 
     if (typeof w.navigateOverride === "function") {

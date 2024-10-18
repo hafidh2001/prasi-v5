@@ -1,6 +1,5 @@
 import { FC } from "react";
-import { useLocal } from "utils/react/use-local";
-import { EOutputType, PExpr, PExprDefinition, PExprField } from "../lib/types";
+import { EOutputType, PExpr, PExprField } from "../lib/types";
 import { ExprPartAdd } from "./expr-parts-add";
 import { ExprPartBody } from "./expr-parts-body";
 import { ExprPartsStatic } from "./expr-parts-static";
@@ -13,17 +12,12 @@ export const ExprPartsField: FC<{
     name: string;
     expr: Record<string, PExpr>;
   };
-  def: PExprDefinition<any>;
+  def: { fields: Record<string, { kind: "expression" }> };
   expected_type?: EOutputType[];
   onChange: (value: PExpr) => void;
 }> = ({ name, value, def, expected_type, onChange }) => {
-  const local = useLocal({ value });
   const field = def.fields[name] as PExprField;
   const expr = value.expr[name];
-
-  if (local.value) {
-    console.log(local.value);
-  }
 
   if (!field) return null;
   let content = null;
@@ -55,7 +49,7 @@ export const ExprPartsField: FC<{
         content = (
           <ExprPartsStatic
             type={expr.type}
-            value={expr.value}
+            value={expr}
             onChange={(val) => {
               onChange({ ...value, expr: { ...value.expr, [name]: val } });
             }}

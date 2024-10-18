@@ -26,6 +26,10 @@ export type PExprDefinition<T extends PExprFields> = {
   desc: string;
   output_type: Readonly<EOutputType>;
   Component: ExprComponent<T>;
+  infer: (arg: {
+    current: PTypedExpr<T>;
+    set: Set<EOutputType>;
+  }) => Set<EOutputType>;
   evaluate: (current: PTypedExpr<T>) => { value: any; type: EType };
 };
 

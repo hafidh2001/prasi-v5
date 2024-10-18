@@ -2,20 +2,21 @@ import { FC } from "react";
 import { useLocal } from "utils/react/use-local";
 import { PExpr } from "./lib/types";
 import { ExprPartAdd } from "./parts/expr-parts-add";
-import { ExprPartBody } from "./parts/expr-parts-body";
+import { ExprPartsField } from "./parts/expr-parts-field";
 
 export const EdExprEditorRoot: FC<{
   value?: PExpr;
-  onChange?: (value: PExpr) => void;
+  onChange: (value: PExpr) => void;
 }> = ({ value, onChange }) => {
   const local = useLocal({ add_focus: () => {} });
+  const root = { expr: { value }, kind: "expr", name: "" } as PExpr;
   return (
     <div
       onContextMenu={(e) => {
         e.preventDefault();
       }}
       className={cx(
-        "w-full select-none text-sm h-full cursor-pointer flex flex-start justify-start flex-wrap content-start items-center p-1 overflow-auto",
+        "w-full select-none text-[93%] h-full cursor-pointer flex flex-start justify-start flex-wrap content-start items-center p-1 overflow-auto",
         css`
           font-family: "Liga Menlo", monospace;
 
@@ -52,7 +53,7 @@ export const EdExprEditorRoot: FC<{
           }
 
           .expr-body {
-            border: 1px solid #ececeb;
+            border: 1px solid #fafafa;
             width: 100%;
             height: 100%;
             flex: 1;
@@ -101,9 +102,9 @@ export const EdExprEditorRoot: FC<{
             }
 
             & > {
-              &:hover {
+              /* &:hover {
                 border: 1px solid blue;
-              }
+              } */
               &.focus {
                 outline: 1px solid blue;
               }
@@ -117,6 +118,7 @@ export const EdExprEditorRoot: FC<{
 
           .expr-static {
             border: 1px solid #ccc;
+            border-radius: 2px;
             display: flex;
             .type-label {
               border-right: 1px solid #ccc;
@@ -131,7 +133,6 @@ export const EdExprEditorRoot: FC<{
             }
             .input {
               flex: 1;
-              padding: 2px;
             }
           }
         `
@@ -154,11 +155,13 @@ export const EdExprEditorRoot: FC<{
           content="<div style='color:#999;'>Add Expression</div>"
         />
       )}
-      {value && value.kind === "expr" && (
-        <ExprPartBody
-          value={value}
+      {root.kind === "expr" && (
+        <ExprPartsField
+          value={root}
+          name={"value"}
+          def={{ fields: { value: { kind: "expression" } } }}
           onChange={(value) => {
-            onChange?.(value);
+            if (value.kind === "expr") onChange(value.expr.value);
           }}
         />
       )}

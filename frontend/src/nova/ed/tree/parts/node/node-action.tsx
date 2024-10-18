@@ -60,7 +60,7 @@ export const EdTreeAction = ({
     <div className="flex items-center pr-1 space-x-1">
       {has_event && (
         <Tooltip content="Content / Loop defined, JS disabled">
-          <AudioWaveform size={9} className="mr-1" />
+          <AudioWaveform size={16} className="mr-1 text-blue-500 bg-white p-[2px] rounded-[3px]" />
         </Tooltip>
       )}
 

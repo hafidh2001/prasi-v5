@@ -22,6 +22,10 @@ export default defineExpression({
     },
     else: { kind: "expression", optional: true, label: "Result" },
   },
+  infer({ current, set }) {
+    
+    return set;
+  },
   evaluate(current) {
     const condition = evalExpr(current.expr.condition);
 
@@ -50,6 +54,11 @@ export default defineExpression({
           expected_type={["boolean"]}
           onChange={onChange}
         />
+
+        {value.expr?.condition?.kind !== "expr" && (
+          <span className="text-green-700">IS TRUE </span>
+        )}
+
         <span>THEN</span>
         <ExprPartsField
           name="then"

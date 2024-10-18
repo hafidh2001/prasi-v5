@@ -5,13 +5,14 @@ import { Switch } from "utils/shadcn/comps/ui/switch";
 export const EdPickerBoolean: FC<{
   value: boolean;
   onChange: (value: boolean) => void;
-}> = ({ value, onChange }) => {
+  className?: string;
+}> = ({ value, onChange, className }) => {
   if (typeof value === "boolean") {
     onChange(!!value);
   }
 
   return (
-    <label className="flex items-center">
+    <label className={cx("flex items-center", className)}>
       <Switch
         checked={!!value}
         onClick={() => {

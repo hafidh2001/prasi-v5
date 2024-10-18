@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
 import { EOutputType, ExprBackdrop, PExpr, PTypedExpr } from "../lib/types";
@@ -6,7 +6,7 @@ import { ExprPartList } from "./expr-parts-list";
 
 export const ExprPartsKind: FC<{
   name: string;
-  label?: string;
+  label?: ReactNode;
   expected_type?: EOutputType[];
   value: PTypedExpr<any>;
   onChange: (value: PExpr) => void;

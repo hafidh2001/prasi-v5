@@ -17,6 +17,9 @@ export default defineExpression({
     const value = evalExpr(current.expr.value);
     return { value: !!value, type: "boolean" };
   },
+  infer({ current, set }) {
+    return set;
+  },
   Component({ value, expected_type, onChange, onFocusChange }) {
     const { name, expr } = value;
     return (
@@ -31,7 +34,7 @@ export default defineExpression({
           name={name}
           value={value}
           onChange={onChange}
-          label="IS EXISTS"
+          label={<span className="text-green-700">IS EXISTS </span>}
           expected_type={expected_type}
           onFocusChange={onFocusChange}
         />
