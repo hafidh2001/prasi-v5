@@ -8,6 +8,7 @@ import { useGlobal } from "../../utils/react/use-global";
 import { useLocal } from "../../utils/react/use-local";
 import { Loading } from "../../utils/ui/loading";
 import { jscript } from "utils/script/jscript";
+import { navigate } from "utils/react/navigate";
 
 jscript.init();
 
@@ -91,6 +92,7 @@ export default page({
 
         try {
           const last_open = JSON.parse(last_open_str || "");
+
           if (last_open.site_id && last_open.page_id) {
             navigate(`/ed/${last_open.site_id}/${last_open.page_id}`);
           } else {

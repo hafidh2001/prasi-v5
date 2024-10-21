@@ -14,6 +14,7 @@ import {
   useMergeRefs,
   useRole,
 } from "@floating-ui/react";
+import { PopoverArrow } from "@radix-ui/react-popover";
 import * as React from "react";
 
 interface TooltipOptions {
@@ -136,19 +137,22 @@ export function Tooltip({
         {children}
       </TooltipTrigger>
       <TooltipContent
-        className={cx(
-          css`
-            pointer-events: none;
-            position: relative;
-            background: white;
-            padding: 3px 8px;
-            box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.15);
-            font-size: 12px;
-          `
-        )}
+        className={cx(css`
+          pointer-events: none;
+          position: relative;
+          box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.15);
+          font-size: 12px;
+
+          border: 1px solid black;
+          background: white;
+          padding: 3px 8px;
+          .arrow {
+            border: 1px solid black;
+          }
+        `)}
       >
         {content}
-        <TooltipArrow />
+        {<TooltipArrow />}
       </TooltipContent>
     </TooltipContext.Provider>
   );
@@ -156,31 +160,69 @@ export function Tooltip({
 
 function TooltipArrow() {
   const context = useTooltipContext();
-  const { x: arrowX, y: arrowY } = context.middlewareData.arrow || {
+  let { x: arrowX, y: arrowY } = context.middlewareData.arrow || {
     x: 0,
     y: 0,
   };
   const staticSide = mapPlacementSideToCSSProperty(context.placement) as string;
 
+  if (staticSide === "left") arrowX = undefined;
+
   return (
     <div
-      ref={context.arrowRef}
-      style={{
-        left: arrowX != null ? `${arrowX}px` : "",
-        top: arrowY != null ? `${arrowY}px` : "",
-        [staticSide]: "-4px",
-        transform: "rotate(45deg)",
-      }}
       className={cx(
         css`
-          pointer-events: none;
           position: absolute;
-          width: 10px;
-          height: 10px;
-          background: white;
-        `
+          overflow: hidden;
+          padding: 2px;
+        `,
+        typeof arrowX === "number" &&
+          css`
+            left: ${arrowX}px;
+          `,
+        typeof arrowY === "number" &&
+          css`
+            top: ${arrowY}px;
+          `,
+        ["top", "bottom"].includes(staticSide) &&
+          css`
+            width: 16px;
+            height: 5px;
+          `,
+        ["left", "right"].includes(staticSide) &&
+          css`
+            height: 16px;
+            width: 5px;
+          `,
+        "flex items-start justify-start"
       )}
-    />
+      style={{ [staticSide]: "-5px" }}
+      ref={context.arrowRef}
+    >
+      <div
+        style={{
+          transform: "rotate(45deg)",
+          position: "absolute",
+        }}
+        className={cx(
+          "arrow",
+          css`
+            pointer-events: none;
+            width: 10px;
+            height: 10px;
+            background: white;
+          `,
+          staticSide === "right" &&
+            css`
+              left: -7px;
+            `,
+          staticSide === "bottom" &&
+            css`
+              top: -7px;
+            `
+        )}
+      />
+    </div>
   );
 }
 

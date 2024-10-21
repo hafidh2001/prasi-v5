@@ -1,11 +1,12 @@
 import { NodeModel, RenderParams } from "@minoru/react-dnd-treeview";
 import { loadCompTree } from "crdt/load-comp-tree";
 import { getNodeById, updateNodeById } from "crdt/node/get-node-by-id";
-import { AudioWaveform, Scroll } from "lucide-react";
+import { AudioWaveform } from "lucide-react";
+import { iconExpr } from "popup/expr/parts/expr-icon";
 import { waitUntil } from "prasi-utils";
 import { useGlobal } from "../../../../../utils/react/use-global";
 import { Tooltip } from "../../../../../utils/ui/tooltip";
-import { activateItem, active } from "../../../logic/active";
+import { active } from "../../../logic/active";
 import { EDGlobal } from "../../../logic/ed-global";
 import { PNode } from "../../../logic/types";
 export const EdTreeAction = ({
@@ -59,8 +60,17 @@ export const EdTreeAction = ({
   return (
     <div className="flex items-center pr-1 space-x-1">
       {has_event && (
-        <Tooltip content="Content / Loop defined, JS disabled">
-          <AudioWaveform size={16} className="mr-1 text-blue-500 bg-white p-[2px] rounded-[3px]" />
+        <Tooltip
+          content={
+            <div className="flex space-x-1 items-center">
+              {iconExpr} <div>Expression defined, JS disabled</div>
+            </div>
+          }
+        >
+          <AudioWaveform
+            size={16}
+            className="mr-1 text-blue-500 bg-white p-[2px] rounded-[3px]"
+          />
         </Tooltip>
       )}
 

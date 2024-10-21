@@ -1,3 +1,4 @@
+import { navigate } from "utils/react/navigate";
 import { useGlobal } from "../../../../utils/react/use-global";
 import { EDGlobal } from "../../logic/ed-global";
 import { TopBtn } from "../../ui/top-btn";

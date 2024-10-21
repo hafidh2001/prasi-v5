@@ -4,6 +4,7 @@ import { isLocalhost } from "../../utils/ui/is-localhost";
 import { Loading } from "../../utils/ui/loading";
 import { page } from "../../utils/react/page";
 import { useGlobal } from "../../utils/react/use-global";
+import { navigate } from "utils/react/navigate";
 
 export default page({
   url: "**",

@@ -17,8 +17,8 @@ export type IItem = {
   html?: string;
   events?: Record<EventType, { flow: PFlow }>;
   vars?: Record<string, IVar<any>>;
-  loop?: IFlowOrVar;
-  content?: IFlowOrVar;
+  loop?: PExpr;
+  content?: PExpr;
   childs: IItem[];
 } & MetaItem &
   BasicItem;

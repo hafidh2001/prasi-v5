@@ -401,7 +401,7 @@ const GroupItem: FC<{
   onOpenChange: onSubOpenChange,
 }) => {
   return (
-    <div className="flex flex-col pt-1 text-sm">
+    <div className="flex flex-col text-sm">
       <div
         className={cx(
           css`
@@ -411,7 +411,7 @@ const GroupItem: FC<{
               margin-right: 4px;
             }
           `,
-          "text-xs border-b pl-1 pb-1 text-slate-400 flex items-center"
+          "text-xs border-b pl-1 pb-1 pt-1 bg-slate-100 text-slate-500 flex items-center"
         )}
       >
         {icon}
