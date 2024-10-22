@@ -1,3 +1,4 @@
+import { inferType } from "popup/expr/lib/infer-type";
 import { evalExpr } from "../../lib/eval";
 import { ExprGroup } from "../../lib/group";
 import { defineExpression } from "../../lib/types";
@@ -17,6 +18,10 @@ export default defineExpression({
   evaluate(current) {
     const value = evalExpr(current.expr.left);
     return { value: !!value, type: "boolean" };
+  },
+  infer(arg) {
+    const left = inferType({ ...arg, expr: arg.current.expr.left });
+    return left;
   },
   Component({ value, expected_type, onChange, onFocusChange }) {
     const { name, expr } = value;

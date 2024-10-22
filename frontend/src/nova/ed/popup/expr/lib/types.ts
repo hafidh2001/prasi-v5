@@ -1,3 +1,4 @@
+import { PG } from "logic/ed-global";
 import { EBaseType, ESimpleType, EType } from "popup/vars/lib/type";
 import { FC } from "react";
 import { VarUsage } from "utils/types/item";
@@ -17,7 +18,8 @@ export type PExprField =
   | { kind: "options"; options: string[]; optional?: boolean };
 export type PExprFields = Record<string, PExprField>;
 
-export type EOutputType = ESimpleType | "any";
+export type EDeepType = { simple: EOutputType; type: EType };
+export type EOutputType = ESimpleType | "object" | "array" | "any";
 export type PExprDefinition<T extends PExprFields> = {
   name: EXPR_NAME;
   label: string;
@@ -27,9 +29,11 @@ export type PExprDefinition<T extends PExprFields> = {
   output_type: Readonly<EOutputType>;
   Component: ExprComponent<T>;
   infer: (arg: {
+    p: PG;
     current: PTypedExpr<T>;
-    set: Set<EOutputType>;
-  }) => Set<EOutputType>;
+    item_id: string;
+    prev: EDeepType[];
+  }) => EDeepType[];
   evaluate: (current: PTypedExpr<T>) => { value: any; type: EType };
 };
 
