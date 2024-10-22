@@ -21,6 +21,7 @@ export const editorCompLoad = async (comp_ids: string[]) => {
       result[id] = found.data;
     }
   }
+
   if (load_comp_ids.size === 0) {
     return result;
   }

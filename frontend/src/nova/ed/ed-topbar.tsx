@@ -1,18 +1,58 @@
 import { activateComp } from "crdt/load-comp-tree";
 import set from "lodash.set";
 import { active } from "logic/active";
-import { EDGlobal } from "logic/ed-global";
-import {
-  ChevronLeft,
-  ChevronRight,
-  PanelLeftClose,
-  PanelLeftOpen,
-  PanelRightOpen,
-  Play,
-} from "lucide-react";
+import { EDGlobal, PG } from "logic/ed-global";
+import { PanelLeftClose, PanelLeftOpen, PanelRightOpen } from "lucide-react";
 import { useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { Tooltip } from "utils/ui/tooltip";
+
+export const navPrevItem = (p: PG) => {
+  p.nav.navigating = true;
+  const item = p.nav.history[p.nav.cursor - 2];
+  if (item) {
+    if (item.comp_id) {
+      activateComp(p, item.comp_id);
+    } else if (active.comp) {
+      active.comp.destroy();
+      active.comp_id = "";
+      active.comp = null;
+    }
+    active.item_id = item.item_id;
+    if (item.ui) {
+      for (const [k, v] of Object.entries(item.ui)) {
+        set(p, k, v);
+      }
+    }
+
+    p.nav.cursor--;
+    p.render();
+  }
+};
+
+export const navNextItem = (p: PG) => {
+  p.nav.navigating = true;
+  const item = p.nav.history[p.nav.cursor];
+  if (item) {
+    if (item.comp_id) {
+      activateComp(p, item.comp_id);
+    } else if (active.comp) {
+      active.comp.destroy();
+      active.comp_id = "";
+      active.comp = null;
+    }
+
+    if (item.ui) {
+      for (const [k, v] of Object.entries(item.ui)) {
+        set(p, k, v);
+      }
+    }
+
+    active.item_id = item.item_id;
+    p.nav.cursor++;
+    p.render();
+  }
+};
 
 export const EdTopBar = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -43,7 +83,7 @@ export const EdTopBar = () => {
 
   const can_next = p.nav.cursor <= p.nav.history.length - 1;
   const can_back = p.nav.cursor - 2 >= 0;
-  
+
   return (
     <div
       className={cx(
@@ -78,25 +118,7 @@ export const EdTopBar = () => {
               can_back ? "hover:text-blue-600" : "text-slate-400"
             )}
             onClick={async () => {
-              p.nav.navigating = true;
-              const item = p.nav.history[p.nav.cursor - 2];
-              if (item) {
-                if (item.comp_id) {
-                  activateComp(p, item.comp_id);
-                } else if (active.comp) {
-                  active.comp.destroy();
-                  active.comp = null;
-                }
-                active.item_id = item.item_id;
-                if (item.ui) {
-                  for (const [k, v] of Object.entries(item.ui)) {
-                    set(p, k, v);
-                  }
-                }
-
-                p.nav.cursor--;
-                p.render();
-              }
+              navPrevItem(p);
             }}
           >
             <TriangleIcon />
@@ -108,26 +130,7 @@ export const EdTopBar = () => {
               can_next ? "hover:text-blue-600" : "text-slate-400"
             )}
             onClick={async () => {
-              p.nav.navigating = true;
-              const item = p.nav.history[p.nav.cursor];
-              if (item) {
-                if (item.comp_id) {
-                  activateComp(p, item.comp_id);
-                } else if (active.comp) {
-                  active.comp.destroy();
-                  active.comp = null;
-                }
-
-                if (item.ui) {
-                  for (const [k, v] of Object.entries(item.ui)) {
-                    set(p, k, v);
-                  }
-                }
-
-                active.item_id = item.item_id;
-                p.nav.cursor++;
-                p.render();
-              }
+              navNextItem(p);
             }}
           >
             <TriangleIcon />

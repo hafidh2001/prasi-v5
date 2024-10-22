@@ -1,4 +1,4 @@
-import { FC, Suspense, useEffect } from "react";
+import { FC, Suspense } from "react";
 import { ErrorBox } from "./lib/error-box";
 import { viInit } from "./lib/init-vi";
 import { useVi } from "./lib/store";
@@ -18,12 +18,15 @@ export const ViRoot: FC<ViProp> = ({
   enable_preload,
   set_ref,
 }) => {
-  const { init, ref } = useVi(({ action, ref, state }) => ({
+  const { init, ref, resetCompInstance } = useVi(({ action, ref, state }) => ({
     init: action.init,
     state_page: state.page,
     state_comps: ref.comps,
     ref,
+    resetCompInstance: action.reset_comp_instance,
   }));
+
+  ref.resetCompInstance = resetCompInstance;
 
   if (set_ref) set_ref(ref);
 

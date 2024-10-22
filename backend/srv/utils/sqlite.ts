@@ -196,6 +196,7 @@ interface _TableFunctions<TT extends Tables, T extends Tables[string]> {
       | Partial<{ [K in keyof AddColumnDefaults<_Columns<TT, T>>]: any }>;
     sort?: Partial<Record<keyof T["columns"], "asc" | "desc">>;
     limit?: number;
+    debug?: boolean;
     select?: S;
     resolve?: R;
   }) => AddTableFx<
@@ -482,20 +483,20 @@ export class BunORM<T extends Narrow<Tables>> {
                 : ""
             }${opts.limit ? ` LIMIT ${opts.limit}` : ""};`;
 
+        let where = (
+          opts?.where
+            ? Object.values(opts.where).map((e) => {
+                if (Array.isArray(e)) return e[1];
+                return e;
+              })
+            : []
+        ) as any;
+
+        if (typeof opts?.where === "string") where = undefined;
+
         return resolveRelations(
           executeGetMiddleware(
-            injectFx(
-              parseJSON(
-                this.db.query(sql).all(
-                  ...((opts?.where
-                    ? Object.values(opts.where).map((e) => {
-                        if (Array.isArray(e)) return e[1];
-                        return e;
-                      })
-                    : []) as any[])
-                ) as any[]
-              )
-            )
+            injectFx(parseJSON(this.db.query(sql).all(where) as any[]))
           ),
           opts?.resolve || ([] as any)
         );

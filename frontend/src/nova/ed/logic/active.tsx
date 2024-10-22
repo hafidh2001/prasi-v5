@@ -25,6 +25,12 @@ export const active = {
   set item_id(value: string) {
     localStorage.setItem("prasi-active-item-id", value);
   },
+  get comp_id() {
+    return localStorage.getItem("prasi-active-comp-id") || "";
+  },
+  set comp_id(value: string) {
+    localStorage.setItem("prasi-active-comp-id", value);
+  },
   comp: null as null | CompTree,
   hover: { id: "", tree: false },
   script_nav: {

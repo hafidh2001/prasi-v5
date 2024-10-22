@@ -1,6 +1,6 @@
 import { NodeModel, RenderParams } from "@minoru/react-dnd-treeview";
 import { getActiveTree } from "logic/active";
-import { EDGlobal } from "logic/ed-global";
+import { EDGlobal, PG } from "logic/ed-global";
 import { RectangleEllipsis } from "lucide-react";
 import { FC } from "react";
 import { useGlobal } from "utils/react/use-global";
@@ -108,7 +108,7 @@ export const EdTreeNodeName: FC<{
                 <div className="text-[12px]">Editing Component</div>
               </div>
             ) : (
-              <Name node={node} render_params={render_params} />
+              <Name p={p} node={node} render_params={render_params} />
             )}
           </>
         )}
@@ -117,11 +117,12 @@ export const EdTreeNodeName: FC<{
   );
 };
 
-const Name: FC<{ node: PNode; render_params: RenderParams }> = ({
+const Name: FC<{ p: PG; node: PNode; render_params: RenderParams }> = ({
   node,
   render_params,
+  p,
 }) => {
-  const name = node.item.name;
+  let name = node.item.name;
 
   let comp_label = "";
 
@@ -135,6 +136,9 @@ const Name: FC<{ node: PNode; render_params: RenderParams }> = ({
           comp_label = "";
         }
       }
+    }
+    if (p.comp.loaded[node.item.component.id]) {
+      name = p.comp.loaded[node.item.component.id].content_tree.name;
     }
   }
 

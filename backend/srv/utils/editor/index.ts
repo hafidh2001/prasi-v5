@@ -106,9 +106,6 @@ export const editor = {
 
 //#region init-cache-db
 const initCacheDb = () => {
-  try {
-    unlinkSync(dir.data("editor-cache.db"));
-  } catch (e) {}
   return new BunORM(dir.data("editor-cache.db"), {
     tables: {
       comp: {

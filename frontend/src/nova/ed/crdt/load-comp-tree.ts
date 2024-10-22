@@ -20,25 +20,27 @@ export const activateComp = async (p: PG, comp_id: string) => {
   if (active.comp) {
     active.comp.destroy();
     active.comp = null;
-    const id = comp_id;
-    if (p.ui.comp.last_edit_ids.length > 0 && p.sync) {
-      active.comp = await loadCompTree({
-        sync: p.sync,
-        id: id,
-        async on_update(ctree) {
-          if (!p.comp.loaded[id]) {
-            await waitUntil(() => p.comp.loaded[id]);
-          }
+  }
+  const id = comp_id;
 
-          p.comp.loaded[id].content_tree = ctree;
-          p.render();
-        },
-      });
-      p.ui.comp.loading_id = "";
-      p.render();
-    }
+  if (p.sync) {
+    active.comp = await loadCompTree({
+      sync: p.sync,
+      id: id,
+      async on_update(ctree) {
+        if (!p.comp.loaded[id]) {
+          await waitUntil(() => p.comp.loaded[id]);
+        }
+
+        if (p.viref.resetCompInstance) p.viref.resetCompInstance(id);
+        p.comp.loaded[id].content_tree = ctree;
+        p.render();
+      },
+    });
+    p.ui.comp.loading_id = "";
     p.render();
   }
+  p.render();
 };
 
 export const loadCompTree = (opt: {
@@ -48,6 +50,7 @@ export const loadCompTree = (opt: {
   on_component?: (item: IItem) => void;
   on_load?: (value: any) => void;
 }) => {
+  active.comp_id = opt.id;
   return new Promise<ReturnType<typeof internalLoadCompTree>>((done) => {
     internalLoadCompTree({ ...opt, on_load: done });
   });

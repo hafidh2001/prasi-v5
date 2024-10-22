@@ -48,7 +48,9 @@ export const edActionNewComp = (
           sync: p.sync,
           id: comp.id,
           on_update(ctree) {
-            p.comp.loaded[comp.id].content_tree = ctree;
+            const id = comp.id;
+            if (p.viref.resetCompInstance) p.viref.resetCompInstance(id);
+            p.comp.loaded[id].content_tree = ctree;
             p.render();
           },
         });

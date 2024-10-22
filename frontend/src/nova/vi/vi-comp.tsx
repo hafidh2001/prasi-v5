@@ -43,6 +43,7 @@ export const ViComp: FC<{
   if (!instance) return loading_component;
 
   return (
+    //@ts-ignore
     <ViItem
       item={instance}
       __idx={__idx}

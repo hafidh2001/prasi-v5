@@ -43,7 +43,7 @@ export const EdViRoot = memo(() => {
       render();
     });
   }
-
+  
   for (const [k, v] of Object.entries(p.comp.loaded)) {
     ref.comps[k] = v.content_tree;
   }

@@ -24,6 +24,8 @@ const viRef = {
 
   wrapper: null as null | ViWrapperComp,
   cache_js: true as boolean,
+
+  resetCompInstance: (comp_id: string) => {},
 };
 export type ViRef = typeof viRef;
 
@@ -43,6 +45,13 @@ export const useVi = defineStore({
       if (!state.comp.instances[item.id] && comp_id && ref.comps[comp_id]) {
         state.comp.instances[item.id] = structuredClone(ref.comps[comp_id]);
         state.comp.instances[item.id].id = item.id;
+      }
+    },
+    reset_comp_instance: (comp_id: string) => {
+      for (const [k, v] of Object.entries(state.comp.instances)) {
+        if (v.component?.id === comp_id) {
+          delete state.comp.instances[k];
+        }
       }
     },
     init: ({

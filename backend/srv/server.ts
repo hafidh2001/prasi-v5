@@ -17,7 +17,7 @@ api.init();
 if (g.mode === "dev") {
   const path = dir.data(`/site-static`);
   if (!(await existsAsync(path))) {
-    waitUntil(() => existsAsync(path));
+    await waitUntil(() => existsAsync(path));
   }
   watch(path, (e, c) => {
     asset.nova.rescan();

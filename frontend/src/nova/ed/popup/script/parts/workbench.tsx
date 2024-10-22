@@ -43,11 +43,22 @@ export const EdScriptWorkbench: FC<{
     node.item.component.id !== active.comp?.id
   ) {
     return (
-      <div className="flex items-center text-sm text-center flex-col justify-center flex-1">
-        <ScrollText className="mb-2" />
-        Please access component
-        <br /> props to edit script.
-      </div>
+      <>
+        <div
+          onClick={() => {
+            popup.open = false;
+            p.render();
+          }}
+          className="absolute right-0 top-2 flex items-center justify-center px-1 pr-2 cursor-pointer hover:text-red-600"
+        >
+          <X size={13} />
+        </div>
+        <div className="flex items-center text-sm text-center flex-col justify-center flex-1">
+          <ScrollText className="mb-2" />
+          Please access component
+          <br /> props to edit script.
+        </div>
+      </>
     );
   }
 

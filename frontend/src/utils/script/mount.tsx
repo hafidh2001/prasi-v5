@@ -77,7 +77,10 @@ export const jsMount = async (editor: MonacoEditor, monaco: Monaco, p?: PG) => {
                     sync: p.sync,
                     id: comp_id,
                     on_update(ctree) {
-                      p.comp.loaded[comp_id].content_tree = ctree;
+                      const id = comp_id;
+                      if (p.viref.resetCompInstance)
+                        p.viref.resetCompInstance(id);
+                      p.comp.loaded[id].content_tree = ctree;
                       p.render();
                     },
                   });
@@ -102,7 +105,10 @@ export const jsMount = async (editor: MonacoEditor, monaco: Monaco, p?: PG) => {
                     sync: p.sync,
                     id: comp_id,
                     on_update(ctree) {
-                      p.comp.loaded[comp_id].content_tree = ctree;
+                      const id = comp_id;
+                      if (p.viref.resetCompInstance)
+                        p.viref.resetCompInstance(id);
+                      p.comp.loaded[id].content_tree = ctree;
                       p.render();
                     },
                   });

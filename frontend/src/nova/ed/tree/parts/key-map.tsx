@@ -2,6 +2,7 @@ import { RenderParams } from "@minoru/react-dnd-treeview";
 import { getNodeById } from "crdt/node/get-node-by-id";
 import { KeyboardEvent } from "react";
 import { IItem } from "../../../../utils/types/item";
+import { navNextItem, navPrevItem } from "../../ed-topbar";
 import { active } from "../../logic/active";
 import { PG } from "../../logic/ed-global";
 import { edActionAdd } from "../action/add";
@@ -16,6 +17,14 @@ export const treeItemKeyMap = (p: PG, prm: RenderParams, item: IItem) => {
       active.item_id = item.id;
       edActionAdd(p);
       return;
+    }
+
+    if (e.key === "-" && e.ctrlKey) {
+      if (e.shiftKey) {
+        navNextItem(p);
+      } else {
+        navPrevItem(p);
+      }
     }
 
     if (e.key === "ArrowLeft") {

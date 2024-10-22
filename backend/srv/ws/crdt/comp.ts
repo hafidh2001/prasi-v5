@@ -109,7 +109,22 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
         });
         undoManager = new UndoManager(data);
       }
+
       undoManager.captureTimeout = 200;
+
+      const saveCache = () => {
+        const found = editor.cache.tables.comp.find({ where: { comp_id } });
+        editor.cache.tables.comp.save({
+          id: found?.[0]?.id,
+          comp_id: comp_id,
+          data: {
+            id: comp_id,
+            id_component_group: db_comp.component_group?.id,
+            content_tree: immer.get(),
+          },
+          ts: Date.now(),
+        });
+      };
 
       if (undoManager) {
         const awareness = new Awareness(doc);
@@ -234,8 +249,11 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
               actionHistory[res[0].id] = action_name;
             }
           }
+          saveCache();
         }
       });
+
+      saveCache();
     }
   }
 

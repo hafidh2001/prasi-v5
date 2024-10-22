@@ -17,6 +17,8 @@ import { EdPopCompGroup } from "./popup/comp/comp-group";
 import { EdPopCompPicker } from "./popup/comp/comp-picker";
 import { iconVSCode } from "./ui/icons";
 import { EdRight } from "./ed-right";
+import { active } from "logic/active";
+import { activateComp } from "crdt/load-comp-tree";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -27,6 +29,10 @@ export const EdBase = () => {
     p.page.tree = loadPageTree(p.sync, p.page.cur.id, {
       async loaded(content_tree) {
         await loadPendingComponent(p);
+        if (active.comp_id && !active.comp) {
+          activateComp(p, active.comp_id);
+        }
+
         fg.prasi.updated_outside = true;
         p.page.cur.content_tree = content_tree;
         if (!p.mode) p.mode = "desktop";

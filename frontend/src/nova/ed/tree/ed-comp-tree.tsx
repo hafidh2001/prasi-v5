@@ -37,6 +37,7 @@ export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
             if (active.comp) {
               active.comp.destroy();
               active.comp = null;
+              active.comp_id = "";
               if (p.ui.comp.last_edit_ids.length > 0 && p.sync) {
                 const id = p.ui.comp.last_edit_ids.pop();
                 if (id) {
@@ -48,6 +49,8 @@ export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
                         await waitUntil(() => p.comp.loaded[id]);
                       }
 
+                      if (p.viref.resetCompInstance)
+                        p.viref.resetCompInstance(id);
                       p.comp.loaded[id].content_tree = ctree;
                       p.render();
                     },

@@ -194,11 +194,14 @@ export const EdTreeAction = ({
                       sync: p.sync,
                       id: comp.id,
                       async on_update(ctree) {
-                        if (!p.comp.loaded[comp.id]) {
-                          await waitUntil(() => p.comp.loaded[comp.id]);
+                        const id = comp.id;
+                        if (!p.comp.loaded[id]) {
+                          await waitUntil(() => p.comp.loaded[id]);
                         }
 
-                        p.comp.loaded[comp.id].content_tree = ctree;
+                        if (p.viref.resetCompInstance)
+                          p.viref.resetCompInstance(id);
+                        p.comp.loaded[id].content_tree = ctree;
                         p.render();
                       },
                     });
