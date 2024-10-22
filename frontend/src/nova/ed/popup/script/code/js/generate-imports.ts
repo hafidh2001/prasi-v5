@@ -2,9 +2,10 @@ import { ScriptModel } from "crdt/node/load-script-models";
 
 export const generateImports = (
   model: ScriptModel,
-  models: Record<string, ScriptModel>
+  models: Record<string, ScriptModel>,
+  debug?: boolean
 ) => {
-  const merged = mergeParentVars(model, models);
+  const merged = mergeParentVars(model, models, debug);
   const imports = {} as Record<string, string[]>;
 
   for (const [k, v] of Object.entries(merged)) {
@@ -26,7 +27,8 @@ export const generateImports = (
 
 const mergeParentVars = (
   model: ScriptModel,
-  models: Record<string, ScriptModel>
+  models: Record<string, ScriptModel>,
+  debug?: boolean
 ) => {
   const variables = {} as Record<string, string>;
 
@@ -40,5 +42,6 @@ const mergeParentVars = (
       }
     }
   }
+
   return variables;
 };

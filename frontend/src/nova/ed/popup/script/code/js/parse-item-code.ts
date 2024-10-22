@@ -1,13 +1,11 @@
+import { ObjectExpression } from "@oxc-parser/wasm";
 import { ScriptModel } from "crdt/node/load-script-models";
 import get from "lodash.get";
-import trim from "lodash.trim";
 import { cutCode, jscript } from "utils/script/jscript";
 import { traverse } from "utils/script/parser/traverse";
-import { replaceString } from "./replace-string";
-import { ObjectExpression } from "@oxc-parser/wasm";
 import { parseItemLocal } from "./parse-item-local";
 import { parseItemPassProp } from "./parse-item-passprop";
-import { SingleExportVar } from "./parse-item-types";
+import { replaceString } from "./replace-string";
 
 export const parseItemCode = (model: ScriptModel) => {
   const replacements: Array<{
@@ -55,7 +53,7 @@ export const parseItemCode = (model: ScriptModel) => {
             ) {
               if (!exports[d.id.name]) {
                 exports[d.id.name] = {
-                  name: "",
+                  name: d.id.name,
                   type: "local",
                   value: "",
                 };
@@ -71,7 +69,10 @@ export const parseItemCode = (model: ScriptModel) => {
                     const single_export = exports[d.id.name] as any;
                     if (single_export) {
                       if (prop.key.name === "name") {
-                        if (prop.value.type === "StringLiteral")
+                        if (
+                          prop.value.type === "StringLiteral" &&
+                          single_export.type !== "local"
+                        )
                           single_export[prop.key.name] = prop.value.value;
                       } else {
                         single_export[prop.key.name] = cutCode(

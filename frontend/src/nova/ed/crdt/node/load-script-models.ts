@@ -136,7 +136,9 @@ export const loadScriptModels = async (
 
   for (const [k, v] of Object.entries(result)) {
     if (v.source && !v.ready) {
-      v.source = await jscript.prettier.format?.(migrateCode(v, result));
+      v.source = await jscript.prettier.format?.(
+        migrateCode(v, result, v.id.startsWith("q9"))
+      );
       v.ready = true;
     }
   }

@@ -4,7 +4,8 @@ import { generatePassProp } from "./generate-passprop";
 
 export const migrateCode = (
   model: ScriptModel,
-  models: Record<string, ScriptModel>
+  models: Record<string, ScriptModel>,
+  debug?: boolean
 ) => {
   const code = model.source;
   const { local } = model;
@@ -16,7 +17,7 @@ export const migrateCode = (
     );
     const main_code = lines.slice(region_end + 1).join("\n");
 
-    const region_code = generateRegion(model, models);
+    const region_code = generateRegion(model, models, debug);
 
     return `\
 ${region_code}
@@ -44,9 +45,10 @@ export default () => (${model.extracted_content})`;
 
 const generateRegion = (
   model: ScriptModel,
-  models: Record<string, ScriptModel>
+  models: Record<string, ScriptModel>,
+  debug?: boolean
 ) => {
-  const imports = generateImports(model, models);
+  const imports = generateImports(model, models, debug);
   const passprop = generatePassProp(model);
 
   return `\
