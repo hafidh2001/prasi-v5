@@ -53,9 +53,11 @@ export const EdScriptWorkbench: FC<{
 
   const has_expression = !!node?.item.content || !!node?.item.loop;
 
+  let mode = popup.mode;
   if (has_expression) {
-    popup.mode = "css";
+    mode = "css";
   }
+
   return (
     <div className="flex flex-1 flex-col select-none">
       <div
@@ -123,7 +125,7 @@ export const EdScriptWorkbench: FC<{
                   </div>
                 </div>
               )}
-              {popup.mode === "js" && (
+              {mode === "js" && (
                 <>
                   {popup.type === "item" && (
                     <>
