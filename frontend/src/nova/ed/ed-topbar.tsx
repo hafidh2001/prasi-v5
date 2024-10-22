@@ -43,6 +43,7 @@ export const EdTopBar = () => {
 
   const can_next = p.nav.cursor <= p.nav.history.length - 1;
   const can_back = p.nav.cursor - 2 >= 0;
+  
   return (
     <div
       className={cx(

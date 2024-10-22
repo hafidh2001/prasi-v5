@@ -195,7 +195,7 @@ export const fetchSendDb = async (
     let body: any = params;
     let result = null;
     if (db_mode[dburl] === "msgpack") {
-      body = gzip(pack(params), {});
+      body = gzip(new Uint8Array(pack(params)), {});
       const res = await fetch(getProxyUrl(url), { method: "POST", body });
       result = await res.json();
     } else {

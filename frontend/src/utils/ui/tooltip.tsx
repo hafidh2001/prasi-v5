@@ -14,7 +14,6 @@ import {
   useMergeRefs,
   useRole,
 } from "@floating-ui/react";
-import { PopoverArrow } from "@radix-ui/react-popover";
 import * as React from "react";
 
 interface TooltipOptions {

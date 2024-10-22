@@ -51,9 +51,9 @@ export const EdScriptWorkbench: FC<{
     );
   }
 
-  const has_content = !!node?.item.content;
+  const has_expression = !!node?.item.content || !!node?.item.loop;
 
-  if (has_content) {
+  if (has_expression) {
     popup.mode = "css";
   }
   return (
@@ -70,7 +70,7 @@ export const EdScriptWorkbench: FC<{
           {popup.type === "item" && (
             <>
               <div className="flex p-2 space-x-1 border-r">
-                {(!has_content
+                {(!has_expression
                   ? [
                       { type: "js", color: "#e9522c" },
                       { type: "css", color: "#188228" },
@@ -105,18 +105,21 @@ export const EdScriptWorkbench: FC<{
                   );
                 })}
               </div>
-              {has_content && (
+              {has_expression && (
                 <div className="flex items-center text-sm pl-2 text-slate-400">
-                  JS is disabled because this item has content{" "}
+                  JS is disabled because this item has expression{" "}
                   <div
                     onClick={() => {
                       p.ui.right.tab = "events";
-                      p.ui.popup.events.open = "content";
+                      p.ui.popup.events.open = node.item.loop
+                        ? "loop"
+                        : "content";
+
                       p.render();
                     }}
                     className="border border-blue-600 px-2 ml-2 text-blue-600 cursor-pointer hover:bg-blue-600 hover:text-white"
                   >
-                    Edit Content
+                    Edit
                   </div>
                 </div>
               )}

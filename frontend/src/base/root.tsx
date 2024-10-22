@@ -29,6 +29,7 @@ export const Root: FC<{}> = ({}) => {
       local.render();
     }
   );
+
   local.rendering = true;
   useEffect(() => {
     local.rendering = false;
