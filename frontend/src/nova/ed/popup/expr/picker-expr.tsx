@@ -1,9 +1,9 @@
 import { active } from "logic/active";
 import { Trash, TriangleAlert } from "lucide-react";
 import { FC, ReactNode } from "react";
-import { EdExprEditor } from "../expr-editor";
-import { PExpr } from "../lib/types";
-import { iconExpr } from "./expr-icon";
+import { EdExprEditor } from "./expr-editor";
+import { PExpr } from "./lib/types";
+import { iconExpr } from "./parts/expr-icon";
 
 export const EdExprPicker: FC<{
   value?: PExpr;

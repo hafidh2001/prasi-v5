@@ -1,3 +1,4 @@
+import { inferType } from "popup/expr/lib/infer-type";
 import { evalExpr } from "../../lib/eval";
 import { ExprGroup } from "../../lib/group";
 import { defineExpression } from "../../lib/types";
@@ -22,9 +23,13 @@ export default defineExpression({
     },
     else: { kind: "expression", optional: true, label: "Result" },
   },
-  infer({ current, set }) {
-    
-    return set;
+  infer(arg) {
+    const result = inferType({ ...arg, expr: arg.current.expr.then });
+
+    if (!result.find((e) => e.simple === "null")) {
+      result.push({ simple: "null", type: "null" });
+    }
+    return result;
   },
   evaluate(current) {
     const condition = evalExpr(current.expr.condition);

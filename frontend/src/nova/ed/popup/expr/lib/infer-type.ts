@@ -2,6 +2,7 @@ import { EType } from "popup/vars/lib/type";
 import { getExpressionDefinition } from "../parts/all-expr";
 import { EDeepType, EOutputType, PExpr } from "./types";
 import { PG } from "logic/ed-global";
+import { getVarDef } from "./var-def";
 
 export const inferType = (arg: {
   p: PG;
@@ -9,15 +10,19 @@ export const inferType = (arg: {
   item_id: string;
   prev?: EDeepType[];
 }): EDeepType[] => {
-  const { expr, item_id, prev } = arg;
+  const { expr, item_id, p, prev } = arg;
   if (expr.kind === "static") {
     return [{ simple: expr.type, type: expr.type }];
   } else if (expr.kind === "expr") {
     const def = getExpressionDefinition(expr.name);
     if (def) {
-      return def.infer({ current: expr, item_id, prev: [] });
+      return def.infer({ p, current: expr, item_id, prev: prev || [] });
     }
-  } else if (expr.kind === "var") {
+  } else if (expr.kind === "var" && expr.var) {
+    const def = getVarDef(p, expr.var);
+    if (def) {
+      return [{ simple: simplifyType(def.type), type: def.type }];
+    }
   }
 
   return [];

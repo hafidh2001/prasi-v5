@@ -2,8 +2,9 @@ import { Resizable } from "re-resizable";
 import { FC, useEffect } from "react";
 import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
-import { EdExprEditorRoot } from "./expr-editor-root";
+import { EdExprEditorBody } from "./expr-editor-body";
 import { PExpr } from "./lib/types";
+import { EdExprEditorTop } from "./expr-editor-top";
 
 export const EdExprEditor: FC<{
   children: any;
@@ -12,7 +13,7 @@ export const EdExprEditor: FC<{
   item_id: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-}> = ({ children, open, onOpenChange, value, onChange }) => {
+}> = ({ children, open, onOpenChange, value, onChange, item_id }) => {
   const local = useLocal({ opened: false });
 
   useEffect(() => {
@@ -74,7 +75,17 @@ export const EdExprEditor: FC<{
           }}
           className={cx("text-sm")}
         >
-          <EdExprEditorRoot value={value} onChange={onChange} />
+          <EdExprEditorTop
+            onChange={onChange}
+            item_id={item_id}
+            value={value}
+          />
+
+          <EdExprEditorBody
+            value={value}
+            onChange={onChange}
+            item_id={item_id}
+          />
         </Resizable>
       }
     >

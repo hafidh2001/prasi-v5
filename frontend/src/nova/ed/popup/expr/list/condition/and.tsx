@@ -4,6 +4,7 @@ import { ExprGroup } from "../../lib/group";
 import { defineExpression } from "../../lib/types";
 import { ExprPartsField } from "../../parts/expr-parts-field";
 import { ExprPartsKind } from "../../parts/expr-parts-kind";
+import { mergeType } from "popup/expr/lib/merge-type";
 
 export default defineExpression({
   name: "and",
@@ -20,8 +21,7 @@ export default defineExpression({
     return { value: !!value, type: "boolean" };
   },
   infer(arg) {
-    const left = inferType({ ...arg, expr: arg.current.expr.left });
-    return left;
+    return [{ simple: "boolean", type: "boolean" }];
   },
   Component({ value, expected_type, onChange, onFocusChange }) {
     const { name, expr } = value;

@@ -2,7 +2,7 @@ import { Placement } from "@floating-ui/react";
 import { TreeVarItems } from "crdt/node/var-items";
 import { active, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
-import { ChevronRight, Pencil } from "lucide-react";
+import { ChevronRight, Pencil, Smile, Sticker } from "lucide-react";
 import { Resizable } from "re-resizable";
 import { FC, ReactNode, useCallback, useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
@@ -266,6 +266,16 @@ export const EdVarPicker: FC<{
                 </div>
               </div>
             )}
+          {local.vars.length === 0 && (
+            <div className="flex items-center flex-col justify-center flex-1">
+              <Sticker size={50} strokeWidth={1} className="mb-2" />
+              <div className="text-center">
+                No Variable
+                <br /> in current scope.
+              </div>
+            </div>
+          )}
+
           {local.vars.map((item) => {
             let is_active = false;
 

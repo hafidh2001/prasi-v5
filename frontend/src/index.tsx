@@ -5,7 +5,7 @@ import { dbProxy } from "./base/load/db/db-proxy";
 import { w } from "./utils/types/general";
 
 import "@fontsource/source-sans-3";
-import { EdExprEditorRoot } from "popup/expr/expr-editor-root";
+import { EdExprEditorBody } from "popup/expr/expr-editor-body";
 import { StrictMode } from "react";
 import "./index.css";
 import { defineReact } from "./utils/react/define-react";

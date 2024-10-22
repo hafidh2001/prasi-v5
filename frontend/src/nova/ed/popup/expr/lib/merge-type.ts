@@ -1,15 +1,24 @@
-import { EType } from "popup/vars/lib/type";
-import { isTypeEqual } from "./is-type-equal";
 import { EDeepType } from "./types";
-import { simplifyType } from "./infer-type";
 
-export const mergeType = (type1: EType, type2: EType): EDeepType[] => {
-  if (isTypeEqual(type1, type2)) {
-    return [{ simple: simplifyType(type1), type: type1 }];
+export const mergeType = (...types: EDeepType[]): EDeepType[] => {
+  if (types.length <= 1) return types;
+
+  const seen = new Set();
+  const merged = [];
+  for (const type of types) {
+    let simplified = "";
+    if (["object", "array"].includes(type.simple)) {
+      simplified = JSON.stringify(type.type);
+    } else {
+      simplified = type.simple;
+    }
+
+    if (seen.has(simplified)) {
+      continue;
+    }
+    seen.add(simplified);
+    merged.push(type);
   }
 
-  return [
-    { simple: simplifyType(type1), type: type1 },
-    { simple: simplifyType(type2), type: type2 },
-  ];
+  return merged;
 };

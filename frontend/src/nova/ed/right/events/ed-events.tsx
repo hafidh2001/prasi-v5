@@ -3,7 +3,7 @@ import { ActiveTree, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import { PNode } from "logic/types";
 import { PExpr } from "popup/expr/lib/types";
-import { EdExprPicker } from "popup/expr/parts/expr-picker";
+import { EdExprPicker } from "popup/expr/picker-expr";
 import { useGlobal } from "utils/react/use-global";
 import { VarUsage } from "utils/types/item";
 import { EdEventItem } from "./ed-event-item";

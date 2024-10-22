@@ -17,8 +17,8 @@ export default defineExpression({
     const value = evalExpr(current.expr.value);
     return { value: !!value, type: "boolean" };
   },
-  infer({ current, set }) {
-    return set;
+  infer({}) {
+    return [{ simple: "boolean", type: "boolean" }];
   },
   Component({ value, expected_type, onChange, onFocusChange }) {
     const { name, expr } = value;

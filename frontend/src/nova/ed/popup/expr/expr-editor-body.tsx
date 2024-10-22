@@ -4,10 +4,11 @@ import { PExpr } from "./lib/types";
 import { ExprPartAdd } from "./parts/expr-parts-add";
 import { ExprPartsField } from "./parts/expr-parts-field";
 
-export const EdExprEditorRoot: FC<{
+export const EdExprEditorBody: FC<{
   value?: PExpr;
   onChange: (value: PExpr) => void;
-}> = ({ value, onChange }) => {
+  item_id: string;
+}> = ({ value, onChange, item_id }) => {
   const local = useLocal({ add_focus: () => {} });
   const root = { expr: { value }, kind: "expr", name: "" } as PExpr;
   return (

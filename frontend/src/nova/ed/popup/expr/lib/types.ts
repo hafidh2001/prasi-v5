@@ -34,7 +34,10 @@ export type PExprDefinition<T extends PExprFields> = {
     item_id: string;
     prev: EDeepType[];
   }) => EDeepType[];
-  evaluate: (current: PTypedExpr<T>) => { value: any; type: EType };
+  evaluate: (current: PTypedExpr<T>) => {
+    value: any;
+    type: EType;
+  };
 };
 
 export type ExprComponent<T extends PExprFields> = FC<{
