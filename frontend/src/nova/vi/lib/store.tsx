@@ -1,7 +1,7 @@
 import { DeepReadonly } from "popup/flow/runtime/types";
 import { IItem, IVar } from "utils/types/item";
 import { defineStore } from "../../../utils/react/define-store";
-import { ViComps, ViPage, ViWrapperComp } from "./types";
+import { ViComps, ViPage, ViWrapperType } from "./types";
 
 type ITEM_ID = string;
 type VAR_NAME = string;
@@ -22,7 +22,7 @@ const viRef = {
   local_value: {} as Record<ITEM_ID, Record<VAR_NAME, any>>,
   pass_prop_value: {} as Record<ITEM_ID, Record<string | number, any>>,
 
-  wrapper: null as null | ViWrapperComp,
+  wrapper: null as null | ViWrapperType,
   cache_js: true as boolean,
 
   resetCompInstance: (comp_id: string) => {},

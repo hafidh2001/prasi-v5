@@ -6,11 +6,12 @@ import {
   Library,
   PanelRightClose,
   PanelRightOpen,
-  SquareChartGantt
+  SquareChartGantt,
 } from "lucide-react";
 import { useGlobal } from "utils/react/use-global";
 import { EdVarList } from "./popup/vars/ed-var-list";
 import { EdEvents } from "./right/events/ed-events";
+import { EdCompTitle } from "./right/comp/ed-comp-title";
 
 export const EdRight = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -43,6 +44,7 @@ export const EdRight = () => {
           )}
         </div>
 
+        {is_comp && <EdCompTitle />}
         {!is_comp && (
           <div className="flex items-end pt-2">
             {["style", "events", "vars"].map((tab) => {

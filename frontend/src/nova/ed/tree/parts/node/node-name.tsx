@@ -2,7 +2,7 @@ import { NodeModel, RenderParams } from "@minoru/react-dnd-treeview";
 import { getActiveTree } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import { RectangleEllipsis } from "lucide-react";
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { LoadingSpinner } from "utils/ui/loading";
@@ -122,7 +122,11 @@ const Name: FC<{ p: PG; node: PNode; render_params: RenderParams }> = ({
   render_params,
   p,
 }) => {
-  let name = node.item.name;
+  let name: ReactNode = node.item.name
+    .replace(/[^a-zA-Z0-9:]+/g, " ")
+    .split(" ")
+    .map((e) => (e[0] || "").toUpperCase() + e.slice(1))
+    .join(" ");
 
   let comp_label = "";
 
@@ -138,7 +142,17 @@ const Name: FC<{ p: PG; node: PNode; render_params: RenderParams }> = ({
       }
     }
     if (p.comp.loaded[node.item.component.id]) {
-      name = p.comp.loaded[node.item.component.id].content_tree.name;
+      const comp_name = p.comp.loaded[node.item.component.id].content_tree.name;
+      if (comp_name.toLowerCase() !== node.item.name.toLowerCase()) {
+        name = (
+          <div className="flex items-center center space-x-1">
+            <div className="node-text text-purple-500">{comp_name}:</div>
+            <div>{name}</div>
+          </div>
+        );
+      } else {
+        name = <div className="node-text text-purple-500">{name}</div>;
+      }
     }
   }
 
@@ -181,11 +195,7 @@ const Name: FC<{ p: PG; node: PNode; render_params: RenderParams }> = ({
         </div>
       )}
       <div>
-        {name
-          .replace(/[^a-zA-Z0-9:]+/g, " ")
-          .split(" ")
-          .map((e) => (e[0] || "").toUpperCase() + e.slice(1))
-          .join(" ")}
+        {name}
         {comp_label && `: ${comp_label}`}
       </div>
     </div>

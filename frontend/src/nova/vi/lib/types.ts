@@ -10,6 +10,8 @@ export type ViPage = {
   url: string;
 };
 
+export type DIV_PROPS_OPT = { item: IItem; ref: ViRef; instance_id?: string };
+
 export type ViComps = Record<string, IItem>;
 
 export type ViProp = {
@@ -19,7 +21,7 @@ export type ViProp = {
   db: any;
   api: any;
   mode: "desktop" | "mobile";
-  wrapper?: ViWrapperComp;
+  wrapper?: ViWrapperType;
   loader: {
     pages: (ids: string[]) => Promise<void>;
     comps: (ids: string[]) => Promise<void>;
@@ -29,9 +31,10 @@ export type ViProp = {
   set_ref?: (ref: ViRef) => void;
 };
 
-export type ViWrapperComp = FC<{
+export type ViWrapperType = FC<{
   item: IItem;
   is_layout: boolean;
   ViRender: typeof ViRender;
   __idx?: string | number;
+  instance_id?: string;
 }>;

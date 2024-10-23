@@ -14,6 +14,7 @@ export function replaceString(
 
     // Verify if indices are within bounds
     if (start < 0 || end > textArray.length || start >= end) {
+      console.error(originalText, replace);
       throw new Error("Invalid start or end positions.");
     }
 

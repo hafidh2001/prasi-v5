@@ -8,7 +8,8 @@ export const ViChilds: FC<{
   item: DeepReadonly<{ id: string; childs: IItem[] }>;
   is_layout: boolean;
   __idx?: string | number;
-}> = ({ item, is_layout, __idx }) => {
+  instance_id?: string;
+}> = ({ item, is_layout, __idx, instance_id }) => {
   const { parents } = useVi(({ state, ref }) => ({
     parents: ref.item_parents,
   }));
@@ -20,6 +21,7 @@ export const ViChilds: FC<{
       <ViRender
         key={child.id}
         __idx={__idx}
+        instance_id={instance_id}
         item={child}
         is_layout={is_layout}
       />

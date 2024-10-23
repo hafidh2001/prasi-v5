@@ -88,10 +88,7 @@ export const internalLoadCompTree = (
     await loadScriptModels(
       [content_tree],
       component.script_models,
-      component.var_items,
-      {
-        exclude_comp_ids: [comp_id],
-      }
+      component.var_items
     );
 
     opt.on_update(content_tree);
@@ -198,9 +195,7 @@ export const internalLoadCompTree = (
         immer.update(_fn);
       }
     },
-    view<T>(fn: (val: EBaseComp["content_tree"]) => T) {
-      return fn(this.snapshot);
-    },
+
     subscribe(fn: any) {
       return immer.subscribe(fn);
     },

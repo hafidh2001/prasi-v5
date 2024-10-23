@@ -83,12 +83,14 @@ export const EdPrasiCode = () => {
                   ...Object.values(tree.script_models),
                 ];
               }}
-              onChange={({ model, value, editor, monaco }) => {
-                if (model.id) {
-                  model.source = value;
-                  model.exports = {};
+              onChange={({ model, value, editor }) => {
+                if (active.item_id === model.id) {
+                  if (model.source !== value) {
+                    model.source = value;
+                    model.exports = {};
 
-                  update.push(p, model.id, value);
+                    update.push(p, model.id, value);
+                  }
                 }
               }}
               activeModel={`file:///${active.item_id}.tsx`}

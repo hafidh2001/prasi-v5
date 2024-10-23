@@ -1,5 +1,4 @@
 import { DeepReadonly } from "popup/flow/runtime/types";
-import { FC, lazy, Suspense } from "react";
 import { IItem } from "utils/types/item";
 import { ViRender } from "vi/vi-render";
 
@@ -27,7 +26,13 @@ export const compArgs = (
               parent: any;
             }) => {
               parents[content.id] = parent.id;
-              return <ViRender is_layout={false} item={content} />;
+              return (
+                <ViRender
+                  is_layout={false}
+                  instance_id={item.id}
+                  item={content}
+                />
+              );
             },
             __render(parent: IItem, parents: Record<string, string>) {
               return <this.__LazyChild parent={parent} parents={parents} />;

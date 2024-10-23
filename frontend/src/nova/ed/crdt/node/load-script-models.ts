@@ -8,6 +8,7 @@ import { IItem } from "utils/types/item";
 import { loopItem } from "./loop-item";
 import { SingleExportVar } from "popup/script/code/js/parse-item-types";
 import { TreeVarItems } from "./var-items";
+import { active } from "logic/active";
 
 const source_sym = Symbol("source");
 
@@ -44,10 +45,13 @@ export const loadScriptModels = async (
   loopItem(
     items,
     { exclude_comp_ids },
-    async ({ item, path_name, path_id, parent }) => {
+    async ({ item, path_name, path_id }) => {
       if (item.component?.id && !exclude_comp_ids.includes(item.component.id)) {
         for (const [name, prop] of Object.entries(item.component.props)) {
-          if (!(prop.content && prop.meta?.type === "content-element")) {
+          if (
+            !(prop.content && prop.meta?.type === "content-element") ||
+            active.comp_id === item.component.id
+          ) {
             const file = `${item.id}~${name}`;
             const source_hash = hash(prop.value).toString();
 
@@ -137,7 +141,7 @@ export const loadScriptModels = async (
   for (const [k, v] of Object.entries(result)) {
     if (v.source && !v.ready) {
       v.source = await jscript.prettier.format?.(
-        migrateCode(v, result, v.id.startsWith("q9"))
+        migrateCode(v, result)
       );
       v.ready = true;
     }

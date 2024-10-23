@@ -4,7 +4,8 @@ import { IItem } from "utils/types/item";
 export const createViPassProp = (
   item: DeepReadonly<IItem>,
   pass_props: Record<string, Record<string | number, any>>,
-  __idx?: string | number
+  __idx?: string | number,
+  instance_id?: string
 ) => {
   return function (
     this: any,
@@ -34,11 +35,12 @@ export const createViPassProp = (
     if (isWritable(arg.children, "key")) {
       children.key = idx;
       children.props.__idx = idx;
+      children.props.instance_id = instance_id;
     } else {
       children = {
         ...arg.children,
         key: idx,
-        props: { ...arg.children.props, __idx: idx },
+        props: { ...arg.children.props, __idx: idx, instance_id },
       };
     }
 

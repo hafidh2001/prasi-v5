@@ -60,6 +60,7 @@ export const EDGlobal = {
       open_all: false,
       ref: null as null | TreeMethods,
       prevent_indent: false,
+      prevent_tooltip: false,
       expanded: {} as Record<string, string[]>,
       search: {
         value: "",

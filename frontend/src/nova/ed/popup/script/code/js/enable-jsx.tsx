@@ -20,22 +20,24 @@ export const monacoEnableJSX = async (
   monaco.languages.register({ id: "typescript" });
   if (editor.getModel()) {
     const jsxHgController = new MonacoJsxSyntaxHighlight(getWorker(), monaco);
-    const { highlighter } = jsxHgController.highlighterBuilder({
-      editor: editor,
-    });
 
     if (typeof editor.getModel === "function") {
+      const { highlighter } = jsxHgController.highlighterBuilder({
+        editor: editor,
+      });
       highlighter();
     }
     editor.onDidChangeModelContent(() => {
       if (typeof editor.getModel === "function") {
         try {
+          const { highlighter } = jsxHgController.highlighterBuilder({
+            editor: editor,
+          });
           highlighter();
         } catch (e) {}
       }
     });
   }
-
 
   const compilerOptions: CompilerOptions = {
     // note: ReactJSX ga bisa solve type buat <div> etc...

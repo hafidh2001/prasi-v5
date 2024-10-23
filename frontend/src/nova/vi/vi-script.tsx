@@ -25,6 +25,7 @@ export const ViScript: FC<{
     };
   ts?: number;
   __idx?: string | number;
+  instance_id?: string;
 }> = ({ item, childs, props, __idx }) => {
   const {
     comp_props_parents,
@@ -59,11 +60,6 @@ export const ViScript: FC<{
   let passprops_args = __idx
     ? parentPassProps(pass_props_parents, parents, item.id, __idx)
     : {};
-
-  if (item.component?.id) {
-    comp_props_parents[item.id] = compArgs(item, comp_args, db, api);
-    comp_args = comp_props_parents[item.id];
-  }
 
   for (const [k, v] of Object.entries(comp_args)) {
     if (typeof v === "object" && (v as any).__jsx) {

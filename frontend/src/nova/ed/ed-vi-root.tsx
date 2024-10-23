@@ -1,6 +1,6 @@
 import { apiProxy } from "base/load/api/api-proxy";
 import { dbProxy } from "base/load/db/db-proxy";
-import { activateItem, active } from "logic/active";
+import { activateItem, active, getActiveTree } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import { waitUntil } from "prasi-utils";
 import { memo, useRef, useState } from "react";
@@ -8,7 +8,7 @@ import { StoreProvider } from "utils/react/define-store";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { Loading } from "utils/ui/loading";
-import { ViComps, ViWrapperComp } from "vi/lib/types";
+import { ViComps, ViWrapperType } from "vi/lib/types";
 import { ViRoot } from "vi/vi-root";
 import { EdTreeCtxMenu } from "./tree/parts/ctx-menu";
 import { IItem } from "utils/types/item";
@@ -43,7 +43,7 @@ export const EdViRoot = memo(() => {
       render();
     });
   }
-  
+
   for (const [k, v] of Object.entries(p.comp.loaded)) {
     ref.comps[k] = v.content_tree;
   }
@@ -75,7 +75,7 @@ export const EdViRoot = memo(() => {
 });
 
 const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
-  (({ item, is_layout, ViRender, __idx }) => {
+  (({ item, is_layout, ViRender, __idx, instance_id }) => {
     const local = useLocal({
       ctx_menu: null as any,
       item: null as null | IItem,
@@ -87,18 +87,55 @@ const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
           item={item}
           is_layout={is_layout}
           __idx={__idx}
-          div_props={(item) => ({
+          instance_id={instance_id}
+          div_props={({ item, ref, instance_id }) => ({
             onPointerEnter(e) {
+              if (instance_id) {
+                //@ts-ignore
+                const instance = ref.comp_props[instance_id];
+                if (instance) {
+                  //@ts-ignore
+                  const cur = getActiveTree(p).nodes.map[item.id];
+                  if (!cur) {
+                    active.hover.id = instance_id;
+                    render();
+                    return;
+                  }
+                }
+              }
               active.hover.id = item.id;
               render();
             },
             onPointerLeave(e) {
-              active.hover.id = "";
-              render();
+              if (instance_id) {
+                const cur = getActiveTree(p).nodes.map[item.id];
+                if (!cur) {
+                  active.hover.id = "";
+                  render();
+                  return;
+                }
+              } else {
+                active.hover.id = "";
+                render();
+              }
             },
             onPointerDown(e) {
               e.stopPropagation();
               e.preventDefault();
+              p.ui.tree.prevent_tooltip = true;
+              if (instance_id) {
+                //@ts-ignore
+                const instance = ref.comp_props[instance_id];
+                if (instance) {
+                  const cur = getActiveTree(p).nodes.map[item.id];
+                  if (!cur) {
+                    activateItem(p, instance_id);
+                    render();
+                    return;
+                  }
+                }
+              }
+
               activateItem(p, item.id);
               render();
             },
@@ -126,4 +163,4 @@ const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
         )}
       </>
     );
-  }) as ViWrapperComp;
+  }) as ViWrapperType;

@@ -144,9 +144,6 @@ export const loadPageTree = (
         immer.update(_fn);
       }
     },
-    view<T>(fn: (val: EPage["content_tree"]) => T) {
-      return fn(this.snapshot);
-    },
     subscribe(fn: any) {
       return immer.subscribe(fn);
     },

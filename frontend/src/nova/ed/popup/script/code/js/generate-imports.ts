@@ -17,9 +17,11 @@ export const generateImports = (
   }
   const result: string[] = [];
   for (const [id, v] of Object.entries(imports)) {
-    result.push(
-      `import { ${v.join(", ")} } from "./${id}"; /* ${models[id].title.trim()} */`
-    );
+    if (models[id]) {
+      result.push(
+        `import { ${v.join(", ")} } from "./${id}"; /* ${models[id].title.trim()} */`
+      );
+    }
   }
 
   return result.length > 0 ? `\n` + result.join("\n") : "";
@@ -31,13 +33,35 @@ const mergeParentVars = (
   debug?: boolean
 ) => {
   const variables = {} as Record<string, string>;
+  const models_map = {} as Record<string, string[]>;
+
+  for (const [k, v] of Object.entries(models)) {
+    const id = k.split("~")[0];
+    const prop_name = k.split("~")[1];
+    if (!models_map[id]) models_map[id] = [];
+    if (prop_name) {
+      models_map[id].push(prop_name);
+    }
+  }
 
   for (const id of model.path_ids) {
     if (model.id !== id) {
       const m = models[id];
+
       if (m) {
         for (const e of Object.values(m.exports)) {
           variables[e.name] = m.id;
+        }
+      }
+      if (models_map[id]?.length > 1) {
+        for (const prop_name of models_map[id]) {
+          const m = models[`${id}~${prop_name}`];
+
+          if (m) {
+            for (const e of Object.values(m.exports)) {
+              variables[e.name] = `${id}~${prop_name}`;
+            }
+          }
         }
       }
     }

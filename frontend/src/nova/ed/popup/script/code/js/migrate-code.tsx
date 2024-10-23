@@ -36,11 +36,21 @@ export const ${local.name} = defineLocal({
 `;
   }
 
-  const final_code = `\
+  if (model.prop_name) {
+    model.exports[model.prop_name] = {
+      name: model.prop_name,
+      type: "propname",
+    };
+    return `\
+${generateRegion(model, models)}${inject}
+
+export const ${model.prop_name} = ${model.extracted_content}`;
+  } else {
+    return `\
 ${generateRegion(model, models)}${inject}
 
 export default () => (${model.extracted_content})`;
-  return final_code;
+  }
 };
 
 const generateRegion = (

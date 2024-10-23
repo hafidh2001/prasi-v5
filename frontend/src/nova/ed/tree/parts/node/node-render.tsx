@@ -51,6 +51,7 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
   return (
     <Tooltip
       placement="right"
+      open={p.ui.tree.prevent_tooltip === true ? false : undefined}
       content={
         <>
           {item.component?.id &&
@@ -85,6 +86,7 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
           p.render();
         }}
         onClick={() => {
+          p.ui.tree.prevent_tooltip = false;
           activateItem(p, item.id);
         }}
         className={cx(

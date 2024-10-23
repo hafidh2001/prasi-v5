@@ -48,6 +48,7 @@ export const MonacoJS: FC<{
     const preventCtrlP = function (event: any) {
       const w = window as any;
       if (
+        local.editor &&
         event.keyCode === 80 &&
         (event.ctrlKey || event.metaKey) &&
         !event.altKey &&
@@ -120,6 +121,9 @@ export const MonacoJS: FC<{
           _models = await onReloadModels(editor, monaco);
         }
 
+        editor.onDidDispose(() => {
+          local.editor = null;
+        });
         local.editor = editor;
         registerPrettier(monaco);
         await registerReact(monaco);

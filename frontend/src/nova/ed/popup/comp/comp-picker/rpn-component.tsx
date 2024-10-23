@@ -1,9 +1,9 @@
 import { NodeModel, RenderParams } from "@minoru/react-dnd-treeview";
 import { EDGlobal } from "logic/ed-global";
-import { FC, ReactNode } from "react";
+import { FC } from "react";
+import tc from "tinycolor2";
 import { useGlobal } from "utils/react/use-global";
 import { CompPickerNode } from "./render-picker-node";
-import tc from "tinycolor2";
 import { compPickerToNodes } from "./to-nodes";
 
 export const RPNComponent: FC<{
@@ -41,7 +41,9 @@ export const RPNComponent: FC<{
           await _db.component.update({
             where: { id: comp_id },
             data: { id_component_group: trash_folder.id },
-            select: {},
+            select: {
+              id: true,
+            },
           });
           found.id_component_group = trash_folder.id;
           node.parent = trash_folder.id;
@@ -121,7 +123,7 @@ const Name: FC<{ id: string; name: string; onClick: () => void }> = ({
   name,
   onClick,
 }) => {
-  const bg = colorize(name);
+  const bg = colorize(name + id.substring(0, 2));
   const fg = tc(bg);
   return (
     <div
