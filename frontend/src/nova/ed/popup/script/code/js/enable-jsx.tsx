@@ -3,7 +3,7 @@ import { PG } from "logic/ed-global";
 import {
   getWorker,
   MonacoJsxSyntaxHighlight,
-} from "monaco-jsx-syntax-highlight-v2";
+} from "popup/script/jsx-highlight";
 export type MonacoEditor = Parameters<OnMount>[0];
 export type Monaco = Parameters<OnMount>[1];
 
