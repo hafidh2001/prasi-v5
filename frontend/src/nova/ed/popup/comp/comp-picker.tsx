@@ -51,35 +51,38 @@ export const EdPopCompPicker = () => {
     };
   }, []);
 
+  const reload = async () => {
+    {
+      popup.status = "loading";
+      p.render();
+      popup.data.groups = await _db.component_group.findMany({
+        where: { component_site: { some: { id_site: p.site.id } } },
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+      popup.data.comps = await _db.component.findMany({
+        where: {
+          id_component_group: { in: popup.data.groups.map((e) => e.id) },
+        },
+        select: {
+          id: true,
+          name: true,
+          id_component_group: true,
+        },
+      });
+      compPickerToNodes(p);
+    }
+    popup.status = "ready";
+    p.render();
+  };
   useEffect(() => {
     if (!popup.on_pick) local.tab = "Components";
     else {
       (async () => {
         if (popup.data.groups.length === 0 || popup.data.comps.length === 0) {
-          {
-            popup.status = "loading";
-            p.render();
-            popup.data.groups = await _db.component_group.findMany({
-              where: { component_site: { some: { id_site: p.site.id } } },
-              select: {
-                id: true,
-                name: true,
-              },
-            });
-            popup.data.comps = await _db.component.findMany({
-              where: {
-                id_component_group: { in: popup.data.groups.map((e) => e.id) },
-              },
-              select: {
-                id: true,
-                name: true,
-                id_component_group: true,
-              },
-            });
-            compPickerToNodes(p);
-          }
-          popup.status = "ready";
-          p.render();
+          reload();
         }
       })();
     }
@@ -93,6 +96,7 @@ export const EdPopCompPicker = () => {
 
   let initial_open: string[] = [];
   const group_len = {} as Record<string, number>;
+  const trash_id = popup.data.groups.find((e) => e.name === "__TRASH__")?.id;
   let nodes =
     local.tab === "Components"
       ? popup.data.nodes.filter((e) => {
@@ -118,6 +122,7 @@ export const EdPopCompPicker = () => {
           }
           if (e.data?.type === "folder" && e.data.name === "__TRASH__")
             return false;
+          if (e.data?.type === "comp" && e.parent === trash_id) return false;
           return true;
         })
       : popup.data.nodes.filter((e) => {
@@ -132,8 +137,11 @@ export const EdPopCompPicker = () => {
               initial_open.push(e.id.toString());
             }
           }
+          if (e.data?.type === "comp" && e.parent === trash_id) return true;
+
           if (e.data?.type === "folder" && e.data.name === "__TRASH__")
             return true;
+
           return false;
         });
 
@@ -153,9 +161,6 @@ export const EdPopCompPicker = () => {
       }
     } catch (e) {}
   }
-  // const has_prasi_ui = !!tree.find(
-  //   (e) => e.data?.type === "folder" && e.data?.id === ID_PRASI_UI
-  // );
   const TypedTree = DNDTree<CompPickerNode>;
 
   return (
@@ -202,6 +207,7 @@ export const EdPopCompPicker = () => {
                             )}
                             onClick={() => {
                               local.tab = e;
+                              local.checked.clear();
                               p.render();
                             }}
                           >
@@ -211,7 +217,7 @@ export const EdPopCompPicker = () => {
                       })}
                     </div>
                     <div className="flex flex-1 mr-1 justify-end items-stretch">
-                      {local.checked.size > 0 && (
+                      {local.checked.size > 0 && local.tab === "Components" && (
                         <div
                           className="bg-white text-xs border border-red-600 flex items-center text-red-600 px-2 mr-1 hover:border-red-800 my-1 hover:bg-blue-50 cursor-pointer"
                           onClick={async () => {
@@ -262,6 +268,8 @@ export const EdPopCompPicker = () => {
                         onClick={async () => {
                           const name = prompt("Folder Name:");
                           if (name) {
+                            popup.status = "loading";
+                            p.render();
                             await _db.component_group.create({
                               data: {
                                 name,
@@ -273,7 +281,7 @@ export const EdPopCompPicker = () => {
                                 },
                               },
                             });
-                            // await reloadCompPicker(p);
+                            reload();
                           }
                         }}
                       >
@@ -320,8 +328,7 @@ export const EdPopCompPicker = () => {
                       <div
                         className="bg-white text-xs border px-2 mr-1 my-1 flex items-center hover:border-blue-500 hover:bg-blue-50 cursor-pointer"
                         onClick={async () => {
-                          // reloadCompPicker(p);
-                          p.render();
+                          reload();
                         }}
                         dangerouslySetInnerHTML={{
                           __html: `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-ccw"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>`,
@@ -340,7 +347,7 @@ export const EdPopCompPicker = () => {
                         type="search"
                         placeholder="Search"
                         spellCheck={false}
-                        className="my-1 bg-transparent bg-white border outline-none px-1 focus:border-blue-500 focus:w-[300px] transition-all"
+                        className="my-1 bg-transparent bg-white border outline-none px-1 focus:border-blue-500 w-[300px] transition-all"
                         autoFocus
                         value={popup.search.value}
                         onChange={(e) => {
@@ -386,7 +393,7 @@ export const EdPopCompPicker = () => {
                             flex-wrap: wrap;
                             position: relative;
                             padding-bottom: 10px;
-                            padding-left: 27px;
+                            padding-left: 30px;
                           }
                         `
                       )}
@@ -408,24 +415,41 @@ export const EdPopCompPicker = () => {
                             }}
                             tree={nodes}
                             initialOpen={initial_open}
-                            rootId={"root"}
+                            rootId={"comp_root"}
                             sort={false}
                             onDrop={async (newTree, opt) => {
-                              // compPicker.tree = newTree;
-                              // p.render();
-                              // if (
-                              //   typeof opt.dragSourceId === "string" &&
-                              //   typeof opt.dropTargetId === "string"
-                              // ) {
-                              //   _db.component.update({
-                              //     where: {
-                              //       id: opt.dragSourceId,
-                              //     },
-                              //     data: {
-                              //       id_component_group: opt.dropTargetId,
-                              //     },
-                              //   });
-                              // }
+                              if (
+                                opt.dragSource?.data?.type === "comp" &&
+                                opt.dropTarget?.data?.type === "folder"
+                              ) {
+                                const data = p.ui.popup.comp.data;
+                                const found = data.comps.find(
+                                  (e) => e.id === opt.dragSource?.id
+                                );
+                                const comp = popup.data.nodes.find(
+                                  (e) => e.id === opt.dragSource?.id
+                                );
+                                if (found && comp) {
+                                  found.id_component_group = opt.dropTarget
+                                    .id as string;
+                                  comp.parent = opt.dropTarget.id;
+
+                                  if (
+                                    typeof opt.dragSourceId === "string" &&
+                                    typeof opt.dropTargetId === "string"
+                                  ) {
+                                    _db.component.update({
+                                      where: {
+                                        id: opt.dragSourceId,
+                                      },
+                                      data: {
+                                        id_component_group: opt.dropTargetId,
+                                      },
+                                    });
+                                  }
+                                }
+                              }
+                              p.render();
                             }}
                             onChangeOpen={(e) => {
                               localStorage.setItem(
@@ -433,7 +457,8 @@ export const EdPopCompPicker = () => {
                                 JSON.stringify(e)
                               );
                             }}
-                            dragPreviewRender={() => <></>}
+                            placeholderRender={() => <></>}
+                            dragPreviewRender={() => <>amsdoa</>}
                             canDrag={() => true}
                             canDrop={(tree, opt) => {
                               if (opt.dropTarget?.data?.type === "comp")

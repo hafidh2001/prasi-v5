@@ -7,11 +7,12 @@ export const compPickerToNodes = (p: PG) => {
     popup.data.nodes.push({
       id: group.id,
       text: group.name,
-      parent: "root",
+      parent: "comp_root",
       data: {
         id: group.id,
         name: group.name,
         type: "folder",
+        idx: "",
       },
     });
   }
@@ -26,6 +27,7 @@ export const compPickerToNodes = (p: PG) => {
           id: comp.id,
           name: comp.name,
           type: "comp",
+          idx: "",
         },
       });
   }

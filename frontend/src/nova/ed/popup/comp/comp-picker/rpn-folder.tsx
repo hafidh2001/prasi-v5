@@ -96,7 +96,7 @@ export const RPNFolder: FC<{
             }}
           />
         ) : (
-          <div className="flex flex-col">
+          <div className="flex flex-col flex-1">
             <div className="flex items-center">
               <Name name={node.data?.name} />
 
@@ -132,8 +132,11 @@ export const RPNFolder: FC<{
                 ></div>
               )}
             </div>
-            <div className="text-xs text-slate-400">
-              {len} {len > 1 ? "Components" : "Component"}
+            <div className="text-xs pr-2 text-slate-400 flex items-center justify-between">
+              <div>
+                {len} {len > 1 ? "Components" : "Component"}
+              </div>
+              <div>{item.id}</div>
             </div>
           </div>
         )}

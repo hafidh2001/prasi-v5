@@ -12,7 +12,7 @@ export const DragPreview: DragPreviewRender<PNode> = (props) => {
     <div
       className={cx("bg-blue-500 text-white px-4 py-[2px] text-sm inline-grid")}
     >
-      <div>{node.data?.item.name}</div>
+      <div>{node.data?.item?.name || (node.data as any)?.name}</div>
     </div>
   );
 };
