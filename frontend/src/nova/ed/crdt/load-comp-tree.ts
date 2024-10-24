@@ -132,10 +132,7 @@ export const internalLoadCompTree = (
       await loadScriptModels(
         [content_tree],
         component.script_models,
-        component.var_items,
-        {
-          exclude_comp_ids: [comp_id],
-        }
+        component.var_items
       );
     },
     before_update: null as null | ((do_update: () => void) => void),

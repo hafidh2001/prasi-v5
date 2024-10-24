@@ -15,6 +15,11 @@ export const ViPage = () => {
   const content_tree = (is_layout
     ? layout?.root
     : page?.root) as unknown as DeepReadonly<IItem>;
+    
+  // console.log(
+  //   page?.root?.childs[0].childs[1].component?.props.child.content?.childs[0]
+  //     .html
+  // );
 
   return (
     <div className="flex flex-1 flex-col relative">

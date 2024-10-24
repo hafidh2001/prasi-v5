@@ -1,11 +1,10 @@
 import { IItem } from "utils/types/item";
 import { parsePropForJsx } from "./flatten-tree";
+import { active } from "logic/active";
 
 export const loopItem = (
   items: IItem[],
-  opt: {
-    exclude_comp_ids?: string[];
-  },
+  opt: {},
   fn: (arg: {
     item: IItem;
     parent?: IItem;
@@ -14,6 +13,7 @@ export const loopItem = (
   }) => void,
   recursive?: {
     parent: IItem;
+    parent_comp?: IItem;
     path_name: string[];
     path_id: string[];
   }
@@ -21,7 +21,7 @@ export const loopItem = (
   const parent = recursive?.parent;
   const path_name = recursive?.path_name || [];
   const path_id = recursive?.path_id || [];
-  const exclude_comp_ids = opt?.exclude_comp_ids || [];
+
   for (const item of items) {
     fn({
       item,
@@ -29,11 +29,21 @@ export const loopItem = (
       path_name: [...path_name, item.name],
       path_id: [...path_id, item.id],
     });
-    if (item.component?.id && !exclude_comp_ids.includes(item.component.id)) {
+    if (item.component?.id) {
       const props = parsePropForJsx(item);
       for (const prop of Object.values(props)) {
         loopItem([prop], opt, fn, {
           parent: item,
+          parent_comp: item,
+          path_name: [...path_name, item.name],
+          path_id: [...path_id, item.id],
+        });
+      }
+
+      if (item.childs && active.comp_id === item.component.id) {
+        loopItem(item.childs, opt, fn, {
+          parent: item,
+          parent_comp: item,
           path_name: [...path_name, item.name],
           path_id: [...path_id, item.id],
         });
@@ -42,6 +52,7 @@ export const loopItem = (
       if (item.childs) {
         loopItem(item.childs, opt, fn, {
           parent: item,
+          parent_comp: recursive?.parent_comp,
           path_name: [...path_name, item.name],
           path_id: [...path_id, item.id],
         });

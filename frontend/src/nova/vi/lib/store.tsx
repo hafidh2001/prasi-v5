@@ -24,6 +24,7 @@ const viRef = {
 
   wrapper: null as null | ViWrapperType,
   cache_js: true as boolean,
+  instanced: {} as Record<ITEM_ID, any>,
 
   resetCompInstance: (comp_id: string) => {},
 };

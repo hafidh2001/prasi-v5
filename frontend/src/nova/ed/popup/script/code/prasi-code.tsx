@@ -138,9 +138,9 @@ const update = {
   push(p: PG, id: string, source: string, prop_name?: string) {
     this.p = p;
     this.queue[id] = { id, source, prop_name };
-    this.execute();
+    this.executeUpdate();
   },
-  execute() {
+  executeUpdate() {
     clearTimeout(this.timeout);
     this.timeout = setTimeout(async () => {
       if (!jscript.loaded) {
@@ -205,7 +205,7 @@ const update = {
       getActiveTree(this.p).update("Update Code", ({ findNode }) => {
         for (const q of Object.values(this.queue)) {
           const n = findNode(q.id);
-          if (n && n.item.adv && !n.item.component?.id) {
+          if (n && n.item.adv) {
             if (!q.prop_name) {
               n.item.adv.js = q.source;
               if (q.source_built !== null) {

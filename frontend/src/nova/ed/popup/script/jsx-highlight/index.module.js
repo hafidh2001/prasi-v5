@@ -318,7 +318,7 @@ var MonacoJsxSyntaxHighlight = /** @class */ (function () {
                 var _a = event.data, classifications = _a.classifications, version = _a.version, disposeFilePath = _a.filePath;
                 requestAnimationFrame(function () {
                     // 确认为本文件，并且为最新版本
-                    if (disposeFilePath === filePath && version === editor.getModel().getVersionId()) {
+                    if (disposeFilePath === filePath && version === editor.getModel()?.getVersionId()) {
                         var preDecoration = decorationsRef.current;
                         decorationsRef.current = editor.deltaDecorations(preDecoration, classifications.map(function (classification) { return ({
                             range: new _this.monaco.Range(classification.start.row, classification.start.column, classification.end.row, classification.end.column + 1),

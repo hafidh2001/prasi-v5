@@ -50,6 +50,8 @@ export const EdTreeNodeName: FC<{
             }}
             onBlur={() => {
               if (node.parent?.component?.is_jsx_root) {
+                p.ui.tree.rename_id = "";
+                p.render();
                 return;
               }
               const tree = getActiveTree(p);

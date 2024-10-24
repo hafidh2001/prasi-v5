@@ -16,7 +16,7 @@ export const ViComp: FC<{
   __idx?: string | number;
   instance_id?: string;
 }> = ({ item, is_layout, div_props, __idx, instance_id }) => {
-  const { comps, instances, instantiate, ref_comp_props, parents, db, api } =
+  const { comps, instances, instantiate, ref_comp_props, parents, db, api, instanced } =
     useVi(({ state, ref, action }) => ({
       comps: ref.comps,
       load: ref.loader.comps,
@@ -27,6 +27,7 @@ export const ViComp: FC<{
       parents: ref.item_parents,
       db: ref.db,
       api: ref.api,
+      instanced: ref.instanced,
     }));
 
   const comp_id = item.component!.id;
@@ -35,14 +36,10 @@ export const ViComp: FC<{
   if (!comps[comp_id]) {
     return loading_component;
   } else {
-    if (!instances[item.id]) {
+    if (!instances[item.id] || instanced[item.id] !== item) {
+      instanced[item.id] = item;
       const parent_comp_args = parentCompArgs(parents, ref_comp_props, item.id);
-      ref_comp_props[item.id] = compArgs(
-        item,
-        parent_comp_args,
-        db,
-        api,
-      );
+      ref_comp_props[item.id] = compArgs(item, parent_comp_args, db, api);
       instantiate(item);
     }
   }

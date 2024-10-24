@@ -8,7 +8,7 @@ import { StoreProvider } from "utils/react/define-store";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { Loading } from "utils/ui/loading";
-import { ViComps, ViWrapperType } from "vi/lib/types";
+import { ViComps, ViPage, ViWrapperType } from "vi/lib/types";
 import { ViRoot } from "vi/vi-root";
 import { EdTreeCtxMenu } from "./tree/parts/ctx-menu";
 import { IItem } from "utils/types/item";
@@ -18,7 +18,7 @@ export const EdViRoot = memo(() => {
   const ref = useRef({
     db: dbProxy(p.site.config.api_url),
     api: apiProxy(p.site.config.api_url),
-    page: null as any,
+    page: null as ViPage | null,
     comps: {} as ViComps,
     wrapper: ViWrapper({
       p,
@@ -32,11 +32,13 @@ export const EdViRoot = memo(() => {
 
   p.ui.editor.render = render;
   if (!p.page.cur) return <Loading />;
-  ref.page = {
-    id: p.page.cur.id,
-    url: p.page.cur.url,
-    root: p.page.cur.content_tree,
-  };
+  if (ref.page?.root !== p.page.cur.content_tree || !ref.page) {
+    ref.page = {
+      id: p.page.cur.id,
+      url: p.page.cur.url,
+      root: p.page.cur.content_tree,
+    };
+  }
 
   if (!ref.page.root) {
     waitUntil(() => p.page.cur.content_tree).then(() => {
@@ -89,6 +91,7 @@ const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
           __idx={__idx}
           instance_id={instance_id}
           div_props={({ item, ref, instance_id }) => ({
+            contentEditable: item.type === "text" ? true : undefined,
             onPointerEnter(e) {
               if (instance_id) {
                 //@ts-ignore
@@ -119,7 +122,24 @@ const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
                 render();
               }
             },
+            spellCheck: item.type === "text" ? false : undefined,
+            onBlur:
+              item.type === "text"
+                ? (e) => {
+                    const content = e.currentTarget.innerHTML || "";
+                    getActiveTree(p).update("Update Text", ({ findNode }) => {
+                      const n = findNode(item.id);
+                      if (n) {
+                        n.item.html = content;
+                      }
+                    });
+                  }
+                : undefined,
             onPointerDown(e) {
+              if (item.type === "text") {
+                e.stopPropagation();
+                return;
+              }
               e.stopPropagation();
               e.preventDefault();
               p.ui.tree.prevent_tooltip = true;
