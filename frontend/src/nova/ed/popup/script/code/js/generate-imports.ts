@@ -6,21 +6,28 @@ export const generateImports = (
   debug?: boolean
 ) => {
   const merged = mergeParentVars(model, models, debug);
-  const imports = {} as Record<string, string[]>;
+  const imports = {} as Record<string, { name: string; type: string }[]>;
 
   for (const [k, v] of Object.entries(merged)) {
-    if (v === model.name) continue;
-    if (!imports[v]) {
-      imports[v] = [];
+    if (v.id === model.name) continue;
+    if (!imports[v.id]) {
+      imports[v.id] = [];
     }
-    imports[v].push(k);
+    imports[v.id].push({ name: k, type: v.type });
   }
   const result: string[] = [];
   for (const [id, v] of Object.entries(imports)) {
     if (models[id]) {
-      result.push(
-        `import { ${v.join(", ")} } from "./${id}"; /* ${models[id].title.trim()} */`
-      );
+      if (v.find((e) => e.type === "passprop")) {
+        result.push(
+          `import { pass_prop as p_${id} } from "./${id}"; /* ${models[id].title.trim()} */`
+        );
+        result.push(`const { ${v.map((e) => e.name).join(", ")} } = p_${id};`);
+      } else {
+        result.push(
+          `import { ${v.map((e) => e.name).join(", ")} } from "./${id}"; /* ${models[id].title.trim()} */`
+        );
+      }
     }
   }
 
@@ -32,7 +39,7 @@ const mergeParentVars = (
   models: Record<string, ScriptModel>,
   debug?: boolean
 ) => {
-  const variables = {} as Record<string, string>;
+  const variables = {} as Record<string, { id: string; type: string }>;
   const models_map = {} as Record<string, string[]>;
 
   for (const [k, v] of Object.entries(models)) {
@@ -50,7 +57,7 @@ const mergeParentVars = (
 
       if (m) {
         for (const e of Object.values(m.exports)) {
-          variables[e.name] = m.id;
+          variables[e.name] = { id: m.id, type: e.type };
         }
       }
 
@@ -60,14 +67,13 @@ const mergeParentVars = (
 
           if (m) {
             for (const e of Object.values(m.exports)) {
-              variables[e.name] = `${id}~${prop_name}`;
+              variables[e.name] = { id: `${id}~${prop_name}`, type: e.type };
             }
           }
         }
       }
     }
   }
-  
 
   return variables;
 };

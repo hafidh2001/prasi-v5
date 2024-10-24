@@ -203,19 +203,22 @@ const update = {
                 })
               )?.code;
             } catch (e) {
-              console.log(replaced, e, q);
+              console.warn("Code transpile failed on item:", q.id);
             }
           } else {
             q.source_built = undefined;
           }
-        } catch (e) {
-          console.error(e);
+        } catch (e: any) {
+          console.warn("Code transpile failed on item:", q.id, e.message);
         }
       }
 
       getActiveTree(this.p).update("Update Code", ({ findNode }) => {
         for (const q of Object.values(this.queue)) {
           const n = findNode(q.id);
+          if (n && !n.item.adv) {
+            n.item.adv = {};
+          }
           if (n && n.item.adv) {
             if (!q.prop_name) {
               n.item.adv.js = q.source;

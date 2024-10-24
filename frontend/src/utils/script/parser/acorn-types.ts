@@ -38,6 +38,7 @@ type AggregatedNode = {
   TsParameterPropertyParameter: swc.TsParameterPropertyParameter;
   TsType: swc.TsType;
   TsTypeElement: swc.TsTypeElement;
+
 };
 
 export type AnyNode =

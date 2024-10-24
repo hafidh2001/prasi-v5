@@ -31,6 +31,7 @@ export const jscript = {
     ts: null as null | typeof ts,
     format: async (source: string) => source,
   },
+  getTailwindStyles: null as null | ((contents: string[]) => Promise<string>),
   loaded: false,
   traverse: (code: string, visitors: SimpleVisitors<any>) => {
     const ast = jscript.parse?.(code, {
@@ -146,9 +147,7 @@ export const jscript = {
                 }
               },
             };
-
-            const monaco_instance = await monaco_react.loader.init();
-
+            await monaco_react.loader.init();
             monaco.languages.css.cssDefaults.setOptions({
               data: {
                 dataProviders: {
@@ -156,7 +155,13 @@ export const jscript = {
                 },
               },
             });
-            configureMonacoTailwindcss(monaco);
+            const res = configureMonacoTailwindcss(monaco);
+            this.getTailwindStyles = async (contents: string[]) => {
+              return await res.generateStylesFromContent(
+                `@tailwind utilities;`,
+                contents.map((e) => ({ content: e, extension: "tsx" }))
+              );
+            };
             jscript.MonacoEditor = monaco_react.Editor;
           })(),
         ]);

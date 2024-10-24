@@ -1,9 +1,7 @@
 import { ScriptModel } from "crdt/node/load-script-models";
-import get from "lodash.get";
-import trim from "lodash.trim";
-import { cutCode } from "utils/script/jscript";
 import { JSXElement, JSXElementName } from "utils/script/parser/oxc-types";
 import { SingleExportVar } from "./parse-item-types";
+import { cutCode } from "utils/script/jscript";
 
 export const parseItemPassProp = ({
   name,
@@ -43,13 +41,17 @@ export const parseItemPassProp = ({
             value = "boolean";
           } else if (expr.type === "NumericLiteral") {
             value = "number";
-          } 
+          } else if (expr.type === "TSAsExpression") {
+            value = cutCode(model.source, expr.typeAnnotation, -2);
+          }
 
-          exports[prop_name] = {
-            type: "passprop",
-            name: prop_name,
-            value,
-          };
+          if (prop_name !== "key") {
+            exports[prop_name] = {
+              type: "passprop",
+              name: prop_name,
+              value,
+            };
+          }
         }
       }
     }

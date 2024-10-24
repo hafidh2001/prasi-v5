@@ -12,7 +12,6 @@ import { foldRegionVState } from "./js/fold-region-vstate";
 import { jsxColorScheme } from "./js/jsx-style";
 import { registerPrettier } from "./js/register-prettier";
 import { registerReact } from "./js/register-react";
-
 export const MonacoJS: FC<{
   highlightJsx?: boolean;
   sidebar?: boolean;

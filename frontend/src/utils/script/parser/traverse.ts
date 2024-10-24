@@ -28,7 +28,16 @@ function simpleWalk<TState>(
       if (typeof baseVisitor[type] === "function") {
         baseVisitor[type](node, st, c);
       } else {
-        console.error("Warning Parser Node Type Not Found: " + (type || node));
+        const proto = Object.getPrototypeOf(baseVisitor);
+        console.log(proto)
+        if (typeof proto[type] === "function") {
+          proto[type](node, st, c);
+        } else {
+          console.error(
+            "Warning Parser Node Type Not Found: " + (type || node),
+            baseVisitor
+          );
+        }
       }
       if (visitors[type]) visitors[type](node, st);
     }

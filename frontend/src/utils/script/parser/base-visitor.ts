@@ -823,6 +823,12 @@ export class BaseVisitor implements Required<RecursiveVisitors<unknown>> {
     }
   }
   TsKeywordType = ignore;
+  TSUnknownKeyword = ignore;
+  TSAnyKeyword = ignore;
+  TSNumberKeyword = ignore;
+  TSBooleanKeyword = ignore;
+  TSTypeAnnotation = ignore;
+  TSTypeLiteral = ignore;
   TsPropertySignature<S>(n: oxc.TsPropertySignature, st: S, cb: Callback<S>) {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- params can be undefined
     for (const param of n.params ?? []) {
@@ -838,6 +844,10 @@ export class BaseVisitor implements Required<RecursiveVisitors<unknown>> {
     if (n.typeParams) {
       cb(n.typeParams, st);
     }
+  }
+  TSAsExpression<S>(n: oxc.TsAsExpression, st: S, cb: Callback<S>) {
+    cb(n.expression, st);
+    cb(n.typeAnnotation, st);
   }
   TsAsExpression<S>(n: oxc.TsAsExpression, st: S, cb: Callback<S>) {
     cb(n.expression, st);
