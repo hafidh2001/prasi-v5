@@ -2,13 +2,22 @@ import { NodeModel, RenderParams } from "@minoru/react-dnd-treeview";
 import { getActiveTree } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import { RectangleEllipsis } from "lucide-react";
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, useEffect, useState } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { LoadingSpinner } from "utils/ui/loading";
 import { PNode } from "../../../logic/types";
 import { scrollTreeActiveItem } from "../scroll-tree";
 import { ComponentIcon } from "./node-indent";
+import { waitUntil } from "prasi-utils";
+
+export const formatItemName = (name: string) => {
+  return (name || "")
+    .replace(/[^a-zA-Z0-9:]+/g, " ")
+    .split(" ")
+    .map((e) => (e[0] || "").toUpperCase() + e.slice(1))
+    .join(" ");
+};
 
 export const EdTreeNodeName: FC<{
   raw: NodeModel<PNode>;
@@ -88,11 +97,7 @@ export const EdTreeNodeName: FC<{
               }
             }}
             onChange={(e) => {
-              local.rename = e.target.value
-                .replace(/[^a-zA-Z0-9:]+/g, " ")
-                .split(" ")
-                .map((e) => (e[0] || "").toUpperCase() + e.slice(1))
-                .join(" ");
+              local.rename = formatItemName(e.currentTarget.value);
 
               local.render();
             }}
@@ -124,13 +129,24 @@ const Name: FC<{ p: PG; node: PNode; render_params: RenderParams }> = ({
   render_params,
   p,
 }) => {
-  let name: ReactNode = node.item.name
-    .replace(/[^a-zA-Z0-9:]+/g, " ")
-    .split(" ")
-    .map((e) => (e[0] || "").toUpperCase() + e.slice(1))
-    .join(" ");
+  const [, render] = useState({});
+  let name: ReactNode = formatItemName(node.item.name);
 
   let comp_label = "";
+  useEffect(() => {
+    if (node.item.component?.id && p.comp.loaded[node.item.component.id]) {
+      const comp_name =
+        p.comp.loaded[node.item.component.id]?.content_tree?.name;
+      if (!comp_name) {
+        waitUntil(
+          () => p.comp.loaded[node.item.component?.id || ""]?.content_tree?.name
+        ).then(() => {
+          console.log("asdsa");
+          render({});
+        });
+      }
+    }
+  }, []);
 
   if (node?.item.component?.id) {
     for (const prop of Object.values(node?.item.component?.props || {})) {
@@ -144,17 +160,15 @@ const Name: FC<{ p: PG; node: PNode; render_params: RenderParams }> = ({
       }
     }
     if (p.comp.loaded[node.item.component.id]) {
-      const comp_name = p.comp.loaded[node.item.component.id].content_tree.name;
-      if (comp_name.toLowerCase() !== node.item.name.toLowerCase()) {
+      const comp_name =
+        p.comp.loaded[node.item.component.id]?.content_tree?.name;
+      if (!comp_name) {
+      }
+      if (comp_name?.toLowerCase() !== node?.item?.name?.toLowerCase()) {
         name = (
           <div className="flex items-center center space-x-1">
-            <div className="node-text text-purple-500">
-              {comp_name
-                .replace(/[^a-zA-Z0-9:]+/g, " ")
-                .split(" ")
-                .map((e) => (e[0] || "").toUpperCase() + e.slice(1))
-                .join(" ")}
-              :
+            <div className="node-text text-purple-500 flex items-center">
+              {formatItemName(comp_name) || <LoadingSpinner size={13} />}:
             </div>
             <div>{name}</div>
           </div>

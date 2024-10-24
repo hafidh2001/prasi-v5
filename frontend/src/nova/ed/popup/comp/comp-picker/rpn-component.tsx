@@ -6,6 +6,7 @@ import { useGlobal } from "utils/react/use-global";
 import { CompPickerNode } from "./render-picker-node";
 import { compPickerToNodes } from "./to-nodes";
 import { Check } from "lucide-react";
+import { formatItemName } from "../../../tree/parts/node/node-name";
 
 export const RPNComponent: FC<{
   node: NodeModel<CompPickerNode>;
@@ -142,11 +143,7 @@ const Name: FC<{ id: string; name: string; onClick: () => void }> = ({
       )}
     >
       <div>
-        {name
-          .replace(/[^a-zA-Z0-9:]+/g, " ")
-          .split(" ")
-          .map((e) => (e[0] || "").toUpperCase() + e.slice(1))
-          .join(" ")}
+        {formatItemName(name)}
       </div>
       <div className={"text-[8px] opacity-70"}>{id}</div>
     </div>

@@ -35,7 +35,7 @@ export const editorPageLoad = async (
     store: (result, cached) => {
       ed.cache.tables.page.save({
         id: cached?.id,
-        root: pack(result),
+        root: new Uint8Array(pack(result)),
         page_id,
         ts: Date.now(),
       });

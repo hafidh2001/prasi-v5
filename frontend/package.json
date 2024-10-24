@@ -22,7 +22,7 @@
     "@swc/types": "^0.1.12",
     "@types/dagre": "^0.7.52",
     "@types/lodash.capitalize": "^4.2.9",
-    "@uiw/react-json-view": "^2.0.0-alpha.27",
+    "@uiw/react-json-view": "^2.0.0-alpha.30",
     "@xyflow/react": "^12.2.0",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.7",

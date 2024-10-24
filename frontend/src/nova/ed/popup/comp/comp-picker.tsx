@@ -137,6 +137,16 @@ export const EdPopCompPicker = () => {
               initial_open.push(e.id.toString());
             }
           }
+
+          if (
+            popup.search.value &&
+            e.data?.type === "comp" &&
+            !e.data.name
+              .toLowerCase()
+              .includes(popup.search.value.toLowerCase())
+          ) {
+            return false;
+          }
           if (e.data?.type === "comp" && e.parent === trash_id) return true;
 
           if (e.data?.type === "folder" && e.data.name === "__TRASH__")
@@ -395,7 +405,13 @@ export const EdPopCompPicker = () => {
                             padding-bottom: 10px;
                             padding-left: 30px;
                           }
-                        `
+                        `,
+                        local.tab === "Trash" &&
+                          css`
+                            .tree-container {
+                              padding-top: 10px;
+                            }
+                          `
                       )}
                     >
                       {popup.picker_ref && popup.status === "ready" && (
