@@ -3,7 +3,7 @@ import { dbProxy } from "base/load/db/db-proxy";
 import { activateItem, active, getActiveTree } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import { waitUntil } from "prasi-utils";
-import { memo, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { StoreProvider } from "utils/react/define-store";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
@@ -82,6 +82,7 @@ const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
       ctx_menu: null as any,
       item: null as null | IItem,
     });
+
     return (
       <>
         {/* @ts-ignore */}
@@ -92,6 +93,11 @@ const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
           instance_id={instance_id}
           div_props={({ item, ref, instance_id }) => ({
             contentEditable: item.type === "text" ? true : undefined,
+            ref: (div) => {
+              if (item.id === active.item_id && item.type === "text") {
+                div?.focus();
+              }
+            },
             onPointerEnter(e) {
               if (instance_id) {
                 //@ts-ignore
@@ -136,10 +142,11 @@ const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
                   }
                 : undefined,
             onPointerDown(e) {
-              if (item.type === "text") {
+              if (active.item_id === item.id) {
                 e.stopPropagation();
                 return;
               }
+
               e.stopPropagation();
               e.preventDefault();
               p.ui.tree.prevent_tooltip = true;

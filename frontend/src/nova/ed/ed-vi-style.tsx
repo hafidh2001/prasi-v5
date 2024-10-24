@@ -9,11 +9,16 @@ export const mainStyle = (p: PG) => {
   if (p.mode === "mobile") {
     width = `${(1 / scale) * 375}px`;
   }
+  const item = getActiveNode(p)?.item;
 
   return cx(
     "absolute flex main-editor-content overflow-auto",
     css`
       contain: content;
+
+      .text-block {
+        cursor: pointer;
+      }
     `,
     p.mode === "mobile"
       ? css`
@@ -54,10 +59,14 @@ export const mainStyle = (p: PG) => {
           }
         }
       `,
-    active.item_id === getActiveNode(p)?.item.id &&
+    active.item_id === item?.id &&
       css`
         .s-${active.item_id} {
           outline: none;
+
+          &.text-block {
+            cursor: text;
+          }
 
           &::after {
             content: " ";

@@ -17,6 +17,7 @@ export const viDivProps = (
       produceCSS(item as any, {
         mode: opt.mode,
       }),
+      item.type === "text" && !item.adv?.js ? "text-block" : "",
       opt?.div_props?.className
     ),
   };
