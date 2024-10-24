@@ -58,7 +58,7 @@ export const EdTreeSearch = () => {
               ? "border-blue-600 bg-blue-50"
               : "border-transparent"
           )}
-          placeholder="Search..."
+          placeholder="Search Name..."
           value={p.ui.tree.search.value || ""}
           spellCheck={false}
           onInput={(e) => {

@@ -35,7 +35,7 @@ export const parseItemLocal = ({
               model.local.name = attr.value.value;
               replacements.push({
                 ...attr.value,
-                replacement: `{${model.local.name}[__localname]}`,
+                replacement: `{ local_name }`,
               });
             } else if (attr.value.type === "JSXExpressionContainer") {
               if (attr.value.expression.type === "ComputedMemberExpression") {

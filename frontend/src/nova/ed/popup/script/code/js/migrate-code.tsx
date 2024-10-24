@@ -30,7 +30,7 @@ ${main_code}`;
     inject = `
 
 export const ${local.name} = defineLocal({
-  name: "${local.name}",
+  name: local_name,
   value: ${local.value}
 });
 `;
@@ -60,12 +60,12 @@ const generateRegion = (
 ) => {
   const imports = generateImports(model, models, debug);
   const passprop = generatePassProp(model);
-
   return `\
 // #region generated⠀
 // Do not modify code inside region, any modification will be lost.
 
 import React from "react";\
+${model.local.name ? `const local_name = "${model.local.name}"` : ""}\
 ${imports}${passprop}
 
 // #endregion`;

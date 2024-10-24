@@ -12,9 +12,8 @@ const isDesktop: boolean;
 const __props: any;
 const siteurl: (path:string) => string;
 const preloaded: (url:string) => boolean;
-const __localname = Symbol("__localname");
 const definePassProp: <T extends Record<string, any>>() => { PassProp: (arg:T & { children:any, key: (string | number) }) => ReactElement, exports: T & {idx: (string | number)} };
-const defineLocal: <T extends Record<string, any>>(arg: {value:T, name: string}) => T & { [__localname]: string, render: () => void };
+const defineLocal: <T extends Record<string, any>>(arg: {value:T, name: string}) => T & { render: () => void };
 const preload: (urls: string | string[], opt?: {
   on_load?: (
     pages: {

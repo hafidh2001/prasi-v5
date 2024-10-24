@@ -51,35 +51,57 @@ export const parseItemCode = (model: ScriptModel) => {
               d.init?.type === "CallExpression" &&
               d.id.type === "Identifier"
             ) {
-              if (!exports[d.id.name]) {
+              if (
+                d.init.callee.type === "Identifier" &&
+                d.init.callee.name === "defineLocal"
+              ) {
+                model.local.name = d.id.name;
+                model.local.value = `{
+        //local object marjiuir
+      }`;
+                const value = d.init.arguments.find(
+                  (e) => e.type === "ObjectExpression"
+                );
+                if (value && value.type === "ObjectExpression") {
+                  const local_value = value.properties.find(
+                    (e) =>
+                      e.type === "ObjectProperty" &&
+                      e.key.type === "Identifier" &&
+                      e.key.name === "value"
+                  );
+                  if (local_value?.type === "ObjectProperty") {
+                    model.local.value = cutCode(model.source, local_value.value, -2);
+                  }
+                }
+
                 exports[d.id.name] = {
                   name: d.id.name,
                   type: "local",
-                  value: "",
+                  value: model.local.value,
                 };
-              }
-
-              const dec = d.init.arguments[0] as ObjectExpression;
-              if (dec.properties) {
-                for (const prop of dec.properties) {
-                  if (
-                    prop.type === "ObjectProperty" &&
-                    prop.key.type === "Identifier"
-                  ) {
-                    const single_export = exports[d.id.name] as any;
-                    if (single_export) {
-                      if (prop.key.name === "name") {
-                        if (
-                          prop.value.type === "StringLiteral" &&
-                          single_export.type !== "local"
-                        )
-                          single_export[prop.key.name] = prop.value.value;
-                      } else {
-                        single_export[prop.key.name] = cutCode(
-                          model.source,
-                          prop.value,
-                          -2
-                        );
+              } else {
+                const dec = d.init.arguments[0] as ObjectExpression;
+                if (dec.properties) {
+                  for (const prop of dec.properties) {
+                    if (
+                      prop.type === "ObjectProperty" &&
+                      prop.key.type === "Identifier"
+                    ) {
+                      const single_export = exports[d.id.name] as any;
+                      if (single_export) {
+                        if (prop.key.name === "name") {
+                          if (
+                            prop.value.type === "StringLiteral" &&
+                            single_export.type !== "local"
+                          )
+                            single_export[prop.key.name] = prop.value.value;
+                        } else {
+                          single_export[prop.key.name] = cutCode(
+                            model.source,
+                            prop.value,
+                            -2
+                          );
+                        }
                       }
                     }
                   }

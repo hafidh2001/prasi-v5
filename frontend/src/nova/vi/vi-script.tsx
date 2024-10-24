@@ -2,9 +2,8 @@ import { rapidhash_fast } from "crdt/node/rapidhash";
 import { DeepReadonly } from "popup/flow/runtime/types";
 import React, { FC, ReactElement, useRef } from "react";
 import { IItem } from "utils/types/item";
-import { compArgs } from "./lib/comp-args";
 import { parentCompArgs } from "./lib/parent-comp-args";
-import { __localname, parentLocalArgs } from "./lib/parent-local-args";
+import { parentLocalArgs } from "./lib/parent-local-args";
 import { parentPassProps } from "./lib/parent-pass-props";
 import { scriptArgs } from "./lib/script-args";
 import { useVi } from "./lib/store";
@@ -75,9 +74,8 @@ export const ViScript: FC<{
     db,
     api,
     __js: item.adv!.js,
-    __localname,
     defineLocal(arg: { name: string; value: any }) {
-      arg.value[__localname] = arg.name;
+      arg.value[Symbol("local_name")] = arg.name;
       return arg.value;
     },
     PassProp: internal.PassProp,

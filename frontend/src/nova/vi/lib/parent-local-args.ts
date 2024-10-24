@@ -1,4 +1,4 @@
-export const __localname = Symbol("__localname");
+export const local_name = Symbol("local_name");
 
 export const parentLocalArgs = (
   local: Record<string, any>,
@@ -9,7 +9,7 @@ export const parentLocalArgs = (
   const args: any = {};
   while (cur) {
     if (local[cur]) {
-      const name = local[cur][__localname];
+      const name = local[cur][local_name];
       if (name && !args[name]) {
         args[name] = local[cur];
       }

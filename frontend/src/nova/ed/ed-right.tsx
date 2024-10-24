@@ -74,7 +74,7 @@ export const EdRight = () => {
                       Style
                     </>
                   )}
-                  {tab === "events" && (
+                  {/* {tab === "events" && (
                     <>
                       <AudioWaveform />
                       Events
@@ -85,7 +85,7 @@ export const EdRight = () => {
                       <Library />
                       Variables
                     </>
-                  )}
+                  )} */}
                 </div>
               );
             })}

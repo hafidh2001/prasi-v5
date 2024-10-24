@@ -22,7 +22,6 @@ export const registerEditorOpener = (
           p.script.monaco_selection = input.options.selection;
           activateItem(p, prasi_model.id);
           if (prasi_model.prop_name) {
-            
           }
         }
       }
