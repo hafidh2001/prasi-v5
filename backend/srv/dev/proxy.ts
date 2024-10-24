@@ -29,13 +29,17 @@ export const devProxy = async ({ url, req, ws }: ServerCtx) => {
     }
   });
 
-  if (res)
+  if (res) {
+    const headers = url.pathname.startsWith("/static/js/async/vendors-")
+      ? { "cache-control": "public, max-age=604800, immutable" }
+      : undefined;
     return new Response(await res.arrayBuffer(), {
       headers: {
+        ...headers,
         "content-type": res.headers.get("content-type") as string,
       },
     });
-  else {
+  } else {
     console.error(`Failed to get: ${url.pathname}`);
     return new Response("");
   }

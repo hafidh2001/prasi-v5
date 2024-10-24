@@ -14,7 +14,8 @@ export const RPNFolder: FC<{
   const local = useLocal({ renaming: node.id === "", rename_to: "" });
   const item = node.data;
   const p = useGlobal(EDGlobal, "EDITOR");
-  if (!item || item.name === "__TRASH__" || p.ui.popup.comp.search.value) return <></>;
+  if (!item || item.name === "__TRASH__" || p.ui.popup.comp.search.value)
+    return <></>;
 
   const data = p.ui.popup.comp.data;
   let folder_item_count = 0;
@@ -44,7 +45,48 @@ export const RPNFolder: FC<{
       }}
     >
       <div className={cx("flex flex-1 px-1 items-center")}>
-        <Name name={node.text} />
+        {local.renaming ? (
+          <input
+            value={local.rename_to}
+            autoFocus
+            spellCheck={false}
+            onBlur={async () => {
+              local.renaming = false;
+              if (local.rename_to) {
+                item.name = local.rename_to;
+                local.render();
+                if (item.id === "") {
+                  if (item.name) {
+                  }
+                } else {
+                  item.name = local.rename_to;
+                  node.text = local.rename_to;
+                  local.render();
+                  p.render();
+                  await _db.component_group.update({
+                    where: { id: item.id },
+                    data: { name: local.rename_to },
+                  });
+                }
+              }
+            }}
+            className="border px-1 bg-white flex-1 outline-none mr-1 border-blue-500 "
+            onChange={(e) => {
+              local.rename_to = e.currentTarget.value;
+              local.render();
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.currentTarget.blur();
+              if (e.key === "Escape") {
+                local.rename_to = item.name;
+                local.render();
+                e.currentTarget.blur();
+              }
+            }}
+          />
+        ) : (
+          <Name name={node.text} />
+        )}
         <div
           className="ml-1 p-1 border border-transparent hover:border-slate-400 bg-white rounded-sm"
           onClick={(e) => {

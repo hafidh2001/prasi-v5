@@ -7,12 +7,6 @@ import {
 export type MonacoEditor = Parameters<OnMount>[0];
 export type Monaco = Parameters<OnMount>[1];
 
-import {
-  configureMonacoTailwindcss,
-  tailwindcssData,
-} from "monaco-tailwindcss";
-import { initialize } from "monaco-tailwindcss/tailwindcss.worker";
-
 type CompilerOptions = Parameters<
   Parameters<OnMount>[1]["languages"]["typescript"]["typescriptDefaults"]["setCompilerOptions"]
 >[0];
@@ -24,16 +18,6 @@ export const monacoEnableJSX = async (
   p?: PG
 ) => {
   monaco.languages.register({ id: "typescript" });
-
-  monaco.languages.css.cssDefaults.setOptions({
-    data: {
-      dataProviders: {
-        tailwindcssData,
-      },
-    },
-  });
-  configureMonacoTailwindcss(monaco);
-
   if (editor.getModel()) {
     // jsx syntax highlight
     const jsxHgController = new MonacoJsxSyntaxHighlight(getWorker(), monaco);

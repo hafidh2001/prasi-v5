@@ -7,6 +7,11 @@ import type Prettier from "prettier/standalone";
 import { SimpleVisitors } from "./parser/acorn-types";
 import { traverse } from "./parser/traverse";
 
+import {
+  configureMonacoTailwindcss,
+  tailwindcssData,
+} from "monaco-tailwindcss";
+
 export type FBuild = (
   entryFileName: string,
   src: string,
@@ -142,7 +147,16 @@ export const jscript = {
               },
             };
 
-            await monaco_react.loader.init();
+            const monaco_instance = await monaco_react.loader.init();
+
+            monaco.languages.css.cssDefaults.setOptions({
+              data: {
+                dataProviders: {
+                  tailwindcssData,
+                },
+              },
+            });
+            configureMonacoTailwindcss(monaco);
             jscript.MonacoEditor = monaco_react.Editor;
           })(),
         ]);

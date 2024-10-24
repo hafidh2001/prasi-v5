@@ -5,13 +5,17 @@ import {
   getBackendOptions,
 } from "@minoru/react-dnd-treeview";
 import { EDGlobal } from "logic/ed-global";
+import { Trash } from "lucide-react";
 import { useEffect } from "react";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { Loading } from "utils/ui/loading";
 import { Modal } from "utils/ui/modal";
-import { CompPickerNode, compRenderPickerNode } from "./comp-picker/render-picker-node";
+import {
+  CompPickerNode,
+  compRenderPickerNode,
+} from "./comp-picker/render-picker-node";
 import { compPickerToNodes } from "./comp-picker/to-nodes";
 
 const ID_PRASI_UI = "13143272-d4e3-4301-b790-2b3fd3e524e6";
@@ -21,10 +25,31 @@ export const EdPopCompPicker = () => {
   const local = useLocal({
     tree_ref: null as TreeMethods | null,
     tab: "Components",
+    checked: new Set<string>(),
+    shift: false,
   });
 
   const popup = p.ui.popup.comp;
   popup.render = local.render;
+
+  useEffect(() => {
+    const keydown = (e: KeyboardEvent) => {
+      if (e.shiftKey) {
+        local.shift = true;
+        local.render();
+      } else {
+        if (local.shift) {
+          local.shift = false;
+          local.render();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", keydown);
+    return () => {
+      document.removeEventListener("keydown", keydown);
+    };
+  }, []);
 
   useEffect(() => {
     if (!popup.on_pick) local.tab = "Components";
@@ -69,6 +94,9 @@ export const EdPopCompPicker = () => {
   let nodes =
     local.tab === "Components"
       ? popup.data.nodes.filter((e) => {
+          if (e.data && e.data.type === "comp") {
+            e.data.idx = e.parent.toString() + e.id.toString();
+          }
           if (
             popup.search.value &&
             e.data?.type === "comp" &&
@@ -83,10 +111,17 @@ export const EdPopCompPicker = () => {
           return true;
         })
       : popup.data.nodes.filter((e) => {
+          if (e.data && e.data.type === "comp") {
+            e.data.idx = e.parent.toString() + e.id.toString();
+          }
           if (e.data?.type === "folder" && e.data.name === "__TRASH__")
             return true;
           return false;
         });
+
+  nodes = nodes.sort((a, b) =>
+    (b.data?.idx || "").localeCompare(a.data?.idx || "")
+  );
 
   // const has_prasi_ui = !!tree.find(
   //   (e) => e.data?.type === "folder" && e.data?.id === ID_PRASI_UI
@@ -146,6 +181,52 @@ export const EdPopCompPicker = () => {
                       })}
                     </div>
                     <div className="flex flex-1 mr-1 justify-end items-stretch">
+                      {local.checked.size > 0 && (
+                        <div
+                          className="bg-white text-xs border border-red-600 flex items-center text-red-600 px-2 mr-1 hover:border-red-800 my-1 hover:bg-blue-50 cursor-pointer"
+                          onClick={async () => {
+                            if (confirm("Move selected components to trash?")) {
+                              const data = p.ui.popup.comp.data;
+                              const trash_folder = data.groups.find(
+                                (e) => e.name === "__TRASH__"
+                              );
+
+                              if (trash_folder) {
+                                await _db.component.updateMany({
+                                  where: { id: { in: [...local.checked] } },
+                                  data: { id_component_group: trash_folder.id },
+                                });
+
+                                data.comps.map((e) => {
+                                  if (local.checked.has(e.id)) {
+                                    const node = nodes.find(
+                                      (item) => item.id === e.id
+                                    );
+
+                                    const found = data.comps.find(
+                                      (item) => e.id === item.id
+                                    );
+                                    if (node && found) {
+                                      found.id_component_group =
+                                        trash_folder.id;
+                                      node.parent = trash_folder.id;
+                                    }
+                                  }
+                                });
+                                p.render();
+                              }
+                            }
+                          }}
+                        >
+                          <Trash size={11} className="mr-1" />
+                          <div>
+                            Delete {local.checked.size}{" "}
+                            {local.checked.size > 1
+                              ? "components"
+                              : "component"}
+                          </div>
+                        </div>
+                      )}
                       <div
                         className="bg-white text-xs border px-2 mr-1 my-1 flex items-center hover:border-blue-500 hover:bg-blue-50 cursor-pointer"
                         onClick={async () => {
@@ -205,6 +286,7 @@ export const EdPopCompPicker = () => {
                           UI
                         </span>
                       </div> */}
+
                       <div
                         className="bg-white text-xs border px-2 mr-1 my-1 flex items-center hover:border-blue-500 hover:bg-blue-50 cursor-pointer"
                         onClick={async () => {
@@ -284,6 +366,7 @@ export const EdPopCompPicker = () => {
                             tree={nodes}
                             initialOpen={true}
                             rootId={"root"}
+                            sort={false}
                             onDrop={async (newTree, opt) => {
                               // compPicker.tree = newTree;
                               // p.render();
@@ -316,7 +399,42 @@ export const EdPopCompPicker = () => {
                               container: "tree-container",
                               dropTarget: "dropping",
                             }}
-                            render={compRenderPickerNode}
+                            render={(node, prm) =>
+                              compRenderPickerNode(
+                                node,
+                                prm,
+                                local.checked.has(node.id as string),
+                                (item_id) => {
+                                  if (local.shift) {
+                                    const first_idx = nodes.findIndex((e) =>
+                                      local.checked.has(e.id as string)
+                                    );
+
+                                    const second_idx = nodes.findIndex(
+                                      (e) => e.id === item_id
+                                    );
+
+                                    for (
+                                      let i = Math.min(first_idx, second_idx);
+                                      i <= Math.max(first_idx, second_idx);
+                                      i++
+                                    ) {
+                                      const node = nodes[i];
+                                      if (node.data?.type === "comp") {
+                                        local.checked.add(node.id as string);
+                                      }
+                                    }
+
+                                    return;
+                                  }
+                                  if (local.checked.has(item_id)) {
+                                    local.checked.delete(item_id);
+                                  } else {
+                                    local.checked.add(item_id);
+                                  }
+                                }
+                              )
+                            }
                           />
                         </DndProvider>
                       )}

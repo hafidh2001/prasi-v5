@@ -5,11 +5,14 @@ import tc from "tinycolor2";
 import { useGlobal } from "utils/react/use-global";
 import { CompPickerNode } from "./render-picker-node";
 import { compPickerToNodes } from "./to-nodes";
+import { Check } from "lucide-react";
 
 export const RPNComponent: FC<{
   node: NodeModel<CompPickerNode>;
   prm: RenderParams;
-}> = ({ node }) => {
+  checked: boolean;
+  onCheck: (item_id: string) => void;
+}> = ({ node, checked, onCheck }) => {
   const item = node.data;
   const p = useGlobal(EDGlobal, "EDITOR");
   if (!item) return <></>;
@@ -57,7 +60,7 @@ export const RPNComponent: FC<{
   return (
     <div
       className={cx(
-        "flex flex-col hover:bg-blue-50 cursor-pointer",
+        "flex flex-col hover:bg-blue-50 cursor-pointer ",
         css`
           .btn {
             opacity: 0;
@@ -67,7 +70,8 @@ export const RPNComponent: FC<{
           }
         `,
         item.id === p.page.cur.id && `bg-blue-50`,
-        item.type === "comp" && "my-1 ml-2 mr-0 border flex-1",
+        item.type === "comp" && "my-1 ml-2 mr-0 border transition-all flex-1",
+        checked && "outline outline-4 outline-red-600",
         item.type === "comp" &&
           css`
             min-width: 190px;
@@ -89,8 +93,12 @@ export const RPNComponent: FC<{
         />
         <div
           className={cx(
-            "transition-all bg-white flex items-center px-1 hover:border-blue-300 hover:bg-blue-100 opacity-20 hover:opacity-100",
+            "transition-all flex justify-center items-center",
+            checked
+              ? "bg-blue-600 text-white"
+              : "bg-white opacity-20 hover:opacity-100 hover:border-blue-300 hover:bg-blue-100 ",
             css`
+              width: 25px;
               &:hover {
                 .normal {
                   display: none;
@@ -103,15 +111,11 @@ export const RPNComponent: FC<{
           )}
           onClick={async (e) => {
             e.stopPropagation();
-            delComponent(item.id);
+            onCheck(item.id);
+            p.render();
           }}
         >
-          <div className="normal">
-            <DeleteIcon />
-          </div>
-          <div className="over hidden text-red-600">
-            <DeleteIcon />
-          </div>
+          {checked && <Check size={13} />}
         </div>
       </div>
     </div>
