@@ -12,9 +12,11 @@ export const compRenderPickerNode = (
   node: NodeModel<CompPickerNode>,
   prm: RenderParams,
   checked: boolean,
-  onCheck: (item_id: string) => void
+  onCheck: (item_id: string) => void,
+  len?: number
 ) => {
-  if (node.data?.type === "folder") return <RPNFolder node={node} prm={prm} />;
+  if (node.data?.type === "folder")
+    return <RPNFolder node={node} prm={prm} len={len || 0} />;
   if (node.data?.type === "comp")
     return (
       <RPNComponent node={node} prm={prm} checked={checked} onCheck={onCheck} />

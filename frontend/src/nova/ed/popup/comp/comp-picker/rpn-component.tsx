@@ -60,7 +60,7 @@ export const RPNComponent: FC<{
   return (
     <div
       className={cx(
-        "flex flex-col hover:bg-blue-50 cursor-pointer ",
+        "flex flex-col bg-white hover:bg-blue-50 cursor-pointer ",
         css`
           .btn {
             opacity: 0;
@@ -71,7 +71,7 @@ export const RPNComponent: FC<{
         `,
         item.id === p.page.cur.id && `bg-blue-50`,
         item.type === "comp" && "my-1 ml-2 mr-0 border transition-all flex-1",
-        checked && "outline outline-4 outline-red-600",
+        checked && "outline outline-2 outline-red-600",
         item.type === "comp" &&
           css`
             min-width: 190px;
@@ -95,8 +95,8 @@ export const RPNComponent: FC<{
           className={cx(
             "transition-all flex justify-center items-center",
             checked
-              ? "bg-blue-600 text-white"
-              : "bg-white opacity-20 hover:opacity-100 hover:border-blue-300 hover:bg-blue-100 ",
+              ? "bg-red-600 text-white"
+              : "bg-white border-[4px] border-[#ccc] opacity-20 hover:opacity-100 hover:border-red-300 hover:bg-red-100 ",
             css`
               width: 25px;
               &:hover {
@@ -141,7 +141,13 @@ const Name: FC<{ id: string; name: string; onClick: () => void }> = ({
         `
       )}
     >
-      <div>{name.split("_").join(" ")}</div>
+      <div>
+        {name
+          .replace(/[^a-zA-Z0-9:]+/g, " ")
+          .split(" ")
+          .map((e) => (e[0] || "").toUpperCase() + e.slice(1))
+          .join(" ")}
+      </div>
       <div className={"text-[8px] opacity-70"}>{id}</div>
     </div>
   );

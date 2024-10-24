@@ -148,7 +148,14 @@ const Name: FC<{ p: PG; node: PNode; render_params: RenderParams }> = ({
       if (comp_name.toLowerCase() !== node.item.name.toLowerCase()) {
         name = (
           <div className="flex items-center center space-x-1">
-            <div className="node-text text-purple-500">{comp_name}:</div>
+            <div className="node-text text-purple-500">
+              {comp_name
+                .replace(/[^a-zA-Z0-9:]+/g, " ")
+                .split(" ")
+                .map((e) => (e[0] || "").toUpperCase() + e.slice(1))
+                .join(" ")}
+              :
+            </div>
             <div>{name}</div>
           </div>
         );

@@ -91,11 +91,21 @@ export const EdPopCompPicker = () => {
 
   if (!popup.on_pick) return null;
 
+  let initial_open: string[] = [];
+  const group_len = {} as Record<string, number>;
   let nodes =
     local.tab === "Components"
       ? popup.data.nodes.filter((e) => {
-          if (e.data && e.data.type === "comp") {
-            e.data.idx = e.parent.toString() + e.id.toString();
+          if (e.data) {
+            if (e.data.type === "comp") {
+              e.data.idx = e.parent.toString() + e.id.toString();
+              if (!group_len[e.parent]) {
+                group_len[e.parent] = 0;
+              }
+              group_len[e.parent]++;
+            } else {
+              initial_open.push(e.id.toString());
+            }
           }
           if (
             popup.search.value &&
@@ -111,18 +121,38 @@ export const EdPopCompPicker = () => {
           return true;
         })
       : popup.data.nodes.filter((e) => {
-          if (e.data && e.data.type === "comp") {
-            e.data.idx = e.parent.toString() + e.id.toString();
+          if (e.data) {
+            if (e.data.type === "comp") {
+              e.data.idx = e.parent.toString() + e.id.toString();
+              if (!group_len[e.parent]) {
+                group_len[e.parent] = 0;
+              }
+              group_len[e.parent]++;
+            } else {
+              initial_open.push(e.id.toString());
+            }
           }
           if (e.data?.type === "folder" && e.data.name === "__TRASH__")
             return true;
           return false;
         });
 
-  nodes = nodes.sort((a, b) =>
-    (b.data?.idx || "").localeCompare(a.data?.idx || "")
-  );
+  nodes = nodes.sort((a, b) => {
+    if (a.data?.type === "folder" && b.data?.type === "folder") {
+      return a.text.localeCompare(b.text);
+    }
+    return (b.data?.idx || "").localeCompare(a.data?.idx || "");
+  });
 
+  if (!popup.search.value) {
+    const stored_open = localStorage.getItem("prasi-picker-comp-open");
+    try {
+      const opened = JSON.parse(stored_open || "");
+      if (Array.isArray(opened)) {
+        initial_open = opened;
+      }
+    } catch (e) {}
+  }
   // const has_prasi_ui = !!tree.find(
   //   (e) => e.data?.type === "folder" && e.data?.id === ID_PRASI_UI
   // );
@@ -157,7 +187,7 @@ export const EdPopCompPicker = () => {
             {popup.status !== "loading" && (
               <>
                 <div className="flex flex-1 flex-col">
-                  <div className="flex h-[30px] border-b items-stretch mb-2 bg-slate-100">
+                  <div className="flex h-[30px] border-b items-stretch bg-slate-100">
                     <div className="flex items-end pl-1 space-x-1">
                       {["Components", "Trash"].map((e) => {
                         return (
@@ -328,6 +358,17 @@ export const EdPopCompPicker = () => {
                           > .tree-container {
                             max-width: 100%;
                             height: 100%;
+                            > .listitem:hover {
+                              background: #eff8ff;
+
+                              .folder {
+                                outline: 1px solid #a0c1de;
+                              }
+                            }
+
+                            .folder-open {
+                              outline: 1px solid #5288be !important;
+                            }
                           }
 
                           > .tree-root > .listitem:first-child > div {
@@ -344,6 +385,8 @@ export const EdPopCompPicker = () => {
                             flex-direction: row;
                             flex-wrap: wrap;
                             position: relative;
+                            padding-bottom: 10px;
+                            padding-left: 27px;
                           }
                         `
                       )}
@@ -364,7 +407,7 @@ export const EdPopCompPicker = () => {
                               }
                             }}
                             tree={nodes}
-                            initialOpen={true}
+                            initialOpen={initial_open}
                             rootId={"root"}
                             sort={false}
                             onDrop={async (newTree, opt) => {
@@ -383,6 +426,12 @@ export const EdPopCompPicker = () => {
                               //     },
                               //   });
                               // }
+                            }}
+                            onChangeOpen={(e) => {
+                              localStorage.setItem(
+                                "prasi-picker-comp-open",
+                                JSON.stringify(e)
+                              );
                             }}
                             dragPreviewRender={() => <></>}
                             canDrag={() => true}
@@ -432,7 +481,8 @@ export const EdPopCompPicker = () => {
                                   } else {
                                     local.checked.add(item_id);
                                   }
-                                }
+                                },
+                                group_len[node.id]
                               )
                             }
                           />
