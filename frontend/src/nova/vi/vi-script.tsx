@@ -3,7 +3,7 @@ import { DeepReadonly } from "popup/flow/runtime/types";
 import React, { FC, ReactElement, useRef } from "react";
 import { IItem } from "utils/types/item";
 import { parentCompArgs } from "./lib/parent-comp-args";
-import { parentLocalArgs } from "./lib/parent-local-args";
+import { local_name, parentLocalArgs } from "./lib/parent-local-args";
 import { parentPassProps } from "./lib/parent-pass-props";
 import { scriptArgs } from "./lib/script-args";
 import { useVi } from "./lib/store";
@@ -75,7 +75,7 @@ export const ViScript: FC<{
     api,
     __js: item.adv!.js,
     defineLocal(arg: { name: string; value: any }) {
-      arg.value[Symbol("local_name")] = arg.name;
+      arg.value[local_name] = arg.name;
       return arg.value;
     },
     PassProp: internal.PassProp,
@@ -116,7 +116,7 @@ export const ViScript: FC<{
     console.error(\`\\
   Error in item ${item.name}: ${item.id} 
   
-  $\{__js}
+$\{__js}
   
   ERROR: $\{e.message}
   \`);

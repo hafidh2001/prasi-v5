@@ -14,6 +14,12 @@ export default defineConfig({
   dev: {
     progressBar: false,
   },
+
+  tools: {
+    rspack: {
+      ignoreWarnings: [/require function is used in a way/],
+    },
+  },
   output: {
     cleanDistPath: true,
     sourceMap: {

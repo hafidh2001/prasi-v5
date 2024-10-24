@@ -82,12 +82,67 @@ export const jscript = {
             jscript.formatMessages = esbuild.formatMessages;
           })(),
           (async () => {
+            const monaco = await import("monaco-editor");
             const monaco_react = await import("@monaco-editor/react");
-            monaco_react.loader.config({
-              paths: {
-                vs: "/monaco/min/vs",
+            monaco_react.loader.config({ monaco });
+
+            self.MonacoEnvironment = {
+              getWorker(_, label: any) {
+                switch (label) {
+                  case "editorWorkerService":
+                    return new Worker(
+                      new URL(
+                        "monaco-editor/esm/vs/editor/editor.worker",
+                        import.meta.url
+                      )
+                    );
+                  case "css":
+                  case "less":
+                  case "scss":
+                    return new Worker(
+                      new URL(
+                        "monaco-editor/esm/vs/language/css/css.worker",
+                        import.meta.url
+                      )
+                    );
+                  case "handlebars":
+                  case "html":
+                  case "razor":
+                    return new Worker(
+                      new URL(
+                        "monaco-editor/esm/vs/language/html/html.worker",
+                        import.meta.url
+                      )
+                    );
+                  case "json":
+                    return new Worker(
+                      new URL(
+                        "monaco-editor/esm/vs/language/json/json.worker",
+                        import.meta.url
+                      )
+                    );
+                  case "javascript":
+                  case "typescript":
+                    return new Worker(
+                      new URL(
+                        "monaco-editor/esm/vs/language/typescript/ts.worker",
+                        import.meta.url
+                      )
+                    );
+                  case "tailwindcss":
+                    return new Worker(
+                      new URL(
+                        "monaco-tailwindcss/tailwindcss.worker",
+                        import.meta.url
+                      )
+                    );
+                  default:
+                    throw new Error(`Unknown label ${label}`);
+                }
               },
-            });
+            };
+
+            await monaco_react.loader.init();
             jscript.MonacoEditor = monaco_react.Editor;
           })(),
         ]);

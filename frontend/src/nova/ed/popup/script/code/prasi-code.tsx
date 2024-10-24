@@ -88,7 +88,10 @@ export const EdPrasiCode = () => {
                   model.source = value;
                   model.exports = {};
 
-                  update.push(p, model.id, value);
+                  update.push(p, model.id, value, {
+                    local_name: model.local?.name,
+                    prop_name: model.prop_name,
+                  });
                 }
               }}
               activeModel={`file:///${active.item_id}.tsx`}
@@ -131,11 +134,17 @@ const update = {
       source: string;
       prop_name?: string;
       source_built?: string | null;
+      local_name?: string;
     }
   >,
-  push(p: PG, id: string, source: string, prop_name?: string) {
+  push(
+    p: PG,
+    id: string,
+    source: string,
+    arg?: { prop_name?: string; local_name?: string }
+  ) {
     this.p = p;
-    this.queue[id] = { id, source, prop_name };
+    this.queue[id] = { id, source, ...arg };
     this.executeUpdate();
   },
   executeUpdate() {
@@ -162,9 +171,13 @@ const update = {
           let source = "";
           for (let i = 0; i < lines.length; i++) {
             if (lines[i].startsWith("// #endregion")) {
-              source = lines.slice(i).join("\n");
+              source = lines.slice(i + 1).join("\n");
               break;
             }
+          }
+
+          if (q.local_name) {
+            source = `const local_name = "${q.local_name}";\n${source}`;
           }
 
           let replace = { replacement: "", start: 0, end: 0 };

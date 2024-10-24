@@ -4,6 +4,13 @@ export const jsxColorScheme = css`
     min-height: 22px;
   }
   .monaco-editor {
+    .monaco-list > .monaco-scrollable-element {
+      font-size: 12px;
+      .codicon-tree-item-expanded:before {
+        font-size: 12px;
+        margin-right: 5px;
+      }
+    }
     .mtk9 {
       color: #022f62;
     }
