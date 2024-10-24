@@ -203,6 +203,7 @@ export const EdTreeAction = ({
                           p.viref.resetCompInstance(id);
                         p.comp.loaded[id].content_tree = ctree;
                         p.render();
+                        p.ui.editor.render();
                       },
                     });
                     p.ui.comp.loading_id = "";

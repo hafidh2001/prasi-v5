@@ -38,7 +38,6 @@ export const ViRender: FC<{
         __idx={__idx}
         is_layout={is_layout}
         div_props={div_props}
-        instance_id={instance_id}
       />
     );
   } else {

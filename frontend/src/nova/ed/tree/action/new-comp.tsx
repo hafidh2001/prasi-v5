@@ -52,6 +52,7 @@ export const edActionNewComp = (
             if (p.viref.resetCompInstance) p.viref.resetCompInstance(id);
             p.comp.loaded[id].content_tree = ctree;
             p.render();
+            p.ui.editor.render();
           },
         });
         p.render();

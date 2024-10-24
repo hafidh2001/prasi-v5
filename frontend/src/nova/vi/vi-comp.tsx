@@ -14,21 +14,30 @@ export const ViComp: FC<{
   is_layout: boolean;
   div_props?: (opt: DIV_PROPS_OPT) => DIV_PROPS;
   __idx?: string | number;
-  instance_id?: string;
-}> = ({ item, is_layout, div_props, __idx, instance_id }) => {
-  const { comps, instances, instantiate, ref_comp_props, parents, db, api, instanced } =
-    useVi(({ state, ref, action }) => ({
-      comps: ref.comps,
-      load: ref.loader.comps,
-      instances: state.comp.instances,
-      loaded: state.comp.loaded,
-      instantiate: action.instantiate_comp,
-      ref_comp_props: ref.comp_props,
-      parents: ref.item_parents,
-      db: ref.db,
-      api: ref.api,
-      instanced: ref.instanced,
-    }));
+}> = ({ item, is_layout, div_props, __idx }) => {
+  const {
+    comps,
+    instances,
+    instantiate,
+    ref_comp_props,
+    parents,
+    db,
+    api,
+    instanced,
+    edit_comp_id,
+  } = useVi(({ state, ref, action }) => ({
+    comps: ref.comps,
+    load: ref.loader.comps,
+    instances: state.comp.instances,
+    loaded: state.comp.loaded,
+    instantiate: action.instantiateComp,
+    ref_comp_props: ref.comp_props,
+    parents: ref.item_parents,
+    db: ref.db,
+    api: ref.api,
+    instanced: ref.instanced,
+    edit_comp_id: ref.edit_comp_id,
+  }));
 
   const comp_id = item.component!.id;
   const loading_component = <LoadingSpinner />;
@@ -36,7 +45,11 @@ export const ViComp: FC<{
   if (!comps[comp_id]) {
     return loading_component;
   } else {
-    if (!instances[item.id] || instanced[item.id] !== item) {
+    if (
+      !instances[item.id] ||
+      instanced[item.id] !== item ||
+      edit_comp_id === comp_id
+    ) {
       instanced[item.id] = item;
       const parent_comp_args = parentCompArgs(parents, ref_comp_props, item.id);
       ref_comp_props[item.id] = compArgs(item, parent_comp_args, db, api);
@@ -46,6 +59,10 @@ export const ViComp: FC<{
   const instance = instances[item.id];
   if (!instance) return loading_component;
 
+  let instance_id: string | undefined = item.id;
+  if (edit_comp_id === comp_id) {
+    instance_id = undefined;
+  }
   return (
     //@ts-ignore
     <ViItem
@@ -53,7 +70,7 @@ export const ViComp: FC<{
       __idx={__idx}
       is_layout={is_layout}
       div_props={div_props}
-      instance_id={item.id}
+      instance_id={instance_id}
     />
   );
 };

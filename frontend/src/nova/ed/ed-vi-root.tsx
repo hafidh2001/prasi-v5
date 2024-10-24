@@ -57,6 +57,7 @@ export const EdViRoot = memo(() => {
       ) : (
         <StoreProvider>
           <ViRoot
+            edit_comp_id={active.comp_id}
             api={ref.api}
             db={ref.db}
             page={ref.page}

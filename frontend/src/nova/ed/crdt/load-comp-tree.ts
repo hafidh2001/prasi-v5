@@ -1,6 +1,9 @@
 import { NodeModel } from "@minoru/react-dnd-treeview";
+import { active } from "logic/active";
+import { PG } from "logic/ed-global";
 import { EBaseComp, EComp, PNode, SyncUndoItem } from "logic/types";
 import { fg } from "popup/flow/utils/flow-global";
+import { waitUntil } from "prasi-utils";
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "utils/sync/client";
 import { IItem } from "utils/types/item";
@@ -10,9 +13,6 @@ import { bind } from "./lib/immer-yjs";
 import { findNodeById, flattenTree } from "./node/flatten-tree";
 import { loadScriptModels, ScriptModel } from "./node/load-script-models";
 import { TreeVarItems } from "./node/var-items";
-import { PG } from "logic/ed-global";
-import { active } from "logic/active";
-import { waitUntil } from "prasi-utils";
 
 export type CompTree = ReturnType<typeof internalLoadCompTree>;
 
@@ -35,6 +35,7 @@ export const activateComp = async (p: PG, comp_id: string) => {
         if (p.viref.resetCompInstance) p.viref.resetCompInstance(id);
         p.comp.loaded[id].content_tree = ctree;
         p.render();
+        p.ui.editor.render();
       },
     });
     p.ui.comp.loading_id = "";

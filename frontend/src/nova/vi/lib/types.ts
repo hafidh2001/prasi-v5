@@ -26,6 +26,7 @@ export type ViProp = {
     pages: (ids: string[]) => Promise<void>;
     comps: (ids: string[]) => Promise<void>;
   };
+  edit_comp_id?: string;
   enable_preload?: boolean;
   enable_cache_js?: boolean;
   set_ref?: (ref: ViRef) => void;

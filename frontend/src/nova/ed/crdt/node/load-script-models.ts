@@ -67,7 +67,6 @@ export const loadScriptModels = async (
             exports: {},
           };
         }
-        result[file].exports = {};
         result[file].title = `${item.name}.${name}`;
       }
     }
@@ -113,7 +112,6 @@ export const loadScriptModels = async (
         exports: {},
       };
     }
-    result[item.id].exports = {};
     result[item.id].title = item.name;
   });
 

@@ -17,13 +17,18 @@ export const ViRoot: FC<ViProp> = ({
   enable_cache_js,
   enable_preload,
   set_ref,
+  edit_comp_id,
 }) => {
-  const { init, ref, resetCompInstance } = useVi(({ action, ref, state }) => ({
-    init: action.init,
+  const {
+    syncProp: syncProp,
+    ref,
+    resetCompInstance,
+  } = useVi(({ action, ref, state }) => ({
+    syncProp: action.syncProp,
     state_page: state.page,
     state_comps: ref.comps,
     ref,
-    resetCompInstance: action.reset_comp_instance,
+    resetCompInstance: action.resetCompInstance,
   }));
 
   ref.resetCompInstance = resetCompInstance;
@@ -41,7 +46,7 @@ export const ViRoot: FC<ViProp> = ({
     viInit({ loader, enablePreload: !!enable_preload });
   }
 
-  init({ page, comps, layout, db, api, mode });
+  syncProp({ page, comps, layout, db, api, mode, edit_comp_id });
 
   return (
     <ErrorBox>

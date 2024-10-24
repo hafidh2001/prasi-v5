@@ -53,6 +53,7 @@ const mergeParentVars = (
           variables[e.name] = m.id;
         }
       }
+
       if (models_map[id]?.length > 1) {
         for (const prop_name of models_map[id]) {
           const m = models[`${id}~${prop_name}`];
@@ -66,6 +67,7 @@ const mergeParentVars = (
       }
     }
   }
+  
 
   return variables;
 };
