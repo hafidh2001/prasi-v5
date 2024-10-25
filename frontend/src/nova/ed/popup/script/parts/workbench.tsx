@@ -119,7 +119,7 @@ export const EdScriptWorkbench: FC<{
                           border: 1px solid ${e.color};
                         `,
                         "uppercase text-white text-[12px] cursor-pointer flex items-center justify-center transition-all hover:opacity-100 w-[40px] text-center",
-                        popup.last_mode === e.type
+                        popup.mode === e.type
                           ? css`
                               background: ${e.color};
                               color: white;
@@ -128,7 +128,6 @@ export const EdScriptWorkbench: FC<{
                       )}
                       onClick={() => {
                         popup.mode = e.type as any;
-                        popup.last_mode = e.type as any;
                         p.render();
                       }}
                     >

@@ -103,7 +103,15 @@ export const EdPrasiCode = () => {
               value={_css}
               defaultValue={itemCssDefault}
               onChange={(val) => {
-                console.log(val);
+                getActiveTree(p).update("Update Code", ({ findNode }) => {
+                  const n = findNode(active.item_id);
+                  if (n && !n.item.adv) {
+                    n.item.adv = {};
+                  }
+                  if (n && n.item.adv) {
+                    n.item.adv.css = val;
+                  }
+                });
               }}
               lang="scss"
             />
@@ -113,7 +121,15 @@ export const EdPrasiCode = () => {
             <MonacoLang
               value={_html}
               onChange={(val) => {
-                console.log(val);
+                getActiveTree(p).update("Update Code", ({ findNode }) => {
+                  const n = findNode(active.item_id);
+                  if (n && !n.item.adv) {
+                    n.item.adv = {};
+                  }
+                  if (n && n.item.adv) {
+                    n.item.adv.html = val;
+                  }
+                });
               }}
               lang="html"
             />

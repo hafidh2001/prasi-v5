@@ -116,7 +116,6 @@ export const EDGlobal = {
         },
         paned: localStorage.getItem("prasi-popup-script-mode") === "paned",
         mode: "js" as "js" | "css" | "html",
-        last_mode: "js" as "js" | "css" | "html",
         type: "item" as "item" | "prop-master" | "prop-instance" | "comp-types",
         prop_kind: "" as PropFieldKind,
         prop_name: "",
