@@ -5,6 +5,7 @@ import { PageTree } from "../crdt/load-page-tree";
 import { CompPickerNode } from "../popup/comp/comp-picker/render-picker-node";
 import { EComp, EPage, ESite, PropFieldKind } from "./types";
 import { ViRef } from "vi/lib/store";
+import { defineScriptEdit } from "popup/script/parts/do-edit";
 
 export const EDGlobal = {
   mode: "" as "desktop" | "mobile",
@@ -28,7 +29,8 @@ export const EDGlobal = {
     loaded: {} as Record<string, EComp>,
   },
   script: {
-    do_edit: async (newval: string, all?: boolean) => {},
+    ignore_changes: false,
+    do_edit: (() => {}) as unknown as ReturnType<typeof defineScriptEdit>,
     flow: {
       current: null as null | RPFlow,
       should_relayout: false,

@@ -12,6 +12,8 @@ import { foldRegionVState } from "./js/fold-region-vstate";
 import { jsxColorScheme } from "./js/jsx-style";
 import { registerPrettier } from "./js/register-prettier";
 import { registerReact } from "./js/register-react";
+import { defineScriptEdit } from "../parts/do-edit";
+import { getActiveNode } from "crdt/node/get-node-by-id";
 export const MonacoJS: FC<{
   highlightJsx?: boolean;
   sidebar?: boolean;
@@ -69,6 +71,7 @@ export const MonacoJS: FC<{
     };
     window.addEventListener("keydown", preventCtrlP, true);
     return () => {
+      p.script.do_edit = (() => {}) as any;
       window.removeEventListener("keydown", preventCtrlP, true);
     };
   }, []);
@@ -124,6 +127,8 @@ export const MonacoJS: FC<{
           local.editor = null;
         });
         local.editor = editor;
+        p.script.do_edit = defineScriptEdit(editor, monaco);
+
         registerPrettier(monaco);
         await registerReact(monaco);
 
@@ -147,7 +152,8 @@ export const MonacoJS: FC<{
             m.model = monacoRegisterSource(monaco, m.source, m.name || "");
             m.model.onDidChangeContent((e) => {
               if (onChange && m.model) {
-                if (m.model._ignoreChanges) {
+                if (m.model._ignoreChanges || p.script.ignore_changes) {
+                  p.script.ignore_changes = false;
                   delete m.model._ignoreChanges;
                   return;
                 }

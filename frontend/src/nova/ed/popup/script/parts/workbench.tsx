@@ -77,12 +77,31 @@ export const EdScriptWorkbench: FC<{
           is_error && "bg-red-100"
         )}
       >
-        <div className={cx("flex items-stretch")}>
+        <div
+          className={cx(
+            "flex items-stretch",
+            css`
+              .top-btn {
+                display: flex;
+                align-items: center;
+                flex-direction: row;
+                font-size: 12px;
+                border: 1px solid #ccc;
+                padding: 0px 5px;
+                height: 20px;
+                cursor: pointer;
+                &:hover {
+                  background: #edf0f9;
+                }
+              }
+            `
+          )}
+        >
           {popup.type === "prop-master" && <CompTitleMaster />}
           {popup.type === "prop-instance" && <CompTitleInstance />}
           {popup.type === "item" && (
             <>
-              <div className="flex p-2 space-x-1 border-r">
+              <div className={cx("flex p-2 space-x-1 border-r")}>
                 {(!has_expression
                   ? [
                       { type: "js", color: "#e9522c" },
@@ -205,7 +224,6 @@ export const EdScriptWorkbench: FC<{
                           </div>
                         </div> */}
 
-                      <EdScriptSnippet />
                       {/* {script_mode === "flow" && (
                           <div className="flex items-center pl-2 border-l ml-1">
                             <Tooltip
@@ -222,6 +240,7 @@ export const EdScriptWorkbench: FC<{
                             </Tooltip>
                           </div>
                         )} */}
+                      <EdScriptSnippet />
                     </>
                   )}
                 </>
