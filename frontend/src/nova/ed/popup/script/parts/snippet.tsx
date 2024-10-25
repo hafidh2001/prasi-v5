@@ -42,8 +42,8 @@ export const EdScriptSnippet: FC<{}> = ({}) => {
               onClick={() => {
                 local.open = false;
                 local.render();
-
-                p.script.do_edit(async ({ imports, body, wrapImports }) => {
+                p.script.snippet_pasted = true;
+                p.script.do_edit(async ({ imports, wrapImports }) => {
                   let name = "local";
                   let idx = 2;
                   const item_name =
@@ -89,26 +89,6 @@ export default () => (
 )`,
                   ];
                 });
-                //                 p.script.do_edit(
-                //                   `\
-                // <div {...props} className={cx(props.className, "")}>
-                // <Local
-                // name="local"
-                // value={
-                // {
-                // //local object
-                // }
-                // }
-                // effect={async (local) => {
-                // //local effect
-                // }}
-                // >
-                // {children}
-                // </Local>
-                // </div>
-                //     `,
-                //                   true
-                //                 );
               }}
             >
               &lt;Local/&gt;
@@ -116,12 +96,35 @@ export default () => (
             <Button
               className={cx(btn_style)}
               onClick={() => {
-                //                 p.script.do_edit(
-                //                   `\
-                // <PassProp key={0} children={children} />
-                //     `,
-                //                   false
-                //                 );
+                p.script.snippet_pasted = true;
+                p.script.do_edit(async ({ imports, wrapImports }) => {
+                  let p_idx = 0;
+                  return [
+                    wrapImports([
+                      ...imports.filter((e, idx) => {
+                        if (e.startsWith("export const pass_prop")) {
+                          p_idx = idx;
+                          return false;
+                        }
+                        if (p_idx > 0 && idx >= p_idx) return false;
+                        return true;
+                      }),
+                      `\
+export const pass_prop = {};
+const PassProp: React.FC<
+  { key: any; children: any } & Record<string, any>
+> = null as any`,
+                    ]),
+                    `\
+export default () => (
+  <div {...props} className={cx(props.className, "")}>
+    <PassProp key={'-'} item={"item"}>
+      { children }
+    </PassProp>
+  </div>
+)`,
+                  ];
+                });
               }}
             >
               &lt;PassProp/&gt;
@@ -129,18 +132,38 @@ export default () => (
             <Button
               className={cx(btn_style)}
               onClick={() => {
-                //                 p.script.do_edit(
-                //                   `\
-                // <div {...props} className={cx(props.className, "")}>
-                // {[].map((item, idx) => (
-                //   <Fragment key={idx}>
-                //     <PassProp item={item} children={children} />
-                //   </Fragment>
-                // ))}
-                // </div>
-                // `,
-                //                   true
-                //                 );
+                p.script.snippet_pasted = true;
+                p.script.do_edit(async ({ imports, wrapImports }) => {
+                  let p_idx = 0;
+                  return [
+                    wrapImports([
+                      ...imports.filter((e, idx) => {
+                        if (e.startsWith("export const pass_prop")) {
+                          p_idx = idx;
+                          return false;
+                        }
+                        if (p_idx > 0 && idx >= p_idx) return false;
+                        return true;
+                      }),
+                      `\
+export const pass_prop = {};
+const PassProp: React.FC<
+  { key: any; children: any } & Record<string, any>
+> = null as any`,
+                    ]),
+                    `\
+export default () => (
+  <div {...props} className={cx(props.className, "")}>
+    {[1, 2, 3].map((item, idx) => (
+      <PassProp key={idx} item={item}>
+        { children }
+      </PassProp>
+    ))}
+  </div>
+)
+`,
+                  ];
+                });
               }}
             >
               &lt;Map /&gt;
@@ -148,12 +171,17 @@ export default () => (
             <Button
               className={cx(btn_style)}
               onClick={() => {
-                //                 p.script.do_edit(
-                //                   `\
-                // <>{true && <div {...props} className={cx(props.className, "")}>{children}</div>}</>
-                // `,
-                //                   true
-                //                 );
+                p.script.snippet_pasted = true;
+                p.script.do_edit(async ({ imports, wrapImports }) => {
+                  return [
+                    wrapImports(imports),
+                    `\
+export default () => (
+  <>{true && <div {...props} className={cx(props.className, "")}>{children}</div>}</>
+)
+`,
+                  ];
+                });
               }}
             >
               &lt;If /&gt;
@@ -161,23 +189,31 @@ export default () => (
             <Button
               className={cx(btn_style)}
               onClick={() => {
-                //                 p.script.do_edit(
-                //                   `\
-                // <>
-                // {
-                // /**if condition */
-                // true ? (
-                // /** then  */
-                // <div {...props} className={cx(props.className, "")}>{children}</div>
-                // ) : (
-                // /** else  */
-                // <div {...props} className={cx(props.className, "")}>ELSE CONDITION</div>
-                // )
-                // }
-                // </>
-                // `,
-                //                   true
-                //                 );
+                p.script.snippet_pasted = true;
+                p.script.do_edit(async ({ imports, wrapImports }) => {
+                  return [
+                    wrapImports(imports),
+                    `\
+export default () => (
+  <>
+    {
+      /**if condition */
+      true ?
+        /** then  */
+        <div {...props} className={cx(props.className, "")}>
+          {children}
+        </div>
+      : /** else  */
+        <div {...props} className={cx(props.className, "")}>
+          ELSE CONDITION
+        </div>
+
+    }
+  </>
+)
+`,
+                  ];
+                });
               }}
             >
               &lt;If Else /&gt;
@@ -185,14 +221,19 @@ export default () => (
             <Button
               className={cx(btn_style)}
               onClick={() => {
-                //                 p.script.do_edit(
-                //                   `\
-                // <div {...props} className={cx(props.className, "relative")}>
-                //   <div className="absolute inset-0">{children}</div>
-                // </div>
-                // `,
-                //                   true
-                //                 );
+                p.script.snippet_pasted = true;
+                p.script.do_edit(async ({ imports, wrapImports }) => {
+                  return [
+                    wrapImports(imports),
+                    `\
+export default () => (
+  <div {...props} className={cx(props.className, "relative overflow-auto")}>
+    <div className="absolute inset-0">{children}</div>
+  </div>
+)
+`,
+                  ];
+                });
               }}
             >
               &lt;Scrollable /&gt;

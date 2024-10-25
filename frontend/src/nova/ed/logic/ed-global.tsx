@@ -30,6 +30,7 @@ export const EDGlobal = {
   },
   script: {
     ignore_changes: false,
+    snippet_pasted: false,
     do_edit: (() => {}) as unknown as ReturnType<typeof defineScriptEdit>,
     flow: {
       current: null as null | RPFlow,

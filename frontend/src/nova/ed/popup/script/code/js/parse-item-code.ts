@@ -29,6 +29,7 @@ export const parseItemCode = (model: ScriptModel) => {
 
   if (ast) {
     const exports = model.exports;
+
     traverse(ast.program, {
       ExportDefaultDeclaration: (node) => {
         if (
@@ -70,7 +71,11 @@ export const parseItemCode = (model: ScriptModel) => {
                       e.key.name === "value"
                   );
                   if (local_value?.type === "ObjectProperty") {
-                    model.local.value = cutCode(model.source, local_value.value, -2);
+                    model.local.value = cutCode(
+                      model.source,
+                      local_value.value,
+                      -2
+                    );
                   }
                 }
 
