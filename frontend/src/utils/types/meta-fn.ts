@@ -14,6 +14,7 @@ export type FNAdv = {
   jsBuilt?: string;
   css?: string;
   html?: string;
+  tailwind?: string;
 };
 
 export type FNComponent = {

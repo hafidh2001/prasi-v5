@@ -11,6 +11,16 @@ export const viDivProps = (
   item: DeepReadonly<IItem>,
   opt: { mode: "desktop" | "mobile"; div_props?: DIV_PROPS }
 ) => {
+  if (item.adv?.tailwind) {
+    let s = document.querySelector(`style#${item.id}`);
+    if (!s) {
+      s = document.createElement("style");
+      s.id = item.id;
+      document.head.appendChild(s);
+    }
+    s.innerHTML = item.adv.tailwind;
+  }
+
   const props: DIV_PROPS & { inherit?: { style: IItem; className: string } } = {
     ...(opt?.div_props || {}),
     className: cx(

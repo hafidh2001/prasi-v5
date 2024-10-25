@@ -155,7 +155,27 @@ export const jscript = {
                 },
               },
             });
-            const res = configureMonacoTailwindcss(monaco);
+            const res = configureMonacoTailwindcss(monaco, {
+              tailwindConfig: {
+                blocklist: [
+                  "absolute",
+                  "flex",
+                  "relative",
+                  "inset-0",
+                  "overflow-auto",
+                  "block",
+                  "flex",
+                  "flex-row",
+                  "border",
+                  "px-1",
+                  "p-1",
+                  "m-1",
+                  "space-x-1",
+                  "flex-col",
+                  "align-items",
+                ],
+              },
+            });
             this.getTailwindStyles = async (contents: string[]) => {
               return await res.generateStylesFromContent(
                 `@tailwind utilities;`,

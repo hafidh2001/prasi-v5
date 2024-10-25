@@ -179,7 +179,7 @@ export const MonacoJS: FC<{
             (m.model as any).prasi_model = m;
           }
 
-          if (m.name === activeModel && m.model) {
+          if (m.name === activeModel && m.model && !m.model.isDisposed()) {
             editor.setModel(m.model);
             registerEditorOpener(editor, monaco, p);
             monacoEnableJSX(editor, monaco, { nolib }, p);

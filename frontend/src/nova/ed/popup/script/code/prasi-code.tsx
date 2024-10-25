@@ -132,6 +132,7 @@ const update = {
     {
       id: string;
       source: string;
+      tailwind?: string;
       prop_name?: string;
       source_built?: string | null;
       local_name?: string;
@@ -193,6 +194,11 @@ const update = {
 
           const replaced = replaceString(source, [replace]);
           if (replaced.trim()) {
+            const tailwind = await jscript.getTailwindStyles?.([replaced]);
+            if (typeof tailwind === "string") {
+              q.tailwind = tailwind;
+            }
+
             try {
               q.source_built = (
                 await jscript.transform?.(replaced, {
@@ -220,6 +226,10 @@ const update = {
             n.item.adv = {};
           }
           if (n && n.item.adv) {
+            if (q.tailwind !== n.item.adv.tailwind) {
+              n.item.adv.tailwind = q.tailwind;
+            }
+
             if (!q.prop_name) {
               n.item.adv.js = q.source;
               if (q.source_built !== null) {

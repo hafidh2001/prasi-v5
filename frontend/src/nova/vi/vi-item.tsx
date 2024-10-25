@@ -40,9 +40,14 @@ export const ViItem: FC<{
       />
     );
   } else {
-    if (item.type === "text" && !item.adv?.js) {
+    if (item.type === "text") {
       childs = null;
-      props.dangerouslySetInnerHTML = { __html: item.html || "" };
+      if (!item.adv?.js) {
+        props.dangerouslySetInnerHTML = { __html: item.html || "" };
+      } else {
+        delete props.contentEditable;
+        delete props.dangerouslySetInnerHTML;
+      }
     } else {
       if (item.childs) {
         childs = (
@@ -58,7 +63,6 @@ export const ViItem: FC<{
   }
 
   if (item.adv?.js) {
-
     return (
       <ViScript
         __idx={__idx}

@@ -94,11 +94,7 @@ const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
           instance_id={instance_id}
           div_props={({ item, ref, instance_id }) => ({
             contentEditable: item.type === "text" ? true : undefined,
-            ref: (div) => {
-              if (item.id === active.item_id && item.type === "text") {
-                div?.focus();
-              }
-            },
+            ref: (el) => {},
             onPointerEnter(e) {
               if (instance_id) {
                 //@ts-ignore
