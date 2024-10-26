@@ -20,6 +20,7 @@ export const ViLocalAutoRender = (opt: {
       __autorender: true,
       [local_name]: value[local_name],
       __version: 0,
+      __item_id: item.id,
       proxy: proxy({
         ...value,
         render: ref(() => {
@@ -34,6 +35,7 @@ export const ViLocalAutoRender = (opt: {
   const internal = local_value[item.id] as {
     __version: number;
     __autorender: boolean;
+    __item_id: string;  
     proxy: any;
   };
 

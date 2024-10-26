@@ -87,7 +87,12 @@ export const ViScript: FC<{
   const comp_args = parentCompArgs(parents, comp_props_parents, item.id);
   const local_args: Record<
     string,
-    { render: () => void; __autorender?: boolean; proxy?: any }
+    {
+      render: () => void;
+      proxy?: any;
+      __autorender?: boolean;
+      __item_id?: string;
+    }
   > = parentLocalArgs(local_value, parents, item.id);
 
   const passprops_args = __idx
@@ -101,7 +106,7 @@ export const ViScript: FC<{
   }
 
   for (const [k, v] of Object.entries(local_args)) {
-    if (v.__autorender && v.proxy) {
+    if (v.__autorender && v.proxy && v.__item_id !== item.id) {
       local_args[k] = useSnapshot(v.proxy);
       // this is a hack to make valtio only watch accessed properties
       // and not all properties of the object

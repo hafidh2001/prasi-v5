@@ -22,10 +22,11 @@ export default {
             size: formatBytes(JSON.stringify(e).length),
           };
         }),
+        history: comp.actionHistory,
         ts: Date.now(),
       });
     }
-    return compressed(ctx, ["123123"]);
+    return compressed(ctx, ["-"]);
   },
 };
 

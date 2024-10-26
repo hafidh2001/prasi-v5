@@ -261,8 +261,6 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
           save();
         }
       });
-
-      save();
     }
   }
 

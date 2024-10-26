@@ -15,7 +15,7 @@ export const EdTreeHistory = ({ tree }: { tree: PageTree | CompTree }) => {
       timeout: null as any,
       unlisten: () => {},
     },
-    () => {
+    async () => {
       reload();
       tree.before_update = (do_update) => {
         if (local.history && local.history.redo.length > 0) {
