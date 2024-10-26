@@ -77,10 +77,11 @@ export const ${name} = defineLocal({
 export default () => (
   <div {...props} className={cx(props.className, "")}>
     <Local
+      auto_render
       name={local_name}
       value={${name}}
       effect={async (${name}) => {
-        //local effect
+        
       }}
     >
       {children}

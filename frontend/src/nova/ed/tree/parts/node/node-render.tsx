@@ -12,6 +12,7 @@ import { EdTreeNodeIndent } from "./node-indent";
 import { EdTreeNodeName } from "./node-name";
 import { parseNodeState } from "./node-tools";
 import { Popover } from "utils/ui/popover";
+import { CodeHighlight } from "./code-highlight";
 
 export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -58,18 +59,41 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
           : p.ui.tree.tooltip.open === item.id
       }
       content={
-        <div className="p-1 select-text">
-          {item.component?.id &&
-            p.comp.loaded[item.component.id]?.content_tree.name && (
-              <>
-                Component:{" "}
-                <span className="font-bold underline">
-                  {p.comp.loaded[item.component.id]?.content_tree.name}
-                </span>
-                <br />
-              </>
-            )}
-          ID: {node.item.id}
+        <div className="select-text">
+          <div className="p-1">
+            {item.component?.id &&
+              p.comp.loaded[item.component.id]?.content_tree.name && (
+                <>
+                  Component:{" "}
+                  <span className="font-bold underline">
+                    {p.comp.loaded[item.component.id]?.content_tree.name}
+                  </span>
+                  <br />
+                </>
+              )}
+            ID: {node.item.id}
+          </div>
+          {!item.component?.id && (item.adv?.js || item.adv?.css) && (
+            <CodeHighlight
+              format={(e) => {
+                const lines = e.split("\n");
+                const idx = lines.findIndex((line) =>
+                  line.startsWith("// #endregion")
+                );
+                if (idx >= 0) {
+                  return lines
+                    .slice(idx + 1)
+                    .join("\n")
+                    .trim();
+                }
+
+                return e;
+              }}
+              language={item.adv.js ? "ts" : "css"}
+            >
+              {item.adv.js || item.adv.css}
+            </CodeHighlight>
+          )}
         </div>
       }
       onOpenChange={(open) => {
@@ -113,6 +137,7 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
         }}
         onClick={() => {
           p.ui.tree.prevent_tooltip = false;
+          p.ui.tree.tooltip.open = "";
           activateItem(p, item.id);
         }}
         className={cx(

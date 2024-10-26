@@ -19,6 +19,7 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-switch": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.2",
+    "@speed-highlight/core": "^1.2.6",
     "@swc/types": "^0.1.12",
     "@types/dagre": "^0.7.52",
     "@types/lodash.capitalize": "^4.2.9",

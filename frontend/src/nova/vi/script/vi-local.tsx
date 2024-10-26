@@ -10,6 +10,7 @@ export const createViLocal = (
   return (opt: {
     name: string;
     value: any;
+    auto_render?: boolean;
     effect: (local: any) => void;
     children: any;
   }) => {

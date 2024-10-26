@@ -42,6 +42,7 @@ const Local = null as (<T extends Record<string, any>>(arg: {
     idx?: any;
     value: T;
     children?: any;
+    auto_render?: boolean;
     deps?: any[];
     effect?: (
       local: T & { render: () => void }
