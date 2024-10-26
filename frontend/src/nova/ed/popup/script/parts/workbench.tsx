@@ -1,7 +1,13 @@
 import { getNodeById } from "crdt/node/get-node-by-id";
 import { active } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
-import { PanelTopClose, PictureInPicture2, ScrollText, X } from "lucide-react";
+import {
+  PanelTopClose,
+  PictureInPicture2,
+  ScrollText,
+  Sticker,
+  X,
+} from "lucide-react";
 import { FC, ReactNode, useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
@@ -71,94 +77,96 @@ export const EdScriptWorkbench: FC<{
 
   return (
     <div className="flex flex-1 flex-col select-none">
-      <div
-        className={cx(
-          "flex border-b items-stretch justify-between",
-          is_error && "bg-red-100"
-        )}
-      >
-        <div
-          className={cx(
-            "flex items-stretch",
-            css`
-              .top-btn {
-                display: flex;
-                align-items: center;
-                flex-direction: row;
-                font-size: 12px;
-                border: 1px solid #ccc;
-                padding: 0px 5px;
-                height: 20px;
-                cursor: pointer;
-                &:hover {
-                  background: #edf0f9;
-                }
-              }
-            `
-          )}
-        >
-          {popup.type === "prop-master" && <CompTitleMaster />}
-          {popup.type === "prop-instance" && <CompTitleInstance />}
-          {popup.type === "item" && (
-            <>
-              <div className={cx("flex p-2 space-x-1 border-r")}>
-                {(!has_expression
-                  ? [
-                      { type: "js", color: "#e9522c" },
-                      { type: "css", color: "#188228" },
-                      { type: "html", color: "#2c3e83" },
-                    ]
-                  : [{ type: "css", color: "#188228" }]
-                ).map((e) => {
-                  return (
-                    <div
-                      key={e.type}
-                      className={cx(
-                        css`
-                          color: ${e.color};
-                          border: 1px solid ${e.color};
-                        `,
-                        "uppercase text-white text-[12px] cursor-pointer flex items-center justify-center transition-all hover:opacity-100 w-[40px] text-center",
-                        popup.mode === e.type
-                          ? css`
-                              background: ${e.color};
-                              color: white;
-                            `
-                          : "opacity-30"
-                      )}
-                      onClick={() => {
-                        popup.mode = e.type as any;
-                        p.render();
-                      }}
-                    >
-                      {e.type}
-                    </div>
-                  );
-                })}
-              </div>
-              {has_expression && (
-                <div className="flex items-center text-sm pl-2 text-slate-400">
-                  JS is disabled because this item has expression{" "}
-                  <div
-                    onClick={() => {
-                      p.ui.right.tab = "events";
-                      p.ui.popup.events.open = node.item.loop
-                        ? "loop"
-                        : "content";
-
-                      p.render();
-                    }}
-                    className="border border-blue-600 px-2 ml-2 text-blue-600 cursor-pointer hover:bg-blue-600 hover:text-white"
-                  >
-                    Edit
-                  </div>
-                </div>
+      {item && (
+        <>
+          <div
+            className={cx(
+              "flex border-b items-stretch justify-between",
+              is_error && "bg-red-100"
+            )}
+          >
+            <div
+              className={cx(
+                "flex items-stretch",
+                css`
+                  .top-btn {
+                    display: flex;
+                    align-items: center;
+                    flex-direction: row;
+                    font-size: 12px;
+                    border: 1px solid #ccc;
+                    padding: 0px 5px;
+                    height: 20px;
+                    cursor: pointer;
+                    &:hover {
+                      background: #edf0f9;
+                    }
+                  }
+                `
               )}
-              {mode === "js" && (
+            >
+              {popup.type === "prop-master" && <CompTitleMaster />}
+              {popup.type === "prop-instance" && <CompTitleInstance />}
+              {popup.type === "item" && (
                 <>
-                  {popup.type === "item" && (
+                  <div className={cx("flex p-2 space-x-1 border-r")}>
+                    {(!has_expression
+                      ? [
+                          { type: "js", color: "#e9522c" },
+                          { type: "css", color: "#188228" },
+                          { type: "html", color: "#2c3e83" },
+                        ]
+                      : [{ type: "css", color: "#188228" }]
+                    ).map((e) => {
+                      return (
+                        <div
+                          key={e.type}
+                          className={cx(
+                            css`
+                              color: ${e.color};
+                              border: 1px solid ${e.color};
+                            `,
+                            "uppercase text-white text-[12px] cursor-pointer flex items-center justify-center transition-all hover:opacity-100 w-[40px] text-center",
+                            popup.mode === e.type
+                              ? css`
+                                  background: ${e.color};
+                                  color: white;
+                                `
+                              : "opacity-30"
+                          )}
+                          onClick={() => {
+                            popup.mode = e.type as any;
+                            p.render();
+                          }}
+                        >
+                          {e.type}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {has_expression && (
+                    <div className="flex items-center text-sm pl-2 text-slate-400">
+                      JS is disabled because this item has expression{" "}
+                      <div
+                        onClick={() => {
+                          p.ui.right.tab = "events";
+                          p.ui.popup.events.open = node.item.loop
+                            ? "loop"
+                            : "content";
+
+                          p.render();
+                        }}
+                        className="border border-blue-600 px-2 ml-2 text-blue-600 cursor-pointer hover:bg-blue-600 hover:text-white"
+                      >
+                        Edit
+                      </div>
+                    </div>
+                  )}
+                  {mode === "js" && (
                     <>
-                      {/* 
+                      {popup.type === "item" && (
+                        <>
+                          {/* 
                         <div className="border-l flex items-center pl-2 p-1 text-xs">
                           <div
                             className={cx(
@@ -223,7 +231,7 @@ export const EdScriptWorkbench: FC<{
                           </div>
                         </div> */}
 
-                      {/* {script_mode === "flow" && (
+                          {/* {script_mode === "flow" && (
                           <div className="flex items-center pl-2 border-l ml-1">
                             <Tooltip
                               content="Reset Flow"
@@ -239,57 +247,74 @@ export const EdScriptWorkbench: FC<{
                             </Tooltip>
                           </div>
                         )} */}
-                      <EdScriptSnippet />
+                          <EdScriptSnippet />
+                        </>
+                      )}
                     </>
                   )}
                 </>
               )}
-            </>
-          )}
-        </div>
-        <div className="flex items-stretch text-xs">
-          {!popup.paned && (
-            <Tooltip content="Switch to Panned Mode" asChild>
+            </div>
+            <div className="flex items-stretch text-xs">
+              {!popup.paned && (
+                <Tooltip content="Switch to Panned Mode" asChild>
+                  <div
+                    onClick={() => {
+                      localStorage.setItem("prasi-popup-script-mode", "paned");
+                      popup.paned = true;
+                      p.render();
+                    }}
+                    className="flex items-center justify-center px-2 cursor-pointer hover:text-blue-600"
+                  >
+                    <PanelTopClose size={13} />
+                  </div>
+                </Tooltip>
+              )}
+              {popup.paned && (
+                <Tooltip content="Switch to Popup Mode" asChild>
+                  <div
+                    onClick={() => {
+                      localStorage.setItem("prasi-popup-script-mode", "popup");
+                      popup.paned = false;
+                      p.render();
+                    }}
+                    className="flex items-center justify-center px-2 cursor-pointer hover:text-blue-600"
+                  >
+                    <PictureInPicture2 size={13} />
+                  </div>
+                </Tooltip>
+              )}
               <div
                 onClick={() => {
-                  localStorage.setItem("prasi-popup-script-mode", "paned");
-                  popup.paned = true;
+                  p.viref?.resetLocal?.();
+                  popup.open = false;
                   p.render();
                 }}
-                className="flex items-center justify-center px-2 cursor-pointer hover:text-blue-600"
+                className="flex items-center justify-center px-1 pr-2 cursor-pointer hover:text-red-600"
               >
-                <PanelTopClose size={13} />
+                <X size={13} />
               </div>
-            </Tooltip>
-          )}
-          {popup.paned && (
-            <Tooltip content="Switch to Popup Mode" asChild>
-              <div
-                onClick={() => {
-                  localStorage.setItem("prasi-popup-script-mode", "popup");
-                  popup.paned = false;
-                  p.render();
-                }}
-                className="flex items-center justify-center px-2 cursor-pointer hover:text-blue-600"
-              >
-                <PictureInPicture2 size={13} />
-              </div>
-            </Tooltip>
-          )}
+            </div>
+          </div>
+          {children}
+        </>
+      )}
+      {!item && (
+        <div className="flex items-center justify-center flex-1 w-full h-full flex-col text-center">
+          <Sticker size={40} strokeWidth={1} />
+          No Item Selected
           <div
+            className="border rounded px-2 hover:bg-blue-100 cursor-pointer"
             onClick={() => {
               p.viref?.resetLocal?.();
               popup.open = false;
               p.render();
             }}
-            className="flex items-center justify-center px-1 pr-2 cursor-pointer hover:text-red-600"
           >
-            <X size={13} />
+            Close
           </div>
         </div>
-      </div>
-
-      {children}
+      )}
     </div>
   );
 };
