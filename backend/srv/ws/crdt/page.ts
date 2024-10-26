@@ -231,6 +231,15 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
               actionHistory[res[0].id] = action_name;
             }
           }
+
+          _db.page.update({
+            where: { id: page_id },
+            data: {
+              content_tree: immer.get(),
+              updated_at: new Date(),
+            },
+            select: { id: true },
+          });
         }
       });
     }

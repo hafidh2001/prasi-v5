@@ -112,7 +112,7 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
 
       undoManager.captureTimeout = 200;
 
-      const saveCache = () => {
+      const save = async () => {
         const found = editor.cache.tables.comp.find({ where: { comp_id } });
         editor.cache.tables.comp.save({
           id: found?.[0]?.id,
@@ -123,6 +123,15 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
             content_tree: immer.get(),
           },
           ts: Date.now(),
+        });
+        await _db.component.update({
+          where: { id: comp_id },
+          data: {
+            name: db_comp.name,
+            content_tree: immer.get(),
+            updated_at: new Date(),
+          },
+          select: { id: true },
         });
       };
 
@@ -249,11 +258,11 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
               actionHistory[res[0].id] = action_name;
             }
           }
-          saveCache();
+          save();
         }
       });
 
-      saveCache();
+      save();
     }
   }
 
