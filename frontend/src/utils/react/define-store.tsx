@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { proxy, Snapshot, useSnapshot } from "valtio";
+import { getVersion, proxy, Snapshot, useSnapshot } from "valtio";
 
 const default_ctx = { ctx: {} as any, render() {} };
 const store_ctx = createContext<{
@@ -60,36 +60,40 @@ export const defineStore = function <
     });
 
     const store = useContext(store_ctx);
-    const ctx = store.ctx;
-    if (!ctx[init.name] && init.state) {
-      ctx[init.name] = { state: proxy(init.state), ref: init.ref || {} };
+    const init_ctx = store.ctx;
+    if (!init_ctx[init.name] && init.state) {
+      init_ctx[init.name] = {
+        state: proxy(init.state),
+        ref: init.ref || {},
+      };
     }
+    const ctx = init_ctx[init.name];
 
-    const state = useSnapshot<T>(ctx[init.name].state);
-    const ref = ctx[init.name].ref;
-
+    const ref = ctx.ref;
+    const state = useSnapshot(ctx.state);
     const selection = selector({
       ref,
       state,
-      action: createAction(ref, ctx[init.name].state, init),
+      action: createAction(ref, ctx.state, init),
     }) as Z & {
       update: (fn: (state: T) => void) => void;
     };
+
     selection.update = (fn) => {
-      fn(ctx[init.name].state);
+      fn(ctx.state);
     };
 
     if (init.effect) {
-      const effects = init.effect({ state: ctx[init.name].state });
+      const effects = init.effect({ state: ctx.state });
 
       for (const e of effects) {
         useEffect(() => {
           internal.current.mounted = true;
           e.effect({
-            action: createAction(ref, ctx[init.name].state, init),
-            state,
+            action: createAction(ref, ctx.state, init),
+            state: ctx.state,
             update(fn) {
-              fn(ctx[init.name].state);
+              fn(ctx.state);
             },
           });
           return () => {
@@ -143,3 +147,58 @@ const createAction = (
     }
   ) as any;
 };
+
+// type Path = (string | symbol)[];
+
+// interface DeepProxy {
+//   __path: Path[];
+//   [key: string]: any;
+// }
+
+// function createDeepProxy(): DeepProxy {
+//   const root = {};
+
+//   const paths = {} as Record<string, { __path: Path }>;
+
+//   const handler: ProxyHandler<object> = {
+//     get(target: any, prop: string | symbol, receiver: any) {
+//       if (target === root) {
+//         const id = createId();
+//         paths[id] = { __path: [prop] };
+//         return new Proxy(paths[id], handler);
+//       }
+
+//       if (prop === "__path") {
+//         return target.__path;
+//       }
+//       target.__path.push(prop);
+
+//       return new Proxy(target, handler);
+//     },
+//   };
+
+//   return new Proxy(root, handler) as DeepProxy;
+// }
+// function cleanArray(arr: Path[]): Path[] {
+//   const result: Path[] = [];
+//   let currentGroup: Path | null = null;
+
+//   for (const subArr of arr) {
+//     if (!currentGroup) {
+//       currentGroup = subArr; // Start a new group
+//     } else if (subArr[0] === currentGroup[0]) {
+//       // If it starts with the same character, keep adding
+//       currentGroup = subArr;
+//     } else {
+//       // Save the current group and start a new one
+//       result.push(currentGroup);
+//       currentGroup = subArr;
+//     }
+//   }
+
+//   if (currentGroup) {
+//     result.push(currentGroup); // Append the last group
+//   }
+
+//   return result;
+// }

@@ -18,19 +18,21 @@ export const ProdRouter = memo(() => {
     mode,
     db,
     api,
+    ref,
   } = useProdState(({ ref, state, action }) => ({
     pathname: state.pathname,
     mode: state.mode,
     router: ref.router,
     pages: ref.pages,
     loadPage: action.loadPage,
-    page: state.page,
-    layout: state.layout,
+    page: ref.page,
+    layout: ref.layout,
     comps: ref.comps,
     comp_status: state.status.comps,
     ts: state.ts,
     db: ref.db,
     api: ref.api,
+    ref,
   }));
 
   const found = router?.lookup(base.pathname);
@@ -80,7 +82,7 @@ export const ProdRouter = memo(() => {
     }
   } else {
     update((s) => {
-      s.page = null;
+      ref.page = null;
     });
   }
 

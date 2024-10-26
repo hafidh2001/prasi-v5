@@ -27,12 +27,12 @@ export const EdTreeAction = ({
   let mode = "";
   let has_js = false;
   let has_css = false;
-  if (!mode && item.adv?.js) {
-    mode = "js";
+  if (item.adv?.js) {
+    if (!mode) mode = "js";
     has_js = true;
   }
-  if (!mode && item.adv?.css) {
-    mode = "css";
+  if (item.adv?.css) {
+    if (!mode) mode = "css";
     has_css = true;
   }
   if (!mode && item.adv?.html) mode = "html";
@@ -102,8 +102,12 @@ export const EdTreeAction = ({
         (comp.editable && comp.id === active.comp?.id) ||
         child_jsx_has_script) && (
         <>
-          {has_js && <div className="node-text text-[8px] text-orange-500 ml-1">JS</div>}
-          {has_css && <div className="node-text text-[8px] text-green-800 ml-1">CSS</div>}
+          {has_js && (
+            <div className="node-text text-[9px] text-orange-500 ml-1">JS</div>
+          )}
+          {has_css && (
+            <div className="node-text text-[9px] text-green-800 ml-1">CSS</div>
+          )}
           <Tooltip content={`Edit ${mode}`} asChild>
             <div
               className={cx(

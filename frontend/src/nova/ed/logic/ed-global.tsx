@@ -64,6 +64,10 @@ export const EDGlobal = {
       ref: null as null | TreeMethods,
       prevent_indent: false,
       prevent_tooltip: false,
+      tooltip: {
+        open: "",
+        open_timeout: null as any,
+      },
       expanded: {} as Record<string, string[]>,
       search: {
         value: "",

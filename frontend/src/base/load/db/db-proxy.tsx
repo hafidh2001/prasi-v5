@@ -15,7 +15,7 @@ const db_mode = {} as Record<string, "msgpack" | "json">;
 export const dbProxy = (dburl: string) => {
   const name = "";
 
-  if (!db_mode[dburl]) {
+  if (dburl && !db_mode[dburl]) {
     fetchSendDb(
       {
         table: "check",

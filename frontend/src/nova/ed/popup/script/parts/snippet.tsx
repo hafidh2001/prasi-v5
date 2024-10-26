@@ -78,7 +78,7 @@ export default () => (
   <div {...props} className={cx(props.className, "")}>
     <Local
       name={local_name}
-      value={local}
+      value={${name}}
       effect={async (${name}) => {
         //local effect
       }}

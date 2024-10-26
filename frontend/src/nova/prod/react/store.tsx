@@ -25,12 +25,13 @@ export const useProdState = defineStore({
       >,
     },
     comps: {} as Record<string, EBaseComp>,
+    page: null as null | PageRoute,
+    layout: { id: "", root: null as null | EPage["content_tree"] },
   },
   state: {
     ts: Date.now(),
     pathname: location.pathname,
     mode: "desktop" as "mobile" | "desktop",
-    page: null as null | PageRoute,
     site: {
       id: "",
       name: "",
@@ -38,7 +39,6 @@ export const useProdState = defineStore({
       responsive: "all",
       api_url: "",
     },
-    layout: { id: "", root: null as null | EPage["content_tree"] },
     status: {
       router: "init" as "init" | "loading" | "ready",
       comps: {} as Record<string, "init" | "loading">,
@@ -51,7 +51,7 @@ export const useProdState = defineStore({
         loadRouter().then(({ router, pages, site, layout }) => {
           update((s) => {
             s.site = site;
-            s.layout = layout;
+            r.layout = layout;
             r.router = router;
             r.pages = pages;
 
@@ -122,8 +122,8 @@ export const useProdState = defineStore({
       }, 50);
     },
     loadPage(page: PageRoute) {
-      if (s.page?.id !== page.id) {
-        s.page = page;
+      if (r.page?.id !== page.id) {
+        r.page = page;
       }
 
       if (!page.root && !page.loading) {
@@ -132,18 +132,18 @@ export const useProdState = defineStore({
         loadPages([page.id]).then((result) => {
           update((s) => {
             const tree = result[page.id];
-            if (tree && s.page) {
-              s.page.root = tree;
+            if (tree && r.page) {
+              r.page.root = tree;
 
               let mode = (
                 s.site.responsive !== "all" ? s.site.responsive : "desktop"
               ) as "mobile" | "desktop";
               s.mode = tree.responsive ? tree.responsive : mode;
 
-              delete s.page.loading;
+              delete r.page.loading;
 
               if (tree.component_ids) {
-                const ids = snapshot(tree.component_ids);
+                const ids = tree.component_ids;
                 if (Array.isArray(ids)) {
                   this.loadComp(ids);
                 }

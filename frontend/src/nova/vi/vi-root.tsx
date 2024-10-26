@@ -25,8 +25,6 @@ export const ViRoot: FC<ViProp> = ({
     resetCompInstance,
   } = useVi(({ action, ref, state }) => ({
     syncProp: action.syncProp,
-    state_page: state.page,
-    state_comps: ref.comps,
     ref,
     resetCompInstance: action.resetCompInstance,
   }));

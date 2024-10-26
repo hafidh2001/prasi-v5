@@ -2,6 +2,17 @@ import { ScriptModel } from "crdt/node/load-script-models";
 import { generateImports } from "./generate-imports";
 import { generatePassProp } from "./generate-passprop";
 
+export const extractRegion = (code: string) => {
+  if (code.startsWith("// #region")) {
+    const lines = code.split("\n");
+    const region_end = lines.findIndex((line) =>
+      line.startsWith("// #endregion")
+    );
+    return lines.slice(0, region_end + 1);
+  }
+  return []
+};
+
 export const migrateCode = (
   model: ScriptModel,
   models: Record<string, ScriptModel>,

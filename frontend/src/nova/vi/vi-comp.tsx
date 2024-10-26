@@ -28,8 +28,8 @@ export const ViComp: FC<{
   } = useVi(({ state, ref, action }) => ({
     comps: ref.comps,
     load: ref.loader.comps,
-    instances: state.comp.instances,
-    loaded: state.comp.loaded,
+    instances: ref.comp.instances,
+    loaded: ref.comp.loaded,
     instantiate: action.instantiateComp,
     ref_comp_props: ref.comp_props,
     parents: ref.item_parents,

@@ -1,5 +1,5 @@
 import { DeepReadonly } from "popup/flow/runtime/types";
-import { FC } from "react";
+import { FC, useState } from "react";
 import { IItem } from "utils/types/item";
 import { DIV_PROPS, viDivProps } from "./lib/gen-parts";
 import { useVi } from "./lib/store";
@@ -14,14 +14,14 @@ export const ViItem: FC<{
   __idx?: string | number;
   instance_id?: string;
 }> = ({ item, is_layout, div_props, __idx, instance_id }) => {
-  const { page, mode, ts, ref } = useVi(({ state, ref, action }) => ({
-    page: state.page,
+  const { page, mode, ref } = useVi(({ state, ref, action }) => ({
+    page: ref.page,
     db: ref.db,
     api: ref.api,
-    ts: state.local_render[item.id],
     mode: state.mode,
     ref,
   }));
+  const [, render] = useState({});
 
   const props = viDivProps(item, {
     mode,
@@ -70,7 +70,7 @@ export const ViItem: FC<{
         childs={childs}
         props={props}
         instance_id={instance_id}
-        ts={ts}
+        render={() => render({})}
       />
     );
   }

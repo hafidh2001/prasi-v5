@@ -26,7 +26,13 @@ const viRef = {
   cache_js: true as boolean,
   instanced: {} as Record<ITEM_ID, any>,
 
+  page: null as null | ViPage,
+  layout: null as null | ViPage,
+  comp: { instances: {} as Record<string, IItem>, loaded: new Set<string>() },
+
   edit_comp_id: "",
+  local_render: {} as Record<string, () => void>,
+
   resetCompInstance: (comp_id: string) => {},
 };
 export type ViRef = typeof viRef;
@@ -36,23 +42,19 @@ export const useVi = defineStore({
   ref: viRef,
   state: {
     mode: "desktop" as "mobile" | "desktop",
-    page: null as null | ViPage,
-    layout: null as null | ViPage,
-    local_render: {} as Record<string, number>,
-    comp: { instances: {} as Record<string, IItem>, loaded: new Set<string>() },
   },
   action: ({ state, ref, update }) => ({
     instantiateComp: (item: DeepReadonly<IItem>) => {
       const comp_id = item.component!.id;
-      if (!state.comp.instances[item.id] && comp_id && ref.comps[comp_id]) {
-        state.comp.instances[item.id] = structuredClone(ref.comps[comp_id]);
-        state.comp.instances[item.id].id = item.id;
+      if (!ref.comp.instances[item.id] && comp_id && ref.comps[comp_id]) {
+        ref.comp.instances[item.id] = structuredClone(ref.comps[comp_id]);
+        ref.comp.instances[item.id].id = item.id;
       }
     },
     resetCompInstance: (comp_id: string) => {
-      for (const [k, v] of Object.entries(state.comp.instances)) {
+      for (const [k, v] of Object.entries(ref.comp.instances)) {
         if (v.component?.id === comp_id) {
-          delete state.comp.instances[k];
+          delete ref.comp.instances[k];
         }
       }
     },
@@ -73,16 +75,18 @@ export const useVi = defineStore({
       mode: "desktop" | "mobile";
       edit_comp_id?: string;
     }) => {
-      state.page = page;
-      state.layout = layout || null;
+      ref.page = page;
+      ref.layout = layout || null;
       ref.comps = comps;
       ref.db = db;
       ref.api = api;
-      state.mode = mode;
+      if (mode !== state.mode) {
+        state.mode = mode;
+      }
       ref.edit_comp_id = edit_comp_id || "";
 
       for (const id of Object.keys(comps)) {
-        state.comp.loaded.add(id);
+        ref.comp.loaded.add(id);
       }
     },
   }),

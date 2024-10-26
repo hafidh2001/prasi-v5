@@ -2,7 +2,6 @@ import { NodeRender } from "@minoru/react-dnd-treeview";
 import { useEffect } from "react";
 import { useGlobal } from "../../../../../utils/react/use-global";
 import { useLocal } from "../../../../../utils/react/use-local";
-import { Tooltip } from "../../../../../utils/ui/tooltip";
 import { activateItem, active } from "../../../logic/active";
 import { EDGlobal } from "../../../logic/ed-global";
 import { PNode } from "../../../logic/types";
@@ -12,6 +11,7 @@ import { EdTreeAction } from "./node-action";
 import { EdTreeNodeIndent } from "./node-indent";
 import { EdTreeNodeName } from "./node-name";
 import { parseNodeState } from "./node-tools";
+import { Popover } from "utils/ui/popover";
 
 export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -49,11 +49,16 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
   const { is_active, is_component, is_hover } = parseNodeState({ item });
 
   return (
-    <Tooltip
+    <Popover
       placement="right"
-      open={p.ui.tree.prevent_tooltip === true ? false : undefined}
+      backdrop={false}
+      open={
+        p.ui.tree.prevent_tooltip === true
+          ? false
+          : p.ui.tree.tooltip.open === item.id
+      }
       content={
-        <>
+        <div className="p-1 select-text">
           {item.component?.id &&
             p.comp.loaded[item.component.id]?.content_tree.name && (
               <>
@@ -65,12 +70,33 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
               </>
             )}
           ID: {node.item.id}
-        </>
+        </div>
       }
+      onOpenChange={(open) => {
+        if (!open) {
+          p.ui.tree.tooltip.open = "";
+          p.render();
+        }
+      }}
       asChild
     >
       <div
         tabIndex={0}
+        onPointerEnter={() => {
+          if (p.ui.tree.tooltip.open) {
+            p.ui.tree.tooltip.open = item.id;
+            p.render();
+          } else {
+            clearTimeout(p.ui.tree.tooltip.open_timeout);
+            p.ui.tree.tooltip.open_timeout = setTimeout(() => {
+              p.ui.tree.tooltip.open = item.id;
+              p.render();
+            }, 1000);
+          }
+        }}
+        onPointerLeave={() => {
+          clearTimeout(p.ui.tree.tooltip.open_timeout);
+        }}
         onKeyDown={treeItemKeyMap(p, render_params, item)}
         onContextMenu={(event) => {
           event.preventDefault();
@@ -173,6 +199,6 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
             <EdTreeAction raw={raw} render_params={render_params} />
           )}
       </div>
-    </Tooltip>
+    </Popover>
   );
 };

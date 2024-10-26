@@ -5,6 +5,7 @@ import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { jscript } from "utils/script/jscript";
 import { Loading } from "utils/ui/loading";
+import { defineScriptEdit } from "../parts/do-edit";
 import { monacoRegisterSource } from "./js/create-model";
 import { registerEditorOpener } from "./js/editor-opener";
 import { Monaco, MonacoEditor, monacoEnableJSX } from "./js/enable-jsx";
@@ -12,8 +13,8 @@ import { foldRegionVState } from "./js/fold-region-vstate";
 import { jsxColorScheme } from "./js/jsx-style";
 import { registerPrettier } from "./js/register-prettier";
 import { registerReact } from "./js/register-react";
-import { defineScriptEdit } from "../parts/do-edit";
-import { getActiveNode } from "crdt/node/get-node-by-id";
+import { extractRegion } from "./js/migrate-code";
+
 export const MonacoJS: FC<{
   highlightJsx?: boolean;
   sidebar?: boolean;
@@ -164,8 +165,23 @@ export const MonacoJS: FC<{
                     return;
                   }
                 }
+
+                const value = m.model.getValue();
+                if (value) {
+                  const region = extractRegion(value);
+                  const local_name = region.find((e) =>
+                    e.trim().startsWith('const local_name')
+                  );
+                  if (local_name) {
+                    m.local = {
+                      name: new Function(`${local_name}; return local_name;`)(),
+                      value: m.local?.value || "",
+                    };
+                  }
+                }
+
                 onChange({
-                  value: m.model.getValue(),
+                  value: value,
                   model: m,
                   event: e,
                   editor,

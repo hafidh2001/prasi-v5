@@ -1,6 +1,6 @@
 import { rapidhash_fast } from "crdt/node/rapidhash";
 import { DeepReadonly } from "popup/flow/runtime/types";
-import React, { FC, ReactElement, useRef } from "react";
+import React, { FC, ReactElement, useEffect, useRef, useState } from "react";
 import { IItem } from "utils/types/item";
 import { parentCompArgs } from "./lib/parent-comp-args";
 import { local_name, parentLocalArgs } from "./lib/parent-local-args";
@@ -22,27 +22,31 @@ export const ViScript: FC<{
         className: string;
       };
     };
-  ts?: number;
   __idx?: string | number;
   instance_id?: string;
-}> = ({ item, childs, props, __idx }) => {
+  render: () => void;
+}> = ({ item, childs, props, __idx, render }) => {
   const {
     comp_props_parents,
     pass_props_parents,
     parents,
     db,
     api,
-    local_parents,
+    local_value,
     cache_js,
+    local_render,
   } = useVi(({ ref }) => ({
     comp_props_parents: ref.comp_props,
     parents: ref.item_parents,
     db: ref.db,
     api: ref.api,
-    local_parents: ref.local_value,
+    local_value: ref.local_value,
     pass_props_parents: ref.pass_prop_value,
     cache_js: ref.cache_js,
+    local_render: ref.local_render,
   }));
+
+  local_render[item.id] = render;
 
   const internal = useRef<any>({}).current;
   const result = { children: null };
@@ -50,12 +54,12 @@ export const ViScript: FC<{
 
   if (item !== internal.item) {
     internal.item = item;
-    internal.Local = createViLocal(item, local_parents);
+    internal.Local = createViLocal(item, local_value, local_render);
     internal.PassProp = createViPassProp(item, pass_props_parents, __idx);
   }
 
   let comp_args = parentCompArgs(parents, comp_props_parents, item.id);
-  let local_args = parentLocalArgs(local_parents, parents, item.id);
+  let local_args = parentLocalArgs(local_value, parents, item.id);
   let passprops_args = __idx
     ? parentPassProps(pass_props_parents, parents, item.id, __idx)
     : {};

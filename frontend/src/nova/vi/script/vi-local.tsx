@@ -1,11 +1,11 @@
 import { DeepReadonly } from "popup/flow/runtime/types";
 import { useEffect } from "react";
 import { IItem } from "utils/types/item";
-import { useVi } from "vi/lib/store";
 
 export const createViLocal = (
   item: DeepReadonly<IItem>,
-  local_parents: Record<string, any>
+  local_value: Record<string, any>,
+  local_render: Record<string, () => void>
 ) => {
   return (opt: {
     name: string;
@@ -13,29 +13,20 @@ export const createViLocal = (
     effect: (local: any) => void;
     children: any;
   }) => {
-    const local = useVi(({ state, ref }) => ({
-      ts: state.local_render,
-      value: ref.local_value,
-    }));
-
-    if (!local.ts[item.id]) {
-      if (!local_parents[item.id]) {
-        local_parents[item.id] = {};
+    if (!local_value[item.id]) {
+      if (!local_value[item.id]) {
+        local_value[item.id] = {};
       }
-      local_parents[item.id][opt.name] = local.value[item.id];
-
-      local.value[item.id] = {
+      local_value[item.id] = {
         ...opt.value,
         render() {
-          local.update((state) => {
-            state.local_render[item.id] = Date.now();
-          });
+          local_render[item.id]();
         },
       };
     }
 
     useEffect(() => {
-      opt.effect(local.value[item.id]);
+      opt.effect(local_value[item.id]);
     }, []);
 
     return opt.children;
