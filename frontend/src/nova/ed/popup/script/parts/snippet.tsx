@@ -67,7 +67,7 @@ export const EdScriptSnippet: FC<{}> = ({}) => {
                       `const local_name = "${name}"`,
                     ]),
                     `\
-export const ${name} = defineLocal({
+export const ${name} = defineAutoRender({
   name: local_name,
   value: {
     

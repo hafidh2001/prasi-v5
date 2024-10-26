@@ -18,6 +18,7 @@ export const ViRender: FC<{
     wrapper: ref.wrapper,
   }));
 
+  console.log("render", item.name, item.id);
   if (wrapper) {
     const Wrapper = wrapper;
 

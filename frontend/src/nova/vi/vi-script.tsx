@@ -52,7 +52,14 @@ export const ViScript: FC<{
   if (!script_instance[item.id]) {
     script_instance[item.id] = {};
   }
-  const internal = script_instance[item.id];
+  const internal = script_instance[item.id] as {
+    Local: any;
+    PassProp: any;
+    ScriptComponent: any;
+    item: DeepReadonly<IItem>;
+    watch_auto_render: Record<string, any>;
+    arg_hash: string;
+  };
   const result = { children: null as any };
   const script_args = scriptArgs({ item, childs, props, result });
 
@@ -60,13 +67,29 @@ export const ViScript: FC<{
     internal.item = item;
     internal.Local = createViLocal(item, local_value, local_render);
     internal.PassProp = createViPassProp(item, pass_props_parents, __idx);
+
+    if (internal.watch_auto_render) {
+      for (const cleanup of Object.values(internal.watch_auto_render)) {
+        cleanup();
+      }
+    }
+    internal.watch_auto_render = {};
   }
+
+  useEffect(() => {
+    return () => {
+      for (const cleanup of Object.values(internal.watch_auto_render)) {
+        cleanup();
+      }
+    };
+  }, []);
 
   const comp_args = parentCompArgs(parents, comp_props_parents, item.id);
   const local_args: Record<
     string,
     { render: () => void; __autorender?: boolean; proxy?: any }
   > = parentLocalArgs(local_value, parents, item.id);
+
   const passprops_args = __idx
     ? parentPassProps(pass_props_parents, parents, item.id, __idx)
     : {};
@@ -79,9 +102,17 @@ export const ViScript: FC<{
 
   for (const [k, v] of Object.entries(local_args)) {
     if (v.__autorender && v.proxy) {
-      local_args[k] = v.proxy;
+      local_args[k] = useSnapshot(v.proxy);
+      // this is a hack to make valtio only watch accessed properties
+      // and not all properties of the object
+      local_args[k].__autorender;
     }
   }
+
+  const defineLocal = (arg: { name: string; value: any }) => {
+    arg.value[local_name] = arg.name;
+    return arg.value;
+  };
 
   const final_args = {
     ...comp_args,
@@ -91,10 +122,8 @@ export const ViScript: FC<{
     db,
     api,
     __js: removeRegion(item.adv!.js || ""),
-    defineLocal(arg: { name: string; value: any }) {
-      arg.value[local_name] = arg.name;
-      return arg.value;
-    },
+    defineLocal,
+    defineAutoRender: defineLocal,
     PassProp: internal.PassProp,
     Local: internal.Local,
     React,

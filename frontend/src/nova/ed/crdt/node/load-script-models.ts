@@ -20,7 +20,7 @@ export type ScriptModel = {
   prop_name?: string;
   path_ids: string[];
   title: string;
-  local: { name: string; value: string };
+  local: { name: string; value: string; auto_render: boolean };
   extracted_content: string;
   model?: ReturnType<typeof monacoCreateModel> & { _ignoreChanges?: any };
   [source_sym]: string;
@@ -60,7 +60,7 @@ export const loadScriptModels = async (
             prop_name: name,
             path_ids: path_id,
             name: `file:///${file}.tsx`,
-            local: { name: "", value: "" },
+            local: { name: "", value: "", auto_render: false },
             extracted_content: "",
             source_hash,
             ready: false,
@@ -105,7 +105,7 @@ export const loadScriptModels = async (
         path_names: path_name,
         path_ids: path_id,
         title: item.name,
-        local: { name: "", value: "" },
+        local: { name: "", value: "", auto_render: false },
         extracted_content: "",
         source_hash,
         ready: false,

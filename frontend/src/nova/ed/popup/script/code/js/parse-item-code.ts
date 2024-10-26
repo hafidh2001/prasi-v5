@@ -54,7 +54,8 @@ export const parseItemCode = (model: ScriptModel) => {
             ) {
               if (
                 d.init.callee.type === "Identifier" &&
-                d.init.callee.name === "defineLocal"
+                (d.init.callee.name === "defineLocal" ||
+                  d.init.callee.name === "defineAutoRender")
               ) {
                 model.local.name = d.id.name;
                 model.local.value = `{

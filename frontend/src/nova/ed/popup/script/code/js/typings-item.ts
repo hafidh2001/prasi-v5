@@ -13,6 +13,12 @@ const __props: any;
 const siteurl: (path:string) => string;
 const preloaded: (url:string) => boolean;
 const defineLocal: <T extends Record<string, any>>(arg: {value:T, name: string}) => T & { render: () => void };
+type DeepReadonly<T> = T extends Function
+  ? T
+  : T extends object
+    ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
+    : T;
+const defineAutoRender: <T extends Record<string, any>>(arg: {value:T, name: string}) => DeepReadonly<T> & { set: T };
 const preload: (urls: string | string[], opt?: {
   on_load?: (
     pages: {

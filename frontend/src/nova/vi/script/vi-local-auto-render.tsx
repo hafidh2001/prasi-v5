@@ -29,14 +29,13 @@ export const ViLocalAutoRender = (opt: {
         }),
       }),
     };
+    local_value[item.id].proxy.set = ref(local_value[item.id].proxy);
   }
   const internal = local_value[item.id] as {
     __version: number;
     __autorender: boolean;
     proxy: any;
   };
-
-  useSnapshot(internal.proxy);
 
   const valtio_version = getVersion(internal.proxy) || 0;
   useEffect(() => {

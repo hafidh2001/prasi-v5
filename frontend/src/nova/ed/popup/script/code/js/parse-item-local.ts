@@ -30,6 +30,9 @@ export const parseItemLocal = ({
           attr.name.type === "JSXIdentifier" &&
           attr.value
         ) {
+          if (attr.name.name === "auto_render") {
+            model.local.auto_render = true;
+          }
           if (attr.name.name === "name") {
             if (attr.value.type === "StringLiteral") {
               model.local.name = attr.value.value;
