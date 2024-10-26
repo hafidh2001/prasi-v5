@@ -73,8 +73,16 @@ export class BaseVisitor implements Required<RecursiveVisitors<unknown>> {
     cb(n.right, st);
   }
   BlockStatement<S>(n: oxc.BlockStatement, st: S, cb: Callback<S>) {
-    for (const stmt of n.stmts) {
-      cb(stmt, st);
+    if (Array.isArray(n.stmts)) {
+      for (const stmt of n.stmts) {
+        cb(stmt, st);
+      }
+    } else {
+      if (Array.isArray((n as any).body)) {
+        for (const stmt of (n as any).body) {
+          cb(stmt, st);
+        }
+      }
     }
   }
   BooleanLiteral = ignore;

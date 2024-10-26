@@ -145,6 +145,7 @@ export const EdTreeAction = ({
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                p.ui.tree.tooltip.open = "";
                 if (p.ui.popup.script.open) {
                   p.ui.popup.script.open = false;
                   p.render();

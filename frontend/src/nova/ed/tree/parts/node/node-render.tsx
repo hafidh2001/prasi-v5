@@ -107,6 +107,7 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
       <div
         tabIndex={0}
         onPointerEnter={() => {
+          if (local.right_click) return;
           if (p.ui.tree.tooltip.open) {
             p.ui.tree.tooltip.open = item.id;
             p.render();
@@ -124,6 +125,8 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
         onKeyDown={treeItemKeyMap(p, render_params, item)}
         onContextMenu={(event) => {
           event.preventDefault();
+          clearTimeout(p.ui.tree.tooltip.open_timeout);
+          p.ui.tree.tooltip.open = "";
           local.right_click = event;
           local.render();
         }}

@@ -149,8 +149,7 @@ export const EdLeft = () => {
           }}
           ref={ref_tree}
         >
-          {!p.page.tree ? (
-
+          {!p.page.tree || (active.comp_id && !active.comp) ? (
             <Loading backdrop={false} note="loading-tree" />
           ) : (
             <>
