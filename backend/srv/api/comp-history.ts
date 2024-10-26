@@ -13,12 +13,14 @@ export default {
         undo: comp.undoManager.undoStack.map((e) => {
           return {
             ts: (e as any).ts,
+            id: (e as any).id,
             size: formatBytes(JSON.stringify(e).length),
           };
         }),
         redo: comp.undoManager.redoStack.map((e) => {
           return {
             ts: (e as any).ts,
+            id: (e as any).id,
             size: formatBytes(JSON.stringify(e).length),
           };
         }),
