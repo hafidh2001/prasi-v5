@@ -24,6 +24,5 @@ export const scriptArgs = (opt: {
     children: opt.childs,
   };
 
-
   return args;
 };

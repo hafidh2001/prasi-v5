@@ -30,11 +30,6 @@ export const EdViRoot = memo(() => {
   const [, _set] = useState({});
   const render = () => _set({});
 
-  useEffect(() => {
-    
-  }, [])
-
-
   p.ui.editor.render = render;
   if (!p.page.cur) return <Loading />;
   if (ref.page?.root !== p.page.cur.content_tree || !ref.page) {

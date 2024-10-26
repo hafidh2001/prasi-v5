@@ -278,6 +278,7 @@ export const EdScriptWorkbench: FC<{
           )}
           <div
             onClick={() => {
+              p.viref?.resetLocal?.();
               popup.open = false;
               p.render();
             }}

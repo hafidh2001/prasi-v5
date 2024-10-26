@@ -130,22 +130,19 @@ export const EdBase = () => {
               {script.paned && script.open ? (
                 <EdPopItemScript />
               ) : (
-                <>
-                  <div
-                    className={cx(
-                      "w-full h-full flex flex-1 relative overflow-auto",
-                      p.mode === "mobile" ? "flex-col items-center" : ""
-                    )}
-                    onContextMenu={(e) => {
-                      e.preventDefault();
-                    }}
-                  >
-                    <div className={mainStyle(p)}>
-                      <EdViRoot />
-                    </div>
+                <div
+                  className={cx(
+                    "w-full h-full flex flex-1 relative overflow-auto",
+                    p.mode === "mobile" ? "flex-col items-center" : ""
+                  )}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                  }}
+                >
+                  <div className={mainStyle(p)}>
+                    <EdViRoot />
                   </div>
-                  )
-                </>
+                </div>
               )}
             </Panel>
             <PanelResizeHandle />

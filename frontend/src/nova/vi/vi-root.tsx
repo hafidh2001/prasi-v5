@@ -20,7 +20,7 @@ export const ViRoot: FC<ViProp> = ({
   edit_comp_id,
 }) => {
   const {
-    syncProp: syncProp,
+    syncProp,
     ref,
     resetCompInstance,
   } = useVi(({ action, ref, state }) => ({

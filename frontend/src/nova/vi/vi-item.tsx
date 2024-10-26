@@ -18,7 +18,7 @@ export const ViItem: FC<{
     page: ref.page,
     db: ref.db,
     api: ref.api,
-    mode: state.mode,
+    mode: ref.mode,
     ref,
   }));
   const [, render] = useState({});

@@ -9,6 +9,8 @@ type VAR_ID = string;
 
 const viRef = {
   init: false,
+  mode: "desktop" as "mobile" | "desktop",
+
   loader: {
     comps: (ids: string[]) => Promise<void>,
   },
@@ -33,16 +35,17 @@ const viRef = {
   edit_comp_id: "",
   local_render: {} as Record<string, () => void>,
 
+  script_instance: {} as Record<string, any>,
+
   resetCompInstance: (comp_id: string) => {},
+  resetLocal: () => {},
 };
 export type ViRef = typeof viRef;
 
 export const useVi = defineStore({
   name: "vi-store",
   ref: viRef,
-  state: {
-    mode: "desktop" as "mobile" | "desktop",
-  },
+  state: {},
   action: ({ state, ref, update }) => ({
     instantiateComp: (item: DeepReadonly<IItem>) => {
       const comp_id = item.component!.id;
@@ -80,11 +83,12 @@ export const useVi = defineStore({
       ref.comps = comps;
       ref.db = db;
       ref.api = api;
-      if (mode !== state.mode) {
-        state.mode = mode;
-      }
+      ref.mode = mode;
       ref.edit_comp_id = edit_comp_id || "";
-
+      ref.resetLocal = () => {
+        ref.script_instance = {};
+        ref.local_value = {};
+      };
       for (const id of Object.keys(comps)) {
         ref.comp.loaded.add(id);
       }

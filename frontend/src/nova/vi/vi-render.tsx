@@ -20,6 +20,7 @@ export const ViRender: FC<{
 
   if (wrapper) {
     const Wrapper = wrapper;
+
     return (
       <Wrapper
         item={item as any}

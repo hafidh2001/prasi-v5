@@ -9,8 +9,7 @@ import { scriptArgs } from "./lib/script-args";
 import { useVi } from "./lib/store";
 import { createViLocal } from "./script/vi-local";
 import { createViPassProp } from "./script/vi-pass-prop";
-
-const cached_js_build = {} as Record<string, { arg_hash: string; fn: any }>;
+import { useSnapshot } from "valtio";
 
 export const ViScript: FC<{
   item: DeepReadonly<IItem>;
@@ -35,6 +34,7 @@ export const ViScript: FC<{
     local_value,
     cache_js,
     local_render,
+    script_instance,
   } = useVi(({ ref }) => ({
     comp_props_parents: ref.comp_props,
     parents: ref.item_parents,
@@ -44,12 +44,16 @@ export const ViScript: FC<{
     pass_props_parents: ref.pass_prop_value,
     cache_js: ref.cache_js,
     local_render: ref.local_render,
+    script_instance: ref.script_instance,
   }));
 
   local_render[item.id] = render;
 
-  const internal = useRef<any>({}).current;
-  const result = { children: null };
+  if (!script_instance[item.id]) {
+    script_instance[item.id] = {};
+  }
+  const internal = script_instance[item.id];
+  const result = { children: null as any };
   const script_args = scriptArgs({ item, childs, props, result });
 
   if (item !== internal.item) {
@@ -58,15 +62,24 @@ export const ViScript: FC<{
     internal.PassProp = createViPassProp(item, pass_props_parents, __idx);
   }
 
-  let comp_args = parentCompArgs(parents, comp_props_parents, item.id);
-  let local_args = parentLocalArgs(local_value, parents, item.id);
-  let passprops_args = __idx
+  const comp_args = parentCompArgs(parents, comp_props_parents, item.id);
+  const local_args: Record<
+    string,
+    { render: () => void; __autorender?: boolean; proxy?: any }
+  > = parentLocalArgs(local_value, parents, item.id);
+  const passprops_args = __idx
     ? parentPassProps(pass_props_parents, parents, item.id, __idx)
     : {};
 
   for (const [k, v] of Object.entries(comp_args)) {
     if (typeof v === "object" && (v as any).__jsx) {
       comp_args[k] = (v as any).__render(item, parents);
+    }
+  }
+
+  for (const [k, v] of Object.entries(local_args)) {
+    if (v.__autorender && v.proxy) {
+      local_args[k] = v.proxy;
     }
   }
 
@@ -77,62 +90,77 @@ export const ViScript: FC<{
     ...passprops_args,
     db,
     api,
-    __js: item.adv!.js,
+    __js: removeRegion(item.adv!.js || ""),
     defineLocal(arg: { name: string; value: any }) {
       arg.value[local_name] = arg.name;
       return arg.value;
     },
     PassProp: internal.PassProp,
+    Local: internal.Local,
     React,
+    __result: result,
   };
-  final_args.Local = internal.Local;
-
-  let fn = cached_js_build[item.id]?.fn;
 
   const arg_hash = rapidhash_fast(Object.keys(final_args).join("-")).toString();
-  if (
-    !cached_js_build[item.id] ||
-    !cache_js ||
-    (cached_js_build[item.id] && cached_js_build[item.id].arg_hash !== arg_hash)
-  ) {
-    const src = (item.adv!.jsBuilt || "").replace(
-      /React\.createElement/g,
-      "createElement"
-    );
-    fn = new Function(
-      ...Object.keys(final_args),
-      `// ${item.name}: ${item.id} 
-  try {
-    const createElement = function (...arg) {
-      if (arg && Array.isArray(arg) && arg[0] === PassProp && arg[1]) {
-        if (!arg[1].idx && arg[1].key) {
-          arg[1].idx = arg[1].key;
-        } else if (arg[1].idx && !arg[1].key) {
-          arg[1].key = arg[1].idx;
-        }
-      }
 
-      return React.createElement(...arg);
+  const src = (item.adv!.jsBuilt || "").replace(
+    /React\.createElement/g,
+    "createElement"
+  );
+  const src_fn = `\
+// ${item.name}: ${item.id} 
+
+${Object.keys(final_args)
+  .map((e) => {
+    return `const ${e} = __props__.${e}`;
+  })
+  .join(";")}
+try {
+  const createElement = function (...arg) {
+    if (arg && Array.isArray(arg) && arg[0] === PassProp && arg[1]) {
+      if (!arg[1].idx && arg[1].key) {
+        arg[1].idx = arg[1].key;
+      } else if (arg[1].idx && !arg[1].key) {
+        arg[1].key = arg[1].idx;
+      }
     }
+
+    return React.createElement(...arg);
+  }
+/** user code start **/
+{
+  ${src};
+}
+/** user code end **/
   
-    ${src}
-  } catch (e) {
-    console.error(\`\\
-  Error in item ${item.name}: ${item.id} 
-  
+  return __result.children;
+} catch (e) {
+  console.error(\`\\
+Error in item ${item.name}: ${item.id} 
+
 $\{__js}
-  
-  ERROR: $\{e.message}
-  \`);
-  }`
-    );
-    if (cache_js) cached_js_build[item.id] = { fn, arg_hash };
+
+ERROR: $\{e.message}
+\`);
+}
+
+return null;
+`;
+  if (!internal.ScriptComponent || internal.arg_hash !== arg_hash) {
+    internal.ScriptComponent = new Function("__props__", src_fn);
+    internal.arg_hash = arg_hash;
   }
 
   try {
-    fn(...Object.values(final_args));
-    return result.children;
+    return <internal.ScriptComponent {...final_args} />;
   } catch (e) {
     throw e;
+  }
+};
+
+const removeRegion = (src: string) => {
+  if (src.startsWith("// #region")) {
+    const end = src.indexOf("// #endregion");
+    return src.substring(end + 13).trim();
   }
 };

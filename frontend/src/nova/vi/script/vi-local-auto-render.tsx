@@ -1,5 +1,5 @@
 import { DeepReadonly } from "popup/flow/runtime/types";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { IItem } from "utils/types/item";
 import { getVersion, proxy, ref, useSnapshot } from "valtio";
 
@@ -12,28 +12,36 @@ export const ViLocalAutoRender = (opt: {
   local_value: Record<string, any>;
   local_render: Record<string, () => void>;
 }) => {
-  const { local_render, local_value, item, name, value, effect, children } =
-    opt;
+  const { local_render, local_value, item, value, effect, children } = opt;
+  const internal = useRef({ version: 0 }).current;
 
   if (!local_value[item.id]) {
-    local_value[item.id] = proxy({
-      ...value,
-      render: ref(() => {
-        console.warn(
-          `🛟 Warning: local.render() is ignored in <Local> with auto_render.`
-        );
+    local_value[item.id] = {
+      __autorender: true,
+      proxy: proxy({
+        ...value,
+        render: ref(() => {
+          console.warn(
+            `🛟 Warning: local.render() is ignored in <Local> with auto_render.`
+          );
+        }),
       }),
-    });
+    };
   }
 
-  const local = useSnapshot(local_value[item.id]);
   useEffect(() => {
-    effect(local);
+    effect(local_value[item.id].proxy);
   }, []);
 
+  const valtio_version = getVersion(local_value[item.id].proxy) || 0;
   useEffect(() => {
-    local_render[item.id]?.();
-  }, [getVersion(local_value[item.id])]);
+    if (internal.version === 0) {
+      internal.version = valtio_version;
+    } else {
+      internal.version = valtio_version;
+      local_render[item.id]?.();
+    }
+  }, [valtio_version]);
 
   return children;
 };
