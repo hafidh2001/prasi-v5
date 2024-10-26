@@ -73,7 +73,7 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
               )}
             ID: {node.item.id}
           </div>
-          {!item.component?.id && (item.adv?.js || item.adv?.css) && (
+          {!item.component?.id && !p.ui.popup.script.open && (item.adv?.js || item.adv?.css) && (
             <CodeHighlight
               format={(e) => {
                 const lines = e.split("\n");
