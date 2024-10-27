@@ -57,6 +57,10 @@ export const EDGlobal = {
       creating_id: "",
       loading_id: "",
       last_edit_ids: [] as string[],
+      prop: {
+        active: "",
+        context_event: null as null | React.MouseEvent<HTMLElement, MouseEvent>,
+      },
     },
     tree: {
       rename_id: "",
