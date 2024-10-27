@@ -1,5 +1,5 @@
+import { gunzipSync } from "bun";
 import { Prisma } from "prasi-db/db";
-import { gunzipAsync } from "../server/zlib";
 
 export type DBArg = {
   db: string;
@@ -7,7 +7,7 @@ export type DBArg = {
   action: string;
   params: any[];
 };
-
+const decoder = new TextDecoder();
 export const execQuery = async (args: DBArg, prisma: any) => {
   const { table, action, params } = args;
 
@@ -22,7 +22,7 @@ export const execQuery = async (args: DBArg, prisma: any) => {
           const u8 = new Uint8Array(
             [...atob(gzip)].map((c) => c.charCodeAt(0))
           );
-          const json = JSON.parse((await gunzipAsync(u8)).toString("utf8"));
+          const json = JSON.parse(decoder.decode(gunzipSync(u8)));
 
           if (Array.isArray(json)) {
             const q = json.shift();

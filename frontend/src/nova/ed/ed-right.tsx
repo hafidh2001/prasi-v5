@@ -12,6 +12,7 @@ import { useGlobal } from "utils/react/use-global";
 import { EdVarList } from "./popup/vars/ed-var-list";
 import { EdEvents } from "./right/events/ed-events";
 import { EdCompTitle } from "./right/comp/ed-comp-title";
+import { EdCompProp } from "./right/comp/ed-comp-prop";
 
 export const EdRight = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -43,7 +44,6 @@ export const EdRight = () => {
             <PanelRightOpen size={15} />
           )}
         </div>
-
         {is_comp && <EdCompTitle />}
         {!is_comp && (
           <div className="flex items-end pt-2">
@@ -94,12 +94,15 @@ export const EdRight = () => {
       </div>
 
       <div className="relative flex-1 overflow-auto">
-        {!is_comp && (
-          <div className="absolute inset-0">
-            {p.ui.right.tab === "events" && <EdEvents />}
-            {p.ui.right.tab === "vars" && <EdVarList />}
-          </div>
-        )}
+        <div className="absolute inset-0">
+          {!is_comp && (
+            <>
+              {p.ui.right.tab === "events" && <EdEvents />}
+              {p.ui.right.tab === "vars" && <EdVarList />}
+            </>
+          )}
+          {is_comp && <EdCompProp />}
+        </div>
         {/* <code className="monospace whitespace-pre-wrap text-[8px] absolute inset-0">
           {getActiveNode(p)?.item.adv?.jsBuilt}
         </code> */}

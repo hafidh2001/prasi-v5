@@ -62,7 +62,9 @@ w.prasiApi[url] = {
           },
         });
 
-        return compressed(ctx, res);
+        return compressed(ctx, res, {
+          headers: { "content-type": "text/javascript" },
+        });
       }
     }
 
