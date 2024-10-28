@@ -69,19 +69,6 @@ export const remountPrasiModels = (arg: {
       m.model = monacoRegisterSource(monaco, m.source, m.name || "");
       m.model.onDidChangeContent((e) => {
         if (onChange && m.model) {
-          let respect_ignore_changes = true;
-          if (p.script.snippet_pasted) {
-            respect_ignore_changes = false;
-            p.script.snippet_pasted = false;
-          }
-          if (respect_ignore_changes) {
-            if (m.model._ignoreChanges || p.script.ignore_changes) {
-              p.script.ignore_changes = false;
-              delete m.model._ignoreChanges;
-              return;
-            }
-          }
-
           const value = m.model.getValue();
           const region = extractRegion(value);
           const local_name = region.find((e) =>

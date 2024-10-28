@@ -12,7 +12,7 @@ export const updateActiveCode = (p: PG) => {
       const source =
         getActiveNode(p)?.item.component?.props[prop_name].value || "";
       p.script.ignore_changes = true;
-      p.script.do_edit(async ({}) => source.trim().split("\n"));
+      p.script.do_edit(async () => source.trim().split("\n"));
     }
   }
 };

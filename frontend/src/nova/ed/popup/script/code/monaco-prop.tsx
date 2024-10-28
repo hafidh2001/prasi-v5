@@ -27,11 +27,21 @@ export const EdMonacoProp: FC<{
   div?: React.RefObject<HTMLDivElement>;
 }> = ({ className, onChange, div }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
-  const local = useLocal({
-    editor: null as null | MonacoEditor,
-    width: undefined as undefined | number,
-    height: undefined as undefined | number,
-  });
+  const local = useLocal(
+    {
+      editor: null as null | MonacoEditor,
+      width: undefined as undefined | number,
+      height: undefined as undefined | number,
+      models: [] as ScriptModel[],
+    },
+    async () => {
+      local.models = (await reloadPrasiModels(
+        p,
+        active.item_id
+      )) as ScriptModel[];
+      local.render();
+    }
+  );
   const Editor = jscript.MonacoEditor;
   const ui = p.ui.comp.prop;
 
@@ -81,7 +91,11 @@ export const EdMonacoProp: FC<{
     }
   }, [div?.current]);
 
-  if (!Editor || (div && (!local.width || !local.height)))
+  if (
+    !Editor ||
+    (div && (!local.width || !local.height)) ||
+    local.models.length === 0
+  )
     return (
       <div className="relative w-full h-full items-center justify-center flex flex-1">
         <Loading backdrop={false} note="loading-monaco" />
@@ -119,7 +133,7 @@ export const EdMonacoProp: FC<{
       }}
       onMount={async (editor, monaco) => {
         try {
-          const _models = await reloadPrasiModels(p, active.item_id);
+          await registerReact(monaco);
 
           editor.onDidDispose(() => {
             local.editor = null;
@@ -128,11 +142,10 @@ export const EdMonacoProp: FC<{
           p.script.do_edit = defineScriptEdit(editor, monaco);
 
           registerPrettier(monaco);
-          await registerReact(monaco);
 
           remountPrasiModels({
             p,
-            _models,
+            _models: local.models,
             activeFileName: `file:///${active.item_id}~${ui.active}.tsx`,
             editor,
             monaco,
