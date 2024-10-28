@@ -1,3 +1,4 @@
+import { EComp } from "logic/types";
 import { monacoCreateModel } from "popup/script/code/js/create-model";
 import { migrateCode } from "popup/script/code/js/migrate-code";
 import { parseItemCode } from "popup/script/code/js/parse-item-code";
@@ -8,9 +9,6 @@ import { IItem } from "utils/types/item";
 import { loopItem } from "./loop-item";
 import { rapidhash_fast as hash } from "./rapidhash";
 import { TreeVarItems } from "./var-items";
-import { PG } from "logic/ed-global";
-import { EComp } from "logic/types";
-import { loadPendingComponent } from "./load-child-comp";
 
 const source_sym = Symbol("source");
 
@@ -35,7 +33,7 @@ export const loadScriptModels = async (
   p: { comp: { loaded: Record<string, EComp>; pending: Set<string> } },
   items: IItem[],
   result: Record<string, ScriptModel>,
-  var_items: TreeVarItems
+  var_items: TreeVarItems,
 ) => {
   if (!jscript.loaded) {
     await waitUntil(() => jscript.loaded);
@@ -140,7 +138,7 @@ export const loadScriptModels = async (
       try {
         v.source = await jscript.prettier.format?.(migrateCode(v, result));
       } catch (e) {
-        console.error(`[ERROR] Formatting Code\n${v.title} ~> ${v.id}\n\n`, e);
+        console.error(`[ERROR] When Formatting Code\n${v.title} ~> ${v.id}\n\n`, e);
       }
       v.ready = true;
     }

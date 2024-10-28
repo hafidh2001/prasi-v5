@@ -1,10 +1,10 @@
 import { EDGlobal } from "logic/ed-global";
+import { ChevronRight } from "lucide-react";
 import { useGlobal } from "utils/react/use-global";
 import { IItem } from "utils/types/item";
 import { FNCompDef } from "utils/types/meta-fn";
 import { EdPropName } from "./ed-prop-name";
 import { EdPropString } from "./fields/ed-prop-string";
-import { ChevronLeft, ChevronRight, Play } from "lucide-react";
 
 export const EdPropField = (arg: {
   name: string;
@@ -28,13 +28,14 @@ export const EdPropField = (arg: {
                 .bg-white {
                   background: transparent;
                 }
-              `
+              `,
             )
-          : "hover:bg-blue-100"
+          : "hover:bg-blue-100",
       )}
       onContextMenu={(e) => {
         e.preventDefault();
         ui.context_event = e;
+        ui.context_name = name;
         p.render();
       }}
     >
@@ -48,7 +49,7 @@ export const EdPropField = (arg: {
                 margin-left: -8px;
               }
               margin-right: -10px;
-            `
+            `,
           )}
         >
           <ChevronRight fill={"white"} size={20} />

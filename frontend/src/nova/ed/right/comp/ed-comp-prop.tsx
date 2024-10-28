@@ -4,12 +4,14 @@ import { Sticker } from "lucide-react";
 import { waitUntil } from "prasi-utils";
 import { useEffect, useState } from "react";
 import { useGlobal } from "utils/react/use-global";
+import { Menu, MenuItem } from "utils/ui/context-menu";
 import { EdPropField } from "./prop-field/ed-prop-field";
 
 export const EdCompProp = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const [, render] = useState({});
   const node = getActiveNode(p);
+  const ui = p.ui.comp.prop;
   const comp_id = node?.item.component?.id || "";
   const comp_def = p.comp.loaded[comp_id];
   const comp = comp_def?.content_tree.component;
@@ -50,6 +52,25 @@ export const EdCompProp = () => {
             />
           );
         })}
+
+      {ui.context_event && (
+        <Menu
+          mouseEvent={ui.context_event}
+          onClose={() => {
+            ui.context_event = null;
+            ui.context_name = "";
+            p.render();
+          }}
+        >
+          <MenuItem
+            label="Edit code"
+            onClick={() => {
+              ui.active = ui.context_name;
+              p.render();
+            }}
+          />
+        </Menu>
+      )}
     </div>
   );
 };

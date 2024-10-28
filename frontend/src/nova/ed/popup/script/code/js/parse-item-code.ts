@@ -38,7 +38,7 @@ export const parseItemCode = (model: ScriptModel) => {
         ) {
           const jsx = get(
             node,
-            "declaration.body.statements.0.expression.expression"
+            "declaration.body.statements.0.expression.expression",
           ) as any;
           if (jsx) {
             model.extracted_content = cutCode(model.source, jsx, -2);
@@ -51,6 +51,11 @@ export const parseItemCode = (model: ScriptModel) => {
             if (model.prop_name) {
               if (d.id.type === "Identifier" && d.id.name === model.prop_name) {
                 model.extracted_content = cutCode(model.source, d.init);
+
+                exports[d.id.name] = {
+                  name: d.id.name,
+                  type: "propname",
+                };
               }
             } else {
               if (
@@ -64,23 +69,23 @@ export const parseItemCode = (model: ScriptModel) => {
                 ) {
                   model.local.name = d.id.name;
                   model.local.value = `{
-        
+
       }`;
                   const value = d.init.arguments.find(
-                    (e) => e.type === "ObjectExpression"
+                    (e) => e.type === "ObjectExpression",
                   );
                   if (value && value.type === "ObjectExpression") {
                     const local_value = value.properties.find(
                       (e) =>
                         e.type === "ObjectProperty" &&
                         e.key.type === "Identifier" &&
-                        e.key.name === "value"
+                        e.key.name === "value",
                     );
                     if (local_value?.type === "ObjectProperty") {
                       model.local.value = cutCode(
                         model.source,
                         local_value.value,
-                        -2
+                        -2,
                       );
                     }
                   }
@@ -110,7 +115,7 @@ export const parseItemCode = (model: ScriptModel) => {
                             single_export[prop.key.name] = cutCode(
                               model.source,
                               prop.value,
-                              -2
+                              -2,
                             );
                           }
                         }
@@ -126,8 +131,10 @@ export const parseItemCode = (model: ScriptModel) => {
       JSXElement: (node) => {
         const name = node.openingElement.name;
 
-        parseItemLocal({ name, node, model, replacements, exports });
-        parseItemPassProp({ name, node, model, replacements, exports });
+        if (!model.prop_name) {
+          parseItemLocal({ name, node, model, replacements, exports });
+          parseItemPassProp({ name, node, model, replacements, exports });
+        }
       },
     });
   }

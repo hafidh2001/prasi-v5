@@ -4,13 +4,13 @@ import { PG } from "logic/ed-global";
 import { waitUntil } from "prasi-utils";
 import { cutCode, jscript } from "utils/script/jscript";
 import { MonacoEditor, monacoRegisterSource } from "./js/create-model";
+import { itemJsDefault } from "./js/default-val";
 import { registerEditorOpener } from "./js/editor-opener";
 import { Monaco, monacoEnableJSX } from "./js/enable-jsx";
 import { foldRegionVState } from "./js/fold-region-vstate";
-import { extractRegion, migrateCode } from "./js/migrate-code";
+import { extractRegion, migrateCode, removeRegion } from "./js/migrate-code";
 import { replaceString } from "./js/replace-string";
 import { typingsItem } from "./js/typings-item";
-import { itemJsDefault } from "./js/default-val";
 
 export const reloadPrasiModels = async (p: PG, id: string) => {
   const tree = getActiveTree(p);
@@ -56,7 +56,7 @@ export const remountPrasiModels = (arg: {
     if (!m.source) m.source = "";
 
     const model = monacoModels.find(
-      (e) => e === m.model || e.uri.toString() === m.name
+      (e) => e === m.model || e.uri.toString() === m.name,
     );
 
     if (model) {
@@ -72,7 +72,7 @@ export const remountPrasiModels = (arg: {
           const value = m.model.getValue();
           const region = extractRegion(value);
           const local_name = region.find((e) =>
-            e.trim().startsWith("const local_name")
+            e.trim().startsWith("const local_name"),
           );
           if (local_name) {
             m.local = {
@@ -143,7 +143,7 @@ export const codeUpdate = {
     p: PG,
     id: string,
     source: string,
-    arg?: { prop_name?: string; local_name?: string }
+    arg?: { prop_name?: string; local_name?: string },
   ) {
     this.p = p;
     this.queue[id] = { id, source, ...arg };
@@ -166,7 +166,10 @@ export const codeUpdate = {
 
           let final_source = "";
           if (q.prop_name) {
-            final_source = q.source;
+            final_source = removeRegion(q.source).replace(
+              `export const ${q.prop_name} =`,
+              "",
+            );
           } else {
             const lines = q.source.split("\n").map((e) => {
               if (e.startsWith("export const")) {
@@ -248,15 +251,12 @@ export const codeUpdate = {
               if (comp) {
                 const [name, prop] =
                   Object.entries(comp.props).find(
-                    ([name, prop]) => name === q.prop_name
+                    ([name, prop]) => name === q.prop_name,
                   ) || [];
 
                 if (name && prop) {
                   prop.value = q.source;
-                  prop.valueBuilt = (q.source_built || "")
-                    .trim()
-                    .substring(`const ${name} =`.length)
-                    .trim();
+                  prop.valueBuilt = (q.source_built || "").trim();
                 }
               }
             }

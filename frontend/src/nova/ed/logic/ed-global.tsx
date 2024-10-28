@@ -1,11 +1,11 @@
 import { NodeModel, TreeMethods } from "@minoru/react-dnd-treeview";
 import { RPFlow } from "popup/flow/runtime/types";
+import { defineScriptEdit } from "popup/script/parts/do-edit";
 import { createClient } from "utils/sync/client";
+import { ViRef } from "vi/lib/store";
 import { PageTree } from "../crdt/load-page-tree";
 import { CompPickerNode } from "../popup/comp/comp-picker/render-picker-node";
-import { EComp, EPage, ESite, PropFieldKind } from "./types";
-import { ViRef } from "vi/lib/store";
-import { defineScriptEdit } from "popup/script/parts/do-edit";
+import { EComp, EPage, ESite } from "./types";
 
 export const EDGlobal = {
   mode: "" as "desktop" | "mobile",
@@ -64,6 +64,7 @@ export const EDGlobal = {
         set active(value) {
           localStorage.setItem("prasi-code-active-prop", value);
         },
+        context_name: "",
         context_event: null as null | React.MouseEvent<HTMLElement, MouseEvent>,
       },
     },
@@ -124,14 +125,14 @@ export const EDGlobal = {
         set open(value) {
           localStorage.setItem(
             "prasi-popup-script-open",
-            JSON.stringify(value)
+            JSON.stringify(value),
           );
         },
         paned:
           localStorage.getItem("prasi-popup-script-mode") !== "popup"
             ? true
             : false,
-        mode: "" as ""| "prop" | "comp" | "js" | "css" | "html",
+        mode: "" as "" | "prop" | "comp" | "js" | "css" | "html",
         type: "item" as "item" | "prop-master" | "prop-instance" | "comp-types",
         on_close: () => {},
         typings: { status: "ok" as "ok" | "loading" | "error", err_msg: "" },

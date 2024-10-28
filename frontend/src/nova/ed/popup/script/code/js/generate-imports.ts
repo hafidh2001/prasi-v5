@@ -3,7 +3,7 @@ import { ScriptModel } from "crdt/node/load-script-models";
 export const generateImports = (
   model: ScriptModel,
   models: Record<string, ScriptModel>,
-  debug?: boolean
+  debug?: boolean,
 ) => {
   const merged = mergeParentVars(model, models, debug);
   const imports = {} as Record<string, { name: string; type: string }[]>;
@@ -20,12 +20,20 @@ export const generateImports = (
     if (models[id]) {
       if (v.find((e) => e.type === "passprop")) {
         result.push(
-          `import { pass_prop as p_${id} } from "./${id}"; /* ${models[id].title.trim()} */`
+          `import { pass_prop as p_${id} } from "./${id}"; /* ${models[id].title.trim()} */`,
         );
-        result.push(`const { ${v.map((e) => e.name).join(", ")} } = p_${id};`);
+        result.push(
+          `const { ${v
+            .map((e) => e.name)
+            .filter((e) => e)
+            .join(", ")} } = p_${id};`,
+        );
       } else {
         result.push(
-          `import { ${v.map((e) => e.name).join(", ")} } from "./${id}"; /* ${models[id].title.trim()} */`
+          `import { ${v
+            .map((e) => e.name)
+            .filter((e) => e)
+            .join(", ")} } from "./${id}"; /* ${models[id].title.trim()} */`,
         );
       }
     }
@@ -37,7 +45,7 @@ export const generateImports = (
 const mergeParentVars = (
   model: ScriptModel,
   models: Record<string, ScriptModel>,
-  debug?: boolean
+  debug?: boolean,
 ) => {
   const variables = {} as Record<string, { id: string; type: string }>;
   const models_map = {} as Record<string, string[]>;

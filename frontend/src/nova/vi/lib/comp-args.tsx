@@ -6,7 +6,7 @@ export const compArgs = (
   item: DeepReadonly<IItem>,
   existing: any,
   db: any,
-  api: any
+  api: any,
 ) => {
   const args: Record<string, any> = { ...existing };
   if (item.component?.props) {
@@ -47,7 +47,7 @@ export const compArgs = (
       if (js.startsWith(`const _jsxFileName = "";`)) {
         js = `(() => { ${js.replace(
           `const _jsxFileName = "";`,
-          `const _jsxFileName = ""; return `
+          `const _jsxFileName = ""; return `,
         )} })()`;
       }
 
@@ -61,17 +61,15 @@ export const compArgs = (
         ...existing,
       };
 
-      const fn = new Function(
-        ...Object.keys(arg),
-        `// [${item.name}] ${k}: ${item.id} 
+      const fn_src = `// [${item.name}] ${k}: ${item.id}
 return ${src}
-`
-      );
-
+`;
       try {
+        const fn = new Function(...Object.keys(arg), fn_src);
+
         args[k] = fn(...Object.values(arg));
       } catch (e) {
-        console.error(e);
+        console.error(fn_src, e);
         arg[k] = null;
       }
     }
