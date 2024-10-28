@@ -117,6 +117,8 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
     mode = "css";
   }
 
+  if (mode === "" || mode === "prop") mode = "js";
+
   return (
     <div className="flex flex-1 flex-col select-none">
       {item && (
@@ -174,7 +176,7 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
                               border: 1px solid ${e.color};
                             `,
                             "uppercase text-white text-[12px] cursor-pointer flex items-center justify-center transition-all hover:opacity-100 w-[40px] text-center tab-btn",
-                            popup.mode === e.type
+                            mode === e.type
                               ? css`
                                   background: ${e.color};
                                   color: white;
@@ -211,9 +213,7 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
                   )}
                   {mode === "js" && (
                     <>
-                      {popup.type === "item" && (
-                        <>
-                          {/* 
+                      {/* 
                         <div className="border-l flex items-center pl-2 p-1 text-xs">
                           <div
                             className={cx(
@@ -278,7 +278,7 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
                           </div>
                         </div> */}
 
-                          {/* {script_mode === "flow" && (
+                      {/* {script_mode === "flow" && (
                           <div className="flex items-center pl-2 border-l ml-1">
                             <Tooltip
                               content="Reset Flow"
@@ -294,9 +294,7 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
                             </Tooltip>
                           </div>
                         )} */}
-                          <EdScriptSnippet />
-                        </>
-                      )}
+                      <EdScriptSnippet />
                     </>
                   )}
                 </>
