@@ -64,7 +64,7 @@ export const parseItemCode = (model: ScriptModel) => {
                 ) {
                   model.local.name = d.id.name;
                   model.local.value = `{
-        //local object marjiuir
+        
       }`;
                   const value = d.init.arguments.find(
                     (e) => e.type === "ObjectExpression"

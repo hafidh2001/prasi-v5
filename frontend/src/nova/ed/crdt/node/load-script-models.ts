@@ -125,6 +125,13 @@ export const loadScriptModels = async (
   for (const [k, v] of Object.entries(result)) {
     if (v.source && !v.ready) {
       parseItemCode(v);
+      if (v.local) {
+        v.exports[v.local.name] = {
+          name: v.local.name,
+          value: v.local.value,
+          type: "local",
+        };
+      }
     }
   }
 
