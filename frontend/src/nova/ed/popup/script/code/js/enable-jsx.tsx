@@ -14,8 +14,7 @@ type CompilerOptions = Parameters<
 export const monacoEnableJSX = async (
   editor: MonacoEditor,
   monaco: Monaco,
-  arg?: { nolib?: boolean },
-  p?: PG
+  arg?: {}
 ) => {
   monaco.languages.register({ id: "typescript" });
   if (editor.getModel()) {
@@ -47,8 +46,7 @@ export const monacoEnableJSX = async (
     jsx: monaco.languages.typescript.JsxEmit.React,
     target: monaco.languages.typescript.ScriptTarget.ES2015,
     allowNonTsExtensions: true,
-    lib: arg?.nolib ? [] : ["es6", "dom"],
-    noLib: !!arg?.nolib,
+    lib: ["es6", "dom"],
     module: monaco.languages.typescript.ModuleKind.ESNext,
     esModuleInterop: true,
     moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,

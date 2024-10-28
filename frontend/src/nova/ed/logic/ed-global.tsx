@@ -58,7 +58,12 @@ export const EDGlobal = {
       loading_id: "",
       last_edit_ids: [] as string[],
       prop: {
-        active: "",
+        get active() {
+          return localStorage.getItem("prasi-code-active-prop") || "";
+        },
+        set active(value) {
+          localStorage.setItem("prasi-code-active-prop", value);
+        },
         context_event: null as null | React.MouseEvent<HTMLElement, MouseEvent>,
       },
     },
@@ -126,10 +131,8 @@ export const EDGlobal = {
           localStorage.getItem("prasi-popup-script-mode") !== "popup"
             ? true
             : false,
-        mode: "js" as "js" | "css" | "html",
+        mode: "" as ""| "prop" | "comp" | "js" | "css" | "html",
         type: "item" as "item" | "prop-master" | "prop-instance" | "comp-types",
-        prop_kind: "" as PropFieldKind,
-        prop_name: "",
         on_close: () => {},
         typings: { status: "ok" as "ok" | "loading" | "error", err_msg: "" },
         wb_render: () => {},

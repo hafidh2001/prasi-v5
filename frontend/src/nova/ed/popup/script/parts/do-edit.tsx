@@ -1,13 +1,8 @@
 import { MonacoEditor } from "utils/script/typings";
 import { Monaco } from "../code/js/enable-jsx";
 import { foldRegionVState } from "../code/js/fold-region-vstate";
-import { PG } from "logic/ed-global";
 
-export const defineScriptEdit = (
-  editor: MonacoEditor,
-  monaco: Monaco,
-  p: { script: { snippet_pasted: boolean } }
-) => {
+export const defineScriptEdit = (editor: MonacoEditor, monaco: Monaco) => {
   return async (
     fn: (arg: {
       body: string;
@@ -25,26 +20,27 @@ export const defineScriptEdit = (
       .slice(region_end + 1)
       .join("\n")
       .trim();
-    const imports = lines.slice(1, region_end);
+    const imports = lines.slice(1, region_end).filter((e) => e.trim());
 
     if (imports.length === 0) {
       imports.push(`import React from "react"`);
     }
 
-    const result = await fn({
+    const arg = {
       imports,
       body,
-      wrapImports(imports) {
+      wrapImports(imports: string[]) {
         return `\
 // #region generated
 ${imports.join("\n")}
 // #endregion
 `;
       },
-    });
+    };
+    let result = await fn(arg);
     const model = editor.getModel();
     if (model) {
-      editor.executeEdits("paste-template", [
+      editor.executeEdits("prasi-update-code", [
         {
           range: new monaco.Range(0, 0, Number.MAX_VALUE, Number.MAX_VALUE),
           text: result.join("\n"),

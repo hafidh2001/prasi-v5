@@ -24,9 +24,11 @@ export const EdCompProp = () => {
 
   if (!node || !instance || !comp) {
     return (
-      <div className="flex items-center justify-center flex-1 w-full h-full flex-col text-center">
+      <div className="flex items-center justify-center flex-1 w-full text-sm h-full flex-col text-center space-y-1">
         <Sticker size={40} strokeWidth={1} />
-        {!node || !instance ? <>Not a component</> : <>Loading Component...</>}
+        <div>
+          {!node || !instance ? <>Not a component</> : <>Loading Component</>}
+        </div>
       </div>
     );
   }
@@ -37,9 +39,17 @@ export const EdCompProp = () => {
         .sort((a, b) => {
           return (a[1].idx || 0) - (b[1].idx || 0);
         })
-        .map(([key, field]) => (
-          <EdPropField key={key} name={key} field={field} instance={instance} />
-        ))}
+        .map(([key, field]) => {
+          if (field.meta?.type === "content-element") return null;
+          return (
+            <EdPropField
+              key={key}
+              name={key}
+              field={field}
+              instance={instance}
+            />
+          );
+        })}
     </div>
   );
 };

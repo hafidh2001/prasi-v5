@@ -4,7 +4,13 @@ import { WebsocketProvider } from "y-websocket";
 import { Doc } from "yjs";
 import { createClient } from "../../../utils/sync/client";
 import { IItem } from "../../../utils/types/item";
-import { EPage, EPageContentTree, PNode, SyncUndoItem } from "../logic/types";
+import {
+  EComp,
+  EPage,
+  EPageContentTree,
+  PNode,
+  SyncUndoItem,
+} from "../logic/types";
 import { bind } from "./lib/immer-yjs";
 import { findNodeById, flattenTree } from "./node/flatten-tree";
 import { loadScriptModels, ScriptModel } from "./node/load-script-models";
@@ -16,6 +22,7 @@ type ITEM_ID = string;
 type VAR_ID = string;
 
 export const loadPageTree = (
+  p: { comp: { loaded: Record<string, EComp>; pending: Set<string> } },
   sync: ReturnType<typeof createClient>,
   page_id: string,
   arg?: {
@@ -42,6 +49,7 @@ export const loadPageTree = (
       },
     });
     await loadScriptModels(
+      p,
       content_tree.childs,
       tree.script_models,
       tree.var_items
@@ -81,6 +89,7 @@ export const loadPageTree = (
       const content_tree = immer.get();
       tree.script_models = {};
       await loadScriptModels(
+        p,
         content_tree.childs,
         tree.script_models,
         tree.var_items

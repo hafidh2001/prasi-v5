@@ -1,4 +1,4 @@
-import { MonacoJS } from "popup/script/code/monaco-js";
+import { MonacoItemJS } from "popup/script/code/monaco-item-js";
 import { FC } from "react";
 import { debounce } from "utils/script/debounce";
 import { jscript } from "utils/script/jscript";
@@ -44,7 +44,7 @@ export const PFPropCode: FC<{
         );
       }}
     >
-      <MonacoJS
+      {/* <MonacoJS
         nolib
         className={cx(css`
           .monaco-editor {
@@ -88,7 +88,7 @@ export const PFPropCode: FC<{
         onAfterMount={(editor) => {
           editor.focus();
         }}
-      />
+      /> */}
     </Resizable>
   );
 };

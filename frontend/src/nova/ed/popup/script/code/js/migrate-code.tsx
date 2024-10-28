@@ -10,7 +10,21 @@ export const extractRegion = (code: string) => {
     );
     return lines.slice(0, region_end + 1);
   }
-  return []
+  return [];
+};
+
+export const removeRegion = (code: string) => {
+  if (code.startsWith("// #region")) {
+    const lines = code.split("\n");
+    const region_end = lines.findIndex((line) =>
+      line.startsWith("// #endregion")
+    );
+    return lines
+      .slice(region_end + 1)
+      .join("\n")
+      .trim();
+  }
+  return code;
 };
 
 export const migrateCode = (
@@ -52,6 +66,7 @@ export const ${local.name} = defineLocal({
       name: model.prop_name,
       type: "propname",
     };
+
     return `\
 ${generateRegion(model, models)}${inject}
 

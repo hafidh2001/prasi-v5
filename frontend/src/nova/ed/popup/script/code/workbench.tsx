@@ -1,25 +1,22 @@
 import { getNodeById } from "crdt/node/get-node-by-id";
 import { active } from "logic/active";
-import { EDGlobal } from "logic/ed-global";
-import {
-  PanelTopClose,
-  PictureInPicture2,
-  ScrollText,
-  Sticker,
-  X,
-} from "lucide-react";
-import { FC, ReactNode, useEffect } from "react";
+import { EDGlobal, PG } from "logic/ed-global";
+import { ScrollText, Sticker, X } from "lucide-react";
+import { FC, useEffect, useRef } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
-import { Tooltip } from "utils/ui/tooltip";
-import { EdScriptSnippet } from "./snippet";
+import { EdMonacoProp } from "./monaco-prop";
+import { EdPrasiCodeItem } from "./prasi-code-item";
+import { codeUpdate } from "./prasi-code-update";
+import { EdWorkbenchPaneAction } from "../parts/pane-action";
+import { EdScriptSnippet } from "../parts/snippet";
+import { formatItemName } from "../../../tree/parts/node/node-name";
 
-export const EdScriptWorkbench: FC<{
-  children: ReactNode;
-}> = ({ children }) => {
+export const EdScriptWorkbench: FC<{}> = ({}) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({ active_id: "" });
   const popup = p.ui.popup.script;
+  const div = useRef<HTMLDivElement>(null);
   popup.wb_render = local.render;
 
   const node = getNodeById(p, active.item_id);
@@ -42,18 +39,63 @@ export const EdScriptWorkbench: FC<{
   };
 
   const is_error = popup.typings.status === "error" && popup.mode === "js";
+  const ui = p.ui.comp.prop;
 
   if (
     node &&
     node.item.component?.id &&
     node.item.component.id !== active.comp?.id
   ) {
+    if (p.ui.comp.prop.active) {
+      p.ui.popup.script.mode = "prop";
+      return (
+        <div className="flex flex-col flex-1 items-stretch">
+          <div
+            className={cx(
+              "flex border-b items-stretch justify-between h-[32px]"
+            )}
+          >
+            <CompTitleInstance />
+            <EdWorkbenchPaneAction />
+          </div>
+          <div
+            className={cx(
+              "relative flex-1",
+              css`
+                > * {
+                  position: absolute !important;
+                  left: 0;
+                  right: 0;
+                  bottom: 0;
+                  top: 0;
+                }
+              `
+            )}
+            ref={div}
+          >
+            <EdMonacoProp
+              div={div}
+              onChange={({ model, value, editor }) => {
+                if (model.id && model.source !== value) {
+                  model.source = value;
+                  model.exports = {};
+
+                  codeUpdate.push(p, model.id, value, {
+                    local_name: model.local?.name,
+                    prop_name: model.prop_name,
+                  });
+                }
+              }}
+            />
+          </div>
+        </div>
+      );
+    }
     return (
       <>
         <div
           onClick={() => {
-            popup.open = false;
-            p.render();
+            closeEditor(p);
           }}
           className="absolute right-0 top-2 flex items-center justify-center px-1 pr-2 cursor-pointer hover:text-red-600"
         >
@@ -81,7 +123,7 @@ export const EdScriptWorkbench: FC<{
         <>
           <div
             className={cx(
-              "flex border-b items-stretch justify-between",
+              "flex border-b items-stretch justify-between h-[32px]",
               is_error && "bg-red-100"
             )}
           >
@@ -89,6 +131,9 @@ export const EdScriptWorkbench: FC<{
               className={cx(
                 "flex items-stretch",
                 css`
+                  .tab-btn {
+                    height: 20px;
+                  }
                   .top-btn {
                     display: flex;
                     align-items: center;
@@ -109,7 +154,9 @@ export const EdScriptWorkbench: FC<{
               {popup.type === "prop-instance" && <CompTitleInstance />}
               {popup.type === "item" && (
                 <>
-                  <div className={cx("flex p-2 space-x-1 border-r")}>
+                  <div
+                    className={cx("flex px-1 items-center space-x-1 border-r")}
+                  >
                     {(!has_expression
                       ? [
                           { type: "js", color: "#e9522c" },
@@ -126,7 +173,7 @@ export const EdScriptWorkbench: FC<{
                               color: ${e.color};
                               border: 1px solid ${e.color};
                             `,
-                            "uppercase text-white text-[12px] cursor-pointer flex items-center justify-center transition-all hover:opacity-100 w-[40px] text-center",
+                            "uppercase text-white text-[12px] cursor-pointer flex items-center justify-center transition-all hover:opacity-100 w-[40px] text-center tab-btn",
                             popup.mode === e.type
                               ? css`
                                   background: ${e.color};
@@ -255,68 +302,53 @@ export const EdScriptWorkbench: FC<{
                 </>
               )}
             </div>
-            <div className="flex items-stretch text-xs">
-              {!popup.paned && (
-                <Tooltip content="Switch to Panned Mode" asChild>
-                  <div
-                    onClick={() => {
-                      localStorage.setItem("prasi-popup-script-mode", "paned");
-                      popup.paned = true;
-                      p.render();
-                    }}
-                    className="flex items-center justify-center px-2 cursor-pointer hover:text-blue-600"
-                  >
-                    <PanelTopClose size={13} />
-                  </div>
-                </Tooltip>
-              )}
-              {popup.paned && (
-                <Tooltip content="Switch to Popup Mode" asChild>
-                  <div
-                    onClick={() => {
-                      localStorage.setItem("prasi-popup-script-mode", "popup");
-                      popup.paned = false;
-                      p.render();
-                    }}
-                    className="flex items-center justify-center px-2 cursor-pointer hover:text-blue-600"
-                  >
-                    <PictureInPicture2 size={13} />
-                  </div>
-                </Tooltip>
-              )}
-              <div
-                onClick={() => {
-                  p.viref?.resetLocal?.();
-                  popup.open = false;
-                  p.render();
-                }}
-                className="flex items-center justify-center px-1 pr-2 cursor-pointer hover:text-red-600"
-              >
-                <X size={13} />
-              </div>
-            </div>
+
+            <EdWorkbenchPaneAction />
           </div>
-          {children}
+
+          <div
+            className={cx(
+              "relative flex-1",
+              css`
+                > * {
+                  position: absolute !important;
+                  left: 0;
+                  right: 0;
+                  bottom: 0;
+                  top: 0;
+                }
+              `
+            )}
+            ref={div}
+          >
+            <EdPrasiCodeItem />
+          </div>
         </>
       )}
       {!item && (
-        <div className="flex items-center justify-center flex-1 w-full h-full flex-col text-center">
+        <div className="flex items-center text-sm space-y-2 justify-center flex-1 w-full h-full flex-col text-center">
           <Sticker size={40} strokeWidth={1} />
+          <div>Code Editor: </div>
           No Item Selected
           <div
             className="border rounded px-2 hover:bg-blue-100 cursor-pointer"
             onClick={() => {
-              p.viref?.resetLocal?.();
-              popup.open = false;
-              p.render();
+              closeEditor(p);
             }}
           >
-            Close
+            Close Code
           </div>
         </div>
       )}
     </div>
   );
+};
+
+export const closeEditor = (p: PG) => {
+  p.viref?.resetLocal?.();
+  p.ui.comp.prop.active = "";
+  p.ui.popup.script.open = false;
+  p.render();
 };
 
 const CompTitleInstance = () => {
@@ -325,19 +357,16 @@ const CompTitleInstance = () => {
   const node = getNodeById(p, active.item_id);
   const item = node?.item;
 
-  const popup = p.ui.popup.script;
+  const ui = p.ui.comp.prop;
   if (item && item.component?.id) {
-    const props = item.component.props;
     return (
       <div className="flex text-xs p-2 space-x-1 items-center">
         <div className="bg-blue-700 text-white text-[11px] px-1 mr-1">
           INSTANCE
         </div>
-        <div>{item.name}</div>
+        <div>{formatItemName(item.name)}</div>
         <ArrowRight />
-        <div>{popup.prop_name}</div>
-        <ArrowRight />
-        <div>{popup.prop_kind}</div>
+        <div>{ui.active}</div>
       </div>
     );
   }
@@ -357,9 +386,6 @@ const CompTitleMaster = () => {
         </div>
         <div>{item.name}</div>
         <ArrowRight />
-        <div>{p.ui.popup.script.prop_name}</div>
-        <ArrowRight />
-        <div>{p.ui.popup.script.prop_kind}</div>
       </div>
     );
   }

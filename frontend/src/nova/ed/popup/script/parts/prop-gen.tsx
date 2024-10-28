@@ -18,7 +18,7 @@ export const EdPropGen = () => {
 
   if (item && item.component?.id) {
     const props = item.component.props;
-    const { prop_name } = p.ui.popup.script;
+    const prop_name = p.ui.comp.prop.active;
     const prop = props[prop_name];
 
     const gen = {
@@ -127,7 +127,7 @@ export const EdPropGen = () => {
                   } else {
                     src = fn_result;
                   }
-                  if (p.script.do_edit) p.script.do_edit(src, true);
+                  // if (p.script.do_edit) p.script.do_edit(src);
                   p.render();
                 }
               }}

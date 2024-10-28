@@ -9,6 +9,7 @@ import { Tooltip } from "../../../../../utils/ui/tooltip";
 import { active } from "../../../logic/active";
 import { EDGlobal } from "../../../logic/ed-global";
 import { PNode } from "../../../logic/types";
+import { closeEditor } from "popup/script/code/workbench";
 export const EdTreeAction = ({
   raw,
   render_params,
@@ -50,13 +51,6 @@ export const EdTreeAction = ({
       if (!mode && item.adv?.html) mode = "html";
     }
   }
-
-  if (item.name === "Moko")
-    console.log(
-      item.adv,
-      item.adv?.js || item.adv?.css || item.adv?.html,
-      mode
-    );
 
   const no_adv = !(item.adv?.js || item.adv?.css || item.adv?.html);
 
@@ -147,8 +141,7 @@ export const EdTreeAction = ({
                 e.stopPropagation();
                 p.ui.tree.tooltip.open = "";
                 if (p.ui.popup.script.open) {
-                  p.ui.popup.script.open = false;
-                  p.render();
+                  closeEditor(p);
                 } else {
                   if (has_content) mode = "css";
 
@@ -209,6 +202,7 @@ export const EdTreeAction = ({
                     active.comp = await loadCompTree({
                       sync: p.sync,
                       id: comp.id,
+                      p,
                       async on_update(ctree) {
                         const id = comp.id;
                         if (!p.comp.loaded[id]) {

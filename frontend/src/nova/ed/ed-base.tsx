@@ -20,6 +20,7 @@ import { EDGlobal } from "./logic/ed-global";
 import { EdPopCompGroup } from "./popup/comp/comp-group";
 import { EdPopCompPicker } from "./popup/comp/comp-picker";
 import { iconVSCode } from "./ui/icons";
+import { updateActiveCode } from "popup/script/code/js/update-active-code";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -27,7 +28,7 @@ export const EdBase = () => {
   prasiKeybinding(p);
 
   if (!p.page.tree && p.page.cur && p.sync) {
-    p.page.tree = loadPageTree(p.sync, p.page.cur.id, {
+    p.page.tree = loadPageTree(p, p.sync, p.page.cur.id, {
       async loaded(content_tree) {
         await loadPendingComponent(p);
         if (active.comp_id && !active.comp) {
@@ -41,12 +42,8 @@ export const EdBase = () => {
           p.mode = content_tree.responsive;
         }
         if (p.ui.popup.script.open) {
-          if (p.ui.popup.script.mode === "js") {
-            if (!document.activeElement?.classList.contains("inputarea")) {
-              const source = getActiveNode(p)?.item.adv?.js || "";
-              p.script.ignore_changes = true;
-              p.script.do_edit(async () => source.split("\n"));
-            }
+          if (!document.activeElement?.classList.contains("inputarea")) {
+           updateActiveCode(p)
           }
         }
 
@@ -126,7 +123,7 @@ export const EdBase = () => {
           <EdTopBar />
 
           <PanelGroup autoSaveId="prasi-editor-right" direction="horizontal">
-            <Panel>
+            <Panel className="flex">
               {script.paned && script.open ? (
                 <EdPopItemScript />
               ) : (

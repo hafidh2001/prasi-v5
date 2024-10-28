@@ -63,6 +63,9 @@ export const EdTreeNodeName: FC<{
                 p.render();
                 return;
               }
+
+              p.ui.tree.rename_id = "";
+              p.render();
               const tree = getActiveTree(p);
               tree.update(
                 "Rename item",
@@ -82,10 +85,11 @@ export const EdTreeNodeName: FC<{
                   }
                 },
                 async () => {
-                  await tree.reloadScriptModels();
-
                   p.ui.tree.rename_id = "";
                   p.render();
+
+                  // await tree.reloadScriptModels();
+
                   setTimeout(scrollTreeActiveItem);
                 }
               );
@@ -141,7 +145,6 @@ const Name: FC<{ p: PG; node: PNode; render_params: RenderParams }> = ({
         waitUntil(
           () => p.comp.loaded[node.item.component?.id || ""]?.content_tree?.name
         ).then(() => {
-          console.log("asdsa");
           render({});
         });
       }
@@ -170,11 +173,15 @@ const Name: FC<{ p: PG; node: PNode; render_params: RenderParams }> = ({
             <div className="node-text text-purple-500 flex items-center">
               {formatItemName(comp_name) || <LoadingSpinner size={13} />}:
             </div>
-            <div>{name}</div>
+            <div className="node-text flex items-center">{name}</div>
           </div>
         );
       } else {
-        name = <div className="node-text text-purple-500">{name}</div>;
+        name = (
+          <div className="node-text text-purple-500 flex items-center">
+            {name}
+          </div>
+        );
       }
     }
   }
@@ -183,12 +190,8 @@ const Name: FC<{ p: PG; node: PNode; render_params: RenderParams }> = ({
     return (
       <div className={cx("flex items-center space-x-1 pr-1")}>
         <RectangleEllipsis size={12} className="node-text text-purple-500" />
-        <div className="flex-1 relative self-stretch">
-          <div className="absolute inset-0 flex items-center">
-            <div className="truncate text-ellipsis">
-              {name + (comp_label ? `: ${comp_label}` : "")}
-            </div>
-          </div>
+        <div className="flex leading-none truncate text-ellipsis">
+          {name + (comp_label ? `: ${comp_label}` : "")}
         </div>
       </div>
     );
@@ -205,7 +208,7 @@ const Name: FC<{ p: PG; node: PNode; render_params: RenderParams }> = ({
           ></div>
           <div className="font-mono text-[8px]">JSX</div>
         </div>
-        <div>{name.substring(4)}</div>
+        <div className="flex leading-none">{name.substring(4)}</div>
       </div>
     );
   }
@@ -217,7 +220,7 @@ const Name: FC<{ p: PG; node: PNode; render_params: RenderParams }> = ({
           <ComponentIcon />
         </div>
       )}
-      <div>
+      <div className="flex leading-none">
         {name}
         {comp_label && `: ${comp_label}`}
       </div>

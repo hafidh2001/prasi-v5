@@ -8,6 +8,9 @@ import { IItem } from "utils/types/item";
 import { loopItem } from "./loop-item";
 import { rapidhash_fast as hash } from "./rapidhash";
 import { TreeVarItems } from "./var-items";
+import { PG } from "logic/ed-global";
+import { EComp } from "logic/types";
+import { loadPendingComponent } from "./load-child-comp";
 
 const source_sym = Symbol("source");
 
@@ -29,6 +32,7 @@ export type ScriptModel = {
 };
 
 export const loadScriptModels = async (
+  p: { comp: { loaded: Record<string, EComp>; pending: Set<string> } },
   items: IItem[],
   result: Record<string, ScriptModel>,
   var_items: TreeVarItems
@@ -37,13 +41,16 @@ export const loadScriptModels = async (
     await waitUntil(() => jscript.loaded);
   }
 
-  loopItem(items, {}, async ({ item, path_name, path_id }) => {
+  await loopItem(items, {}, async ({ item, path_name, path_id }) => {
     if (item.component?.id) {
+      const comp_id = item.component.id;
       for (const [name, prop] of Object.entries(item.component.props)) {
         const file = `${item.id}~${name}`;
         const source_hash = hash(prop.value).toString();
 
         if (result[file]?.source_hash !== source_hash) {
+          let comp_def = p.comp.loaded[comp_id];
+
           result[file] = {
             id: item.id,
             get source() {
@@ -123,7 +130,11 @@ export const loadScriptModels = async (
 
   for (const [k, v] of Object.entries(result)) {
     if (v.source && !v.ready) {
-      v.source = await jscript.prettier.format?.(migrateCode(v, result));
+      try {
+        v.source = await jscript.prettier.format?.(migrateCode(v, result));
+      } catch (e) {
+        console.error(`[ERROR] Formatting Code\n${v.title} ~> ${v.id}\n\n`, e);
+      }
       v.ready = true;
     }
   }

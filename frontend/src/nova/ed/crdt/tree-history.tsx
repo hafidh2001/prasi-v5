@@ -44,7 +44,6 @@ export const EdTreeHistory = ({ tree }: { tree: PageTree | CompTree }) => {
       local.loading = true;
       local.render();
       local.history = await tree.history();
-      console.log(local.history)
       local.loading = false;
       local.render();
     }

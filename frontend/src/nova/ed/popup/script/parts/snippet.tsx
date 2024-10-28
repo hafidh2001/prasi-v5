@@ -18,7 +18,7 @@ export const EdScriptSnippet: FC<{}> = ({}) => {
     font-size: 12px;
   `;
   return (
-    <div className="flex items-center space-x-1 pl-2">
+    <div className="flex items-center space-x-1 pl-1">
       <Popover
         open={local.open}
         onOpenChange={(open) => {
