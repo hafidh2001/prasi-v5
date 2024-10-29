@@ -10,6 +10,7 @@ import { useVi } from "./lib/store";
 import { createViLocal } from "./script/vi-local";
 import { createViPassProp } from "./script/vi-pass-prop";
 import { useSnapshot } from "valtio";
+import { IF } from "./script/vi-if";
 
 export const ViScript: FC<{
   item: DeepReadonly<IItem>;
@@ -132,6 +133,7 @@ export const ViScript: FC<{
     PassProp: internal.PassProp,
     Local: internal.Local,
     React,
+    IF,
     __result: result,
   };
 

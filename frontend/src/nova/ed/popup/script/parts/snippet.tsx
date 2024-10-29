@@ -178,39 +178,15 @@ export default () => (
                     wrapImports(imports),
                     `\
 export default () => (
-  <>{true && <div {...props} className={cx(props.className, "")}>{children}</div>}</>
-)
-`,
-                  ];
-                });
-              }}
-            >
-              &lt;If /&gt;
-            </Button>
-            <Button
-              className={cx(btn_style)}
-              onClick={() => {
-                p.script.snippet_pasted = true;
-                p.script.do_edit(async ({ imports, wrapImports }) => {
-                  return [
-                    wrapImports(imports),
-                    `\
-export default () => (
-  <>
-    {
-      /**if condition */
-      true ?
-        /** then  */
-        <div {...props} className={cx(props.className, "")}>
-          {children}
-        </div>
-      : /** else  */
-        <div {...props} className={cx(props.className, "")}>
-          ELSE CONDITION
-        </div>
-
+  <IF
+    condition={true}
+    then={
+      <div {...props} className={cx(props.className, "")}>
+        {children}
+      </div>
     }
-  </>
+    else={<></>}
+  />
 )
 `,
                   ];

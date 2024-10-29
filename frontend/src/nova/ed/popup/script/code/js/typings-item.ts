@@ -19,6 +19,7 @@ type DeepReadonly<T> = T extends Function
     ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
     : T;
 const defineAutoRender: <T extends Record<string, any>>(arg: {value:T, name: string}) => DeepReadonly<T> & { set: T };
+const IF: (prop: {condition?: boolean; then: ReactNode; else?: ReactNode}) => ReactNode;
 const preload: (urls: string | string[], opt?: {
   on_load?: (
     pages: {
