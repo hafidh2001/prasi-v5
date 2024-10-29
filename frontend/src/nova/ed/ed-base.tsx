@@ -4,7 +4,7 @@ import { loadPendingComponent } from "crdt/node/load-child-comp";
 import { active } from "logic/active";
 import { fg } from "popup/flow/utils/flow-global";
 import { updateActiveCodeFromServer } from "popup/script/code/js/update-active-code";
-import { EdPopItemScript } from "popup/script/item-script";
+import { EdPopItemScript } from "popup/script/ed-item-script";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useGlobal } from "../../utils/react/use-global";
 import { w } from "../../utils/types/general";
@@ -45,6 +45,7 @@ export const EdBase = () => {
           updateActiveCodeFromServer(p);
         }
 
+        p.ui.page.loaded = true;
         p.render();
         p.ui.editor.render();
       },
@@ -77,7 +78,7 @@ export const EdBase = () => {
                       svg {
                         width: 11px;
                       }
-                    `,
+                    `
                   )}
                 >
                   <div dangerouslySetInnerHTML={{ __html: iconVSCode }} />
@@ -128,7 +129,7 @@ export const EdBase = () => {
                 <div
                   className={cx(
                     "w-full h-full flex flex-1 relative overflow-auto",
-                    p.mode === "mobile" ? "flex-col items-center" : "",
+                    p.mode === "mobile" ? "flex-col items-center" : ""
                   )}
                   onContextMenu={(e) => {
                     e.preventDefault();
@@ -145,7 +146,7 @@ export const EdBase = () => {
               defaultSize={25}
               hidden={!p.ui.panel.right}
               className={cx(
-                p.ui.panel.right && "flex flex-col min-w-[265px] border-l",
+                p.ui.panel.right && "flex flex-col min-w-[265px] border-l"
               )}
             >
               <EdRight />

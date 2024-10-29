@@ -20,6 +20,7 @@ export default defineConfig({
       ignoreWarnings: [/require function is used in a way/],
     },
   },
+
   output: {
     cleanDistPath: true,
     sourceMap: {

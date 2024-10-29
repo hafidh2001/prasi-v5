@@ -5,13 +5,14 @@ import { ScrollText, Sticker, X } from "lucide-react";
 import { FC, useEffect, useRef } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
-import { EdMonacoProp } from "./monaco-prop";
-import { EdPrasiCodeItem } from "./prasi-code-item";
-import { codeUpdate } from "./prasi-code-update";
-import { EdWorkbenchPaneAction } from "../parts/pane-action";
-import { EdScriptSnippet } from "../parts/snippet";
-import { formatItemName } from "../../../tree/parts/node/node-name";
-import { EdScriptHistory } from "../parts/script-history";
+import { EdMonacoProp } from "./code/monaco-prop";
+import { EdPrasiCodeItem } from "./code/prasi-code-item";
+import { codeUpdate } from "./code/prasi-code-update";
+import { EdWorkbenchPaneAction } from "./parts/pane-action";
+import { EdScriptSnippet } from "./parts/snippet";
+import { formatItemName } from "../../tree/parts/node/node-name";
+import { EdScriptHistory } from "./parts/script-history";
+import { Loading } from "utils/ui/loading";
 
 export const EdScriptWorkbench: FC<{}> = ({}) => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -40,7 +41,10 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
   };
 
   const is_error = popup.typings.status === "error" && popup.mode === "js";
-  const ui = p.ui.comp.prop;
+
+  if (!p.ui.page.loaded) {
+    return <Loading />;
+  }
 
   if (
     node &&

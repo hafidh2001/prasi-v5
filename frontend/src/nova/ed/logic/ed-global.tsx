@@ -44,6 +44,7 @@ export const EDGlobal = {
     history: [] as { comp_id?: string; item_id: string; ui?: any }[],
   },
   ui: {
+    page: { loaded: false },
     panel: {
       left: localStorage.getItem("prasi-panel-left") !== "n",
       right: localStorage.getItem("prasi-panel-right") !== "n",
@@ -125,7 +126,7 @@ export const EDGlobal = {
         set open(value) {
           localStorage.setItem(
             "prasi-popup-script-open",
-            JSON.stringify(value),
+            JSON.stringify(value)
           );
         },
         paned:

@@ -2,7 +2,7 @@ import { EDGlobal } from "logic/ed-global";
 import { PanelTopClose, PictureInPicture2, X } from "lucide-react";
 import { useGlobal } from "utils/react/use-global";
 import { Tooltip } from "utils/ui/tooltip";
-import { closeEditor } from "../code/workbench";
+import { closeEditor } from "../ed-workbench";
 
 export const EdWorkbenchPaneAction = () => {
   const p = useGlobal(EDGlobal, "EDITOR");

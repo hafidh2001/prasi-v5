@@ -9,7 +9,7 @@ import { Tooltip } from "../../../../../utils/ui/tooltip";
 import { active } from "../../../logic/active";
 import { EDGlobal } from "../../../logic/ed-global";
 import { PNode } from "../../../logic/types";
-import { closeEditor } from "popup/script/code/workbench";
+import { closeEditor } from "popup/script/ed-workbench";
 export const EdTreeAction = ({
   raw,
   render_params,

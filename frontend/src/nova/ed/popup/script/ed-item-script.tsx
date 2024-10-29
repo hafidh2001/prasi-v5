@@ -1,7 +1,7 @@
 import { EDGlobal } from "logic/ed-global";
 import { useGlobal } from "utils/react/use-global";
 import { Modal } from "utils/ui/modal";
-import { closeEditor, EdScriptWorkbench } from "./code/workbench";
+import { closeEditor, EdScriptWorkbench } from "./ed-workbench";
 
 export const EdPopItemScript = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -9,7 +9,7 @@ export const EdPopItemScript = () => {
 
   if (!popup.open) return null;
 
-  const content = <EdScriptWorkbench></EdScriptWorkbench>;
+  const content = <EdScriptWorkbench />;
 
   if (popup.paned) {
     return (

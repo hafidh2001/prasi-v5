@@ -157,7 +157,7 @@ export const remountPrasiModels = (arg: {
 };
 
 export const codeUpdate = {
-  p: null as any,
+  p: null as null | PG,
   timeout: null as any,
   queue: {} as Record<
     string,
@@ -186,8 +186,6 @@ export const codeUpdate = {
       if (!jscript.loaded) {
         await waitUntil(() => jscript.loaded);
       }
-
-      _api.code_history({ mantapp: "jiwa" });
 
       for (const q of Object.values(this.queue)) {
         q.source_built = null;
@@ -263,7 +261,20 @@ export const codeUpdate = {
         }
       }
 
-      getActiveTree(this.p).update("Update Code", ({ findNode }) => {
+      _api.code_history({
+        action: "update",
+        codes: Object.values(this.queue).map((e) => {
+          return {
+            page_id: this.p!.page.cur.id,
+            item_id: e.id,
+            type: e.prop_name ? "prop" : "js",
+            prop_name: e.prop_name,
+            text: e.source,
+          };
+        }),
+      });
+
+      getActiveTree(this.p!).update("Update Code", ({ findNode }) => {
         for (const q of Object.values(this.queue)) {
           const n = findNode(q.id);
           if (n && !n.item.adv) {

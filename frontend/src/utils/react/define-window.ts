@@ -7,6 +7,7 @@ export const defineWindow = async (awaitServerUrl = true) => {
 
   if (awaitServerUrl) await waitUntil(() => w.__SRV_URL__);
 
+  w.process = { env: { NODE_ENV: "production" } };
   w.prasiContext = {
     global: {},
     render() {},
