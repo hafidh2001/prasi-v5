@@ -7,15 +7,13 @@ import { useLocal } from "utils/react/use-local";
 import { jscript } from "utils/script/jscript";
 import { Loading } from "utils/ui/loading";
 import { defineScriptEdit } from "../parts/do-edit";
-import { reloadPrasiModels, remountPrasiModels } from "./prasi-code-update";
 import { Monaco, MonacoEditor } from "./js/enable-jsx";
-import { foldRegionVState } from "./js/fold-region-vstate";
 import { jsxColorScheme } from "./js/jsx-style";
 import { registerPrettier } from "./js/register-prettier";
 import { registerReact } from "./js/register-react";
+import { reloadPrasiModels, remountPrasiModels } from "./prasi-code-update";
 
 export const MonacoItemJS: FC<{
-  sidebar?: boolean;
   onChange?: (arg: {
     value: string;
     model: Partial<ScriptModel>;

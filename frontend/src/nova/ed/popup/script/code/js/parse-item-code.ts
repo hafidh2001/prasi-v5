@@ -6,6 +6,7 @@ import { traverse } from "utils/script/parser/traverse";
 import { parseItemLocal } from "./parse-item-local";
 import { parseItemPassProp } from "./parse-item-passprop";
 import { replaceString } from "./replace-string";
+import { JSXElement, JSXElementName } from "utils/script/parser/oxc-types";
 
 export const parseItemCode = (model: ScriptModel) => {
   const replacements: Array<{
@@ -38,7 +39,7 @@ export const parseItemCode = (model: ScriptModel) => {
         ) {
           const jsx = get(
             node,
-            "declaration.body.statements.0.expression.expression",
+            "declaration.body.statements.0.expression.expression"
           ) as any;
           if (jsx) {
             model.extracted_content = cutCode(model.source, jsx, -2);
@@ -72,20 +73,20 @@ export const parseItemCode = (model: ScriptModel) => {
 
       }`;
                   const value = d.init.arguments.find(
-                    (e) => e.type === "ObjectExpression",
+                    (e) => e.type === "ObjectExpression"
                   );
                   if (value && value.type === "ObjectExpression") {
                     const local_value = value.properties.find(
                       (e) =>
                         e.type === "ObjectProperty" &&
                         e.key.type === "Identifier" &&
-                        e.key.name === "value",
+                        e.key.name === "value"
                     );
                     if (local_value?.type === "ObjectProperty") {
                       model.local.value = cutCode(
                         model.source,
                         local_value.value,
-                        -2,
+                        -2
                       );
                     }
                   }
@@ -115,7 +116,7 @@ export const parseItemCode = (model: ScriptModel) => {
                             single_export[prop.key.name] = cutCode(
                               model.source,
                               prop.value,
-                              -2,
+                              -2
                             );
                           }
                         }
@@ -128,12 +129,84 @@ export const parseItemCode = (model: ScriptModel) => {
           }
         }
       },
+      CallExpression: (node) => {
+        if (
+          node.callee.type === "StaticMemberExpression" &&
+          node.callee.property.type === "Identifier" &&
+          node.callee.property.name === "map"
+        ) {
+          const expr = node.arguments[0];
+
+          if (
+            expr.expression === true &&
+            expr.type === "ArrowFunctionExpression"
+          ) {
+            if (
+              !Array.isArray(expr.params) &&
+              expr.params.type === "FormalParameters"
+            ) {
+              const item_expr = expr.params.items[0];
+              const idx_expr = expr.params.items[1];
+
+              let item = "";
+              if (
+                item_expr.type === "FormalParameter" &&
+                item_expr.pattern.type === "Identifier"
+              ) {
+                item = item_expr.pattern.name;
+              }
+
+              let idx = "";
+              if (
+                idx_expr.type === "FormalParameter" &&
+                idx_expr.pattern.type === "Identifier"
+              ) {
+                idx = idx_expr.pattern.name;
+              }
+
+              if (item) {
+                if (expr.body.type === "FunctionBody") {
+                  const stmt = expr.body.statements[0];
+                  if (stmt.type === "ExpressionStatement") {
+                    const parent_node = node;
+
+                    if (stmt.expression.type === "ParenthesizedExpression") {
+                      const node = stmt.expression.expression as JSXElement;
+
+                      if (node.type === "JSXElement") {
+                        const name = node.openingElement.name as JSXElementName;
+                        if (!model.prop_name) {
+                          const val = cutCode(model.source, parent_node.callee);
+                          parseItemPassProp({
+                            name,
+                            node,
+                            model,
+                            exports,
+                            map: {
+                              value: val.substring(0, val.length - 4),
+                              item,
+                              idx,
+                            },
+                          });
+                        }
+                      }
+                    }
+                  }
+                }
+                console.log(expr.body);
+              }
+            }
+          }
+        }
+      },
       JSXElement: (node) => {
         const name = node.openingElement.name;
 
         if (!model.prop_name) {
           parseItemLocal({ name, node, model, replacements, exports });
-          parseItemPassProp({ name, node, model, replacements, exports });
+          if (!(node as any).__processed) {
+            parseItemPassProp({ name, node, model, exports });
+          }
         }
       },
     });

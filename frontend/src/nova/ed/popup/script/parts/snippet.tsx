@@ -147,7 +147,10 @@ export default () => (
                         return true;
                       }),
                       `\
-export const pass_prop = {};
+const pass_prop_list = [1, 2, 3];
+export const pass_prop = {
+  item: null as unknown as (typeof pass_prop_list)[number]
+}
 const PassProp: React.FC<
   { key: any; children: any } & Record<string, any>
 > = null as any`,

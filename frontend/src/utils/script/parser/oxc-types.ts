@@ -1,5 +1,7 @@
 import {
   ComputedMemberExpression,
+  FormalParameter,
+  FormalParameters,
   FunctionBody,
   JSXIdentifier,
   ExportNamedDeclaration as OXCExportNamedDeclaration,
@@ -1543,9 +1545,9 @@ export interface Import extends Node, HasSpan {
 export interface CallExpression extends ExpressionBase {
   type: "CallExpression";
 
-  callee: Super | Import | Expression;
+  callee: Super | Import | Expression | StaticMemberExpression;
 
-  arguments: Argument[];
+  arguments: (Argument | (ArrowFunctionExpression & { expression: true }))[];
 
   typeArguments?: TsTypeParameterInstantiation;
 }
@@ -1569,7 +1571,7 @@ export interface SequenceExpression extends ExpressionBase {
 export interface ArrowFunctionExpression extends ExpressionBase {
   type: "ArrowFunctionExpression";
 
-  params: Pattern[];
+  params: (Pattern[] | FormalParameters);
 
   body: FunctionBody | BlockStatement | Expression;
 
@@ -2045,6 +2047,7 @@ export type Pattern =
   | ObjectPattern
   | AssignmentPattern
   | Invalid
+  | FormalParameter
   | Expression;
 
 export interface BindingIdentifier extends PatternBase {

@@ -7,21 +7,18 @@ export const parseItemPassProp = ({
   name,
   node,
   model,
-  replacements,
   exports,
+  map,
 }: {
   name: JSXElementName;
   node: JSXElement;
   model: ScriptModel;
-  replacements: Array<{
-    start: number;
-    end: number;
-    replacement: string;
-  }>;
   exports: Record<string, SingleExportVar>;
+  map?: { value?: string; item: string; idx?: string };
 }) => {
   if (name.type === "JSXIdentifier") {
     if (name.name === "PassProp") {
+      (node as any).__processed = true;
       for (const attr of node.openingElement.attributes) {
         if (
           attr.type === "JSXAttribute" &&
@@ -43,13 +40,14 @@ export const parseItemPassProp = ({
             value = "number";
           } else if (expr.type === "TSAsExpression") {
             value = cutCode(model.source, expr.typeAnnotation, -2);
-          }
+          } 
 
           if (prop_name !== "key") {
             exports[prop_name] = {
               type: "passprop",
               name: prop_name,
               value,
+              map,
             };
           }
         }
