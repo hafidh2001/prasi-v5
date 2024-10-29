@@ -9,4 +9,5 @@ export const apiDefinition = [
   await import("./api/page-load"),
   await import("./api/page-history"),
   await import("./api/auth-login"),
+  await import("./api/code-history"),
 ];

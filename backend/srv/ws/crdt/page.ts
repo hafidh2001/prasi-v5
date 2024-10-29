@@ -203,6 +203,7 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
               limit: 1,
               sort: { ts: "desc" },
             });
+
             const checkpoint_counts = site.page.tables.page_updates.count({
               where: { ts: [`>=`, checkpoint[0].ts] },
             });

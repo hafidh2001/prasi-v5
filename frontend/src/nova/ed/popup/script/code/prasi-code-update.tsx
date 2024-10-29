@@ -187,6 +187,8 @@ export const codeUpdate = {
         await waitUntil(() => jscript.loaded);
       }
 
+      _api.code_history({ mantapp: "jiwa" });
+
       for (const q of Object.values(this.queue)) {
         q.source_built = null;
         try {

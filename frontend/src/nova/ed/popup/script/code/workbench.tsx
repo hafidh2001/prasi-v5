@@ -11,6 +11,7 @@ import { codeUpdate } from "./prasi-code-update";
 import { EdWorkbenchPaneAction } from "../parts/pane-action";
 import { EdScriptSnippet } from "../parts/snippet";
 import { formatItemName } from "../../../tree/parts/node/node-name";
+import { EdScriptHistory } from "../parts/script-history";
 
 export const EdScriptWorkbench: FC<{}> = ({}) => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -298,6 +299,7 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
                           </div>
                         )} */}
                       <EdScriptSnippet />
+                      <EdScriptHistory />
                     </>
                   )}
                 </>

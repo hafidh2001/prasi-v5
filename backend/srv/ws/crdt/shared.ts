@@ -24,6 +24,33 @@ const createPageDb = (site_id: string) => {
   });
 };
 
+export const codeHistory = {
+  site(id: string) {
+    if (!this._sites[id]) {
+      this._sites[id] = createCodeHistoryDb(id);
+    }
+    return this._sites[id];
+  },
+  _sites: {} as Record<string, ReturnType<typeof createCodeHistoryDb>>,
+};
+
+const createCodeHistoryDb = (site_id: string) => {
+  return new BunORM(dir.data(`/crdt/site/${site_id}/code-history.db`), {
+    tables: {
+      code: {
+        columns: {
+          page_id: { type: "TEXT" },
+          item_id: { type: "TEXT" },
+          type: { type: "TEXT" }, // js, css, html, prop, comp
+          prop_name: { type: "TEXT" },
+          text: { type: "TEXT" },
+          ts: { type: "INTEGER" },
+        },
+      },
+    },
+  });
+};
+
 export const createSiteCrdt = async (site_id: string) => {
   await dirAsync(dir.data(`/crdt/site/${site_id}`));
 
