@@ -44,7 +44,8 @@ export const loadScriptModels = async (
       const comp_id = item.component.id;
       for (const [name, prop] of Object.entries(item.component.props)) {
         const file = `${item.id}~${name}`;
-        const source_hash = hash(prop.value).toString();
+        let prop_value = prop.value || "";
+        const source_hash = hash(prop_value).toString();
 
         if (result[file]?.source_hash !== source_hash) {
           let comp_def = p.comp.loaded[comp_id];
@@ -56,7 +57,7 @@ export const loadScriptModels = async (
             },
             set source(value: string) {
               this[source_sym] = value;
-              this.source_hash = hash(prop.value).toString();
+              this.source_hash = hash(value).toString();
               this.ready = false;
             },
             [source_sym]: prop.value,
@@ -138,7 +139,10 @@ export const loadScriptModels = async (
       try {
         v.source = await jscript.prettier.format?.(migrateCode(v, result));
       } catch (e) {
-        console.error(`[ERROR] When Formatting Code\n${v.title} ~> ${v.id}\n\n`, e);
+        console.error(
+          `[ERROR] When Formatting Code\n${v.title} ~> ${v.id}\n\n`,
+          e,
+        );
       }
       v.ready = true;
     }

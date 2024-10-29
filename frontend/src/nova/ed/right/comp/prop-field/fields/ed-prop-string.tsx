@@ -21,7 +21,13 @@ export const EdPropString = (arg: {
   const { name, instance } = arg;
 
   useEffect(() => {
-    let value = instance.props[name].value;
+    let value = instance.props[name].value || "";
+    if (!value) {
+      local.has_code = false;
+      local.value = "";
+      return;
+    }
+
     const extracted_str = extractString(name, value.trim());
     if (extracted_str) {
       value = trim(extracted_str, `\`"'`);

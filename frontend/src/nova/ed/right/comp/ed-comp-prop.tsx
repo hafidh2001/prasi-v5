@@ -66,6 +66,7 @@ export const EdCompProp = () => {
             label="Edit code"
             onClick={() => {
               ui.active = ui.context_name;
+              p.ui.popup.script.open = true;
               p.render();
             }}
           />

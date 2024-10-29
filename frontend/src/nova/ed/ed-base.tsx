@@ -1,9 +1,9 @@
 import { activateComp } from "crdt/load-comp-tree";
 import { loadPageTree } from "crdt/load-page-tree";
-import { getActiveNode } from "crdt/node/get-node-by-id";
 import { loadPendingComponent } from "crdt/node/load-child-comp";
 import { active } from "logic/active";
 import { fg } from "popup/flow/utils/flow-global";
+import { updateActiveCodeFromServer } from "popup/script/code/js/update-active-code";
 import { EdPopItemScript } from "popup/script/item-script";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useGlobal } from "../../utils/react/use-global";
@@ -20,7 +20,6 @@ import { EDGlobal } from "./logic/ed-global";
 import { EdPopCompGroup } from "./popup/comp/comp-group";
 import { EdPopCompPicker } from "./popup/comp/comp-picker";
 import { iconVSCode } from "./ui/icons";
-import { updateActiveCode } from "popup/script/code/js/update-active-code";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -41,10 +40,9 @@ export const EdBase = () => {
         if (["mobile", "desktop"].includes(content_tree.responsive)) {
           p.mode = content_tree.responsive;
         }
+
         if (p.ui.popup.script.open) {
-          if (!document.activeElement?.classList.contains("inputarea")) {
-           updateActiveCode(p)
-          }
+          updateActiveCodeFromServer(p);
         }
 
         p.render();
@@ -79,7 +77,7 @@ export const EdBase = () => {
                       svg {
                         width: 11px;
                       }
-                    `
+                    `,
                   )}
                 >
                   <div dangerouslySetInnerHTML={{ __html: iconVSCode }} />
@@ -130,7 +128,7 @@ export const EdBase = () => {
                 <div
                   className={cx(
                     "w-full h-full flex flex-1 relative overflow-auto",
-                    p.mode === "mobile" ? "flex-col items-center" : ""
+                    p.mode === "mobile" ? "flex-col items-center" : "",
                   )}
                   onContextMenu={(e) => {
                     e.preventDefault();
@@ -147,7 +145,7 @@ export const EdBase = () => {
               defaultSize={25}
               hidden={!p.ui.panel.right}
               className={cx(
-                p.ui.panel.right && "flex flex-col min-w-[265px] border-l"
+                p.ui.panel.right && "flex flex-col min-w-[265px] border-l",
               )}
             >
               <EdRight />

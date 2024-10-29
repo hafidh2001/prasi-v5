@@ -176,7 +176,10 @@ export const parseItemCode = (model: ScriptModel) => {
                       if (node.type === "JSXElement") {
                         const name = node.openingElement.name as JSXElementName;
                         if (!model.prop_name) {
-                          const val = cutCode(model.source, parent_node.callee);
+                          let val = cutCode(model.source, parent_node.callee);
+                          if (val.endsWith("(")) {
+                            val = cutCode(model.source, parent_node.callee, -2);
+                          }
                           parseItemPassProp({
                             name,
                             node,
@@ -193,7 +196,6 @@ export const parseItemCode = (model: ScriptModel) => {
                     }
                   }
                 }
-                console.log(expr.body);
               }
             }
           }

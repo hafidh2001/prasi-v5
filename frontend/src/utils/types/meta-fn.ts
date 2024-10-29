@@ -1,4 +1,3 @@
-import { PFlow } from "popup/flow/runtime/types";
 import { IItem } from "./item";
 export type FNLayout = {
   dir: "row" | "col" | "row-reverse" | "col-reverse";
@@ -30,7 +29,7 @@ export type FNCompDef = {
   typings?: string;
   type?: string;
   label?: string;
-  value: any;
+  value?: any;
   valueBuilt?: any;
   gen?: string;
   genBuilt?: string;

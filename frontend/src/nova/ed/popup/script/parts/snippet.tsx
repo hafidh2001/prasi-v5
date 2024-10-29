@@ -28,7 +28,7 @@ export const EdScriptSnippet: FC<{}> = ({}) => {
         content={
           <div
             className={cx(
-              "flex flex-wrap w-[300px] p-1 pb-2",
+              "flex flex-wrap mr-2 p-1 pb-2",
               css`
                 > * {
                   margin-left: 5px;
@@ -94,42 +94,7 @@ export default () => (
             >
               &lt;Local/&gt;
             </Button>{" "}
-            <Button
-              className={cx(btn_style)}
-              onClick={() => {
-                p.script.snippet_pasted = true;
-                p.script.do_edit(async ({ imports, wrapImports }) => {
-                  let p_idx = 0;
-                  return [
-                    wrapImports([
-                      ...imports.filter((e, idx) => {
-                        if (e.startsWith("export const pass_prop")) {
-                          p_idx = idx;
-                          return false;
-                        }
-                        if (p_idx > 0 && idx >= p_idx) return false;
-                        return true;
-                      }),
-                      `\
-export const pass_prop = {};
-const PassProp: React.FC<
-  { key: any; children: any } & Record<string, any>
-> = null as any`,
-                    ]),
-                    `\
-export default () => (
-  <div {...props} className={cx(props.className, "")}>
-    <PassProp key={'-'} item={"item"}>
-      { children }
-    </PassProp>
-  </div>
-)`,
-                  ];
-                });
-              }}
-            >
-              &lt;PassProp/&gt;
-            </Button>
+         
             <Button
               className={cx(btn_style)}
               onClick={() => {
@@ -170,7 +135,7 @@ export default () => (
                 });
               }}
             >
-              &lt;Map /&gt;
+              &lt;PassProp /&gt;
             </Button>
             <Button
               className={cx(btn_style)}

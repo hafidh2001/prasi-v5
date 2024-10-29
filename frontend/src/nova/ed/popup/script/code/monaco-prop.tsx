@@ -14,6 +14,7 @@ import { registerPrettier } from "./js/register-prettier";
 import { registerReact } from "./js/register-react";
 import { reloadPrasiModels, remountPrasiModels } from "./prasi-code-update";
 import { generateImports } from "./js/generate-imports";
+import { defaultCode } from "./js/default-code";
 
 export const EdMonacoProp: FC<{
   className?: string;
@@ -142,6 +143,7 @@ export const EdMonacoProp: FC<{
           p.script.do_edit = defineScriptEdit(editor, monaco);
 
           registerPrettier(monaco);
+          await registerReact(monaco);
 
           remountPrasiModels({
             p,

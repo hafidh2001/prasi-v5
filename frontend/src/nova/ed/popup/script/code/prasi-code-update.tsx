@@ -1,29 +1,21 @@
 import { ScriptModel } from "crdt/node/load-script-models";
-import { getActiveTree } from "logic/active";
+import { active, getActiveTree } from "logic/active";
 import { PG } from "logic/ed-global";
 import { waitUntil } from "prasi-utils";
 import { cutCode, jscript } from "utils/script/jscript";
 import { MonacoEditor, monacoRegisterSource } from "./js/create-model";
-import { itemJsDefault } from "./js/default-val";
+import { defaultCode as dcode } from "./js/default-code";
 import { registerEditorOpener } from "./js/editor-opener";
 import { Monaco, monacoEnableJSX } from "./js/enable-jsx";
 import { foldRegionVState } from "./js/fold-region-vstate";
-import { extractRegion, migrateCode, removeRegion } from "./js/migrate-code";
+import { extractRegion, removeRegion } from "./js/migrate-code";
 import { replaceString } from "./js/replace-string";
 import { typingsItem } from "./js/typings-item";
+import { getActiveNode } from "crdt/node/get-node-by-id";
 
 export const reloadPrasiModels = async (p: PG, id: string) => {
   const tree = getActiveTree(p);
   await tree.reloadScriptModels();
-
-  const models = tree.script_models;
-  const model = models[id];
-  if (model && !model.source) {
-    if (!model.prop_name) {
-      model.extracted_content = itemJsDefault;
-      model.source = await jscript.prettier.format(migrateCode(model, models));
-    }
-  }
 
   return [
     {
@@ -50,13 +42,22 @@ export const remountPrasiModels = (arg: {
   onMount?: (m: Partial<ScriptModel>) => void;
 }) => {
   const { p, _models, monaco, activeFileName, onChange, editor, onMount } = arg;
+
+  const defaultCode = () => {
+    const item = getActiveNode(p)?.item;
+    if (item?.component?.props[p.ui.comp.prop.active]) {
+      return dcode.prop(p, p.ui.comp.prop.active);
+    }
+    return dcode.js(p);
+  };
+
   const monacoModels = monaco.editor.getModels();
   for (const m of _models) {
     if (!m.source && m.name !== activeFileName) continue;
     if (!m.source) m.source = "";
 
     const model = monacoModels.find(
-      (e) => e === m.model || e.uri.toString() === m.name,
+      (e) => e === m.model || e.uri.toString() === m.name
     );
 
     if (model) {
@@ -67,12 +68,36 @@ export const remountPrasiModels = (arg: {
       m.model.setValue(m.source);
     } else {
       m.model = monacoRegisterSource(monaco, m.source, m.name || "");
-      m.model.onDidChangeContent((e) => {
+      m.model.onDidChangeContent(async (e) => {
         if (onChange && m.model) {
           const value = m.model.getValue();
+
+          if (p.script.ignore_changes) {
+            p.script.ignore_changes = false;
+            return;
+          } else {
+            if (!value) {
+              p.script.ignore_changes = true;
+              p.script
+                .do_edit(async () => defaultCode().trim().split("\n"))
+                .then(() => {
+                  setTimeout(() => {
+                    if (m.model) {
+                      editor.restoreViewState(
+                        foldRegionVState(m.model.getLinesContent())
+                      );
+                    }
+                  }, 100);
+                });
+              editor.restoreViewState(
+                foldRegionVState(m.model.getLinesContent())
+              );
+            }
+          }
+
           const region = extractRegion(value);
           const local_name = region.find((e) =>
-            e.trim().startsWith("const local_name"),
+            e.trim().startsWith("const local_name")
           );
           if (local_name) {
             m.local = {
@@ -98,9 +123,15 @@ export const remountPrasiModels = (arg: {
     }
 
     if (m.name === activeFileName && m.model && !m.model.isDisposed()) {
+      if (!m.model.getValue()) {
+        m.source = defaultCode().trim();
+        m.model.setValue(m.source);
+      }
+
       registerEditorOpener(editor, monaco, p);
       monacoEnableJSX(editor, monaco);
 
+      if ((m.model as any)?.__isDisposing) return;
       editor.setModel(m.model);
 
       editor.restoreViewState(foldRegionVState(m.model.getLinesContent()));
@@ -143,7 +174,7 @@ export const codeUpdate = {
     p: PG,
     id: string,
     source: string,
-    arg?: { prop_name?: string; local_name?: string },
+    arg?: { prop_name?: string; local_name?: string }
   ) {
     this.p = p;
     this.queue[id] = { id, source, ...arg };
@@ -168,7 +199,7 @@ export const codeUpdate = {
           if (q.prop_name) {
             final_source = removeRegion(q.source).replace(
               `export const ${q.prop_name} =`,
-              "",
+              ""
             );
           } else {
             const lines = q.source.split("\n").map((e) => {
@@ -251,7 +282,7 @@ export const codeUpdate = {
               if (comp) {
                 const [name, prop] =
                   Object.entries(comp.props).find(
-                    ([name, prop]) => name === q.prop_name,
+                    ([name, prop]) => name === q.prop_name
                   ) || [];
 
                 if (name && prop) {

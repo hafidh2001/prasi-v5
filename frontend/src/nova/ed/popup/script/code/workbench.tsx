@@ -117,7 +117,10 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
     mode = "css";
   }
 
-  if (mode === "" || mode === "prop") mode = "js";
+  if (mode === "" || mode === "prop") {
+    mode = "js";
+    popup.mode = "js";
+  }
 
   return (
     <div className="flex flex-1 flex-col select-none">
