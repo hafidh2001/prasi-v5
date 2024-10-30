@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { active } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
-import { Check, HistoryIcon, Sticker } from "lucide-react";
+import { Check, FileClock, Sticker } from "lucide-react";
 import { Resizable } from "re-resizable";
 import { FC } from "react";
 import { useGlobal } from "utils/react/use-global";
@@ -40,7 +40,7 @@ export const EdCodeHistory: FC<{
     >
       <div className="flex items-center ml-1">
         <div className={cx("top-btn space-x-1")}>
-          <HistoryIcon size={12} />
+          <FileClock size={12} />
           <div>History</div>
         </div>
       </div>
