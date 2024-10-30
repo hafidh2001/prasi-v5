@@ -12,7 +12,9 @@ export const navPrevItem = (p: PG) => {
   const item = p.nav.history[p.nav.cursor - 2];
   if (item) {
     if (item.comp_id) {
-      activateComp(p, item.comp_id);
+      if (item.comp_id !== active.comp_id) {
+        activateComp(p, item.comp_id);
+      }
     } else if (active.comp) {
       active.comp.destroy();
       active.comp_id = "";
@@ -35,7 +37,9 @@ export const navNextItem = (p: PG) => {
   const item = p.nav.history[p.nav.cursor];
   if (item) {
     if (item.comp_id) {
-      activateComp(p, item.comp_id);
+      if (item.comp_id !== active.comp_id) {
+        activateComp(p, item.comp_id);
+      }
     } else if (active.comp) {
       active.comp.destroy();
       active.comp_id = "";
@@ -112,7 +116,14 @@ export const EdTopBar = () => {
         </div>
         <div className="flex items-center">
           <Tooltip
-            content="Previous item"
+            content={
+              <div className="flex items-center space-x-2">
+                <div>Previous item</div>{" "}
+                <div className="border border-slate-600 border-b-2 px-1 rounded-sm">
+                  Ctrl + &mdash;
+                </div>
+              </div>
+            }
             className={cx(
               "cursor-pointer pl-2",
               can_back ? "hover:text-blue-600" : "text-slate-400"
@@ -124,7 +135,14 @@ export const EdTopBar = () => {
             <TriangleIcon />
           </Tooltip>
           <Tooltip
-            content="Next item"
+            content={
+              <div className="flex items-center space-x-2">
+                <div>Next item</div>{" "}
+                <div className="border border-slate-600 border-b-2 px-1 rounded-sm">
+                  Ctrl + =
+                </div>
+              </div>
+            }
             className={cx(
               "cursor-pointer rotate-180",
               can_next ? "hover:text-blue-600" : "text-slate-400"

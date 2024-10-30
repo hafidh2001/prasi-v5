@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { PG } from "./logic/ed-global";
 import keys from "ctrl-keys";
 import { active } from "logic/active";
+import { navNextItem, navPrevItem } from "./ed-topbar";
 
 export const prasiKeybinding = (p: PG) => {
   useEffect(() => {
@@ -47,6 +48,10 @@ export const prasiKeybinding = (p: PG) => {
     handler.add("meta+z", undo);
     handler.add("meta+shift+z", redo);
     handler.add("ctrl+y", redo);
+    handler.add("ctrl+-", () => navPrevItem(p));
+    handler.add("meta+-", () => navPrevItem(p));
+    handler.add("ctrl+shift+-", () => navNextItem(p));
+    handler.add("ctrl+=", () => navNextItem(p));
     window.addEventListener("keydown", handler.handle);
 
     return () => {

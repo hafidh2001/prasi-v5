@@ -64,11 +64,6 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
     }
   }, [local.history.id]);
 
-  const scriptNav = {
-    canNext: active.script_nav.idx < active.script_nav.list.length - 1,
-    canBack: active.script_nav.list.length > 0,
-  };
-
   const is_error = popup.typings.status === "error" && popup.mode === "js";
 
   if (!p.ui.page.loaded) {
