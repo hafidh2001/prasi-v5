@@ -1,9 +1,7 @@
 import { getActiveNode } from "crdt/node/get-node-by-id";
 import { ScriptModel } from "crdt/node/load-script-models";
-import { gzipSync } from "fflate";
 import { active, getActiveTree } from "logic/active";
 import { PG } from "logic/ed-global";
-import { encode } from "msgpackr";
 import { waitUntil } from "prasi-utils";
 import { cutCode, jscript } from "utils/script/jscript";
 import { MonacoEditor, monacoRegisterSource } from "./js/create-model";
@@ -299,27 +297,19 @@ export const codeUpdate = {
           }
         },
         () => {
-          _api.code_history(
-            gzipSync(
-              new Uint8Array(
-                encode({
-                  mode: "update",
-                  site_id: this.p?.site.id,
-                  selector: Object.values(this.queue).map((e) => {
-                    return {
-                      comp_id: active.comp_id ? active.comp_id : undefined,
-                      page_id: !active.comp_id
-                        ? this.p!.page.cur.id
-                        : undefined,
-                      item_id: e.id,
-                      type: e.prop_name ? "prop" : "js",
-                      prop_name: e.prop_name,
-                    };
-                  }),
-                })
-              )
-            )
-          );
+          _api._compressed.code_history({
+            mode: "update",
+            site_id: this.p?.site.id,
+            selector: Object.values(this.queue).map((e) => {
+              return {
+                comp_id: active.comp_id ? active.comp_id : undefined,
+                page_id: !active.comp_id ? this.p!.page.cur.id : undefined,
+                item_id: e.id,
+                type: e.prop_name ? "prop" : "js",
+                prop_name: e.prop_name,
+              };
+            }),
+          });
         }
       );
     }, 500);

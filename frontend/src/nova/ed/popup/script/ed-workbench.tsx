@@ -11,7 +11,7 @@ import { codeUpdate } from "./code/prasi-code-update";
 import { EdWorkbenchPaneAction } from "./parts/pane-action";
 import { EdScriptSnippet } from "./parts/snippet";
 import { formatItemName } from "../../tree/parts/node/node-name";
-import { EdScriptHistory } from "./parts/script-history";
+import { EdCodeHistory } from "./parts/ed-code-history";
 import { Loading } from "utils/ui/loading";
 
 export const EdScriptWorkbench: FC<{}> = ({}) => {
@@ -303,7 +303,7 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
                           </div>
                         )} */}
                       <EdScriptSnippet />
-                      <EdScriptHistory />
+                      <EdCodeHistory />
                     </>
                   )}
                 </>

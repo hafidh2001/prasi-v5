@@ -1,6 +1,8 @@
+import { gzipSync } from "fflate";
 import { w } from "../../../utils/types/general";
 import { fetchViaProxy } from "../proxy";
 import { loadApiProxyDef } from "./api-proxy-def";
+import { encode } from "msgpackr";
 
 export type ApiProxy<T extends Record<string, any> = {}> = any;
 
@@ -27,6 +29,21 @@ export const apiProxy = (api_url: string) => {
       {},
       {
         get: (_, actionName: string) => {
+          if (actionName === "_compressed") {
+            return new Proxy(
+              {},
+              {
+                get(target, p, receiver) {
+                  return async (...rest: any) => {
+                    const url = `${base_url}/${p as string}`;
+                    return await fetchSendApi(url, [
+                      gzipSync(new Uint8Array(encode(rest[0]))),
+                    ]);
+                  };
+                },
+              }
+            );
+          }
           if (actionName === "_url") {
             return (pathname: string, proxy?: boolean) => {
               const to_url = new URL(base_url);
@@ -75,7 +92,6 @@ export const apiProxy = (api_url: string) => {
                       resolve(result);
                       return;
                     }
-
 
                     if (actionName === "_raw") {
                       const pathname = rest[0];

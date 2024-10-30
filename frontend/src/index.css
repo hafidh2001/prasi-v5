@@ -32,6 +32,9 @@ body {
     sans-serif;
 }
 
+div[data-floating-ui-focusable] {
+  z-index: 10;
+}
 .JsxText {
   color: #5c6773;
 }

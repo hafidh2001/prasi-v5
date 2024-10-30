@@ -4,12 +4,10 @@ import { EDGlobal, PG } from "logic/ed-global";
 import { useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
-import { codeUpdate } from "./prasi-code-update";
 import { itemCssDefault } from "./js/default-val";
 import { MonacoItemJS } from "./monaco-item-js";
 import { MonacoRaw } from "./monaco-raw";
-import { gzipSync } from "fflate";
-import { encode } from "msgpackr";
+import { codeUpdate } from "./prasi-code-update";
 export const EdPrasiCodeItem = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({ id: "", ready: false, change_timeout: null as any });
@@ -123,25 +121,19 @@ const postCodeUpdateHistory = (p: PG, type: "html" | "css") => {
     const n = findNode(active.item_id);
 
     if (n) {
-      _api.code_history(
-        gzipSync(
-          new Uint8Array(
-            encode({
-              mode: "update",
-              site_id: p.site.id,
-              selector: [
-                {
-                  comp_id: active.comp_id ? active.comp_id : undefined,
-                  page_id: !active.comp_id ? p!.page.cur.id : undefined,
-                  item_id: n.item.id,
-                  type,
-                  prop_name: "",
-                },
-              ],
-            })
-          )
-        )
-      );
+      _api._compressed.code_history({
+        mode: "update",
+        site_id: p.site.id,
+        selector: [
+          {
+            comp_id: active.comp_id ? active.comp_id : undefined,
+            page_id: !active.comp_id ? p!.page.cur.id : undefined,
+            item_id: n.item.id,
+            type,
+            prop_name: "",
+          },
+        ],
+      });
     }
   };
 };
