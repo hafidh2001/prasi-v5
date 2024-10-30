@@ -45,9 +45,12 @@ export const EdBase = () => {
           updateActiveCodeFromServer(p);
         }
 
-        p.ui.page.loaded = true;
         p.render();
         p.ui.editor.render();
+        setTimeout(() => {
+          p.ui.page.loaded = true;
+          p.render();
+        },100);
       },
       async on_component(item) {
         if (p.sync && item.component) {

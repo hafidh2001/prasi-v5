@@ -186,7 +186,7 @@ interface _TableFunctions<TT extends Tables, T extends Tables[string]> {
     where?: Partial<{ [K in keyof _Columns<TT, T>]: any }>;
   }) => number;
   find: <
-    S extends (keyof T["columns"])[] | undefined,
+    S extends (keyof T["columns"] | "id")[] | undefined,
     R extends Narrow<
       (keyof SortOut<T["columns"], { type: "REL" }>)[] | undefined
     >,

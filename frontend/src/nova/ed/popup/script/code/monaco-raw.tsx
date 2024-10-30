@@ -3,14 +3,16 @@ import { useLocal } from "utils/react/use-local";
 import { jscript } from "utils/script/jscript";
 import { Loading } from "utils/ui/loading";
 import { MonacoEditor } from "./js/create-model";
+import { Monaco } from "./js/enable-jsx";
 
 export const MonacoRaw: FC<{
   value: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
   lang: string;
   defaultValue?: string;
   div?: React.RefObject<HTMLDivElement>;
-}> = ({ value, onChange, lang, defaultValue, div }) => {
+  onMount?: (arg: { monaco: Monaco; editor: MonacoEditor }) => void;
+}> = ({ value, onChange, lang, defaultValue, div, onMount }) => {
   const local = useLocal({
     editor: null as null | MonacoEditor,
     width: undefined as undefined | number,
@@ -47,7 +49,7 @@ export const MonacoRaw: FC<{
     <Editor
       defaultValue={value || defaultValue}
       onChange={(value) => {
-        onChange(value || "");
+        if (onChange) onChange(value || "");
       }}
       width={local.width}
       height={local.height}
@@ -58,6 +60,8 @@ export const MonacoRaw: FC<{
       }
       language={lang}
       options={{
+        domReadOnly: !onChange,
+        readOnly: !onChange,
         minimap: { enabled: false },
         wordWrap: "wordWrapColumn",
         autoClosingBrackets: "always",
@@ -70,6 +74,9 @@ export const MonacoRaw: FC<{
         fontFamily: "'Liga Menlo', monospace",
         fontLigatures: true,
         lineNumbersMinChars: 2,
+      }}
+      onMount={(editor, monaco) => {
+        if (onMount) onMount({ editor, monaco });
       }}
     />
   );

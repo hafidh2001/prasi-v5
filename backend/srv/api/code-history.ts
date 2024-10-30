@@ -27,6 +27,12 @@ export default {
             mode: "list";
             site_id: string;
             selector: ICodeHistory;
+          }
+        | {
+            mode: "read";
+            comp_id?: string;
+            site_id?: string;
+            id: number;
           };
 
       if (body.mode === "update") {
@@ -99,15 +105,40 @@ export default {
         if (page_id) {
           list = codeHistory.site(body.site_id).tables.page_code.find({
             where,
-            select: ["ts", "text"],
+            select: ["ts", "id"],
+            sort: { ts: "desc" },
           });
         } else if (comp_id) {
           list = codeHistory.comp(comp_id).tables.comp_code.find({
             where,
-            select: ["ts", "text"],
+            select: ["ts", "id"],
+            sort: { ts: "desc" },
           });
         }
         return new Response(JSON.stringify({ ts: Date.now(), list }), {
+          headers: { "content-type": "application/json" },
+        });
+      } else if (body.mode === "read") {
+        let text = "";
+        if (body.comp_id) {
+          text =
+            codeHistory.comp(body.comp_id).tables.comp_code.find({
+              where: {
+                id: body.id,
+              },
+              select: ["text"],
+            })[0]?.text || "";
+        } else if (body.site_id) {
+          text =
+            codeHistory.site(body.site_id).tables.page_code.find({
+              where: {
+                id: body.id,
+              },
+              select: ["text"],
+            })[0]?.text || "";
+        }
+
+        return new Response(JSON.stringify({ code: text }), {
           headers: { "content-type": "application/json" },
         });
       }

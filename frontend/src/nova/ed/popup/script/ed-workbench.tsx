@@ -1,7 +1,7 @@
 import { getNodeById } from "crdt/node/get-node-by-id";
 import { active } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
-import { ScrollText, Sticker, X } from "lucide-react";
+import { Check, ScrollText, Sticker, Undo, X } from "lucide-react";
 import { FC, useEffect, useRef } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
@@ -13,10 +13,15 @@ import { EdScriptSnippet } from "./parts/snippet";
 import { formatItemName } from "../../tree/parts/node/node-name";
 import { EdCodeHistory } from "./parts/ed-code-history";
 import { Loading } from "utils/ui/loading";
+import { MonacoRaw } from "./code/monaco-raw";
+import { foldRegionVState } from "./code/js/fold-region-vstate";
 
 export const EdScriptWorkbench: FC<{}> = ({}) => {
   const p = useGlobal(EDGlobal, "EDITOR");
-  const local = useLocal({ active_id: "" });
+  const local = useLocal({
+    current_item_id: "",
+    history: { id: 0, code: "", loaded: false },
+  });
   const popup = p.ui.popup.script;
   const div = useRef<HTMLDivElement>(null);
   popup.wb_render = local.render;
@@ -24,16 +29,40 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
   const node = getNodeById(p, active.item_id);
   const item = node?.item;
   useEffect(() => {
-    if (!local.active_id) {
-      local.active_id = active.item_id;
+    if (local.history.id) {
+      local.history.id = 0;
+      local.render();
+    }
+
+    if (!local.current_item_id) {
+      local.current_item_id = active.item_id;
       local.render();
     } else {
       setTimeout(() => {
-        local.active_id = active.item_id;
+        local.current_item_id = active.item_id;
         local.render();
       }, 200);
     }
   }, [active.item_id]);
+
+  useEffect(() => {
+    if (local.history.id && !local.history.loaded) {
+      _api._compressed
+        .code_history({
+          mode: "read",
+          comp_id: active.comp_id ? active.comp_id : undefined,
+          site_id: !active.comp_id ? p.site.id : undefined,
+          id: local.history.id,
+        })
+        .then((history: { code: string }) => {
+          if (history.code) {
+            local.history.code = history.code;
+          }
+          local.history.loaded = true;
+          local.render();
+        });
+    }
+  }, [local.history.id]);
 
   const scriptNav = {
     canNext: active.script_nav.idx < active.script_nav.list.length - 1,
@@ -127,6 +156,7 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
     popup.mode = "js";
   }
 
+  const is_history = !!(local.history.id && local.history.loaded);
   return (
     <div className="flex flex-1 flex-col select-none">
       {item && (
@@ -134,7 +164,8 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
           <div
             className={cx(
               "flex border-b items-stretch justify-between h-[32px]",
-              is_error && "bg-red-100"
+              is_error && "bg-red-100",
+              is_history && "bg-blue-600 text-white"
             )}
           >
             <div
@@ -152,6 +183,8 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
                     border: 1px solid #ccc;
                     padding: 0px 5px;
                     height: 20px;
+                    background: white;
+                    color: black;
                     cursor: pointer;
                     &:hover {
                       background: #edf0f9;
@@ -164,43 +197,48 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
               {popup.type === "prop-instance" && <CompTitleInstance />}
               {popup.type === "item" && (
                 <>
-                  <div
-                    className={cx("flex px-1 items-center space-x-1 border-r")}
-                  >
-                    {(!has_expression
-                      ? [
-                          { type: "js", color: "#e9522c" },
-                          { type: "css", color: "#188228" },
-                          { type: "html", color: "#2c3e83" },
-                        ]
-                      : [{ type: "css", color: "#188228" }]
-                    ).map((e) => {
-                      return (
-                        <div
-                          key={e.type}
-                          className={cx(
-                            css`
-                              color: ${e.color};
-                              border: 1px solid ${e.color};
-                            `,
-                            "uppercase text-white text-[12px] cursor-pointer flex items-center justify-center transition-all hover:opacity-100 w-[40px] text-center tab-btn",
-                            mode === e.type
-                              ? css`
-                                  background: ${e.color};
-                                  color: white;
-                                `
-                              : "opacity-30"
-                          )}
-                          onClick={() => {
-                            popup.mode = e.type as any;
-                            p.render();
-                          }}
-                        >
-                          {e.type}
-                        </div>
-                      );
-                    })}
-                  </div>
+                  {!is_history && (
+                    <div
+                      className={cx(
+                        "flex px-1 items-center space-x-1 border-r"
+                      )}
+                    >
+                      {(!has_expression
+                        ? [
+                            { type: "js", color: "#e9522c" },
+                            { type: "css", color: "#188228" },
+                            { type: "html", color: "#2c3e83" },
+                          ]
+                        : [{ type: "css", color: "#188228" }]
+                      ).map((e) => {
+                        return (
+                          <div
+                            key={e.type}
+                            className={cx(
+                              "bg-white",
+                              css`
+                                color: ${e.color};
+                                border: 1px solid ${e.color};
+                              `,
+                              "uppercase text-white text-[12px] cursor-pointer flex items-center justify-center transition-all hover:opacity-100 w-[40px] text-center tab-btn",
+                              mode === e.type
+                                ? css`
+                                    background: ${e.color};
+                                    color: white;
+                                  `
+                                : "opacity-30"
+                            )}
+                            onClick={() => {
+                              popup.mode = e.type as any;
+                              p.render();
+                            }}
+                          >
+                            {e.type}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                   {has_expression && (
                     <div className="flex items-center text-sm pl-2 text-slate-400">
                       JS is disabled because this item has expression{" "}
@@ -220,90 +258,58 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
                     </div>
                   )}
                   {mode === "js" && (
+                    <>{!local.history.id && <EdScriptSnippet />}</>
+                  )}
+                  <EdCodeHistory
+                    history_id={local.history.id}
+                    onHistoryPick={(id) => {
+                      local.history.id = id;
+                      local.history.loaded = false;
+                      local.render();
+                    }}
+                  />
+                  {is_history && (
                     <>
-                      {/* 
-                        <div className="border-l flex items-center pl-2 p-1 text-xs">
-                          <div
-                            className={cx(
-                              "flex mt-[1px] cursor-pointer border p-[2px] rounded select-none",
-                              script_mode === "flow"
-                                ? "border-purple-700"
-                                : "border-orange-700",
-                              css`
-                                .script-mode {
-                                  padding-top: 1px;
-                                  padding-bottom: 2px;
-                                }
-                              `
-                            )}
-                          >
-                            <div
-                              className={cx(
-                                "script-mode flex items-center space-x-1 px-2 rounded-[3px]",
-                                script_mode === "flow"
-                                  ? "bg-purple-700 text-white"
-                                  : ""
-                              )}
-                              onClick={() => {
-                                getActiveTree(p).update(
-                                  "Switch item js to flow",
-                                  ({ findNode }) => {
-                                    const node = findNode(active.item_id);
-                                    if (node) {
-                                      if (!node.item.adv) node.item.adv = {};
-                                      node.item.adv.scriptMode = "flow";
-                                    }
-                                  }
-                                );
-                              }}
-                            >
-                              <GitFork size={12} rotate={40} />
-                              <div>Flow</div>
-                            </div>
-                            <div
-                              className={cx(
-                                "script-mode flex items-center space-x-1 px-2 rounded-[3px]",
-                                script_mode === "script"
-                                  ? "bg-orange-700 text-white"
-                                  : ""
-                              )}
-                              onClick={() => {
-                                getActiveTree(p).update(
-                                  "Switch item js to script",
-                                  ({ findNode }) => {
-                                    const node = findNode(active.item_id);
-                                    if (node) {
-                                      if (!node.item.adv) node.item.adv = {};
-                                      node.item.adv.scriptMode = "script";
-                                    }
-                                  }
-                                );
-                              }}
-                            >
-                              <Code size={12} />
-                              <div>Script</div>
-                            </div>
-                          </div>
-                        </div> */}
+                      <div className="flex items-center ml-1 space-x-1">
+                        <div
+                          className={cx(
+                            "top-btn flex items-center",
+                            css`
+                              background: red !important;
+                              color: white !important;
+                            `
+                          )}
+                          onClick={() => {
+                            local.history.id = 0;
+                            local.render();
+                          }}
+                        >
+                          <X size={12} className="mr-1" />
+                          Cancel
+                        </div>
+                        <div
+                          className={cx(
+                            "top-btn flex items-center",
+                            css`
+                              background: green !important;
+                              color: white !important;
+                            `
+                          )}
+                          onClick={() => {
+                            local.history.id = 0;
+                            local.render();
 
-                      {/* {script_mode === "flow" && (
-                          <div className="flex items-center pl-2 border-l ml-1">
-                            <Tooltip
-                              content="Reset Flow"
-                              onClick={() => {
-                                if (confirm("Reset Flow ?")) {
-                                  fg.prasi.resetDefault(true);
-                                }
-                              }}
-                            >
-                              <TopBtn className="h-[23px] rounded-sm">
-                                <Trash size={12} />
-                              </TopBtn>
-                            </Tooltip>
-                          </div>
-                        )} */}
-                      <EdScriptSnippet />
-                      <EdCodeHistory />
+                            setTimeout(() => {
+                              p.script.do_edit(async () => {
+                                return local.history.code.split("\n");
+                              });
+                            }, 500);
+                          }}
+                        >
+                          <Check size={12} className="mr-1" />
+                          Use This Code
+                        </div>
+                      </div>
                     </>
                   )}
                 </>
@@ -328,7 +334,40 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
             )}
             ref={div}
           >
-            <EdPrasiCodeItem />
+            {local.history.id && local.history.loaded ? (
+              <MonacoRaw
+                value={local.history.code}
+                lang={
+                  (
+                    {
+                      js: "typescript",
+                      css: "css",
+                      html: "html",
+                    } as any
+                  )[p.ui.popup.script.mode]
+                }
+                onMount={({ monaco, editor }) => {
+                  if (p.ui.popup.script.mode === "js") {
+                    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions(
+                      {
+                        noSemanticValidation: true,
+                        noSyntaxValidation: true,
+                        onlyVisible: true,
+                      }
+                    );
+
+                    const model = editor.getModel();
+                    if (model) {
+                      editor.restoreViewState(
+                        foldRegionVState(model.getLinesContent())
+                      );
+                    }
+                  }
+                }}
+              />
+            ) : (
+              <EdPrasiCodeItem />
+            )}
           </div>
         </>
       )}
