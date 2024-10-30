@@ -43,7 +43,7 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
   const is_error = popup.typings.status === "error" && popup.mode === "js";
 
   if (!p.ui.page.loaded) {
-    return <Loading />;
+    return <Loading backdrop={false} note="Loading Code" />;
   }
 
   if (

@@ -1,10 +1,9 @@
 import { IItem } from "utils/types/item";
 import { parsePropForJsx } from "./flatten-tree";
-import { active } from "logic/active";
 
 export const loopItem = async (
   items: IItem[],
-  opt: {},
+  opt: { active_comp_id?: string },
   fn: (arg: {
     item: IItem;
     parent?: IItem;
@@ -40,7 +39,7 @@ export const loopItem = async (
         });
       }
 
-      if (item.childs && active.comp_id === item.component.id) {
+      if (item.childs && opt.active_comp_id === item.component.id) {
         await loopItem(item.childs, opt, fn, {
           parent: item,
           parent_comp: item,

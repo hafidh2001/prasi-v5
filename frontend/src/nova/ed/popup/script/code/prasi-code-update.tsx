@@ -1,6 +1,9 @@
+import { getActiveNode } from "crdt/node/get-node-by-id";
 import { ScriptModel } from "crdt/node/load-script-models";
+import { gzipSync } from "fflate";
 import { active, getActiveTree } from "logic/active";
 import { PG } from "logic/ed-global";
+import { encode } from "msgpackr";
 import { waitUntil } from "prasi-utils";
 import { cutCode, jscript } from "utils/script/jscript";
 import { MonacoEditor, monacoRegisterSource } from "./js/create-model";
@@ -11,7 +14,6 @@ import { foldRegionVState } from "./js/fold-region-vstate";
 import { extractRegion, removeRegion } from "./js/migrate-code";
 import { replaceString } from "./js/replace-string";
 import { typingsItem } from "./js/typings-item";
-import { getActiveNode } from "crdt/node/get-node-by-id";
 
 export const reloadPrasiModels = async (p: PG, id: string) => {
   const tree = getActiveTree(p);
@@ -261,52 +263,65 @@ export const codeUpdate = {
         }
       }
 
-      _api.code_history({
-        action: "update",
-        codes: Object.values(this.queue).map((e) => {
-          return {
-            page_id: this.p!.page.cur.id,
-            item_id: e.id,
-            type: e.prop_name ? "prop" : "js",
-            prop_name: e.prop_name,
-            text: e.source,
-          };
-        }),
-      });
-
-      getActiveTree(this.p!).update("Update Code", ({ findNode }) => {
-        for (const q of Object.values(this.queue)) {
-          const n = findNode(q.id);
-          if (n && !n.item.adv) {
-            n.item.adv = {};
-          }
-          if (n && n.item.adv) {
-            if (q.tailwind !== n.item.adv.tailwind) {
-              n.item.adv.tailwind = q.tailwind;
+      getActiveTree(this.p!).update(
+        "Update Code",
+        ({ findNode }) => {
+          for (const q of Object.values(this.queue)) {
+            const n = findNode(q.id);
+            if (n && !n.item.adv) {
+              n.item.adv = {};
             }
-
-            if (!q.prop_name) {
-              n.item.adv.js = q.source;
-              if (q.source_built !== null) {
-                n.item.adv.jsBuilt = q.source_built;
+            if (n && n.item.adv) {
+              if (q.tailwind !== n.item.adv.tailwind) {
+                n.item.adv.tailwind = q.tailwind;
               }
-            } else {
-              const comp = n.item.component;
-              if (comp) {
-                const [name, prop] =
-                  Object.entries(comp.props).find(
-                    ([name, prop]) => name === q.prop_name
-                  ) || [];
 
-                if (name && prop) {
-                  prop.value = q.source;
-                  prop.valueBuilt = (q.source_built || "").trim();
+              if (!q.prop_name) {
+                n.item.adv.js = q.source;
+                if (q.source_built !== null) {
+                  n.item.adv.jsBuilt = q.source_built;
+                }
+              } else {
+                const comp = n.item.component;
+                if (comp) {
+                  const [name, prop] =
+                    Object.entries(comp.props).find(
+                      ([name, prop]) => name === q.prop_name
+                    ) || [];
+
+                  if (name && prop) {
+                    prop.value = q.source;
+                    prop.valueBuilt = (q.source_built || "").trim();
+                  }
                 }
               }
             }
           }
+        },
+        () => {
+          _api.code_history(
+            gzipSync(
+              new Uint8Array(
+                encode({
+                  mode: "update",
+                  site_id: this.p?.site.id,
+                  selector: Object.values(this.queue).map((e) => {
+                    return {
+                      comp_id: active.comp_id ? active.comp_id : undefined,
+                      page_id: !active.comp_id
+                        ? this.p!.page.cur.id
+                        : undefined,
+                      item_id: e.id,
+                      type: e.prop_name ? "prop" : "js",
+                      prop_name: e.prop_name,
+                    };
+                  }),
+                })
+              )
+            )
+          );
         }
-      });
+      );
     }, 500);
   },
 };

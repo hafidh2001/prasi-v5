@@ -98,13 +98,15 @@ export default () => (
             <Button
               className={cx(btn_style)}
               onClick={() => {
+                local.open = false;
+                local.render();
                 p.script.snippet_pasted = true;
                 p.script.do_edit(async ({ imports, wrapImports }) => {
                   let p_idx = 0;
                   return [
                     wrapImports([
                       ...imports.filter((e, idx) => {
-                        if (e.startsWith("export const pass_prop")) {
+                        if (e.startsWith("export const pass_prop_list")) {
                           p_idx = idx;
                           return false;
                         }
@@ -140,6 +142,8 @@ export default () => (
             <Button
               className={cx(btn_style)}
               onClick={() => {
+                local.open = false;
+                local.render();
                 p.script.snippet_pasted = true;
                 p.script.do_edit(async ({ imports, wrapImports }) => {
                   return [
@@ -166,6 +170,8 @@ export default () => (
             <Button
               className={cx(btn_style)}
               onClick={() => {
+                local.open = false;
+                local.render();
                 p.script.snippet_pasted = true;
                 p.script.do_edit(async ({ imports, wrapImports }) => {
                   return [

@@ -1,8 +1,8 @@
 import hash_sum from "hash-sum";
 import { get, set } from "idb-keyval";
 import { pack } from "msgpackr";
-import pako, { gzip } from "pako";
 import { fetchViaProxy, getProxyUrl } from "../proxy";
+import { gzipSync } from "fflate";
 
 const schema_promise = {
   tables: {} as Record<string, any>,
@@ -11,7 +11,7 @@ const schema_promise = {
 };
 
 const db_mode = {} as Record<string, "msgpack" | "json">;
-
+const encode = new TextEncoder().encode;
 export const dbProxy = (dburl: string) => {
   const name = "";
 
@@ -113,7 +113,7 @@ export const dbProxy = (dburl: string) => {
 
         if (table.startsWith("$")) {
           return (...params: any[]) => {
-            const bytes = pako.gzip(JSON.stringify(params));
+            const bytes = gzipSync(encode(JSON.stringify(params)));
 
             return fetchSendDb(
               {
@@ -195,7 +195,7 @@ export const fetchSendDb = async (
     let body: any = params;
     let result = null;
     if (db_mode[dburl] === "msgpack") {
-      body = gzip(new Uint8Array(pack(params)), {});
+      body = gzipSync(new Uint8Array(pack(params)), {});
       const res = await fetch(getProxyUrl(url), { method: "POST", body });
       result = await res.json();
     } else {

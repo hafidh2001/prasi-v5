@@ -16,6 +16,7 @@ export const fetchViaProxy = async (
 
   let body = null as any;
   let isFile = false;
+  let isRaw = false;
   let uploadProgress = null as any;
 
   const files: File[] = [];
@@ -25,6 +26,11 @@ export const fetchViaProxy = async (
         files.push(item);
         isFile = true;
       }
+      if (item instanceof Uint8Array) {
+        isRaw = true;
+        body = item;
+      }
+
       if (typeof item === "function") {
         uploadProgress = item;
       }
@@ -34,17 +40,19 @@ export const fetchViaProxy = async (
     files.push(data);
   }
 
-  if (!isFile) {
-    body = JSON.stringify(data);
-    headers["content-type"] = "aplication/json";
-  } else {
-    const fd = new FormData();
-    for (const file of files) {
-      fd.append(file.name, file);
+  if (!isRaw) {
+    if (!isFile) {
+      body = JSON.stringify(data);
+      headers["content-type"] = "aplication/json";
+    } else {
+      const fd = new FormData();
+      for (const file of files) {
+        fd.append(file.name, file);
+      }
+      body = fd;
+      delete headers["content-type"];
+      headers["enctype"] = `multipart/form-data;`;
     }
-    body = fd;
-    delete headers["content-type"];
-    headers["enctype"] = `multipart/form-data;`;
   }
 
   const to_url = new URL(target_url);

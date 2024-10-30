@@ -27,17 +27,41 @@ const createPageDb = (site_id: string) => {
 export const codeHistory = {
   site(id: string) {
     if (!this._sites[id]) {
-      this._sites[id] = createCodeHistoryDb(id);
+      this._sites[id] = createSiteCodeHistoryDb(id);
     }
     return this._sites[id];
   },
-  _sites: {} as Record<string, ReturnType<typeof createCodeHistoryDb>>,
+  timeout: {} as Record<string, any>,
+  _sites: {} as Record<string, ReturnType<typeof createSiteCodeHistoryDb>>,
+  _comp: null as null | ReturnType<typeof createCompCodeHistoryDb>,
+  comp(id: string) {
+    if (!this._comp) {
+      this._comp = createCompCodeHistoryDb();
+    }
+    return this._comp;
+  },
 };
 
-const createCodeHistoryDb = (site_id: string) => {
+const createCompCodeHistoryDb = () => {
+  return new BunORM(dir.data(`/crdt/comp-code-history.db`), {
+    tables: {
+      comp_code: {
+        columns: {
+          comp_id: { type: "TEXT" },
+          item_id: { type: "TEXT" },
+          type: { type: "TEXT" }, // js, css, html, prop, comp
+          prop_name: { type: "TEXT" },
+          text: { type: "TEXT" },
+          ts: { type: "INTEGER" },
+        },
+      },
+    },
+  });
+};
+const createSiteCodeHistoryDb = (site_id: string) => {
   return new BunORM(dir.data(`/crdt/site/${site_id}/code-history.db`), {
     tables: {
-      code: {
+      page_code: {
         columns: {
           page_id: { type: "TEXT" },
           item_id: { type: "TEXT" },

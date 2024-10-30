@@ -1,6 +1,6 @@
 import { getActiveNode } from "crdt/node/get-node-by-id";
 import { active, getActiveTree } from "logic/active";
-import { EDGlobal } from "logic/ed-global";
+import { EDGlobal, PG } from "logic/ed-global";
 import { useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
@@ -8,7 +8,8 @@ import { codeUpdate } from "./prasi-code-update";
 import { itemCssDefault } from "./js/default-val";
 import { MonacoItemJS } from "./monaco-item-js";
 import { MonacoRaw } from "./monaco-raw";
-
+import { gzipSync } from "fflate";
+import { encode } from "msgpackr";
 export const EdPrasiCodeItem = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({ id: "", ready: false, change_timeout: null as any });
@@ -72,15 +73,19 @@ export const EdPrasiCodeItem = () => {
               value={_css}
               defaultValue={itemCssDefault}
               onChange={(val) => {
-                getActiveTree(p).update("Update Code", ({ findNode }) => {
-                  const n = findNode(active.item_id);
-                  if (n && !n.item.adv) {
-                    n.item.adv = {};
-                  }
-                  if (n && n.item.adv) {
-                    n.item.adv.css = val;
-                  }
-                });
+                getActiveTree(p).update(
+                  "Update Code",
+                  ({ findNode }) => {
+                    const n = findNode(active.item_id);
+                    if (n && !n.item.adv) {
+                      n.item.adv = {};
+                    }
+                    if (n && n.item.adv) {
+                      n.item.adv.css = val;
+                    }
+                  },
+                  postCodeUpdateHistory(p, "css")
+                );
               }}
               lang="scss"
             />
@@ -90,15 +95,19 @@ export const EdPrasiCodeItem = () => {
             <MonacoRaw
               value={_html}
               onChange={(val) => {
-                getActiveTree(p).update("Update Code", ({ findNode }) => {
-                  const n = findNode(active.item_id);
-                  if (n && !n.item.adv) {
-                    n.item.adv = {};
-                  }
-                  if (n && n.item.adv) {
-                    n.item.adv.html = val;
-                  }
-                });
+                getActiveTree(p).update(
+                  "Update Code",
+                  ({ findNode }) => {
+                    const n = findNode(active.item_id);
+                    if (n && !n.item.adv) {
+                      n.item.adv = {};
+                    }
+                    if (n && n.item.adv) {
+                      n.item.adv.html = val;
+                    }
+                  },
+                  postCodeUpdateHistory(p, "html")
+                );
               }}
               lang="html"
             />
@@ -107,4 +116,32 @@ export const EdPrasiCodeItem = () => {
       )}
     </div>
   );
+};
+
+const postCodeUpdateHistory = (p: PG, type: "html" | "css") => {
+  return ({ findNode }: any) => {
+    const n = findNode(active.item_id);
+
+    if (n) {
+      _api.code_history(
+        gzipSync(
+          new Uint8Array(
+            encode({
+              mode: "update",
+              site_id: p.site.id,
+              selector: [
+                {
+                  comp_id: active.comp_id ? active.comp_id : undefined,
+                  page_id: !active.comp_id ? p!.page.cur.id : undefined,
+                  item_id: n.item.id,
+                  type,
+                  prop_name: "",
+                },
+              ],
+            })
+          )
+        )
+      );
+    }
+  };
 };
