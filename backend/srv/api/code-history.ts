@@ -80,31 +80,47 @@ export default {
                           select: ["id", "ts", "text"],
                         });
 
-                      console.log(existing);
-
-                      codeHistory.site(body.site_id).tables.page_code.save({
-                        item_id: sel.item_id,
-                        page_id: page_id,
-                        prop_name: sel.prop_name || "",
-                        type: sel.type,
-                        ts: Date.now(),
-                        text,
-                      });
+                      if (existing?.[0]?.text !== text) {
+                        codeHistory.site(body.site_id).tables.page_code.save({
+                          item_id: sel.item_id,
+                          page_id: page_id,
+                          prop_name: sel.prop_name || "",
+                          type: sel.type,
+                          ts: Date.now(),
+                          text,
+                        });
+                      }
                     } else if (comp_id) {
-                      codeHistory.comp(comp_id).tables.comp_code.save({
-                        item_id: sel.item_id,
-                        comp_id: comp_id,
-                        prop_name: sel.prop_name || "",
-                        type: sel.type,
-                        ts: Date.now(),
-                        text,
-                      });
+                      const existing = codeHistory
+                        .comp(comp_id)
+                        .tables.comp_code.find({
+                          where: {
+                            item_id: sel.item_id,
+                            comp_id: comp_id,
+                            prop_name: sel.prop_name || "",
+                            type: sel.type,
+                          },
+                          limit: 1,
+                          sort: { ts: "desc" },
+                          select: ["id", "ts", "text"],
+                        });
+
+                      if (existing?.[0]?.text !== text) {
+                        codeHistory.comp(comp_id).tables.comp_code.save({
+                          item_id: sel.item_id,
+                          comp_id: comp_id,
+                          prop_name: sel.prop_name || "",
+                          type: sel.type,
+                          ts: Date.now(),
+                          text,
+                        });
+                      }
                     }
                   }
                 }
               });
             }
-          }, 10 * 1000);
+          }, 1 * 1000);
         }
       } else if (body.mode === "list") {
         const { page_id, comp_id, item_id, type, prop_name } = body.selector;
