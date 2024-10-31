@@ -296,7 +296,7 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
                               p.script.do_edit(async () => {
                                 return local.history.code.split("\n");
                               });
-                            }, 500);
+                            }, 100);
                           }}
                         >
                           <Check size={12} className="mr-1" />

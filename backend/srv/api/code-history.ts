@@ -120,7 +120,7 @@ export default {
                 }
               });
             }
-          }, 1 * 1000);
+          }, 5 * 1000);
         }
       } else if (body.mode === "list") {
         const { page_id, comp_id, item_id, type, prop_name } = body.selector;

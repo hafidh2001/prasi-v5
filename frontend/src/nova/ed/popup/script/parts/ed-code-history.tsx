@@ -117,7 +117,7 @@ export const EdCodeHistory: FC<{
         <div className={"ml-1 mr-3 text-xs flex items-center"}>
           <div>{dayjs(current.ts).from(local.ts)}</div>
           <div className="border border-white border-opacity-40 rounded-sm ml-1 px-1">
-            {dayjs(current.ts).format("DD MMM YYYY - HH:mm")}
+            {dayjs(current.ts).format("DD MMM YYYY - HH:mm:ss")}
           </div>
         </div>
       )}
