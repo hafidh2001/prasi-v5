@@ -174,11 +174,11 @@ const HistoryList: FC<{
     <Resizable
       defaultSize={{
         width:
-          parseInt(localStorage.getItem("prasi-code-history-w") || "") || 200,
+          parseInt(localStorage.getItem("prasi-code-history-w") || "") || 260,
         height:
           parseInt(localStorage.getItem("prasi-code-history-h") || "") || 200,
       }}
-      minWidth={200}
+      minWidth={260}
       minHeight={200}
       onResizeStop={(_, __, div) => {
         localStorage.setItem(
@@ -226,7 +226,10 @@ const HistoryList: FC<{
             }}
           >
             {history_id === item.id && <Check size={12} className="mr-1" />}
-            {dayjs(item.ts).from(local.ts)}
+            <div>{dayjs(item.ts).from(local.ts)}</div>
+            <div className="border border-black border-opacity-20 rounded-sm ml-3 px-1">
+              {dayjs(item.ts).format("DD MMM YYYY - HH:mm:ss")}
+            </div>
           </div>
         );
       })}
