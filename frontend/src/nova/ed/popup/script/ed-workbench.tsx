@@ -9,18 +9,21 @@ import { EdMonacoProp } from "./code/monaco-prop";
 import { EdPrasiCodeItem } from "./code/prasi-code-item";
 import { codeUpdate } from "./code/prasi-code-update";
 import { EdWorkbenchPaneAction } from "./parts/pane-action";
-import { EdScriptSnippet } from "./parts/snippet";
+import { EdCodeSnippet } from "./parts/snippet";
 import { formatItemName } from "../../tree/parts/node/node-name";
 import { EdCodeHistory } from "./parts/ed-code-history";
 import { Loading } from "utils/ui/loading";
 import { MonacoRaw } from "./code/monaco-raw";
 import { foldRegionVState } from "./code/js/fold-region-vstate";
+import { EdCodeFindAllBtn } from "./parts/ed-find-all-btn";
+import { EdWorkbenchBody } from "./ed-workbench-body";
 
 export const EdScriptWorkbench: FC<{}> = ({}) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({
     current_item_id: "",
     history: { id: 0, code: "", loaded: false },
+    search: { open: false },
   });
   const popup = p.ui.popup.script;
   const div = useRef<HTMLDivElement>(null);
@@ -44,25 +47,6 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
       }, 200);
     }
   }, [active.item_id]);
-
-  useEffect(() => {
-    if (local.history.id && !local.history.loaded) {
-      _api._compressed
-        .code_history({
-          mode: "read",
-          comp_id: active.comp_id ? active.comp_id : undefined,
-          site_id: !active.comp_id ? p.site.id : undefined,
-          id: local.history.id,
-        })
-        .then((history: { code: string }) => {
-          if (history.code) {
-            local.history.code = history.code;
-          }
-          local.history.loaded = true;
-          local.render();
-        });
-    }
-  }, [local.history.id]);
 
   const is_error = popup.typings.status === "error" && popup.mode === "js";
 
@@ -253,13 +237,27 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
                     </div>
                   )}
                   {mode === "js" && (
-                    <>{!local.history.id && <EdScriptSnippet />}</>
+                    <>{!local.history.id && <EdCodeSnippet />}</>
                   )}
                   <EdCodeHistory
                     history_id={local.history.id}
-                    onHistoryPick={(id) => {
+                    onHistoryPick={async (id, should_close) => {
                       local.history.id = id;
-                      local.history.loaded = false;
+                      if (local.history.loaded) {
+                        local.render();
+                      }
+
+                      const history: { code: string } =
+                        await _api._compressed.code_history({
+                          mode: "read",
+                          comp_id: active.comp_id ? active.comp_id : undefined,
+                          site_id: !active.comp_id ? p.site.id : undefined,
+                          id: local.history.id,
+                        });
+                      if (history.code) {
+                        local.history.code = history.code;
+                      }
+                      local.history.loaded = true;
                       local.render();
                     }}
                   />
@@ -307,6 +305,15 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
                       </div>
                     </>
                   )}
+                  {!is_history && (
+                    <EdCodeFindAllBtn
+                      onClick={() => {
+                        local.search.open = true;
+                        popup.side_open = true;
+                        local.render();
+                      }}
+                    />
+                  )}
                 </>
               )}
             </div>
@@ -314,56 +321,64 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
             <EdWorkbenchPaneAction />
           </div>
 
-          <div
-            className={cx(
-              "relative flex-1",
-              css`
-                > * {
-                  position: absolute !important;
-                  left: 0;
-                  right: 0;
-                  bottom: 0;
-                  top: 0;
-                }
-              `
-            )}
-            ref={div}
+          <EdWorkbenchBody
+            side_open={popup.side_open}
+            onSideClose={() => {
+              popup.side_open = false;
+              local.render();
+            }}
           >
-            {local.history.id && local.history.loaded ? (
-              <MonacoRaw
-                value={local.history.code}
-                lang={
-                  (
-                    {
-                      js: "typescript",
-                      css: "css",
-                      html: "html",
-                    } as any
-                  )[p.ui.popup.script.mode]
-                }
-                onMount={({ monaco, editor }) => {
-                  if (p.ui.popup.script.mode === "js") {
-                    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions(
-                      {
-                        noSemanticValidation: true,
-                        noSyntaxValidation: true,
-                        onlyVisible: true,
-                      }
-                    );
-
-                    const model = editor.getModel();
-                    if (model) {
-                      editor.restoreViewState(
-                        foldRegionVState(model.getLinesContent())
-                      );
-                    }
+            <div
+              className={cx(
+                "relative flex-1",
+                css`
+                  > * {
+                    position: absolute !important;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    top: 0;
                   }
-                }}
-              />
-            ) : (
-              <EdPrasiCodeItem />
-            )}
-          </div>
+                `
+              )}
+              ref={div}
+            >
+              {local.history.id && local.history.loaded ? (
+                <MonacoRaw
+                  value={local.history.code}
+                  lang={
+                    (
+                      {
+                        js: "typescript",
+                        css: "css",
+                        html: "html",
+                      } as any
+                    )[p.ui.popup.script.mode]
+                  }
+                  onMount={({ monaco, editor }) => {
+                    if (p.ui.popup.script.mode === "js") {
+                      monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions(
+                        {
+                          noSemanticValidation: true,
+                          noSyntaxValidation: true,
+                          onlyVisible: true,
+                        }
+                      );
+
+                      const model = editor.getModel();
+                      if (model) {
+                        editor.restoreViewState(
+                          foldRegionVState(model.getLinesContent())
+                        );
+                      }
+                    }
+                  }}
+                />
+              ) : (
+                <EdPrasiCodeItem />
+              )}
+            </div>
+          </EdWorkbenchBody>
         </>
       )}
       {!item && (

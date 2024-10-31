@@ -64,24 +64,42 @@ export default {
                   } else {
                     text = item.component.props[sel.prop_name].value;
                   }
-                  if (page_id) {
-                    codeHistory.site(body.site_id).tables.page_code.save({
-                      item_id: sel.item_id,
-                      page_id: page_id,
-                      prop_name: sel.prop_name || "",
-                      type: sel.type,
-                      ts: Date.now(),
-                      text,
-                    });
-                  } else if (comp_id) {
-                    codeHistory.comp(comp_id).tables.comp_code.save({
-                      item_id: sel.item_id,
-                      comp_id: comp_id,
-                      prop_name: sel.prop_name || "",
-                      type: sel.type,
-                      ts: Date.now(),
-                      text,
-                    });
+                  if (text) {
+                    if (page_id) {
+                      const existing = codeHistory
+                        .site(body.site_id)
+                        .tables.page_code.find({
+                          where: {
+                            item_id: sel.item_id,
+                            page_id: page_id,
+                            prop_name: sel.prop_name || "",
+                            type: sel.type,
+                          },
+                          limit: 1,
+                          sort: { ts: "desc" },
+                          select: ["id", "ts", "text"],
+                        });
+
+                      console.log(existing);
+
+                      codeHistory.site(body.site_id).tables.page_code.save({
+                        item_id: sel.item_id,
+                        page_id: page_id,
+                        prop_name: sel.prop_name || "",
+                        type: sel.type,
+                        ts: Date.now(),
+                        text,
+                      });
+                    } else if (comp_id) {
+                      codeHistory.comp(comp_id).tables.comp_code.save({
+                        item_id: sel.item_id,
+                        comp_id: comp_id,
+                        prop_name: sel.prop_name || "",
+                        type: sel.type,
+                        ts: Date.now(),
+                        text,
+                      });
+                    }
                   }
                 }
               });
@@ -95,11 +113,13 @@ export default {
 
         const where: any = {
           item_id: item_id,
-          comp_id,
           type: type,
         };
         if (prop_name) {
           where.prop_name = prop_name;
+        }
+        if (comp_id) {
+          where.comp_id = comp_id;
         }
 
         if (page_id) {

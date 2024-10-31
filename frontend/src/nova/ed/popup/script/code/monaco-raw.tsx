@@ -15,6 +15,7 @@ export const MonacoRaw: FC<{
 }> = ({ value, onChange, lang, defaultValue, div, onMount }) => {
   const local = useLocal({
     editor: null as null | MonacoEditor,
+    monaco: null as null | Monaco,
     width: undefined as undefined | number,
     height: undefined as undefined | number,
   });
@@ -37,6 +38,15 @@ export const MonacoRaw: FC<{
       };
     }
   }, [div?.current]);
+
+  useEffect(() => {
+    if (!onChange) {
+      local.editor?.setValue(value);
+
+      if (onMount && local.editor && local.monaco)
+        onMount({ editor: local.editor, monaco: local.monaco });
+    }
+  }, [value]);
 
   if (!Editor || (div && (!local.width || !local.height)))
     return (
@@ -76,6 +86,9 @@ export const MonacoRaw: FC<{
         lineNumbersMinChars: 2,
       }}
       onMount={(editor, monaco) => {
+        local.editor = editor;
+        local.monaco = monaco;
+        local.render();
         if (onMount) onMount({ editor, monaco });
       }}
     />

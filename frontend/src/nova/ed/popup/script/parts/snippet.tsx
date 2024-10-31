@@ -1,13 +1,18 @@
 import { getActiveNode } from "crdt/node/get-node-by-id";
 import { EDGlobal } from "logic/ed-global";
-import { ChevronDown } from "lucide-react";
+import {
+  ChevronDown,
+  NotepadTextDashed,
+  ScrollText,
+  Stamp,
+} from "lucide-react";
 import { FC } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { Button } from "utils/ui/form/Button";
 import { Popover } from "utils/ui/popover";
 
-export const EdScriptSnippet: FC<{}> = ({}) => {
+export const EdCodeSnippet: FC<{}> = ({}) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({ open: false });
 
@@ -94,7 +99,6 @@ export default () => (
             >
               &lt;Local/&gt;
             </Button>{" "}
-         
             <Button
               className={cx(btn_style)}
               onClick={() => {
@@ -193,7 +197,8 @@ export default () => (
         }
       >
         <div className="top-btn">
-          Template <ChevronDown size={12} className="ml-1" />
+          <ScrollText size={12} className="mr-1" />
+          Template
         </div>
       </Popover>
     </div>

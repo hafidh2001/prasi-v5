@@ -3,9 +3,15 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { active } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
-import { Check, FileClock, Sticker } from "lucide-react";
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  FileClock,
+  Sticker,
+} from "lucide-react";
 import { Resizable } from "re-resizable";
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { LoadingSpinner } from "utils/ui/loading";
@@ -15,47 +21,119 @@ dayjs.extend(relativeTime);
 
 export const EdCodeHistory: FC<{
   history_id: number;
-  onHistoryPick: (id: number) => void;
+  onHistoryPick: (id: number, should_close: boolean) => void;
 }> = ({ onHistoryPick, history_id }) => {
-  const local = useLocal({ open: false });
+  const local = useLocal({
+    open: false,
+    list: [] as { ts: number; id: number }[],
+    ts: 0,
+  });
+
+  const current = local.list.find((item) => item.id === history_id);
   return (
-    <Popover
-      open={local.open}
-      onOpenChange={(open) => {
-        local.open = open;
-        local.render();
-      }}
-      content={
-        <HistoryList
-          history_id={history_id}
-          onHistoryPick={(id) => {
-            local.open = false;
-            local.render();
-            onHistoryPick(id);
-          }}
-        />
-      }
-      asChild
-      backdrop={false}
-    >
-      <div className="flex items-center ml-1">
-        <div className={cx("top-btn space-x-1")}>
-          <FileClock size={12} />
-          <div>History</div>
+    <>
+      <Popover
+        open={local.open}
+        onOpenChange={(open) => {
+          local.open = open;
+          local.render();
+        }}
+        content={
+          <HistoryList
+            history_id={history_id}
+            onHistoryPick={(id) => {
+              local.open = false;
+              local.render();
+              onHistoryPick(id, true);
+            }}
+            onInit={({ list, ts }) => {
+              local.list = list;
+              local.ts = ts;
+            }}
+          />
+        }
+        asChild
+        backdrop={false}
+      >
+        <div className="flex items-center ml-1">
+          <div className={cx("top-btn space-x-1")}>
+            <FileClock size={12} />
+            <div>History</div>
+          </div>
+          {!!history_id && (
+            <>
+              <div
+                className={cx(
+                  "top-btn",
+                  css`
+                    border-left: 0 !important;
+                    border-right: 0 !important;
+                  `
+                )}
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  const index = local.list.findIndex(
+                    (item) => item.id === history_id
+                  );
+                  console.log(index, local.list, history_id);
+
+                  if (index > 0) {
+                    const back = local.list[index - 1].id;
+
+                    if (back) {
+                      onHistoryPick(back, false);
+                    }
+                  }
+                }}
+              >
+                <ChevronLeft size={12} />
+              </div>
+              <div
+                className={cx("top-btn")}
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  const index = local.list.findIndex(
+                    (item) => item.id === history_id
+                  );
+                  if (index >= 0 && index < local.list.length - 1) {
+                    const next = local.list[index + 1].id;
+
+                    if (next) {
+                      onHistoryPick(next, false);
+                    }
+                  }
+                }}
+              >
+                <ChevronRight size={12} />
+              </div>
+            </>
+          )}
         </div>
-      </div>
-    </Popover>
+      </Popover>
+
+      {current && (
+        <div className={"ml-1 mr-3 text-xs flex items-center"}>
+          <div>{dayjs(current.ts).from(local.ts)}</div>
+          <div className="border border-white border-opacity-40 rounded-sm ml-1 px-1">
+            {dayjs(current.ts).format("DD MMM YYYY - HH:mm")}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
 const HistoryList: FC<{
   onHistoryPick: (ts: number) => void;
   history_id: number;
-}> = ({ onHistoryPick, history_id }) => {
+  onInit: (opt: { ts: number; list: { ts: number; id: number }[] }) => void;
+}> = ({ onHistoryPick, history_id, onInit }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal(
     {
-      ts: dayjs(),
+      ts: 0,
       loading: true,
       list: [] as { ts: number; id: number }[],
     },
@@ -86,6 +164,12 @@ const HistoryList: FC<{
       local.render();
     }
   );
+
+  onInit({
+    ts: local.ts,
+    list: local.list,
+  });
+
   return (
     <Resizable
       defaultSize={{

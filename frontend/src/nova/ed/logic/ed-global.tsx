@@ -139,6 +139,7 @@ export const EDGlobal = {
         typings: { status: "ok" as "ok" | "loading" | "error", err_msg: "" },
         wb_render: () => {},
         ref: null as any,
+        side_open: false,
       },
       comp_group: {
         mouse_event: null as null | React.MouseEvent<HTMLElement, MouseEvent>,
