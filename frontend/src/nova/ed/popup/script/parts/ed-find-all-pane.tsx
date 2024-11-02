@@ -130,6 +130,7 @@ export const EdCodeFindAllPane: FC<{}> = ({}) => {
                         className="flex border-l-[10px] border-b text-xs cursor-pointer hover:bg-blue-50"
                         onClick={() => {
                           if (active.item_id !== id) {
+                            console.log(model.prop_name, model.name)
                             activateItem(p, id);
                           }
                           setTimeout(() => {

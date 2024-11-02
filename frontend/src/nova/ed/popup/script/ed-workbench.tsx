@@ -25,6 +25,7 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
     history: { id: 0, code: "", loaded: false },
     search: { open: false },
   });
+
   const popup = p.ui.popup.script;
   popup.wb_render = local.render;
 
@@ -183,19 +184,22 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
               local.render();
             }}
           >
-            <EdMonacoProp
-              onChange={({ model, value, editor }) => {
-                if (model.id && model.source !== value) {
-                  model.source = value;
-                  model.exports = {};
+            {({ div }) => (
+              <EdMonacoProp
+                div={div}
+                onChange={({ model, value, editor }) => {
+                  if (model.id && model.source !== value) {
+                    model.source = value;
+                    model.exports = {};
 
-                  codeUpdate.push(p, model.id, value, {
-                    local_name: model.local?.name,
-                    prop_name: model.prop_name,
-                  });
-                }
-              }}
-            />
+                    codeUpdate.push(p, model.id, value, {
+                      local_name: model.local?.name,
+                      prop_name: model.prop_name,
+                    });
+                  }
+                }}
+              />
+            )}
           </EdWorkbenchBody>
         </div>
       );
@@ -318,42 +322,45 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
               local.render();
             }}
           >
-            <>
-              {local.history.id && local.history.loaded ? (
-                <MonacoRaw
-                  value={local.history.code}
-                  lang={
-                    (
-                      {
-                        js: "typescript",
-                        css: "css",
-                        html: "html",
-                      } as any
-                    )[p.ui.popup.script.mode]
-                  }
-                  onMount={({ monaco, editor }) => {
-                    if (p.ui.popup.script.mode === "js") {
-                      monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions(
+            {({ div }) => (
+              <>
+                {local.history.id && local.history.loaded ? (
+                  <MonacoRaw
+                    value={local.history.code}
+                    div={div}
+                    lang={
+                      (
                         {
-                          noSemanticValidation: true,
-                          noSyntaxValidation: true,
-                          onlyVisible: true,
-                        }
-                      );
-
-                      const model = editor.getModel();
-                      if (model) {
-                        editor.restoreViewState(
-                          foldRegionVState(model.getLinesContent())
-                        );
-                      }
+                          js: "typescript",
+                          css: "css",
+                          html: "html",
+                        } as any
+                      )[p.ui.popup.script.mode]
                     }
-                  }}
-                />
-              ) : (
-                <EdPrasiCodeItem />
-              )}
-            </>
+                    onMount={({ monaco, editor }) => {
+                      if (p.ui.popup.script.mode === "js") {
+                        monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions(
+                          {
+                            noSemanticValidation: true,
+                            noSyntaxValidation: true,
+                            onlyVisible: true,
+                          }
+                        );
+
+                        const model = editor.getModel();
+                        if (model) {
+                          editor.restoreViewState(
+                            foldRegionVState(model.getLinesContent())
+                          );
+                        }
+                      }
+                    }}
+                  />
+                ) : (
+                  <EdPrasiCodeItem div={div} />
+                )}
+              </>
+            )}
           </EdWorkbenchBody>
         </>
       )}

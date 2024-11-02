@@ -2,7 +2,7 @@ import { Monaco } from "@monaco-editor/react";
 import { ScriptModel } from "crdt/node/load-script-models";
 import { active } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
-import { FC, useEffect, useLayoutEffect } from "react";
+import { FC, useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { jscript } from "utils/script/jscript";
@@ -13,8 +13,6 @@ import { jsxColorScheme } from "./js/jsx-style";
 import { registerPrettier } from "./js/register-prettier";
 import { registerReact } from "./js/register-react";
 import { reloadPrasiModels, remountPrasiModels } from "./prasi-code-update";
-import { generateImports } from "./js/generate-imports";
-import { defaultCode } from "./js/default-code";
 
 export const EdMonacoProp: FC<{
   className?: string;

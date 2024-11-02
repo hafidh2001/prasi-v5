@@ -1,21 +1,40 @@
 import { PanelLeftClose } from "lucide-react";
-import { FC } from "react";
+import { FC, ReactNode, RefObject, useRef } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useLocal } from "utils/react/use-local";
 import { EdCodeFindAllPane } from "./parts/ed-find-all-pane";
 
 export const EdWorkbenchBody: FC<{
   side_open: boolean;
-  children: any;
+  children: (arg: { div: RefObject<HTMLDivElement> }) => ReactNode;
   onSideClose: () => void;
 }> = ({ side_open: side, children, onSideClose: onClose }) => {
+  const div = useRef<HTMLDivElement>(null);
   const local = useLocal({
     size: (Number(localStorage.getItem("prasi-workbench-size")) ||
       30) as number,
     active_tab: "Find All",
   });
   if (!side) {
-    return children;
+    return (
+      <div
+        className={cx(
+          "relative flex-1",
+          css`
+            > * {
+              position: absolute !important;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              top: 0;
+            }
+          `
+        )}
+        ref={div}
+      >
+        {children({ div })}
+      </div>
+    );
   }
 
   return (
@@ -85,8 +104,9 @@ export const EdWorkbenchBody: FC<{
               }
             `
           )}
+          ref={div}
         >
-          {children}
+          {children({ div })}
         </div>
       </Panel>
     </PanelGroup>

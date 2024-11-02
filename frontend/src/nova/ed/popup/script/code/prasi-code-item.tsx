@@ -1,14 +1,16 @@
 import { getActiveNode } from "crdt/node/get-node-by-id";
 import { active, getActiveTree } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
-import { useEffect } from "react";
+import { FC, RefObject, useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { itemCssDefault } from "./js/default-val";
 import { MonacoItemJS } from "./monaco-item-js";
 import { MonacoRaw } from "./monaco-raw";
 import { codeUpdate } from "./prasi-code-update";
-export const EdPrasiCodeItem = () => {
+export const EdPrasiCodeItem: FC<{ div: RefObject<HTMLDivElement> }> = ({
+  div,
+}) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({ id: "", ready: false, change_timeout: null as any });
   const node = getActiveNode(p);
@@ -52,6 +54,7 @@ export const EdPrasiCodeItem = () => {
         <>
           {mode === "js" && (
             <MonacoItemJS
+              div={div}
               onChange={({ model, value, editor }) => {
                 if (model.id && model.source !== value) {
                   model.source = value;
@@ -68,6 +71,7 @@ export const EdPrasiCodeItem = () => {
 
           {mode === "css" && (
             <MonacoRaw
+              div={div}
               value={_css}
               defaultValue={itemCssDefault}
               onChange={(val) => {
@@ -91,6 +95,7 @@ export const EdPrasiCodeItem = () => {
 
           {mode === "html" && (
             <MonacoRaw
+              div={div}
               value={_html}
               onChange={(val) => {
                 getActiveTree(p).update(
