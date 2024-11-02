@@ -116,6 +116,7 @@ export const MonacoItemJS: FC<{
         },
       }}
       onMount={async (editor, monaco) => {
+        p.script.editor = editor;
         const _models = await reloadPrasiModels(p, active.item_id);
 
         editor.onDidDispose(() => {

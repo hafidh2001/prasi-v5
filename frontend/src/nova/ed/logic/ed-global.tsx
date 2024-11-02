@@ -6,6 +6,7 @@ import { ViRef } from "vi/lib/store";
 import { PageTree } from "../crdt/load-page-tree";
 import { CompPickerNode } from "../popup/comp/comp-picker/render-picker-node";
 import { EComp, EPage, ESite } from "./types";
+import { MonacoEditor } from "utils/script/typings";
 
 export const EDGlobal = {
   mode: "" as "desktop" | "mobile",
@@ -30,6 +31,7 @@ export const EDGlobal = {
   },
   script: {
     ignore_changes: false,
+    editor: null as null | MonacoEditor,
     snippet_pasted: false,
     do_edit: (() => {}) as unknown as ReturnType<typeof defineScriptEdit>,
     flow: {
@@ -37,6 +39,9 @@ export const EDGlobal = {
       should_relayout: false,
     },
     monaco_selection: null as any,
+    search: {
+      text: "",
+    },
   },
   nav: {
     navigating: false,

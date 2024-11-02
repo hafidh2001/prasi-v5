@@ -133,6 +133,8 @@ export const EdMonacoProp: FC<{
         },
       }}
       onMount={async (editor, monaco) => {
+        p.script.editor = editor;
+
         try {
           await registerReact(monaco);
 

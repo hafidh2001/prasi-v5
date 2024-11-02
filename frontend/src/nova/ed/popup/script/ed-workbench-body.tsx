@@ -68,14 +68,27 @@ export const EdWorkbenchBody: FC<{
             <PanelLeftClose size={15} />
           </div>
         </div>
-        <div className="flex-1 relative overflow-auto">
-          <div className="absolute inset-0">
-            {local.active_tab === "Find All" && <EdCodeFindAllPane />}
-          </div>
-        </div>
+        {local.active_tab === "Find All" && <EdCodeFindAllPane />}
       </Panel>
       <PanelResizeHandle></PanelResizeHandle>
-      <Panel className="flex">{children}</Panel>
+      <Panel className="flex">
+        <div
+          className={cx(
+            "relative flex-1",
+            css`
+              > * {
+                position: absolute !important;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                top: 0;
+              }
+            `
+          )}
+        >
+          {children}
+        </div>
+      </Panel>
     </PanelGroup>
   );
 };

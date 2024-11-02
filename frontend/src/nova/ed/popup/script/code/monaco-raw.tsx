@@ -4,6 +4,8 @@ import { jscript } from "utils/script/jscript";
 import { Loading } from "utils/ui/loading";
 import { MonacoEditor } from "./js/create-model";
 import { Monaco } from "./js/enable-jsx";
+import { useGlobal } from "utils/react/use-global";
+import { EDGlobal } from "logic/ed-global";
 
 export const MonacoRaw: FC<{
   value: string;
@@ -13,6 +15,7 @@ export const MonacoRaw: FC<{
   div?: React.RefObject<HTMLDivElement>;
   onMount?: (arg: { monaco: Monaco; editor: MonacoEditor }) => void;
 }> = ({ value, onChange, lang, defaultValue, div, onMount }) => {
+  const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({
     editor: null as null | MonacoEditor,
     monaco: null as null | Monaco,
@@ -86,6 +89,7 @@ export const MonacoRaw: FC<{
         lineNumbersMinChars: 2,
       }}
       onMount={(editor, monaco) => {
+        p.script.editor = editor;
         local.editor = editor;
         local.monaco = monaco;
         local.render();
