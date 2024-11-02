@@ -7,6 +7,7 @@ import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { AutoHeightTextarea } from "utils/ui/auto-textarea";
 import { formatItemName } from "../../../tree/parts/node/node-name";
+import { ChevronRight } from "lucide-react";
 
 export const EdCodeFindAllPane: FC<{}> = ({}) => {
   const local = useLocal(
@@ -68,7 +69,9 @@ export const EdCodeFindAllPane: FC<{}> = ({}) => {
           }
         }
         if (found.length > 0) {
-          local.found[model.id] = found;
+          local.found[
+            model.id + `${model.prop_name ? `~${model.prop_name}` : ""}`
+          ] = found;
         }
       }
     }
@@ -114,13 +117,19 @@ export const EdCodeFindAllPane: FC<{}> = ({}) => {
         <div className="absolute inset-0 text-sm">
           {Object.entries(local.found).map(([id, found], idx) => {
             const model = local.models[id];
-            const node = local.nodes[id];
+            const node = local.nodes[model.id];
+            if (!node) return null;
             return (
               <div key={id} className="flex flex-col">
-                <div className="p-1 border-b">
-                  {formatItemName(node.item?.name)}
-                  {JSON.stringify(model.prop_name)}
-                  {model.prop_name ? <>&bull; {model.prop_name}</> : ""}
+                <div className="p-1 border-b flex items-center">
+                  <span>{formatItemName(node.item?.name)}</span>
+                  {model.prop_name ? (
+                    <span className="flex-1 flex items-center">
+                      &nbsp; <ChevronRight size={14} /> {model.prop_name}
+                    </span>
+                  ) : (
+                    ""
+                  )}
                 </div>
                 <div className="flex flex-col">
                   {found.map((f, idx) => {
@@ -129,9 +138,11 @@ export const EdCodeFindAllPane: FC<{}> = ({}) => {
                         key={idx}
                         className="flex border-l-[10px] border-b text-xs cursor-pointer hover:bg-blue-50"
                         onClick={() => {
-                          if (active.item_id !== id) {
-                            console.log(model.prop_name, model.name)
-                            activateItem(p, id);
+                          if (model.prop_name) {
+                            p.ui.comp.prop.active = model.prop_name;
+                          }
+                          if (active.item_id !== model.id) {
+                            activateItem(p, model.id);
                           }
                           setTimeout(() => {
                             const ed = p.script.editor;
