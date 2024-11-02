@@ -6,10 +6,12 @@ import { useEffect, useState } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { Menu, MenuItem } from "utils/ui/context-menu";
 import { EdPropField } from "./prop-field/ed-prop-field";
+import { useLocal } from "utils/react/use-local";
+import { loadCompTree } from "crdt/load-comp-tree";
 
 export const EdCompProp = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
-  const [, render] = useState({});
+  const local = useLocal({ comp_id: "", loading: false });
   const node = getActiveNode(p);
   const ui = p.ui.comp.prop;
   const comp_id = node?.item.component?.id || "";
@@ -17,14 +19,38 @@ export const EdCompProp = () => {
   const comp = comp_def?.content_tree.component;
   const instance = node?.item?.component;
   useEffect(() => {
-    if (!comp_def) {
-      waitUntil(() => p.comp.loaded[comp_id]).then(() => {
-        render({});
-      });
-    }
-  }, []);
+    if (local.comp_id !== comp_id) {
+      if (!local.loading) {
+        local.loading = true;
+        local.comp_id = comp_id;
 
-  if (!node || !instance || !comp) {
+        if (p.comp.pending.has(comp_id)) {
+          waitUntil(() => {
+            return !p.comp.pending.has(comp_id);
+          }).then(async () => {
+            local.loading = false;
+            local.render();
+
+            const item = p.comp.loaded[comp_id].content_tree;
+            if (!item.component && p.sync) {
+              const tree = await loadCompTree({
+                id: local.comp_id,
+                p,
+                sync: p.sync,
+                activate: false,
+              });
+              tree.update("Prep Component", ({ tree }) => {
+                tree.component = { id: comp_id, props: {} };
+              });
+              tree.destroy();
+            }
+          });
+        }
+      }
+    }
+  }, [comp_id]);
+
+  if (!node || !instance || !comp || local.loading) {
     return (
       <div className="flex items-center justify-center flex-1 w-full text-sm h-full flex-col text-center space-y-1">
         <Sticker size={40} strokeWidth={1} />

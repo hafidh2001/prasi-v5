@@ -84,6 +84,9 @@ export const EDGlobal = {
         open: "",
         open_timeout: null as any,
       },
+      comp: {
+        master_prop: false,
+      },
       expanded: {} as Record<string, string[]>,
       search: {
         value: "",

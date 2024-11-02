@@ -49,11 +49,14 @@ export const loadCompTree = (opt: {
   p: { comp: { loaded: Record<string, EComp>; pending: Set<string> } };
   sync: ReturnType<typeof createClient>;
   id: string;
-  on_update: (comp: EBaseComp["content_tree"]) => void;
+  on_update?: (comp: EBaseComp["content_tree"]) => void;
   on_component?: (item: IItem) => void;
   on_load?: (value: any) => void;
+  activate?: boolean;
 }) => {
-  active.comp_id = opt.id;
+  if (opt.activate !== false) {
+    active.comp_id = opt.id;
+  }
   return new Promise<ReturnType<typeof internalLoadCompTree>>((done) => {
     internalLoadCompTree({ ...opt, on_load: done });
   });
@@ -95,7 +98,7 @@ export const internalLoadCompTree = (
       component.var_items
     );
 
-    opt.on_update(content_tree);
+    if (opt.on_update) opt.on_update(content_tree);
     if (!state.loaded) {
       state.loaded = true;
       opt.on_load?.(component);

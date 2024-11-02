@@ -42,6 +42,7 @@ export const prasiKeybinding = (p: PG) => {
       e.preventDefault();
       e.stopPropagation();
     };
+
     handler.add("ctrl+s", save);
     handler.add("meta+s", save);
     handler.add("ctrl+z", undo);
@@ -52,6 +53,7 @@ export const prasiKeybinding = (p: PG) => {
     handler.add("meta+-", () => navPrevItem(p));
     handler.add("ctrl+shift+-", () => navNextItem(p));
     handler.add("ctrl+=", () => navNextItem(p));
+    handler.add("meta+=", () => navNextItem(p));
     window.addEventListener("keydown", handler.handle);
 
     return () => {

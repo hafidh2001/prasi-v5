@@ -120,7 +120,11 @@ export const EdTopBar = () => {
               <div className="flex items-center space-x-2">
                 <div>Previous item</div>{" "}
                 <div className="border border-slate-600 border-b-2 px-1 rounded-sm">
-                  Ctrl + &mdash;
+                  Ctrl + -
+                </div>
+                <div>OR</div>
+                <div className="border border-slate-600 border-b-2 px-1 rounded-sm">
+                  Win + -
                 </div>
               </div>
             }
@@ -140,6 +144,10 @@ export const EdTopBar = () => {
                 <div>Next item</div>{" "}
                 <div className="border border-slate-600 border-b-2 px-1 rounded-sm">
                   Ctrl + =
+                </div>
+                <div>OR</div>
+                <div className="border border-slate-600 border-b-2 px-1 rounded-sm">
+                  Win + =
                 </div>
               </div>
             }
