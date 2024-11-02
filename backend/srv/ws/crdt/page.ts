@@ -233,14 +233,16 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
             }
           }
 
-          _db.page.update({
-            where: { id: page_id },
-            data: {
-              content_tree: immer.get(),
-              updated_at: new Date(),
-            },
-            select: { id: true },
-          });
+          _db.page
+            .update({
+              where: { id: page_id },
+              data: {
+                content_tree: doc.getMap("data").toJSON(),
+                updated_at: new Date(),
+              },
+              select: { id: true },
+            })
+            .then((res) => {});
         }
       });
     }

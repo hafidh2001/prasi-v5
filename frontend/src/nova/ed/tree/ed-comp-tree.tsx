@@ -13,6 +13,8 @@ import { doTreeSearch } from "./parts/search";
 import { indentTree, useTreeIndent } from "./parts/use-indent";
 import { DragPreview, Placeholder } from "./parts/drag-preview";
 import { waitUntil } from "prasi-utils";
+import { ArrowLeft, Bolt, FileSliders } from "lucide-react";
+import { getActiveNode } from "crdt/node/get-node-by-id";
 
 const t = { out: null as any };
 export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
@@ -26,13 +28,21 @@ export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
   if (p.ui.tree.search.value) {
     models = doTreeSearch(p);
   }
+  const comp = p.comp.loaded[active.comp_id];
 
   return (
-    <div className="flex-1 flex flex-col items-stretch">
-      <div className="flex text-xs p-1 border-b bg-purple-100 items-stretch">
-        <div className="flex flex-1 items-center">Component Edit</div>
+    <div className="flex-1 flex flex-col items-stretch border-2 border-purple-700">
+      <div className="flex text-xs p-1 border-b justify-between bg-purple-700 text-white items-stretch">
+        Editing Component: {comp?.content_tree?.name}
+      </div>
+      <div className="flex text-xs p-1 border-b justify-between bg-purple-100 items-stretch">
         <TopBtn
-          className="text-[11px] bg-white"
+          className={cx(
+            "text-[11px] bg-white space-x-1",
+            css`
+              padding: 0 5px;
+            `
+          )}
           onClick={async () => {
             if (active.comp) {
               active.comp.destroy();
@@ -44,6 +54,7 @@ export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
                   active.comp = await loadCompTree({
                     sync: p.sync,
                     id: id,
+                    p,
                     async on_update(ctree) {
                       if (!p.comp.loaded[id]) {
                         await waitUntil(() => p.comp.loaded[id]);
@@ -65,7 +76,19 @@ export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
             }
           }}
         >
-          Close
+          <ArrowLeft size={12} />
+          <div>Back</div>
+        </TopBtn>
+        <TopBtn
+          className={cx(
+            "text-[11px] bg-white space-x-1",
+            css`
+              padding: 0 5px;
+            `
+          )}
+        >
+          <Bolt size={12} />
+          <div>Edit Master Props</div>
         </TopBtn>
       </div>
       <div className={cx("flex flex-1 relative overflow-auto")}>

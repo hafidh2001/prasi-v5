@@ -78,11 +78,14 @@ export const EdTreeNodeIndent = ({
             <Text />
           </div>
         )}
-        {item.type === "item" && !isComponent && !render_params.hasChild && (
-          <div className="">
-            <ItemIcon />
-          </div>
-        )}
+        {item.type === "item" &&
+          !isComponent &&
+          render_params.depth > 0 &&
+          !render_params.hasChild && (
+            <div className="">
+              <ItemIcon />
+            </div>
+          )}
         {isComponent && !render_params.hasChild && (
           <div className="node-text text-purple-600 mt-[1px]">
             <ComponentIcon />

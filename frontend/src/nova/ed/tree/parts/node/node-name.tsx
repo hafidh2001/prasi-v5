@@ -1,5 +1,5 @@
 import { NodeModel, RenderParams } from "@minoru/react-dnd-treeview";
-import { getActiveTree } from "logic/active";
+import { active, getActiveTree } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import { RectangleEllipsis } from "lucide-react";
 import { FC, ReactNode, useEffect, useState } from "react";

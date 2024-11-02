@@ -13,6 +13,7 @@ import { editor } from "../../utils/editor";
 import type { WSContext } from "../../utils/server/ctx";
 import BunORM from "../../utils/sqlite";
 import { crdt_comps, MAX_HISTORY_SIZE } from "./shared";
+import type { IItem } from "prasi-frontend/src/utils/types/item";
 
 const crdt_loading = new Set<string>();
 await dirAsync(dir.data(`/crdt`));
@@ -114,13 +115,15 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
 
       const save = async () => {
         const found = editor.cache.tables.comp.find({ where: { comp_id } });
+        const comp = immer.get() as IItem;
+        db_comp.name = comp.name;
         editor.cache.tables.comp.save({
           id: found?.[0]?.id,
           comp_id: comp_id,
           data: {
             id: comp_id,
             id_component_group: db_comp.component_group?.id,
-            content_tree: immer.get(),
+            content_tree: comp,
           },
           ts: Date.now(),
         });
@@ -128,7 +131,7 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
           where: { id: comp_id },
           data: {
             name: db_comp.name,
-            content_tree: immer.get(),
+            content_tree: comp,
             updated_at: new Date(),
           },
           select: { id: true },
