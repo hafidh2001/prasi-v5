@@ -85,7 +85,18 @@ export const EDGlobal = {
         open_timeout: null as any,
       },
       comp: {
-        master_prop: false,
+        get master_prop() {
+          return localStorage.getItem("prasi-master-prop-tab") || "n";
+        },
+        set master_prop(value) {
+          localStorage.setItem("prasi-master-prop-tab", value);
+        },
+        get active() {
+          return localStorage.getItem("prasi-master-prop-active") || "";
+        },
+        set active(value) {
+          localStorage.setItem("prasi-master-prop-active", value);
+        },
       },
       expanded: {} as Record<string, string[]>,
       search: {

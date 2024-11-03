@@ -55,7 +55,7 @@ export const EdPropField = (arg: {
           <ChevronRight fill={"white"} size={20} />
         </div>
       )}
-      <EdPropName name={name} />
+      <EdPropName name={name} field={field} />
       {is_jsx ? (
         <div className="flex-1 flex justify-end items-center">
           <div className="border flex items-center max-h-[15px] px-2 text-[10px] bg-white border-purple-600 text-purple-600">

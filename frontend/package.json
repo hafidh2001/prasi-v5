@@ -53,6 +53,7 @@
     "react-contenteditable": "^3.3.7",
     "react-dom": "^18.3.1",
     "react-hot-keys": "^2.7.3",
+    "react-movable": "^3.3.1",
     "react-resizable-panels": "^2.1.2",
     "react-textarea-autosize": "^8.5.3",
     "react-use-error-boundary": "^3.0.0",

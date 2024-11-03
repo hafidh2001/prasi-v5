@@ -13,6 +13,7 @@ import { bind } from "./lib/immer-yjs";
 import { findNodeById, flattenTree } from "./node/flatten-tree";
 import { loadScriptModels, ScriptModel } from "./node/load-script-models";
 import { TreeVarItems } from "./node/var-items";
+import { current } from "immer";
 
 export type CompTree = ReturnType<typeof internalLoadCompTree>;
 
@@ -181,6 +182,7 @@ export const internalLoadCompTree = (
           },
           findNode: (id) => {
             const result = findNodeById(id, [tree]);
+            console.log(current(tree), result, id);
             return result;
           },
           findParent: (id) => {

@@ -1,5 +1,5 @@
 import trim from "lodash.trim";
-import { active } from "logic/active";
+import { active, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import { extractRegion, removeRegion } from "popup/script/code/js/migrate-code";
 import { codeUpdate } from "popup/script/code/prasi-code-update";
@@ -21,6 +21,15 @@ export const EdPropString = (arg: {
   const { name, instance } = arg;
 
   useEffect(() => {
+    if (!instance.props[name]) {
+      getActiveTree(p).update(`Remove empty prop`, ({ findNode }) => {
+        const node = findNode(active.item_id);
+        if (node && node.item.component) {
+          delete node.item.component.props[name];
+        }
+      });
+      return;
+    }
     let value = instance.props[name].value || "";
     if (!value) {
       local.has_code = false;
@@ -37,7 +46,7 @@ export const EdPropString = (arg: {
     }
     local.value = value;
     local.render();
-  }, [instance.props[name].value]);
+  }, [instance.props[name]?.value]);
 
   if (local.has_code) {
     return <EdPropCode {...arg} />;

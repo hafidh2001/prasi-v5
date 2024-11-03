@@ -45,6 +45,9 @@ export const EdCompProp = () => {
               tree.destroy();
             }
           });
+        } else {
+          local.loading = false;
+          local.render();
         }
       }
     }
