@@ -48,6 +48,7 @@ export const loadScriptModels = async (
         const comp_id = item.component.id;
         for (const [name, prop] of Object.entries(item.component.props)) {
           const file = `${item.id}~${name}`;
+          if (!prop) continue;
           let prop_value = prop.value || "";
           const source_hash = hash(prop_value).toString();
 
@@ -64,7 +65,7 @@ export const loadScriptModels = async (
                 this.source_hash = hash(value).toString();
                 this.ready = false;
               },
-              [source_sym]: prop.value,
+              [source_sym]: prop_value,
               title: `${item.name}.${name}`,
               path_names: path_name,
               prop_name: name,

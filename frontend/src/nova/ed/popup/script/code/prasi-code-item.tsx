@@ -75,6 +75,10 @@ export const EdPrasiCodeItem: FC<{ div: RefObject<HTMLDivElement> }> = ({
               value={_css}
               defaultValue={itemCssDefault}
               onChange={(val) => {
+                if (val.length > 200000) {
+                  alert("CSS code is too long. Please limit to 200KB.");
+                  return;
+                }
                 getActiveTree(p).update(
                   "Update Code",
                   ({ findNode }) => {
@@ -98,6 +102,11 @@ export const EdPrasiCodeItem: FC<{ div: RefObject<HTMLDivElement> }> = ({
               div={div}
               value={_html}
               onChange={(val) => {
+                if (val.length > 200000) {
+                  alert("HTML code is too long. Please limit to 200KB.");
+                  return;
+                }
+
                 getActiveTree(p).update(
                   "Update Code",
                   ({ findNode }) => {

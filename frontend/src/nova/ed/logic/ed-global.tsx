@@ -72,6 +72,7 @@ export const EDGlobal = {
         },
         context_name: "",
         context_event: null as null | React.MouseEvent<HTMLElement, MouseEvent>,
+        expanded: {} as Record<string, Record<string, boolean>>,  
       },
     },
     tree: {

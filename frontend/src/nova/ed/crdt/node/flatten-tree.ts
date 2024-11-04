@@ -85,7 +85,7 @@ export const parsePropForJsx = (item: IItem) => {
   const result = {} as Record<string, IItem>;
   if (item.component)
     for (const [name, prop] of Object.entries(item.component.props)) {
-      if (prop.meta?.type === "content-element" && prop.content) {
+      if (prop && prop.meta?.type === "content-element" && prop.content) {
         result[name] = prop.content;
       }
     }

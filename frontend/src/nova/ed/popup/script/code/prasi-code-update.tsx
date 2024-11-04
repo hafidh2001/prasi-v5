@@ -195,6 +195,11 @@ export const codeUpdate = {
             continue;
           }
 
+          if (q.source.length > 200000) {
+            alert("Code too long, please limit to 200KB or less.");
+            continue;
+          }
+ 
           let final_source = "";
           if (q.prop_name) {
             final_source = removeRegion(q.source).replace(

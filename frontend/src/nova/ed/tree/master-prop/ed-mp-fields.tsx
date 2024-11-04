@@ -4,7 +4,6 @@ import { useLocal } from "utils/react/use-local";
 export const FieldButtons = (arg: {
   label: string;
   buttons: { label: string; checked: () => boolean; check?: () => void }[];
-  onChange?: (value: string) => void;
 }) => {
   const local = useLocal({
     checked_idx: new Set<number>(),
@@ -86,6 +85,39 @@ export const FieldString = (arg: {
           }
         }}
       />
+    </label>
+  );
+};
+
+export const FieldDropdown = (arg: {
+  label: string;
+  value: string;
+  onChange?: (value: string) => void;
+  list: { label: string; value: string }[];
+}) => {
+  const local = useLocal({ value: "", timeout: null as any });
+  useEffect(() => {
+    local.value = arg.value;
+    local.render();
+  }, [arg.value]);
+  return (
+    <label className="flex border-b">
+      <div className="w-[50px] p-1">{arg.label}</div>
+      <select
+        className="py-1 flex-1 border-l outline-none focus:bg-blue-100"
+        value={local.value}
+        onChange={(e) => {
+          local.value = e.target.value;
+          local.render();
+          if (arg.onChange) arg.onChange(local.value);
+        }}
+      >
+        {arg.list.map((e) => (
+          <option key={e.value} value={e.value}>
+            {e.label}
+          </option>
+        ))}
+      </select>
     </label>
   );
 };

@@ -1,6 +1,8 @@
 import { active, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import {
+  ChevronDown,
+  ChevronRight,
   Clipboard,
   Copy,
   GripVertical,
@@ -15,6 +17,8 @@ import { useLocal } from "utils/react/use-local";
 import { Tooltip } from "utils/ui/tooltip";
 import { EdMasterPropName } from "./ed-mp-name";
 import { useRef } from "react";
+import get from "lodash.get";
+import set from "lodash.set";
 
 export const EdMasterProp = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -25,9 +29,45 @@ export const EdMasterProp = () => {
   if (!comp) return null;
 
   const props = item.component?.props || {};
-  const entries = Object.entries(props).sort((a, b) => {
-    return (a[1].idx || 0) - (b[1].idx || 0);
-  });
+  const raw_entries = Object.entries(props);
+  const sorted_entries = {} as Record<string, typeof raw_entries>;
+  const entries = [] as typeof raw_entries;
+  for (const [k, v] of Object.entries(props)) {
+    if (k.includes("__")) {
+      const group = k.split("__").shift() || "";
+      if (!sorted_entries[group]) {
+        sorted_entries[group] = [];
+      }
+      sorted_entries[group].push([k, v]);
+    } else {
+      if (!sorted_entries[""]) sorted_entries[""] = [];
+      sorted_entries[""].push([k, v]);
+    }
+  }
+  for (const [k, v] of Object.entries(sorted_entries)) {
+    sorted_entries[k] = v.sort((a, b) => {
+      if (a[0].endsWith("__") && !b[0].endsWith("__")) return -1;
+      if (!a[0].endsWith("__") && b[0].endsWith("__")) return 1;
+      if (!a[1]) return 0;
+      if (!b[1]) return 0;
+      return (a[1].idx || 0) - (b[1].idx || 0);
+    });
+  }
+  for (const v of sorted_entries[""]) {
+    entries.push(v);
+  }
+
+  for (const [k, v] of Object.entries(sorted_entries).sort((a, b) => {
+    return (a[1][0][1].idx || 0) - (b[1][0][1].idx || 0);
+  })) {
+    if (k) {
+      let first = false;
+      for (const item of v) {
+        entries.push(item);
+      }
+    }
+  }
+
   return (
     <div className="flex flex-col items-stretch flex-1 w-full h-full text-sm">
       <div
@@ -172,6 +212,9 @@ export const EdMasterProp = () => {
                     label: `Prop ${idx}`,
                     value: '""',
                     valueBuilt: '""',
+                    meta: {
+                      type: "text",
+                    },
                     idx,
                   };
                   p.ui.tree.comp.active = name;
@@ -190,6 +233,29 @@ export const EdMasterProp = () => {
           lockVertically
           container={dragbox.current}
           renderItem={({ value, props, isDragged }) => {
+            const is_group = value[0].includes("__");
+            let group_expanded = false;
+            let group_name = "";
+            let is_group_child = false;
+            const is_active = p.ui.tree.comp.active === value[0];
+            if (is_group) {
+              group_name = value[0].split("__").shift() + "__" || "";
+              group_expanded = get(
+                p.ui.comp.prop.expanded,
+                `${active.comp_id}.${group_name}`,
+                false
+              ) as boolean;
+
+              if (!value[0].endsWith("__")) {
+                if (!group_expanded) {
+                  return (
+                    <li {...props} key={value[0]} className="h-[0px]"></li>
+                  );
+                }
+                is_group_child = true;
+              }
+            }
+
             const drag_handle = (
               <div
                 onPointerMove={(e) => {
@@ -222,6 +288,7 @@ export const EdMasterProp = () => {
                     {drag_handle}
                   </Tooltip>
                 )}
+
                 <div
                   className={cx(
                     "flex-1 flex",
@@ -263,6 +330,45 @@ export const EdMasterProp = () => {
                       <Square size={13} />
                     )}
                   </div>
+
+                  {is_group && (
+                    <div
+                      className={cx(
+                        "w-[20px] flex",
+                        is_active ? "bg-blue-500 text-white" : ""
+                      )}
+                    >
+                      {!is_group_child && (
+                        <div
+                          className="flex-1 flex items-center justify-center"
+                          onPointerDown={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            if (!group_expanded) {
+                              set(
+                                p.ui.comp.prop.expanded,
+                                `${active.comp_id}.${group_name}`,
+                                true
+                              );
+                            } else {
+                              set(
+                                p.ui.comp.prop.expanded,
+                                `${active.comp_id}.${group_name}`,
+                                false
+                              );
+                            }
+                            p.render();
+                          }}
+                        >
+                          {group_expanded ? (
+                            <ChevronDown size={14} />
+                          ) : (
+                            <ChevronRight size={14} />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <EdMasterPropName name={value[0]} prop={value[1]} />
                 </div>
               </li>
