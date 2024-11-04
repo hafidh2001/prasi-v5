@@ -10,6 +10,7 @@ import { IItem } from "utils/types/item";
 import { FNCompDef } from "utils/types/meta-fn";
 import { AutoHeightTextarea } from "utils/ui/auto-textarea";
 import { EdPropCode } from "./ed-prop-code";
+import { getActiveNode } from "crdt/node/get-node-by-id";
 
 export const EdPropString = (arg: {
   name: string;
@@ -17,20 +18,24 @@ export const EdPropString = (arg: {
   instance: Exclude<IItem["component"], undefined>;
 }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
-  const local = useLocal({ value: "", has_code: false });
+  const local = useLocal({ value: "", has_code: false, original_value: "" });
   const { name, instance } = arg;
 
   useEffect(() => {
-    if (!instance.props[name]) {
-      getActiveTree(p).update(`Remove empty prop`, ({ findNode }) => {
-        const node = findNode(active.item_id);
-        if (node && node.item.component) {
-          delete node.item.component.props[name];
-        }
-      });
-      return;
+    let prop = instance.props[name];
+    if (!prop) {
+      const comp_id = getActiveNode(p)?.item?.component?.id;
+      if (comp_id) {
+        const comp = p.comp.loaded[comp_id];
+        const cprop = comp?.content_tree.component?.props[name];
+        prop = JSON.parse(JSON.stringify(cprop));
+      } else {
+        return;
+      }
     }
-    let value = instance.props[name].value || "";
+    local.original_value = prop.value;
+
+    let value = prop.value || "";
     if (!value) {
       local.has_code = false;
       local.value = "";
@@ -61,7 +66,7 @@ export const EdPropString = (arg: {
         local.value = text;
         local.render();
 
-        const region = extractRegion(instance.props[name].value);
+        const region = extractRegion(local.original_value);
         let value = "";
         if (region.length > 0) {
           value = `${region.join("\n")}`;

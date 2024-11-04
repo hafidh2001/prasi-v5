@@ -20,7 +20,7 @@ export const EdPropField = (arg: {
   return (
     <div
       className={cx(
-        "border-b min-h-[30px] flex items-stretch select-none",
+        "border-b min-h-[30px] cursor-pointer relative flex items-stretch select-none",
         ui.active === name
           ? cx(
               "bg-blue-600 text-white",
@@ -28,10 +28,25 @@ export const EdPropField = (arg: {
                 .bg-white {
                   background: transparent;
                 }
-              `,
+              `
             )
-          : "hover:bg-blue-100",
+          : "hover:bg-blue-100"
       )}
+      onClick={(e) => {
+        e.preventDefault();
+        if (ui.active) {
+          ui.active = "";
+          p.render();
+          setTimeout(() => {
+            ui.active = name;
+            p.render();
+          }, 50);
+        } else {
+          ui.context_event = e;
+          ui.context_name = name;
+          p.render();
+        }
+      }}
       onContextMenu={(e) => {
         e.preventDefault();
         ui.context_event = e;
@@ -42,14 +57,14 @@ export const EdPropField = (arg: {
       {ui.active === name && (
         <div
           className={cx(
-            "flex items-center",
+            "flex items-center absolute left-0 bottom-0 top-0",
             css`
               border-left: 2px solid white;
               svg {
                 margin-left: -8px;
               }
               margin-right: -10px;
-            `,
+            `
           )}
         >
           <ChevronRight fill={"white"} size={20} />

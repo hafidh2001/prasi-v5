@@ -199,7 +199,7 @@ export const codeUpdate = {
           if (q.prop_name) {
             final_source = removeRegion(q.source).replace(
               `export const ${q.prop_name} =`,
-              ""
+              "return"
             );
           } else {
             const lines = q.source.split("\n").map((e) => {
@@ -250,6 +250,9 @@ export const codeUpdate = {
                   loader: "tsx",
                 })
               )?.code;
+              if (q.prop_name) {
+                q.source_built = `//prasi-prop\n${q.source_built}`;
+              }
             } catch (e) {
               console.warn("Code transpile failed on item:", q.id);
             }
@@ -282,10 +285,21 @@ export const codeUpdate = {
               } else {
                 const comp = n.item.component;
                 if (comp) {
-                  const [name, prop] =
+                  let [name, prop] =
                     Object.entries(comp.props).find(
                       ([name, prop]) => name === q.prop_name
                     ) || [];
+
+                  if (!prop) {
+                    const mcomp = this.p!.comp.loaded[comp.id];
+                    const cprop =
+                      mcomp?.content_tree.component?.props[q.prop_name];
+                    if (cprop) {
+                      comp.props[q.prop_name] = cprop;
+                      name = q.prop_name;
+                      prop = comp.props[q.prop_name];
+                    }
+                  }
 
                   if (name && prop) {
                     prop.value = q.source;

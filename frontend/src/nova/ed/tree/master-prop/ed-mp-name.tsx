@@ -10,10 +10,13 @@ export const EdMasterPropName: FC<{
 }> = ({ name, prop }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const is_active = p.ui.tree.comp.active === name;
+
+  const is_same_name = !prop.label || prop.label === name;
+
   const content = (
     <div
       className={cx(
-        "flex-1 p-1 cursor-pointer text-sm",
+        "flex-1 p-1 cursor-pointer text-sm justify-between flex items-center",
         is_active ? "bg-blue-500 text-white" : "hover:bg-blue-50"
       )}
       onClick={() => {
@@ -21,7 +24,14 @@ export const EdMasterPropName: FC<{
         p.render();
       }}
     >
-      {prop.label || name}
+      {is_same_name ? (
+        <>{prop.label || name}</>
+      ) : (
+        <>
+          <div>{prop.label}</div>
+          <div className="font-mono text-xs">{name}</div>
+        </>
+      )}
     </div>
   );
 
