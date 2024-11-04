@@ -182,7 +182,6 @@ export const internalLoadCompTree = (
           },
           findNode: (id) => {
             const result = findNodeById(id, [tree]);
-            console.log(current(tree), result, id);
             return result;
           },
           findParent: (id) => {

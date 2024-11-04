@@ -13,7 +13,7 @@ export const EdMasterPropName: FC<{
   const content = (
     <div
       className={cx(
-        "flex-1 p-1 cursor-pointer",
+        "flex-1 p-1 cursor-pointer text-sm",
         is_active ? "bg-blue-500 text-white" : "hover:bg-blue-50"
       )}
       onClick={() => {

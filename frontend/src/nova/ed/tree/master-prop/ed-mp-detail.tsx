@@ -29,7 +29,7 @@ export const EdMasterPropDetail: FC<{ children: any; onClose: () => void }> = ({
       content={
         <div
           className={cx(
-            "w-[300px]",
+            "w-[300px] text-sm",
             css`
               height: ${document.body.clientHeight - 100}px;
             `
@@ -44,21 +44,20 @@ export const EdMasterPropDetail: FC<{ children: any; onClose: () => void }> = ({
                   return value.replace(/[^a-zA-Z0-9_]/g, "_");
                 }}
                 onBlur={(value) => {
-                  console.log(value);
-                  // if (!value) return;
-                  // getActiveTree(p).update(
-                  //   `Rename ${name} to ${value}`,
-                  //   ({ tree }) => {
-                  //     if (tree.type === "item") {
-                  //       if (tree.component) {
-                  //         tree.component.props[value] =
-                  //           tree.component.props[name];
-                  //         delete tree.component.props[name];
-                  //         p.ui.tree.comp.active = value;
-                  //       }
-                  //     }
-                  //   }
-                  // );
+                  if (!value || value === name) return;
+                  getActiveTree(p).update(
+                    `Rename ${name} to ${value}`,
+                    ({ tree }) => {
+                      if (tree.type === "item") {
+                        if (tree.component) {
+                          tree.component.props[value] =
+                            tree.component.props[name];
+                          delete tree.component.props[name];
+                          p.ui.tree.comp.active = value;
+                        }
+                      }
+                    }
+                  );
                 }}
               />
               <FieldString

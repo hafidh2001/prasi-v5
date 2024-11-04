@@ -1,23 +1,27 @@
 import { active, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import {
+  Clipboard,
+  Copy,
   GripVertical,
   Plus,
   Square,
-  SquareCheck,
   SquareCheckBig,
+  Trash2,
 } from "lucide-react";
 import { List } from "react-movable";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { Tooltip } from "utils/ui/tooltip";
 import { EdMasterPropName } from "./ed-mp-name";
+import { useRef } from "react";
 
 export const EdMasterProp = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({ checked: new Set<string>(), all: false });
   const item = active.comp?.snapshot;
   const comp = item?.component;
+  const dragbox = useRef<HTMLDivElement>(null);
   if (!comp) return null;
 
   const props = item.component?.props || {};
@@ -33,6 +37,7 @@ export const EdMasterProp = () => {
             .top-btn {
               display: flex;
               align-items: center;
+              flex-wrap: nowrap;
               flex-direction: row;
               font-size: 12px;
               border: 1px solid #ccc;
@@ -49,9 +54,15 @@ export const EdMasterProp = () => {
           `
         )}
       >
-        <div className="p-1 space-x-1">
+        <div className="p-1 space-x-1 flex-1 flex">
           <div
-            className="top-btn ml-[10px]"
+            className={cx(
+              "top-btn ml-[11px]",
+              css`
+                border: 0 !important;
+                background: transparent !important;
+              `
+            )}
             onClick={() => {
               local.all = !local.all;
               if (local.all) {
@@ -62,8 +73,86 @@ export const EdMasterProp = () => {
               local.render();
             }}
           >
-            {local.all ? <SquareCheckBig size={13} /> : <Square size={13} />}
+            {local.all ? (
+              <SquareCheckBig size={13} fill="white" />
+            ) : (
+              <Square size={13} fill="white" />
+            )}
           </div>
+          {local.checked.size > 0 && (
+            <>
+              <Tooltip
+                content="Remove selected Master Props"
+                className="top-btn"
+                onClick={() => {
+                  if (confirm("Remove selected Master Props?")) {
+                    getActiveTree(p).update(
+                      "Remove Master Prop",
+                      ({ findNode }) => {
+                        const node = findNode(item.id);
+                        const props = node?.item.component?.props;
+                        if (props) {
+                          for (const key of local.checked) {
+                            delete props[key];
+                          }
+                        }
+                      }
+                    );
+                  }
+                }}
+              >
+                <Trash2 size={13} />
+              </Tooltip>
+
+              <Tooltip
+                content="Copy selected Master Props to clipboard"
+                className="top-btn"
+                onClick={() => {
+                  navigator.clipboard.writeText(
+                    JSON.stringify(
+                      [...local.checked].map((e) => {
+                        return { name: e, prop: props[e] };
+                      })
+                    )
+                  );
+                  alert(
+                    local.checked.size + " Master Props copied to clipboard"
+                  );
+                }}
+              >
+                <Copy size={13} />
+              </Tooltip>
+            </>
+          )}
+
+          <Tooltip
+            content="Paste Master Props from clipboard"
+            className="top-btn"
+            onClick={async () => {
+              try {
+                const pasted = JSON.parse(await navigator.clipboard.readText());
+
+                if (Array.isArray(pasted)) {
+                  getActiveTree(p).update(
+                    "Paste Master Prop",
+                    ({ findNode }) => {
+                      const node = findNode(item.id);
+                      const props = node?.item.component?.props;
+                      if (props) {
+                        for (const item of pasted) {
+                          if (item.name && item.prop) {
+                            props[item.name] = item.prop;
+                          }
+                        }
+                      }
+                    }
+                  );
+                }
+              } catch (e) {}
+            }}
+          >
+            <Clipboard size={13} />
+          </Tooltip>
         </div>
         <div className="p-1 space-x-1">
           <div
@@ -95,10 +184,11 @@ export const EdMasterProp = () => {
         </div>
       </div>
 
-      <div className="flex-1 relative overflow-auto">
+      <div className="flex-1 relative overflow-auto" ref={dragbox}>
         <List
           values={entries}
           lockVertically
+          container={dragbox.current}
           renderItem={({ value, props, isDragged }) => {
             const drag_handle = (
               <div
@@ -141,6 +231,7 @@ export const EdMasterProp = () => {
                         css`
                           * {
                             border-color: transparent !important;
+                            background-color: transparent !important;
                           }
                         `
                       )
