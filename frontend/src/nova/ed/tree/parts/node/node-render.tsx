@@ -69,31 +69,35 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
                     {p.comp.loaded[item.component.id]?.content_tree.name}
                   </span>
                   <br />
+                  Component ID: {item.component.id}
+                  <br />
                 </>
               )}
             ID: {node.item.id}
           </div>
-          {!item.component?.id && !p.ui.popup.script.open && (item.adv?.js || item.adv?.css) && (
-            <CodeHighlight
-              format={(e) => {
-                const lines = e.split("\n");
-                const idx = lines.findIndex((line) =>
-                  line.startsWith("// #endregion")
-                );
-                if (idx >= 0) {
-                  return lines
-                    .slice(idx + 1)
-                    .join("\n")
-                    .trim();
-                }
+          {!item.component?.id &&
+            !p.ui.popup.script.open &&
+            (item.adv?.js || item.adv?.css) && (
+              <CodeHighlight
+                format={(e) => {
+                  const lines = e.split("\n");
+                  const idx = lines.findIndex((line) =>
+                    line.startsWith("// #endregion")
+                  );
+                  if (idx >= 0) {
+                    return lines
+                      .slice(idx + 1)
+                      .join("\n")
+                      .trim();
+                  }
 
-                return e;
-              }}
-              language={item.adv.js ? "ts" : "css"}
-            >
-              {item.adv.js || item.adv.css}
-            </CodeHighlight>
-          )}
+                  return e;
+                }}
+                language={item.adv.js ? "ts" : "css"}
+              >
+                {item.adv.js || item.adv.css}
+              </CodeHighlight>
+            )}
         </div>
       }
       onOpenChange={(open) => {

@@ -41,10 +41,6 @@ export const EdPropField = (arg: {
             ui.active = name;
             p.render();
           }, 50);
-        } else {
-          ui.context_event = e;
-          ui.context_name = name;
-          p.render();
         }
       }}
       onContextMenu={(e) => {

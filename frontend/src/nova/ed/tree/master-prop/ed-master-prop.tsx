@@ -32,7 +32,7 @@ export const EdMasterProp = () => {
     <div className="flex flex-col items-stretch flex-1 w-full h-full text-sm">
       <div
         className={cx(
-          "bg-blue-100 flex justify-between border-y border-y-blue-500",
+          "bg-purple-100 flex justify-between border-b h-[28px]",
           css`
             .top-btn {
               display: flex;

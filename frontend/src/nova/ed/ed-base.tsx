@@ -27,11 +27,21 @@ export const EdBase = () => {
   prasiKeybinding(p);
 
   if (!p.page.tree && p.page.cur && p.sync) {
+    const comp_ids = new Set<string>();
     p.page.tree = loadPageTree(p, p.sync, p.page.cur.id, {
       async loaded(content_tree) {
         await loadPendingComponent(p);
         if (active.comp_id && !active.comp) {
           activateComp(p, active.comp_id);
+        }
+
+        if (
+          JSON.stringify([...comp_ids]) !==
+          JSON.stringify(content_tree.component_ids)
+        ) {
+          p.page.tree.update("Page Component Usage", ({ tree }) => {
+            tree.component_ids = [...comp_ids];
+          });
         }
 
         fg.prasi.updated_outside = true;
@@ -50,11 +60,12 @@ export const EdBase = () => {
         setTimeout(() => {
           p.ui.page.loaded = true;
           p.render();
-        },100);
+        }, 100);
       },
       async on_component(item) {
         if (p.sync && item.component) {
           const comp_id = item.component.id;
+          comp_ids.add(comp_id);
           if (!p.comp.loaded[comp_id] && !p.comp.pending.has(comp_id)) {
             p.comp.pending.add(comp_id);
           }

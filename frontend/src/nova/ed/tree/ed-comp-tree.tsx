@@ -3,7 +3,7 @@ import { CompTree, loadCompTree } from "crdt/load-comp-tree";
 import { active } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import { PNode } from "logic/types";
-import { ArrowLeft, Bolt, Box, LayoutList, Workflow } from "lucide-react";
+import { ArrowLeft, Box, Copy, LayoutList, ListTree, X } from "lucide-react";
 import { waitUntil } from "prasi-utils";
 import { FC } from "react";
 import { useGlobal } from "utils/react/use-global";
@@ -29,20 +29,25 @@ export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
     models = doTreeSearch(p);
   }
   const comp = p.comp.loaded[active.comp_id];
+
   return (
-    <div className="flex-1 flex flex-col items-stretch border-2 border-purple-700">
-      <div className="flex text-xs p-1 border-b justify-between bg-purple-700 text-white items-stretch">
-        Editing {p.ui.tree.comp.master_prop ? "Master Prop" : "Component"}:{" "}
-        {comp?.content_tree?.name}
-      </div>
-      <div className="flex text-xs p-1 justify-between bg-purple-100 items-stretch">
-        <TopBtn
-          className={cx(
-            "text-[11px] bg-white space-x-1",
-            css`
-              padding: 0 5px;
-            `
-          )}
+    <div
+      className={cx(
+        "flex-1 flex flex-col items-stretch border-2 border-purple-600",
+        css`
+          .top-btn {
+            border-radius: 3px;
+          }
+        `
+      )}
+    >
+      <div className="flex text-xs p-1 justify-between text-white bg-purple-600 items-center">
+        <div className="flex items-center">
+          <Box size={10} className="mr-1" />
+          {comp?.content_tree?.name}
+        </div>
+        <div
+          className="flex items-center hover:bg-white hover:text-black rounded-[3px] px-1 cursor-pointer"
           onClick={async () => {
             if (active.comp) {
               active.comp.destroy();
@@ -76,54 +81,40 @@ export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
             }
           }}
         >
-          <ArrowLeft size={12} />
-          <div>Back</div>
-        </TopBtn>
-        <div className="flex items-center">
-          <TopBtn
+          <X size={12} className="mr-1" />
+          Close
+        </div>
+      </div>
+      <div className="flex text-xs px-1 justify-between pt-1 bg-purple-600 items-stretch">
+        <div className="flex items-end cursor-pointer">
+          <div
             className={cx(
-              "text-[11px] space-x-1 border-r-0 rounded-r-none",
-              css`
-                padding: 0 5px;
-              `,
-              p.ui.tree.comp.master_prop === "n"
-                ? css`
-                    background: #3c82f6;
-                    border-color: #3c82f6;
-                    color: white;
-                  `
-                : "bg-white"
+              "flex items-center p-1 px-2 rounded-t-[2px]",
+              p.ui.tree.comp.master_prop === "n" ? "bg-white" : "text-white bg-purple-500"
             )}
             onClick={() => {
               p.ui.tree.comp.master_prop = "n";
               p.render();
             }}
           >
-            <Box size={12} />
+            <ListTree size={12} className="mr-1" />
             <div>Edit Tree </div>
-          </TopBtn>
-          <TopBtn
+          </div>
+          <div
             className={cx(
-              "text-[11px] bg-white space-x-1 rounded-l-none",
-              css`
-                padding: 0 5px;
-              `,
+              "flex items-center p-1 px-2 rounded-t-[2px]",
               p.ui.tree.comp.master_prop === "y"
-                ? css`
-                    background: #3c82f6;
-                    border-color: #3c82f6;
-                    color: white;
-                  `
-                : "bg-white"
+                ? "bg-purple-100"
+                : "text-white"
             )}
             onClick={() => {
               p.ui.tree.comp.master_prop = "y";
               p.render();
             }}
           >
-            <LayoutList size={12} />
+            <LayoutList size={12} className="mr-1" />
             <div>Edit Master Props</div>
-          </TopBtn>
+          </div>
         </div>
       </div>
       {p.ui.tree.comp.master_prop === "y" ? (

@@ -97,6 +97,7 @@ export const EDGlobal = {
         set active(value) {
           localStorage.setItem("prasi-master-prop-active", value);
         },
+        tab: "basic" as "basic" | "advanced",
       },
       expanded: {} as Record<string, string[]>,
       search: {

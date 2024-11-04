@@ -8,6 +8,7 @@ import { useLocal } from "utils/react/use-local";
 import { AutoHeightTextarea } from "utils/ui/auto-textarea";
 import { formatItemName } from "../../../tree/parts/node/node-name";
 import { ChevronRight } from "lucide-react";
+import { extractRegion } from "../code/js/migrate-code";
 
 export const EdCodeFindAllPane: FC<{}> = ({}) => {
   const local = useLocal(
@@ -43,6 +44,7 @@ export const EdCodeFindAllPane: FC<{}> = ({}) => {
     local.found = {};
     local.count = 0;
     for (const model of Object.values(models)) {
+      const region = extractRegion(model.source);
       const result = model.source.replaceAll(search, (arg) => {
         return `[/FOUND/[${arg}]/FOUND/]`;
       });
@@ -50,6 +52,7 @@ export const EdCodeFindAllPane: FC<{}> = ({}) => {
         const found = [];
         const lines = result.split("\n");
         for (let i = 0; i < lines.length; i++) {
+          if (i <= region.length) continue;
           const line = lines[i];
           if (line.includes(`[/FOUND/[`)) {
             local.count++;

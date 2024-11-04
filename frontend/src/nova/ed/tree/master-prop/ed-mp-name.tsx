@@ -2,7 +2,7 @@ import { EDGlobal } from "logic/ed-global";
 import { FC } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { FNCompDef } from "utils/types/meta-fn";
-import { EdMasterPropDetail } from "./ed-mp-detail";
+import { EdMasterPropDetail } from "./ed-mp-popover";
 
 export const EdMasterPropName: FC<{
   name: string;
