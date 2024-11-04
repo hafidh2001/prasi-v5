@@ -3,13 +3,13 @@ import { loadCompTree } from "crdt/load-comp-tree";
 import { getNodeById, updateNodeById } from "crdt/node/get-node-by-id";
 import { AudioWaveform, Scroll } from "lucide-react";
 import { iconExpr } from "popup/expr/parts/expr-icon";
+import { closeEditor } from "popup/script/ed-workbench";
 import { waitUntil } from "prasi-utils";
 import { useGlobal } from "../../../../../utils/react/use-global";
 import { Tooltip } from "../../../../../utils/ui/tooltip";
 import { active } from "../../../logic/active";
 import { EDGlobal } from "../../../logic/ed-global";
 import { PNode } from "../../../logic/types";
-import { closeEditor } from "popup/script/ed-workbench";
 export const EdTreeAction = ({
   raw,
   render_params,
@@ -102,7 +102,7 @@ export const EdTreeAction = ({
           {has_css && (
             <div className="node-text text-[9px] text-green-800 ml-1">CSS</div>
           )}
-          <div
+          {/* <div
             className={cx(
               "node-action border rounded-sm text-[9px] flex w-[20px] h-[15px] items-center cursor-pointer justify-center uppercase",
               !no_adv
@@ -135,13 +135,13 @@ export const EdTreeAction = ({
                     `bg-green-100  border-green-200 hover:border-green-500 hover:text-green-900 hover:bg-green-300`
                 )
             )}
-            onClick={(e) => {
-              e.preventDefault();
+            onPointerDown={(e) => {
               e.stopPropagation();
-              p.ui.tree.tooltip.open = "";
-              if (p.ui.popup.script.open) {
+              e.preventDefault();
+              if (active.item_id === item.id && p.ui.popup.script.open) {
                 closeEditor(p);
               } else {
+                p.ui.tree.tooltip.open = "";
                 if (has_content) mode = "css";
 
                 if (
@@ -168,7 +168,7 @@ export const EdTreeAction = ({
             }}
           >
             <Scroll size={9} />
-          </div>
+          </div> */}
         </>
       )}
 

@@ -2,7 +2,14 @@ import { activateComp } from "crdt/load-comp-tree";
 import set from "lodash.set";
 import { active } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
-import { PanelLeftClose, PanelLeftOpen, PanelRightOpen } from "lucide-react";
+import {
+  LayoutTemplate,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightOpen,
+  PencilRuler,
+  ScrollText,
+} from "lucide-react";
 import { useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { Tooltip } from "utils/ui/tooltip";
@@ -161,6 +168,36 @@ export const EdTopBar = () => {
           >
             <TriangleIcon />
           </Tooltip>
+        </div>
+        <div className="flex cursor-pointer items-center px-2  select-none">
+          <div
+            className={cx(
+              "border border-r-0 rounded-l-sm px-2 py-[2px] flex items-center space-x-1",
+              !p.ui.popup.script.open
+                ? "bg-blue-600 text-white border-blue-600"
+                : "hover:bg-blue-100"
+            )}
+            onClick={() => {
+              p.ui.popup.script.open = !p.ui.popup.script.open;
+              p.render();
+            }}
+          >
+            <LayoutTemplate size={12} /> <div>Design</div>
+          </div>
+          <div
+            className={cx(
+              "border border-l-0 rounded-r-sm px-2 py-[2px] flex items-center space-x-1",
+              p.ui.popup.script.open
+                ? "bg-orange-600 text-white border-orange-600"
+                : "hover:bg-orange-100"
+            )}
+            onClick={() => {
+              p.ui.popup.script.open = !p.ui.popup.script.open;
+              p.render();
+            }}
+          >
+            <ScrollText size={12} /> <div>Code</div>
+          </div>
         </div>
       </div>
       <div></div>
