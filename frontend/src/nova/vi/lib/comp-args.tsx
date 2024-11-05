@@ -69,7 +69,12 @@ return ${src}
 ${src.substring(`//prasi-prop`.length + 1)}`;
       }
       try {
-        const fn = new Function(...Object.keys(arg), fn_src);
+        const fn = new Function(...Object.keys(arg), `\
+  try { 
+    ${fn_src.split('\n').join(`\n    `)}
+  } catch(e) {
+    console.error(e);
+  }`);
 
         args[k] = fn(...Object.values(arg));
       } catch (e) {
