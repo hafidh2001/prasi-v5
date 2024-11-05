@@ -15,7 +15,7 @@ import { typingsItem } from "./js/typings-item";
 
 export const reloadPrasiModels = async (p: PG, from: string) => {
   const tree = getActiveTree(p);
-  // await tree.reloadScriptModels();
+  await tree.reloadScriptModels();
 
   return [
     {

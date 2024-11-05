@@ -32,17 +32,6 @@ export const EdPropField = (arg: {
             )
           : "hover:bg-blue-100"
       )}
-      onClick={(e) => {
-        e.preventDefault();
-        if (ui.active) {
-          ui.active = "";
-          p.render();
-          setTimeout(() => {
-            ui.active = name;
-            p.render();
-          }, 50);
-        }
-      }}
       onContextMenu={(e) => {
         e.preventDefault();
         ui.context_event = e;
@@ -66,7 +55,25 @@ export const EdPropField = (arg: {
           <ChevronRight fill={"white"} size={20} />
         </div>
       )}
-      <EdPropName name={name} field={field} />
+      <EdPropName
+        name={name}
+        field={field}
+        onClick={(e) => {
+          e.preventDefault();
+          if (ui.active) {
+            ui.active = "";
+            p.render();
+            setTimeout(() => {
+              ui.active = name;
+              p.render();
+            }, 50);
+          } else {
+            ui.context_event = e;
+            ui.context_name = name;
+            p.render();
+          }
+        }}
+      />
       {is_jsx ? (
         <div className="flex-1 flex justify-end items-center">
           <div className="border flex items-center max-h-[15px] px-2 text-[10px] bg-white border-purple-600 text-purple-600">
