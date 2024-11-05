@@ -1,15 +1,44 @@
 import { DeepReadonly } from "popup/flow/runtime/types";
 import { IItem } from "utils/types/item";
 import { ViRender } from "vi/vi-render";
+import { ViComps } from "./types";
 
 export const compArgs = (
   item: DeepReadonly<IItem>,
+  comps: ViComps,
   existing: any,
   db: any,
   api: any
 ) => {
   const args: Record<string, any> = { ...existing };
   if (item.component?.props) {
+    const comp_id = item.component.id;
+    const comp = comps[comp_id];
+
+    const inject = {} as any;
+    if (comp.component) {
+      for (const [k, prop] of Object.entries(comp.component.props)) {
+        if (!k.endsWith("__")) {
+          const iprop = item.component.props[k];
+          if (!iprop) {
+            inject[k] = null;
+          } else {
+            try {
+              const exports = (window as any).exports;
+              const args = {
+                ...exports,
+                db,
+                api,
+                ...existing,
+              };
+              const fn = new Function(...Object.keys(args), iprop.valueBuilt);
+              inject[k] = fn(...Object.values(args));
+            } catch (e) {}
+          }
+        }
+      }
+    }
+
     for (const [k, prop] of Object.entries(item.component.props)) {
       let js = prop.valueBuilt || "";
 
@@ -59,6 +88,7 @@ export const compArgs = (
         db,
         api,
         ...existing,
+        ...inject,
       };
 
       let fn_src = `// [${item.name}] ${k}: ${item.id}
@@ -69,12 +99,15 @@ return ${src}
 ${src.substring(`//prasi-prop`.length + 1)}`;
       }
       try {
-        const fn = new Function(...Object.keys(arg), `\
+        const fn = new Function(
+          ...Object.keys(arg),
+          `\
   try { 
-    ${fn_src.split('\n').join(`\n    `)}
+    ${fn_src.split("\n").join(`\n    `)}
   } catch(e) {
     console.error(e);
-  }`);
+  }`
+        );
 
         args[k] = fn(...Object.values(arg));
       } catch (e) {

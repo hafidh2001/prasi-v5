@@ -13,9 +13,9 @@ import { extractRegion, removeRegion } from "./js/migrate-code";
 import { replaceString } from "./js/replace-string";
 import { typingsItem } from "./js/typings-item";
 
-export const reloadPrasiModels = async (p: PG, id: string) => {
+export const reloadPrasiModels = async (p: PG, from: string) => {
   const tree = getActiveTree(p);
-  await tree.reloadScriptModels();
+  // await tree.reloadScriptModels();
 
   return [
     {
@@ -23,7 +23,7 @@ export const reloadPrasiModels = async (p: PG, id: string) => {
       source: typingsItem,
     },
     ...Object.values(tree.script_models),
-  ];
+  ] as ScriptModel[];
 };
 
 export const remountPrasiModels = (arg: {
@@ -199,7 +199,7 @@ export const codeUpdate = {
             alert("Code too long, please limit to 200KB or less.");
             continue;
           }
- 
+
           let final_source = "";
           if (q.prop_name) {
             final_source = removeRegion(q.source).replace(

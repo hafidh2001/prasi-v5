@@ -8,6 +8,7 @@ import { parentCompArgs } from "./lib/parent-comp-args";
 import { useVi } from "./lib/store";
 import { DIV_PROPS_OPT } from "./lib/types";
 import { ViItem } from "./vi-item";
+import { parentLocalArgs } from "./lib/parent-local-args";
 
 export const ViComp: FC<{
   item: DeepReadonly<IItem>;
@@ -23,6 +24,7 @@ export const ViComp: FC<{
     parents,
     db,
     api,
+    local_value,
     instanced,
     edit_comp_id,
   } = useVi(({ state, ref, action }) => ({
@@ -30,6 +32,7 @@ export const ViComp: FC<{
     load: ref.loader.comps,
     instances: ref.comp.instances,
     loaded: ref.comp.loaded,
+    local_value: ref.local_value,
     instantiate: action.instantiateComp,
     ref_comp_props: ref.comp_props,
     parents: ref.item_parents,
@@ -51,8 +54,15 @@ export const ViComp: FC<{
       edit_comp_id === comp_id
     ) {
       instanced[item.id] = item;
-      const parent_comp_args = parentCompArgs(parents, ref_comp_props, item.id);
-      ref_comp_props[item.id] = compArgs(item, parent_comp_args, db, api);
+      const comp_args = parentCompArgs(parents, ref_comp_props, item.id);
+      const local_args = parentLocalArgs(local_value, parents, item.id);
+      ref_comp_props[item.id] = compArgs(
+        item,
+        comps,
+        { ...comp_args, ...local_args },
+        db,
+        api
+      );
       instantiate(item);
     }
   }

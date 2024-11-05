@@ -86,15 +86,7 @@ export const ViScript: FC<{
   }, []);
 
   const comp_args = parentCompArgs(parents, comp_props_parents, item.id);
-  const local_args: Record<
-    string,
-    {
-      render: () => void;
-      proxy?: any;
-      __autorender?: boolean;
-      __item_id?: string;
-    }
-  > = parentLocalArgs(local_value, parents, item.id);
+  const local_args = parentLocalArgs(local_value, parents, item.id);
 
   const passprops_args = __idx
     ? parentPassProps(pass_props_parents, parents, item.id, __idx)

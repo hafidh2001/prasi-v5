@@ -34,10 +34,7 @@ export const EdMonacoProp: FC<{
       models: [] as ScriptModel[],
     },
     async () => {
-      local.models = (await reloadPrasiModels(
-        p,
-        active.item_id
-      )) as ScriptModel[];
+      local.models = await reloadPrasiModels(p, "monaco-prop");
       local.render();
     }
   );

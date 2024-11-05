@@ -48,14 +48,13 @@ export const loadScriptModels = async (
       if (item.component?.id) {
         const comp_id = item.component.id;
         for (const [name, prop] of Object.entries(item.component.props)) {
-          if (name.endsWith('__')) continue;
+          if (name.endsWith("__")) continue;
           const file = `${item.id}~${name}`;
           if (!prop) continue;
           let prop_value = prop.value || "";
           const source_hash = hash(prop_value).toString();
 
           if (result[file]?.source_hash !== source_hash) {
-
             const comp_def = p.comp.loaded[comp_id];
             result[file] = {
               id: item.id,

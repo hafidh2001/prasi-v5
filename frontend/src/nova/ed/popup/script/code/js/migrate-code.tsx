@@ -35,14 +35,23 @@ export const migrateCode = (
   const code = model.source;
   const { local } = model;
 
-  if (code.startsWith("// #region") && !model.prop_name) {
+  if (code.startsWith("// #region")) {
     const lines = code.split("\n");
     const region_end = lines.findIndex((line) =>
       line.startsWith("// #endregion")
     );
     const main_code = lines.slice(region_end + 1).join("\n");
 
-    const region_code = generateRegion(model, models);
+    let region_code = "";
+
+    if (model.prop_name) {
+      const inject = injectCompProps(model);
+      region_code = generateRegion(model, models, {
+        inject_end: inject.join("\n"),
+      });
+    } else {
+      region_code = generateRegion(model, models);
+    }
 
     return `\
 ${region_code}
@@ -66,19 +75,11 @@ export const ${local.name} = defineLocal({
       name: model.prop_name,
       type: "propname",
     };
+    const inject = injectCompProps(model);
 
-    const props = model.comp_def?.content_tree.component?.props || {};
-    const inject: string[] = [];
-
-    for (const prop_name of Object.keys(props)) {
-      if (!prop_name.endsWith("__") && prop_name !== model.prop_name) {
-        inject.push(`const ${prop_name} = null as any;`);
-      }
-    }
     return `\
 ${generateRegion(model, models, {
-  inject_end: `
-${inject.join("\n")}`,
+  inject_end: inject.join("\n"),
 })}
 
 export const ${model.prop_name} = ${model.extracted_content}`;
@@ -88,6 +89,18 @@ ${generateRegion(model, models)}${inject}
 
 export default () => (${model.extracted_content})`;
   }
+};
+
+const injectCompProps = (model: ScriptModel) => {
+  const props = model.comp_def?.content_tree.component?.props || {};
+  const inject: string[] = [];
+
+  for (const prop_name of Object.keys(props)) {
+    if (!prop_name.endsWith("__") && prop_name !== model.prop_name) {
+      inject.push(`const ${prop_name} = null as any;`);
+    }
+  }
+  return inject;
 };
 
 const generateRegion = (

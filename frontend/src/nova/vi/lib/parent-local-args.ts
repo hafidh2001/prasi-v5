@@ -3,7 +3,7 @@ export const local_name = Symbol("local_name");
 export const parentLocalArgs = (
   local: Record<string, any>,
   parents: Record<string, string>,
-  id: string
+  id: string,
 ) => {
   let cur = id;
   const args: any = {};
@@ -17,5 +17,13 @@ export const parentLocalArgs = (
 
     cur = parents[cur];
   }
-  return args;
+  return args as Record<
+    string,
+    {
+      render: () => void;
+      proxy?: any;
+      __autorender?: boolean;
+      __item_id?: string;
+    }
+  >;
 };
