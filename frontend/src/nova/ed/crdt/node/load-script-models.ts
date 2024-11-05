@@ -21,6 +21,7 @@ export type ScriptModel = {
   path_names: string[];
   prop_name?: string;
   path_ids: string[];
+  comp_def?: EComp;
   title: string;
   local: { name: string; value: string; auto_render: boolean };
   extracted_content: string;
@@ -47,16 +48,18 @@ export const loadScriptModels = async (
       if (item.component?.id) {
         const comp_id = item.component.id;
         for (const [name, prop] of Object.entries(item.component.props)) {
+          if (name.endsWith('__')) continue;
           const file = `${item.id}~${name}`;
           if (!prop) continue;
           let prop_value = prop.value || "";
           const source_hash = hash(prop_value).toString();
 
           if (result[file]?.source_hash !== source_hash) {
-            let comp_def = p.comp.loaded[comp_id];
 
+            const comp_def = p.comp.loaded[comp_id];
             result[file] = {
               id: item.id,
+              comp_def,
               get source() {
                 return this[source_sym];
               },

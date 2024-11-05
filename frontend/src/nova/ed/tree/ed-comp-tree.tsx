@@ -90,7 +90,11 @@ export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
           <div
             className={cx(
               "flex items-center p-1 px-2 rounded-t-[2px]",
-              p.ui.tree.comp.master_prop === "n" ? "bg-white" : "text-white bg-purple-500"
+              p.ui.tree.comp.master_prop === "n"
+                ? active.item_id === comp.content_tree.id
+                  ? "bg-blue-500 text-white"
+                  : "bg-white"
+                : "text-white bg-purple-500"
             )}
             onClick={() => {
               p.ui.tree.comp.master_prop = "n";

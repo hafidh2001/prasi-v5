@@ -51,7 +51,10 @@ export const parseItemCode = (model: ScriptModel) => {
           for (const d of node.declaration.declarations) {
             if (model.prop_name) {
               if (d.id.type === "Identifier" && d.id.name === model.prop_name) {
-                model.extracted_content = cutCode(model.source, d.init);
+                model.extracted_content = cutCode(model.source, d.init, -2);
+                if (model.extracted_content.startsWith("=")) {
+                  model.extracted_content = cutCode(model.source, d.init);
+                }
 
                 exports[d.id.name] = {
                   name: d.id.name,

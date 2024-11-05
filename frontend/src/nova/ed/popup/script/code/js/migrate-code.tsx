@@ -35,14 +35,14 @@ export const migrateCode = (
   const code = model.source;
   const { local } = model;
 
-  if (code.startsWith("// #region")) {
+  if (code.startsWith("// #region") && !model.prop_name) {
     const lines = code.split("\n");
     const region_end = lines.findIndex((line) =>
       line.startsWith("// #endregion")
     );
     const main_code = lines.slice(region_end + 1).join("\n");
 
-    const region_code = generateRegion(model, models, debug);
+    const region_code = generateRegion(model, models);
 
     return `\
 ${region_code}
@@ -67,8 +67,19 @@ export const ${local.name} = defineLocal({
       type: "propname",
     };
 
+    const props = model.comp_def?.content_tree.component?.props || {};
+    const inject: string[] = [];
+
+    for (const prop_name of Object.keys(props)) {
+      if (!prop_name.endsWith("__") && prop_name !== model.prop_name) {
+        inject.push(`const ${prop_name} = null as any;`);
+      }
+    }
     return `\
-${generateRegion(model, models)}${inject}
+${generateRegion(model, models, {
+  inject_end: `
+${inject.join("\n")}`,
+})}
 
 export const ${model.prop_name} = ${model.extracted_content}`;
   } else {
@@ -82,17 +93,22 @@ export default () => (${model.extracted_content})`;
 const generateRegion = (
   model: ScriptModel,
   models: Record<string, ScriptModel>,
-  debug?: boolean
+  opt?: {
+    debug?: boolean;
+    inject_start?: string;
+    inject_end?: string;
+  }
 ) => {
-  const imports = generateImports(model, models, debug);
+  const imports = generateImports(model, models, opt?.debug);
   const passprop = generatePassProp(model);
   return `\
 // #region generated⠀
 // Do not modify code inside region, any modification will be lost.
 
 import React from "react";\
+${opt?.inject_start || ""}\
 ${model.local.name ? `const local_name = "${model.local.name}"` : ""}\
-${imports}${passprop}
+${imports}${passprop}${opt?.inject_end || ""}
 
 // #endregion`;
 };
