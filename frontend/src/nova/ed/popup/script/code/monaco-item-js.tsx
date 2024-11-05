@@ -88,6 +88,7 @@ export const MonacoItemJS: FC<{
 
   return (
     <Editor
+      key={active.item_id + p.ui.comp.prop.active}
       className={cx(jsxColorScheme, className)}
       loading={
         <div className="relative w-full h-full items-center justify-center flex flex-1">

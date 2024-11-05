@@ -100,7 +100,7 @@ const extractString = (name: string, str: string) => {
       if (no_region.endsWith(";")) {
         no_region = no_region.slice(0, -1);
       }
-      return extractString(name, no_region.slice(21).trim());
+      return extractString(name, no_region.slice(`export const ${name} =`.length).trim());
     }
   }
   return "";

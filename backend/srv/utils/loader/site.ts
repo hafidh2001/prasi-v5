@@ -42,7 +42,6 @@ export const loadSite = (site_id: string, opt?: { force_reload?: boolean }) => {
       const logFile = Bun.file(logPath);
       await Bun.write(logFile, `loading site...`);
 
-      await ensureFiles(path, site_id);
       if (!(await existsAsync(dir.data(`${path}/lib`)))) {
         appendFile(logPath, "\ncloning lib...");
 
@@ -50,6 +49,7 @@ export const loadSite = (site_id: string, opt?: { force_reload?: boolean }) => {
           .cwd(dir.data(path))
           .quiet();
       }
+      await ensureFiles(path, site_id);
 
       appendFile(logPath, "\nnpm install...");
       await $`npm i`.cwd(dir.data(path)).quiet();

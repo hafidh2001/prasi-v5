@@ -326,6 +326,7 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
               <>
                 {local.history.id && local.history.loaded ? (
                   <MonacoRaw
+                    id={`history-${p.ui.popup.script.mode}`}
                     value={local.history.code}
                     div={div}
                     lang={

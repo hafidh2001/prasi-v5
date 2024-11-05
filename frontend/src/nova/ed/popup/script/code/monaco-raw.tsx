@@ -8,13 +8,14 @@ import { useGlobal } from "utils/react/use-global";
 import { EDGlobal } from "logic/ed-global";
 
 export const MonacoRaw: FC<{
+  id: string;
   value: string;
   onChange?: (value: string) => void;
   lang: string;
   defaultValue?: string;
   div?: React.RefObject<HTMLDivElement>;
   onMount?: (arg: { monaco: Monaco; editor: MonacoEditor }) => void;
-}> = ({ value, onChange, lang, defaultValue, div, onMount }) => {
+}> = ({ id, value, onChange, lang, defaultValue, div, onMount }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({
     editor: null as null | MonacoEditor,
@@ -60,6 +61,7 @@ export const MonacoRaw: FC<{
 
   return (
     <Editor
+      key={id}
       defaultValue={value || defaultValue}
       onChange={(value) => {
         if (onChange) onChange(value || "");

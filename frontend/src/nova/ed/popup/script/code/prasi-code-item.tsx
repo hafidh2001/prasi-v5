@@ -71,6 +71,7 @@ export const EdPrasiCodeItem: FC<{ div: RefObject<HTMLDivElement> }> = ({
 
           {mode === "css" && (
             <MonacoRaw
+              id="css"
               div={div}
               value={_css}
               defaultValue={itemCssDefault}
@@ -99,6 +100,7 @@ export const EdPrasiCodeItem: FC<{ div: RefObject<HTMLDivElement> }> = ({
 
           {mode === "html" && (
             <MonacoRaw
+              id="html"
               div={div}
               value={_html}
               onChange={(val) => {
