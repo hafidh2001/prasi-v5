@@ -44,7 +44,7 @@ export const EdMasterPropName: FC<{
           <>
             <div>{prop.label}</div>
             {(is_group_child || !is_group) && (
-              <div className="font-mono text-[10px]">{name}</div>
+              <div className="font-mono text-[10px] pr-2">{name}</div>
             )}
           </>
         )}

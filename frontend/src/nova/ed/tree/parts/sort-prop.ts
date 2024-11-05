@@ -25,8 +25,10 @@ export const sortProp = (props: Record<string, FNCompDef>) => {
       return (a[1].idx || 0) - (b[1].idx || 0);
     });
   }
-  for (const v of sorted_entries[""]) {
-    entries.push(v);
+  if (sorted_entries[""]) {
+    for (const v of sorted_entries[""]) {
+      entries.push(v);
+    }
   }
 
   for (const [k, v] of Object.entries(sorted_entries).sort((a, b) => {
