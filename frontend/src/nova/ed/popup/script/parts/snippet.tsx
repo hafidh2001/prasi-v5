@@ -72,7 +72,8 @@ export const EdCodeSnippet: FC<{}> = ({}) => {
                       `const local_name = "${name}"`,
                     ]),
                     `\
-export const ${name} = defineAutoRender({
+export const ${name} = defineLocal({
+  render_mode: "auto",
   name: local_name,
   value: {
     
@@ -82,7 +83,6 @@ export const ${name} = defineAutoRender({
 export default () => (
   <div {...props} className={cx(props.className, "")}>
     <Local
-      auto_render
       name={local_name}
       value={${name}}
       effect={async (${name}) => {

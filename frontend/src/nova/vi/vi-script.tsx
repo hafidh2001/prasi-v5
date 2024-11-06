@@ -3,7 +3,7 @@ import { DeepReadonly } from "popup/flow/runtime/types";
 import React, { FC, ReactElement, useEffect, useRef, useState } from "react";
 import { IItem } from "utils/types/item";
 import { parentCompArgs } from "./lib/parent-comp-args";
-import { local_name, parentLocalArgs } from "./lib/parent-local-args";
+import { local_name, parentLocalArgs, render_mode } from "./lib/parent-local-args";
 import { parentPassProps } from "./lib/parent-pass-props";
 import { scriptArgs } from "./lib/script-args";
 import { useVi } from "./lib/store";
@@ -107,8 +107,13 @@ export const ViScript: FC<{
     }
   }
 
-  const defineLocal = (arg: { name: string; value: any }) => {
+  const defineLocal = (arg: {
+    name: string;
+    value: any;
+    render_mode: "auto" | "manual";
+  }) => {
     arg.value[local_name] = arg.name;
+    arg.value[render_mode] = arg.render_mode;
     return arg.value;
   };
 
@@ -121,7 +126,6 @@ export const ViScript: FC<{
     api,
     __js: removeRegion(item.adv!.js || ""),
     defineLocal,
-    defineAutoRender: defineLocal,
     PassProp: internal.PassProp,
     Local: internal.Local,
     React,

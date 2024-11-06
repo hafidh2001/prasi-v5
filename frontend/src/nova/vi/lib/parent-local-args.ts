@@ -1,4 +1,5 @@
 export const local_name = Symbol("local_name");
+export const render_mode = Symbol("render_mode");
 
 export const parentLocalArgs = (
   local: Record<string, any>,

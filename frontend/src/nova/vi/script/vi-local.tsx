@@ -2,7 +2,7 @@ import { DeepReadonly } from "popup/flow/runtime/types";
 import { useEffect } from "react";
 import { IItem } from "utils/types/item";
 import { ViLocalAutoRender } from "./vi-local-auto-render";
-import { local_name } from "vi/lib/parent-local-args";
+import { local_name, render_mode } from "vi/lib/parent-local-args";
 
 export const createViLocal = (
   item: DeepReadonly<IItem>,
@@ -12,11 +12,10 @@ export const createViLocal = (
   return (opt: {
     name: string;
     value: any;
-    auto_render?: boolean;
     effect: (local: any) => void;
     children: any;
   }) => {
-    if (opt.auto_render) {
+    if (opt.value[render_mode] === 'auto') {
       return (
         <ViLocalAutoRender
           {...opt}

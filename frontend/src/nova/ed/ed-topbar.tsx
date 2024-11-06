@@ -7,9 +7,9 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   PanelRightOpen,
-  PencilRuler,
   ScrollText,
 } from "lucide-react";
+import { closeEditor } from "popup/script/ed-workbench";
 import { useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { Tooltip } from "utils/ui/tooltip";
@@ -178,7 +178,7 @@ export const EdTopBar = () => {
                 : "hover:bg-blue-100"
             )}
             onClick={() => {
-              p.ui.popup.script.open = !p.ui.popup.script.open;
+              closeEditor(p);
               p.render();
             }}
           >
@@ -192,7 +192,7 @@ export const EdTopBar = () => {
                 : "hover:bg-orange-100"
             )}
             onClick={() => {
-              p.ui.popup.script.open = !p.ui.popup.script.open;
+              p.ui.popup.script.open = true;
               p.render();
             }}
           >

@@ -12,13 +12,21 @@ const isDesktop: boolean;
 const __props: any;
 const siteurl: (path:string) => string;
 const preloaded: (url:string) => boolean;
-const defineLocal: <T extends Record<string, any>>(arg: {value:T, name: string}) => T & { render: () => void };
 type DeepReadonly<T> = T extends Function
   ? T
   : T extends object
     ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
     : T;
-const defineAutoRender: <T extends Record<string, any>>(arg: {value:T, name: string}) => DeepReadonly<T> & { set: T };
+const defineLocal: <
+  T extends Record<string, any>,
+  MODE extends "auto" | "manual"
+>(arg: {
+  value: T;
+  name: string;
+  render_mode: MODE;
+}) => MODE extends "auto"
+  ? DeepReadonly<T> & { set: T }
+  : T & { render: () => void } = null as any;
 const IF: (prop: {condition?: boolean; then: ReactNode; else?: ReactNode}) => ReactNode;
 const preload: (urls: string | string[], opt?: {
   on_load?: (
@@ -49,13 +57,12 @@ const Local = null as (<T extends Record<string, any>>(arg: {
     idx?: any;
     value: T;
     children?: any;
-    auto_render?: boolean;
     deps?: any[];
     effect?: (
-      local: T & { render: () => void }
+      local: T 
     ) => void | (() => void) | Promise<void | (() => void)>;
     hook?: (
-      local: T & { render: () => void }
+      local: T 
     ) => void | (() => void) | Promise<void | (() => void)>;
     cache?: boolean;
   }) => ReactElement);
