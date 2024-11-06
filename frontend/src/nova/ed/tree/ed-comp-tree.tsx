@@ -15,8 +15,9 @@ import { nodeRender } from "./parts/node/node-render";
 import { treeCanDrop, treeOnDrop } from "./parts/on-drop";
 import { doTreeSearch } from "./parts/search";
 import { indentTree, useTreeIndent } from "./parts/use-indent";
+import { Loading } from "utils/ui/loading";
+import { loadPendingComponent } from "crdt/node/load-child-comp";
 
-const t = { out: null as any };
 export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
 
@@ -29,6 +30,13 @@ export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
     models = doTreeSearch(p);
   }
   const comp = p.comp.loaded[active.comp_id];
+
+  if (!comp) {
+    if (!p.comp.pending.has(active.comp_id)) {
+      active.comp_id = "";
+    }
+    return <Loading backdrop={false} note="loading-component" />;
+  }
 
   return (
     <div

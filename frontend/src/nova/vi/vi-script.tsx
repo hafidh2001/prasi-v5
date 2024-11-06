@@ -93,7 +93,7 @@ export const ViScript: FC<{
     : {};
 
   for (const [k, v] of Object.entries(comp_args)) {
-    if (typeof v === "object" && (v as any).__jsx) {
+    if (typeof v === "object" && v && (v as any).__jsx) {
       comp_args[k] = (v as any).__render(item, parents);
     }
   }

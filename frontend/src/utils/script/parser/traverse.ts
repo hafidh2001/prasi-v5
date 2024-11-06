@@ -1,18 +1,20 @@
+import { walk } from "estree-walker";
 import { jscript } from "../jscript";
 import { SimpleVisitors } from "./acorn-types";
-import BaseVisitor from "./base-visitor";
 
 export function traverse<T = unknown>(
   ast: ReturnType<Exclude<typeof jscript.parse, null>>["program"],
   visitors: SimpleVisitors<T>,
   state?: T
 ) {
-  const baseVisitor = new BaseVisitor();
-  try {
-    simpleWalk(ast, visitors, baseVisitor, state);
-  } catch (e) {
-    console.log(e);
-  }
+  walk(ast as any, {
+    enter(node, parent, prop, index) {
+      const fn = (visitors as any)[node.type];
+      if (fn) {
+        fn(node);
+      }
+    },
+  });
 }
 
 function simpleWalk<TState>(
@@ -29,7 +31,7 @@ function simpleWalk<TState>(
         baseVisitor[type](node, st, c);
       } else {
         const proto = Object.getPrototypeOf(baseVisitor);
-        console.log(proto)
+        console.log(proto);
         if (typeof proto[type] === "function") {
           proto[type](node, st, c);
         } else {

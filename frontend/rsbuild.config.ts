@@ -17,7 +17,10 @@ export default defineConfig({
 
   tools: {
     rspack: {
-      ignoreWarnings: [/require function is used in a way/],
+      ignoreWarnings: [
+        /require function is used in a way/,
+        /the request of a dependency is an expression/,
+      ],
     },
   },
 

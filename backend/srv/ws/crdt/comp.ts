@@ -127,15 +127,15 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
           },
           ts: Date.now(),
         });
-        await _db.component.update({
-          where: { id: comp_id },
-          data: {
-            name: db_comp.name,
-            content_tree: comp,
-            updated_at: new Date(),
-          },
-          select: { id: true },
-        });
+        // await _db.component.update({
+        //   where: { id: comp_id },
+        //   data: {
+        //     name: db_comp.name,
+        //     content_tree: comp,
+        //     updated_at: new Date(),
+        //   },
+        //   select: { id: true },
+        // });
       };
 
       if (undoManager) {

@@ -79,7 +79,7 @@ export const ${name} = \`${text}\`;
         codeUpdate.push(p, active.item_id, value, { prop_name: name });
       }}
       className={cx(
-        "flex-1 py-1 px-2 border-l  flex w-full border-0 outline-none min-h-[29px]",
+        "flex-1 py-1 px-1 border-l  flex w-full border-0 outline-none min-h-[29px]",
         css`
           background: white;
           color: black;

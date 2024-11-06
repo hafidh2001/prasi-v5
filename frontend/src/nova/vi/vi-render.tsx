@@ -18,6 +18,8 @@ export const ViRender: FC<{
     wrapper: ref.wrapper,
   }));
 
+  if (item.hidden) return null;
+
   if (wrapper) {
     const Wrapper = wrapper;
 

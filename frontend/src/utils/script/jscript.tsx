@@ -1,16 +1,18 @@
 import type { Editor as MonacoEditor } from "@monaco-editor/react";
-import type { parseSync } from "@oxc-parser/wasm";
+import type { parseSync, Program } from "@oxc-parser/wasm";
 import type { formatMessages, transform } from "esbuild-wasm";
 import type estree from "prettier/plugins/estree";
 import type ts from "prettier/plugins/typescript";
 import type Prettier from "prettier/standalone";
 import { SimpleVisitors } from "./parser/acorn-types";
-import { traverse } from "./parser/traverse";
+// import { traverse } from "./parser/traverse";
+import { walk } from "estree-walker";
 
 import {
   configureMonacoTailwindcss,
   tailwindcssData,
 } from "monaco-tailwindcss";
+import { traverse } from "./parser/traverse";
 
 export type FBuild = (
   entryFileName: string,
@@ -194,5 +196,6 @@ export const jscript = {
 };
 
 export const cutCode = (code: string, pos: any, offset?: number) => {
-  return code.substring(pos.start + (offset || 0), pos.end + (offset || 0));
+  // return code.substring(pos.start + (offset || 0), pos.end + (offset || 0));
+  return code.substring(pos.start, pos.end);
 };

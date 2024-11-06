@@ -33,6 +33,7 @@
     "dagre": "^0.8.5",
     "dayjs": "^1.11.13",
     "esbuild-wasm": "^0.24.0",
+    "estree-walker": "^3.0.3",
     "fflate": "^0.8.2",
     "goober": "^2.1.14",
     "idb-keyval": "^6.2.1",

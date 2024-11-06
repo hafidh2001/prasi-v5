@@ -77,6 +77,7 @@ const loadChildComponent = async (p: PG, item: IItem) => {
 export const loadPendingComponent = async (p: PG) => {
   if (p.sync && p.comp.pending.size > 0) {
     const loaded = await p.sync.comp.load([...p.comp.pending]);
+
     for (const comp of Object.values(loaded)) {
       p.comp.loaded[comp.id] = decorateEComp(comp);
       await loopChildComponent(comp.content_tree, ({ item }) =>
@@ -84,6 +85,7 @@ export const loadPendingComponent = async (p: PG) => {
       );
       p.comp.pending.delete(comp.id);
     }
+    p.render()
   }
 };
 

@@ -308,6 +308,9 @@ export class BaseVisitor implements Required<RecursiveVisitors<unknown>> {
   ExpressionStatement<S>(n: oxc.ExpressionStatement, st: S, cb: Callback<S>) {
     cb(n.expression, st);
   }
+  FormalParameter<S>(n: any, st: S, cb: Callback<S>) {
+    console.log("FormalParameter: not implemented ");
+  }
   ForInStatement<S>(n: oxc.ForInStatement, st: S, cb: Callback<S>) {
     cb(n.left, st);
     cb(n.right, st);
@@ -558,6 +561,9 @@ export class BaseVisitor implements Required<RecursiveVisitors<unknown>> {
   KeyValueProperty<S>(n: oxc.KeyValueProperty, st: S, cb: Callback<S>) {
     cb(n.key, st);
     cb(n.value, st);
+  }
+  LogicalExpression<S>(n: any, st: S, cb: Callback<S>) {
+    console.log(n, st, cb);
   }
   LabeledStatement<S>(n: oxc.LabeledStatement, st: S, cb: Callback<S>) {
     cb(n.label, st);
