@@ -4,6 +4,7 @@ import { FC } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { FNCompDef } from "utils/types/meta-fn";
 import { FieldButtons, FieldDropdown, FieldString } from "./ed-mp-fields";
+import { current } from "immer";
 
 export const EdMasterPropBodyBasic: FC<{
   name: string;
@@ -127,8 +128,9 @@ export const EdMasterPropBodyBasic: FC<{
                         tree.component.props[_name + "__"];
                       delete tree.component.props[_name + "__"];
                       p.ui.tree.comp.active = _name;
+                    } else if (name.includes("__")) {
+                      _name = name;
                     }
-
                     tree.component.props[_name].meta = {
                       type: "text",
                     };
@@ -146,7 +148,7 @@ export const EdMasterPropBodyBasic: FC<{
               return prop.type === "option";
             },
             check() {
-              getActiveTree(p).update(`Set Type to TEXT`, ({ tree }) => {
+              getActiveTree(p).update(`Set Type to OPTIONS`, ({ tree }) => {
                 if (tree.type === "item") {
                   if (tree.component) {
                     if (is_group) {
@@ -155,6 +157,8 @@ export const EdMasterPropBodyBasic: FC<{
                         tree.component.props[_name + "__"];
                       delete tree.component.props[_name + "__"];
                       p.ui.tree.comp.active = _name;
+                    } else if (name.includes("__")) {
+                      _name = name;
                     }
 
                     tree.component.props[_name].meta = {
@@ -183,6 +187,8 @@ export const EdMasterPropBodyBasic: FC<{
                         tree.component.props[_name + "__"];
                       delete tree.component.props[_name + "__"];
                       p.ui.tree.comp.active = _name;
+                    } else if (name.includes("__")) {
+                      _name = name;
                     }
 
                     tree.component.props[_name].meta = {
@@ -194,27 +200,28 @@ export const EdMasterPropBodyBasic: FC<{
               });
             },
           },
+          !name.includes("__") || is_group
+            ? {
+                label: "GROUP",
+                checked() {
+                  if (is_group) return true;
+                  return false;
+                },
+                check() {
+                  getActiveTree(p).update(`Set Type to Group`, ({ tree }) => {
+                    if (tree.type === "item") {
+                      if (tree.component) {
+                        tree.component.props[_name + "__"] =
+                          tree.component.props[_name];
 
-          {
-            label: "GROUP",
-            checked() {
-              if (is_group) return true;
-              return false;
-            },
-            check() {
-              getActiveTree(p).update(`Set Type to Group`, ({ tree }) => {
-                if (tree.type === "item") {
-                  if (tree.component) {
-                    tree.component.props[_name + "__"] =
-                      tree.component.props[_name];
-
-                    delete tree.component.props[_name];
-                    p.ui.tree.comp.active = _name + "__";
-                  }
-                }
-              });
-            },
-          },
+                        delete tree.component.props[_name];
+                        p.ui.tree.comp.active = _name + "__";
+                      }
+                    }
+                  });
+                },
+              }
+            : undefined,
         ]}
       />
       <div className="p-1 flex justify-start"></div>

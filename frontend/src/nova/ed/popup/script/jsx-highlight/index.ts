@@ -74,7 +74,7 @@ export class MonacoJsxSyntaxHighlight {
       const { classifications, version, filePath: disposeFilePath } = event.data
       requestAnimationFrame(() => {
         // 确认为本文件，并且为最新版本
-        if (disposeFilePath === filePath && version === editor.getModel().getVersionId()) {
+        if (disposeFilePath === filePath && version === editor.getModel()?.getVersionId()) {
           const preDecoration = decorationsRef.current
           decorationsRef.current = editor.deltaDecorations(
             preDecoration,

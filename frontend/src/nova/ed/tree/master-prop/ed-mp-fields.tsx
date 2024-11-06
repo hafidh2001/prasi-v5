@@ -3,7 +3,10 @@ import { useLocal } from "utils/react/use-local";
 
 export const FieldButtons = (arg: {
   label: string;
-  buttons: { label: string; checked: () => boolean; check?: () => void }[];
+  buttons: (
+    | { label: string; checked: () => boolean; check?: () => void }
+    | undefined
+  )[];
 }) => {
   const local = useLocal({
     checked_idx: new Set<number>(),
@@ -15,6 +18,7 @@ export const FieldButtons = (arg: {
       <div className="w-[50px] p-1">{arg.label}</div>
       <div className="flex space-x-1 items-center px-1 border-l">
         {arg.buttons.map((e, idx) => {
+          if (!e) return null;
           return (
             <div
               key={idx}
