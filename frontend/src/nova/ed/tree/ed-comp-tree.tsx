@@ -85,7 +85,8 @@ export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
                 }
               }
 
-              p.render();
+              p.render()
+              p.ui.editor.render();
             }
           }}
         >

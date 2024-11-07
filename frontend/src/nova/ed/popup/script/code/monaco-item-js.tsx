@@ -30,6 +30,7 @@ export const MonacoItemJS: FC<{
     editor: null as null | MonacoEditor,
     width: undefined as undefined | number,
     height: undefined as undefined | number,
+    loading: true,
   });
   const Editor = jscript.MonacoEditor;
 
@@ -87,57 +88,70 @@ export const MonacoItemJS: FC<{
     );
 
   return (
-    <Editor
-      key={active.item_id + p.ui.comp.prop.active}
-      className={cx(jsxColorScheme, className)}
-      loading={
-        <div className="relative w-full h-full items-center justify-center flex flex-1">
-          <Loading backdrop={false} note="loading-monaco" />
+    <>
+      {local.loading && (
+        <div className="absolute inset-0">
+          <div className="relative w-full h-full items-center justify-center flex flex-1">
+            <Loading backdrop={false} note="loading-monaco" />
+          </div>
         </div>
-      }
-      width={local.width}
-      height={local.height}
-      language={"typescript"}
-      options={{
-        minimap: { enabled: false },
-        wordWrap: "wordWrapColumn",
-        autoClosingBrackets: "always",
-        autoIndent: "full",
-        formatOnPaste: true,
-        formatOnType: true,
-        tabSize: 2,
-        useTabStops: true,
-        automaticLayout: true,
-        fontFamily: "'Liga Menlo', monospace",
-        fontLigatures: true,
-        lineNumbersMinChars: 2,
-        suggest: {
-          showWords: false,
-          showKeywords: false,
-        },
-      }}
-      onMount={async (editor, monaco) => {
-        p.script.editor = editor;
-        const _models = await reloadPrasiModels(p, "monaco-item-js");
+      )}
+      <Editor
+        key={active.item_id + p.ui.comp.prop.active}
+        className={cx(jsxColorScheme, className)}
+        loading={
+          <div className="relative w-full h-full items-center justify-center flex flex-1">
+            <Loading backdrop={false} note="loading-monaco" />
+          </div>
+        }
+        width={local.width}
+        height={local.height}
+        language={"typescript"}
+        options={{
+          minimap: { enabled: false },
+          wordWrap: "wordWrapColumn",
+          autoClosingBrackets: "always",
+          autoIndent: "full",
+          formatOnPaste: true,
+          formatOnType: true,
+          tabSize: 2,
+          useTabStops: true,
+          automaticLayout: true,
+          fontFamily: "'Liga Menlo', monospace",
+          fontLigatures: true,
+          lineNumbersMinChars: 2,
+          suggest: {
+            showWords: false,
+            showKeywords: false,
+          },
+        }}
+        onMount={async (editor, monaco) => {
+          const models = await reloadPrasiModels(p, "monaco-item-js");
+          p.script.editor = editor;
 
-        editor.onDidDispose(() => {
-          local.editor = null;
-        });
-        local.editor = editor;
-        p.script.do_edit = defineScriptEdit(editor, monaco);
+          editor.onDidDispose(() => {
+            local.editor = null;
+          });
+          local.editor = editor;
+          p.script.do_edit = defineScriptEdit(editor, monaco);
 
-        registerPrettier(monaco);
-        await registerReact(monaco);
+          registerPrettier(monaco);
+          await registerReact(monaco);
 
-        remountPrasiModels({
-          p,
-          _models,
-          activeFileName: `file:///${active.item_id}.tsx`,
-          editor,
-          monaco,
-          onChange,
-        });
-      }}
-    />
+          remountPrasiModels({
+            p,
+            models,
+            activeFileName: `file:///${active.item_id}.tsx`,
+            editor,
+            monaco,
+            onChange,
+            onMount: () => {
+              local.loading = false;
+              local.render();
+            },
+          });
+        }}
+      />
+    </>
   );
 };

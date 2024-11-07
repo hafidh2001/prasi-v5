@@ -125,7 +125,7 @@ const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
                 render();
               }
             },
-            spellCheck: item.type === "text" ? false : undefined,
+            spellCheck: item?.type === "text" ? false : undefined,
             onBlur:
               item.type === "text"
                 ? (e) => {
@@ -147,6 +147,7 @@ const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
               e.stopPropagation();
               e.preventDefault();
               p.ui.tree.prevent_tooltip = true;
+
               if (instance_id) {
                 //@ts-ignore
                 const instance = ref.comp_props[instance_id];

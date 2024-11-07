@@ -28,7 +28,7 @@ export const reloadPrasiModels = async (p: PG, from: string) => {
 
 export const remountPrasiModels = (arg: {
   p: PG;
-  _models: Partial<ScriptModel>[];
+  models: Partial<ScriptModel>[];
   monaco: Monaco;
   editor: MonacoEditor;
   activeFileName: string;
@@ -41,7 +41,7 @@ export const remountPrasiModels = (arg: {
   }) => void;
   onMount?: (m: Partial<ScriptModel>) => void;
 }) => {
-  const { p, _models, monaco, activeFileName, onChange, editor, onMount } = arg;
+  const { p, models, monaco, activeFileName, onChange, editor, onMount } = arg;
 
   const defaultCode = () => {
     const item = getActiveNode(p)?.item;
@@ -52,7 +52,7 @@ export const remountPrasiModels = (arg: {
   };
 
   const monacoModels = monaco.editor.getModels();
-  for (const m of _models) {
+  for (const m of models) {
     if (!m.source && m.name !== activeFileName) continue;
     if (!m.source) m.source = "";
 

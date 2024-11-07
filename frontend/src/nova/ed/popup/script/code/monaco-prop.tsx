@@ -26,18 +26,12 @@ export const EdMonacoProp: FC<{
   div?: React.RefObject<HTMLDivElement>;
 }> = ({ className, onChange, div }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
-  const local = useLocal(
-    {
-      editor: null as null | MonacoEditor,
-      width: undefined as undefined | number,
-      height: undefined as undefined | number,
-      models: [] as ScriptModel[],
-    },
-    async () => {
-      local.models = await reloadPrasiModels(p, "monaco-prop");
-      local.render();
-    }
-  );
+  const local = useLocal({
+    editor: null as null | MonacoEditor,
+    width: undefined as undefined | number,
+    height: undefined as undefined | number,
+    loading: true,
+  });
   const Editor = jscript.MonacoEditor;
   const ui = p.ui.comp.prop;
 
@@ -87,11 +81,7 @@ export const EdMonacoProp: FC<{
     }
   }, [div?.current]);
 
-  if (
-    !Editor ||
-    (div && (!local.width || !local.height)) ||
-    local.models.length === 0
-  )
+  if (!Editor || (div && (!local.width || !local.height)))
     return (
       <div className="relative w-full h-full items-center justify-center flex flex-1">
         <Loading backdrop={false} note="loading-monaco" />
@@ -99,61 +89,76 @@ export const EdMonacoProp: FC<{
     );
 
   return (
-    <Editor
-      className={cx(jsxColorScheme, className)}
-      loading={
-        <div className="relative w-full h-full items-center justify-center flex flex-1">
-          <Loading backdrop={false} note="loading-monaco" />
+    <>
+      {local.loading && (
+        <div className="absolute inset-0">
+          <div className="relative w-full h-full items-center justify-center flex flex-1">
+            <Loading backdrop={false} note="loading-monaco" />
+          </div>
         </div>
-      }
-      language={"typescript"}
-      width={local.width}
-      height={local.height}
-      options={{
-        minimap: { enabled: false },
-        wordWrap: "wordWrapColumn",
-        autoClosingBrackets: "always",
-        autoIndent: "full",
-        formatOnPaste: true,
-        formatOnType: true,
-        tabSize: 2,
-        useTabStops: true,
-        automaticLayout: true,
-        fontFamily: "'Liga Menlo', monospace",
-        fontLigatures: true,
-        lineNumbersMinChars: 2,
-        suggest: {
-          showWords: false,
-          showKeywords: false,
-        },
-      }}
-      onMount={async (editor, monaco) => {
-        p.script.editor = editor;
-
-        try {
-          await registerReact(monaco);
-
-          editor.onDidDispose(() => {
-            local.editor = null;
-          });
-          local.editor = editor;
-          p.script.do_edit = defineScriptEdit(editor, monaco);
-
-          registerPrettier(monaco);
-          await registerReact(monaco);
-
-          remountPrasiModels({
-            p,
-            _models: local.models,
-            activeFileName: `file:///${active.item_id}~${ui.active}.tsx`,
-            editor,
-            monaco,
-            onChange,
-          });
-        } catch (e) {
-          console.warn("Monaco Mount Error:", e);
+      )}
+      <Editor
+        className={cx(jsxColorScheme, className)}
+        loading={
+          <div className="relative w-full h-full items-center justify-center flex flex-1">
+            <Loading backdrop={false} note="loading-monaco" />
+          </div>
         }
-      }}
-    />
+        language={"typescript"}
+        width={local.width}
+        height={local.height}
+        options={{
+          minimap: { enabled: false },
+          wordWrap: "wordWrapColumn",
+          autoClosingBrackets: "always",
+          autoIndent: "full",
+          formatOnPaste: true,
+          formatOnType: true,
+          tabSize: 2,
+          useTabStops: true,
+          automaticLayout: true,
+          fontFamily: "'Liga Menlo', monospace",
+          fontLigatures: true,
+          lineNumbersMinChars: 2,
+          suggest: {
+            showWords: false,
+            showKeywords: false,
+          },
+        }}
+        onMount={async (editor, monaco) => {
+          p.script.editor = editor;
+
+          try {
+            const models = await reloadPrasiModels(p, "monaco-prop");
+
+            await registerReact(monaco);
+
+            editor.onDidDispose(() => {
+              local.editor = null;
+            });
+            local.editor = editor;
+            p.script.do_edit = defineScriptEdit(editor, monaco);
+
+            registerPrettier(monaco);
+            await registerReact(monaco);
+
+            remountPrasiModels({
+              p,
+              models,
+              activeFileName: `file:///${active.item_id}~${ui.active}.tsx`,
+              editor,
+              monaco,
+              onChange,
+              onMount(m) {
+                local.loading = false;
+                local.render();
+              },
+            });
+          } catch (e) {
+            console.warn("Monaco Mount Error:", e);
+          }
+        }}
+      />
+    </>
   );
 };
