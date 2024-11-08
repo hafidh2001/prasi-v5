@@ -35,6 +35,9 @@ const viRef = {
   edit_comp_id: "",
   local_render: {} as Record<string, () => void>,
 
+  dev_item_error: {} as Record<string, any>,
+  dev_tree_render: {} as Record<string, () => void>,
+
   script_instance: {} as Record<string, any>,
 
   resetCompInstance: (comp_id: string) => {},
@@ -88,6 +91,8 @@ export const useVi = defineStore({
       ref.resetLocal = () => {
         ref.script_instance = {};
         ref.local_value = {};
+        ref.dev_tree_render = {};
+        ref.dev_item_error = {};
       };
       for (const id of Object.keys(comps)) {
         ref.comp.loaded.add(id);

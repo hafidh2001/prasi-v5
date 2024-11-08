@@ -47,7 +47,11 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
     return <></>;
   }
 
+  if (p.viref && p.viref.dev_tree_render) {
+    p.viref.dev_tree_render[item.id] = local.render;
+  }
   const { is_active, is_component, is_hover } = parseNodeState({ item });
+  const has_error = p.viref.dev_item_error?.[item.id];
 
   return (
     <Popover
@@ -75,29 +79,12 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
               )}
             ID: {node.item.id}
           </div>
-          {!item.component?.id &&
-            !p.ui.popup.script.open &&
-            (item.adv?.js || item.adv?.css) && (
-              <CodeHighlight
-                format={(e) => {
-                  const lines = e.split("\n");
-                  const idx = lines.findIndex((line) =>
-                    line.startsWith("// #endregion")
-                  );
-                  if (idx >= 0) {
-                    return lines
-                      .slice(idx + 1)
-                      .join("\n")
-                      .trim();
-                  }
 
-                  return e;
-                }}
-                language={item.adv.js ? "ts" : "css"}
-              >
-                {item.adv.js || item.adv.css}
-              </CodeHighlight>
-            )}
+          {has_error && (
+            <div className="font-mono p-1 m-1 bg-red-600 text-white text-[10px]">
+              {has_error.message}
+            </div>
+          )}
         </div>
       }
       onOpenChange={(open) => {
@@ -152,6 +139,7 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
           `tree-${item.id}`,
           "relative border-b flex items-stretch outline-none min-h-[26px]",
           render_params.hasChild && "has-child",
+          has_error && !is_active && "bg-red-100",
           css`
             &:hover {
               .action-script {
@@ -170,6 +158,7 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
                   }
                   .node-text {
                     color: white;
+                    border-color: white;
                   }
                   input {
                     background: white;

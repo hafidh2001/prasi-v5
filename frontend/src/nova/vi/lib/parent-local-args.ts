@@ -9,7 +9,7 @@ export const parentLocalArgs = (
   let cur = id;
   const args: any = {};
   while (cur) {
-    if (local[cur]) {
+    if (local[cur] && cur !== id) {
       const name = local[cur][local_name];
       if (name && !args[name]) {
         args[name] = local[cur];

@@ -1,25 +1,32 @@
 import { PNode } from "logic/types";
 import { useErrorBoundary, withErrorBoundary } from "react-use-error-boundary";
 import { useLocal } from "../../../utils/react/use-local";
+import { ReactNode } from "react";
 
 export const ErrorBox = withErrorBoundary(
   ({
     children,
+    error_jsx,
     node,
     id,
     silent = true,
+    onError,
   }: {
     children: any;
+    error_jsx?: ReactNode;
     node?: PNode;
     id?: string;
     silent?: boolean;
+    onError?: (error: any) => void;
   }) => {
     const local = useLocal({ retrying: false, node });
     const [error, resetError] = useErrorBoundary((error, errorInfo) => {
       if (silent !== true) console.error(error);
+      if (onError) onError(error);
     });
 
     if (error) {
+      if (typeof error_jsx !== "undefined") return error_jsx;
       return (
         <div className="bg-red-100 border border-red-300 rounded-sm text-xs flex flex-col items-center">
           <div className="text-[10px] font-bold text-red-900 self-stretch px-1">

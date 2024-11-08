@@ -163,6 +163,7 @@ export const codeUpdate = {
     string,
     {
       id: string;
+      item_name: string;
       source: string;
       tailwind?: string;
       prop_name?: string;
@@ -177,7 +178,9 @@ export const codeUpdate = {
     arg?: { prop_name?: string; local_name?: string }
   ) {
     this.p = p;
-    this.queue[id] = { id, source, ...arg };
+    const tree = getActiveTree(p);
+    const item_name = tree.nodes.map[id]?.item?.name || "";
+    this.queue[id] = { id, source, item_name, ...arg };
     this.executeUpdate();
   },
   executeUpdate() {
@@ -238,6 +241,7 @@ export const codeUpdate = {
             });
 
             final_source = replaceString(source, [replace]);
+            final_source = `// ${q.item_name}: ${q.id} \n${final_source}`;
           }
 
           if (final_source.trim()) {
@@ -248,7 +252,7 @@ export const codeUpdate = {
 
             try {
               q.source_built = (
-                await jscript.transform?.(final_source, {
+                await jscript.transform?.(final_source.trim(), {
                   jsx: "transform",
                   format: "cjs",
                   logLevel: "silent",
@@ -260,6 +264,7 @@ export const codeUpdate = {
               }
             } catch (e) {
               console.warn("Code transpile failed on item:", q.id);
+              console.error(e);
             }
           } else {
             q.source_built = undefined;
