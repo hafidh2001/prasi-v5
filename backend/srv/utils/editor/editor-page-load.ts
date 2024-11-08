@@ -17,8 +17,8 @@ export const editorPageLoad = async (
   return await cacheResolve({
     cached: () => ed.cache.tables.page.find({ where: { page_id } })[0],
     resolve: (cached) => unpack(cached.root),
-    load: () =>
-      _db.page.findFirst({
+    load: () => {
+      return _db.page.findFirst({
         where: { id: page_id, is_deleted: false },
         select: {
           id: true,
@@ -31,7 +31,8 @@ export const editorPageLoad = async (
           url: true,
           updated_at: true,
         },
-      }),
+      });
+    },
     store: (result, cached) => {
       ed.cache.tables.page.save({
         id: cached?.id,

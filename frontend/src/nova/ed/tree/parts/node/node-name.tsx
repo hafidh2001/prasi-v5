@@ -1,7 +1,8 @@
 import { NodeModel, RenderParams } from "@minoru/react-dnd-treeview";
-import { active, getActiveTree } from "logic/active";
+import { getActiveTree } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import { RectangleEllipsis } from "lucide-react";
+import { waitUntil } from "prasi-utils";
 import { FC, ReactNode, useEffect, useState } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
@@ -9,7 +10,6 @@ import { LoadingSpinner } from "utils/ui/loading";
 import { PNode } from "../../../logic/types";
 import { scrollTreeActiveItem } from "../scroll-tree";
 import { ComponentIcon } from "./node-indent";
-import { waitUntil } from "prasi-utils";
 
 export const formatItemName = (name: string) => {
   return (name || "")

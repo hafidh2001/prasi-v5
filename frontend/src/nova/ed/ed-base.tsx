@@ -20,6 +20,7 @@ import { EDGlobal } from "./logic/ed-global";
 import { EdPopCompGroup } from "./popup/comp/comp-group";
 import { EdPopCompPicker } from "./popup/comp/comp-picker";
 import { iconVSCode } from "./ui/icons";
+import { Sticker } from "lucide-react";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -120,7 +121,7 @@ export const EdBase = () => {
       />
     );
   }
-  if (p.status === "site-not-found" || p.status === "page-not-found") {
+  if (p.status === "site-not-found") {
     return (
       <div className="flex fixed inset-0 items-center justify-center">
         {p.status === "site-not-found" ? "Site not found" : "Page not found"}
@@ -152,22 +153,31 @@ export const EdBase = () => {
 
           <PanelGroup autoSaveId="prasi-editor-right" direction="horizontal">
             <Panel className="flex">
-              {script.paned && script.open ? (
-                <EdPopItemScript />
-              ) : (
-                <div
-                  className={cx(
-                    "w-full h-full flex flex-1 relative overflow-auto",
-                    p.mode === "mobile" ? "flex-col items-center" : ""
-                  )}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                  }}
-                >
-                  <div className={mainStyle(p)}>
-                    <EdViRoot />
-                  </div>
+              {p.status === "page-not-found" ? (
+                <div className="flex items-center justify-center flex-1 text-sm">
+                  <Sticker size={40} strokeWidth={1} className="mr-1" />
+                  <div>Page Not Found</div>
                 </div>
+              ) : (
+                <>
+                  {script.paned && script.open ? (
+                    <EdPopItemScript />
+                  ) : (
+                    <div
+                      className={cx(
+                        "w-full h-full flex flex-1 relative overflow-auto",
+                        p.mode === "mobile" ? "flex-col items-center" : ""
+                      )}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                      }}
+                    >
+                      <div className={mainStyle(p)}>
+                        <EdViRoot />
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </Panel>
             <PanelResizeHandle />

@@ -36,7 +36,12 @@ export const initSync = (p: PG) => {
       p.site = await p.sync!.site.load(params.site_id);
 
       const page = (await p.sync!.page.load(params.page_id)) as EPage;
-      p.page.cur = page;
+      if (!page) {
+        p.status = "page-not-found";
+        p.page.cur = null as any;
+      } else {
+        p.page.cur = page;
+      }
 
       console.log("🚀 Prasi Connected");
       p.render();
