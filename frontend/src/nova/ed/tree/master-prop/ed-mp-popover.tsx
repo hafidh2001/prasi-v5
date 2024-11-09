@@ -31,6 +31,9 @@ export const EdMasterPropDetail: FC<{ children: any; onClose: () => void }> = ({
           tabIndex={1}
           onKeyDown={(e) => {
             e.stopPropagation();
+            if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+              e.preventDefault();
+            }
           }}
           className={cx(
             "w-[300px] text-sm outline-none",

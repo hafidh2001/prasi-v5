@@ -1,9 +1,18 @@
+import { DndProvider, getBackendOptions } from "@minoru/react-dnd-treeview";
 import { EdTreeHistory } from "crdt/tree-history";
+import { TreeDeciduous } from "lucide-react";
+import { useRef } from "react";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { Loading } from "utils/ui/loading";
 import { useGlobal } from "../../utils/react/use-global";
 import { Tooltip } from "../../utils/ui/tooltip";
+import { active } from "./logic/active";
 import { EDGlobal } from "./logic/ed-global";
 import { EdSitePicker } from "./popup/site/site-picker";
+import { EdCompTree } from "./tree/ed-comp-tree";
 import { EdPageTree } from "./tree/ed-page-tree";
+import { EdTreeSearch } from "./tree/parts/search";
+import { EdTreeTopBar } from "./tree/parts/top-bar";
 import {
   iconHistory,
   iconLogout,
@@ -12,19 +21,11 @@ import {
   iconVSCode,
 } from "./ui/icons";
 import { TopBtn } from "./ui/top-btn";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import { DndProvider, getBackendOptions } from "@minoru/react-dnd-treeview";
-import { useRef } from "react";
-import { EdTreeSearch } from "./tree/parts/search";
-import { active } from "./logic/active";
-import { EdCompTree } from "./tree/ed-comp-tree";
-import { EdTreeTopBar } from "./tree/parts/top-bar";
-import { Loading } from "utils/ui/loading";
-import { Sticker, TreeDeciduous } from "lucide-react";
 
 export const EdLeft = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const ref_tree = useRef<HTMLDivElement>(null);
+
   return (
     <div className={cx("flex flex-1 flex-col relative border-r select-none")}>
       <div className="absolute inset-0 flex flex-col overflow-hidden">

@@ -265,7 +265,6 @@ export function Popover({
             ? popoverClassName
             : css`
                 background: white;
-                padding: 3px 8px;
                 box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.15);
                 font-size: 12px;
                 user-select: none;

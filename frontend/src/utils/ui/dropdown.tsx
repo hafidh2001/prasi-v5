@@ -1,7 +1,8 @@
-import { FC, ReactNode, useEffect } from "react";
+import { FC, ReactNode, useEffect, useRef } from "react";
 import { Virtuoso as List, VirtuosoHandle } from "react-virtuoso";
 import { useLocal } from "../react/use-local";
 import { Popover } from "./popover";
+import { Sticker } from "lucide-react";
 
 type DropdownItem = { label: string; value: string } | string;
 
@@ -23,14 +24,16 @@ export const Dropdown: FC<
   const local = useLocal({
     open: false,
     search: "",
-    searchChanged: false,
+    searching: false,
     status: "init" as "init" | "ready",
     itemsCache: prop.items,
     activeIdx: -1,
     listEl: null as null | VirtuosoHandle,
     listElTimeout: null as any,
     scrolled: false,
+    label: "",
   });
+  const ref = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!local.open) {
@@ -39,19 +42,23 @@ export const Dropdown: FC<
     }
   }, [local.open]);
 
+  useEffect(() => {
+    local.searching = false;
+    local.render();
+  }, [prop.value]);
+
   const resetInputValue = () => {
     if (prop.items) {
       const val = prop.value || "";
       let idx = 0;
       for (const item of prop.items) {
         if (typeof item === "string" && item === val) {
-          local.search = item;
+          local.label = item;
           local.activeIdx = idx;
         } else if (typeof item === "object" && item.value === val) {
-          local.search = item.label;
+          local.label = item.label;
           local.activeIdx = idx;
         }
-        local.searchChanged = false;
         idx++;
       }
     }
@@ -70,25 +77,22 @@ export const Dropdown: FC<
   delete elProp["popover"];
 
   let items = prop.items || [];
-  if (local.searchChanged) {
-    local.searchChanged = false;
 
-    const search = local.search.toLowerCase().replace(/\W/, "");
-    if (search) {
-      items = [];
-      for (const item of prop.items || []) {
-        if (
-          typeof item === "string" &&
-          item.toLowerCase().replace(/\W/, "").includes(search)
-        ) {
-          items.push(item);
-        } else if (
-          typeof item === "object" &&
-          (item.label.toLowerCase().replace(/\W/, "").includes(search) ||
-            item.value.toLowerCase().replace(/\W/, "").includes(search))
-        ) {
-          items.push(item);
-        }
+  const search = local.search.toLowerCase().replace(/\W/, "");
+  if (search) {
+    items = [];
+    for (const item of prop.items || []) {
+      if (
+        typeof item === "string" &&
+        item.toLowerCase().replace(/\W/, "").includes(search)
+      ) {
+        items.push(item);
+      } else if (
+        typeof item === "object" &&
+        (item.label.toLowerCase().replace(/\W/, "").includes(search) ||
+          item.value.toLowerCase().replace(/\W/, "").includes(search))
+      ) {
+        items.push(item);
       }
     }
   }
@@ -97,8 +101,13 @@ export const Dropdown: FC<
     <Popover
       open={local.open}
       onOpenChange={(open) => {
-        local.open = open;
-        local.render();
+        setTimeout(() => {
+          if (document.activeElement === ref.current && !open) {
+            return;
+          }
+          local.open = open;
+          local.render();
+        }, 50);
       }}
       autoFocus={false}
       placement="bottom-start"
@@ -135,12 +144,13 @@ export const Dropdown: FC<
                   <div
                     key={typeof e === "string" ? e : e.value}
                     className={cx(
-                      "cursor-pointer",
+                      "cursor-pointer px-1 h-[28px]",
+                      idx > 0 && "border-t",
                       prop.value === (typeof e === "string" ? e : e.value) &&
                         "active",
                       prop.popover?.itemClassName
                         ? prop.popover?.itemClassName
-                        : "hover:bg-blue-100 border-b px-2 whitespace-nowrap select-none"
+                        : "hover:bg-blue-100 px-2 whitespace-nowrap select-none"
                     )}
                     onClick={() => {
                       local.open = false;
@@ -165,7 +175,10 @@ export const Dropdown: FC<
               }}
             ></List>
           ) : (
-            <div className="min-h-[100px] min-w-[250px] flex-1 w-full"></div>
+            <div className="flex flex-col items-center min-h-[100px] min-w-[250px] justify-center flex-1 h-full text-gray-500">
+              <Sticker size={40} strokeWidth={1} />
+              List Empty
+            </div>
           )}
         </>
       }
@@ -197,15 +210,25 @@ export const Dropdown: FC<
           type="string"
           placeholder={elProp.placeholder}
           spellCheck={false}
-          value={local.search}
+          value={local.searching ? local.search : local.label}
           onChange={(e) => {
+            local.searching = true;
             local.search = e.currentTarget.value;
-            local.searchChanged = true;
             local.render();
           }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              local.searching = false;
+              local.open = false;
+              local.render();
+            }
+          }}
+          ref={ref}
           onFocus={() => {
-            local.open = true;
-            local.render();
+            if (!local.open) {
+              local.open = true;
+              local.render();
+            }
           }}
         />
       </>

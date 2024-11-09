@@ -127,6 +127,7 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
           },
           ts: Date.now(),
         });
+        
         // await _db.component.update({
         //   where: { id: comp_id },
         //   data: {
@@ -189,6 +190,7 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
 
       doc.on("update", (update, origin) => {
         const comp = crdt_comps[comp_id];
+
         if (comp) {
           const encoder = encoding.createEncoder();
           encoding.writeVarUint(encoder, MessageType.Sync);
@@ -282,7 +284,6 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
       if (encoding.length(encoder) > 1) {
         ws.send(encoding.toUint8Array(encoder));
       }
-
       break;
 
     case MessageType.Awareness: {

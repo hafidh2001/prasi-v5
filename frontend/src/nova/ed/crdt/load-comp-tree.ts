@@ -13,7 +13,6 @@ import { bind } from "./lib/immer-yjs";
 import { findNodeById, flattenTree } from "./node/flatten-tree";
 import { loadScriptModels, ScriptModel } from "./node/load-script-models";
 import { TreeVarItems } from "./node/var-items";
-import { current } from "immer";
 
 export type CompTree = ReturnType<typeof internalLoadCompTree>;
 

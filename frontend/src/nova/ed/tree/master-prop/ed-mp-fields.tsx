@@ -1,5 +1,7 @@
+import { MonacoRaw } from "popup/script/code/monaco-raw";
 import { useEffect } from "react";
 import { useLocal } from "utils/react/use-local";
+import { Popover } from "utils/ui/popover";
 
 export const FieldButtons = (arg: {
   label: string;
@@ -40,6 +42,64 @@ export const FieldButtons = (arg: {
         })}
       </div>
     </div>
+  );
+};
+export const FieldCode = (arg: {
+  label: string;
+  value?: string;
+  default?: string;
+  onBeforeChange?: (value: string) => string;
+  onChange?: (value: string) => void;
+  onBlur?: (value: string) => void;
+}) => {
+  const local = useLocal({ open: false, timeout: null as any });
+
+  return (
+    <label className="flex border-b flex-1">
+      <div className="w-[50px] p-1">{arg.label}</div>
+      <Popover
+        onOpenChange={(open) => {
+          local.open = open;
+
+          if (open && !arg.value && arg.default) {
+            arg.value = arg.default;
+            arg.onChange?.(arg.value);
+          }
+
+          local.render();
+        }}
+        open={local.open}
+        backdrop={false}
+        content={
+          <div className={cx("w-[600px] h-[400px]")}>
+            <MonacoRaw
+              id="field-code"
+              lang="typescript"
+              value={arg.value || ""}
+              onChange={(val) => {
+                clearTimeout(local.timeout);
+                local.timeout = setTimeout(() => {
+                  arg.onChange?.(val);
+                }, 500);
+              }}
+            />
+          </div>
+        }
+        className={cx(
+          "border-l flex items-center flex-1",
+          local.open && "bg-blue-500"
+        )}
+      >
+        <div
+          className={cx(
+            "border m-1 px-2 cursor-pointer",
+            local.open && "border-white text-white"
+          )}
+        >
+          Edit Code
+        </div>{" "}
+      </Popover>
+    </label>
   );
 };
 

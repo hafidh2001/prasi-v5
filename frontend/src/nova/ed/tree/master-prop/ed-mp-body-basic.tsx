@@ -2,9 +2,14 @@ import { getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import { FC } from "react";
 import { useGlobal } from "utils/react/use-global";
+import { jscript } from "utils/script/jscript";
 import { FNCompDef } from "utils/types/meta-fn";
-import { FieldButtons, FieldDropdown, FieldString } from "./ed-mp-fields";
-import { current } from "immer";
+import {
+  FieldButtons,
+  FieldCode,
+  FieldDropdown,
+  FieldString,
+} from "./ed-mp-fields";
 
 export const EdMasterPropBodyBasic: FC<{
   name: string;
@@ -131,9 +136,16 @@ export const EdMasterPropBodyBasic: FC<{
                     } else if (name.includes("__")) {
                       _name = name;
                     }
-                    tree.component.props[_name].meta = {
-                      type: "text",
-                    };
+                    let meta = tree.component.props[_name].meta;
+                    if (!tree.component.props[_name].meta) {
+                      tree.component.props[_name].meta = {
+                        type: "text",
+                      };
+                      meta = tree.component.props[_name].meta;
+                    }
+                    if (meta) {
+                      meta.type = "text";
+                    }
                     tree.component.props[_name].type = "string";
                   }
                 }
@@ -224,10 +236,63 @@ export const EdMasterPropBodyBasic: FC<{
             : undefined,
         ]}
       />
+      {prop.type === "option" && (
+        <FieldCode
+          label="Option"
+          default={`\
+[
+  {
+    label: "yes",
+    value: "y",
+  },
+  {
+    label: "no",
+    value: "n",
+  },
+]`}
+          value={prop.meta?.options}
+          onChange={async (val) => {
+            const source_built = (
+              await jscript.transform?.(val.trim(), {
+                jsx: "transform",
+                format: "cjs",
+                logLevel: "silent",
+                loader: "tsx",
+              })
+            )?.code;
+
+            getActiveTree(p).update(`Prop ${name} Set Options`, ({ tree }) => {
+              if (tree.type === "item") {
+                if (tree.component) {
+                  let meta = tree.component.props[_name].meta;
+                  if (!tree.component.props[_name].meta) {
+                    tree.component.props[_name].meta = {
+                      type: "text",
+                    };
+                    meta = tree.component.props[_name].meta;
+                  }
+                  if (meta) {
+                    meta.options = val;
+                    meta.optionsBuilt = source_built;
+                  }
+                }
+              }
+            });
+          }}
+        />
+      )}
+
+      <FieldButtons
+        label="Mode"
+        buttons={[
+          { label: "Dropdown", checked: () => false, check: () => {} },
+          { label: "Button", checked: () => false, check: () => {} },
+        ]}
+      />
       <div className="p-1 flex justify-start"></div>
-      <pre className="whitespace-pre text-xs ">
+      {/* <pre className="whitespace-pre text-xs ">
         {JSON.stringify(prop, null, 2)}
-      </pre>
+      </pre> */}
     </>
   );
 };

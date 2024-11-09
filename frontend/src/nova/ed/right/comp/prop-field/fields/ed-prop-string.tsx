@@ -89,7 +89,7 @@ export const ${name} = \`${text}\`;
   );
 };
 
-const extractString = (name: string, str: string) => {
+export const extractString = (name: string, str: string): string => {
   if (['"', "'", "`"].includes(str.charAt(0))) {
     if (str.charAt(str.length - 1) === str.charAt(0)) {
       return str;
@@ -100,7 +100,10 @@ const extractString = (name: string, str: string) => {
       if (no_region.endsWith(";")) {
         no_region = no_region.slice(0, -1);
       }
-      return extractString(name, no_region.slice(`export const ${name} =`.length).trim());
+      return extractString(
+        name,
+        no_region.slice(`export const ${name} =`.length).trim()
+      );
     }
   }
   return "";
