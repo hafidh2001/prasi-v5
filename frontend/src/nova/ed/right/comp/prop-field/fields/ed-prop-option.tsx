@@ -1,4 +1,5 @@
-import { active, getActiveTree } from "logic/active";
+import trim from "lodash.trim";
+import { active } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import { extractRegion } from "popup/script/code/js/migrate-code";
 import { codeUpdate } from "popup/script/code/prasi-code-update";
@@ -9,7 +10,6 @@ import { IItem } from "utils/types/item";
 import { FNCompDef } from "utils/types/meta-fn";
 import { Dropdown } from "utils/ui/dropdown";
 import { extractString } from "./ed-prop-string";
-import trim from "lodash.trim";
 
 export const EdPropOption = ({
   name,
@@ -44,7 +44,18 @@ export const EdPropOption = ({
       local.value = value;
 
       const fn = new Function(`return ${src}`);
-      local.options = fn();
+      try {
+        local.options = fn();
+
+        local.options = (local.options || []).map((e) => {
+          if (typeof e === "string") {
+            return { label: e, value: e };
+          }
+          return e;
+        });
+      } catch (e) {
+        console.warn(e);
+      }
       local.render();
     }
   };
@@ -67,19 +78,45 @@ export const ${name} = \`${text}\`;
     resetValue(text);
   };
 
+  const mode = field.meta?.option_mode || "button";
+
   return (
     <div className="flex items-stretch flex-1 border-l bg-white">
-      <Dropdown
-        items={local.options}
-        value={local.value}
-        onChange={setValue}
-        className={cx(
-          "flex-1",
-          css`
-            background: blue;
-          `
-        )}
-      />
+      {mode === "dropdown" && (
+        <Dropdown
+          items={local.options}
+          value={local.value}
+          onChange={setValue}
+          className={cx(
+            "flex-1",
+            css`
+              background: blue;
+            `
+          )}
+        />
+      )}
+      {mode === "button" && (
+        <div className="flex space-x-1 p-1">
+          {local.options.map((e, idx) => {
+            return (
+              <div
+                key={idx}
+                className={cx(
+                  "border px-1 rounded-[3px] cursor-pointer flex items-center justify-center",
+                  local.value === e.value
+                    ? "bg-blue-500 text-white border-blue-500"
+                    : "border hover:bg-blue-100"
+                )}
+                onClick={() => {
+                  setValue(e.value);
+                }}
+              >
+                {e.label}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

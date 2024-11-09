@@ -19,7 +19,7 @@ export const EdPropString = (arg: {
 }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({ value: "", has_code: false, original_value: "" });
-  const { name, instance } = arg;
+  const { name, instance, field } = arg;
 
   useEffect(() => {
     let prop = instance.props[name];
@@ -57,6 +57,23 @@ export const EdPropString = (arg: {
     return <EdPropCode {...arg} />;
   }
 
+  if (field.label === "_") {
+    const fn = new Function(`return ${field.valueBuilt}`);
+    const result = fn() as { label: string; onClick: () => {} }[];
+    return (
+      <div className="flex items-center">
+        <div
+          className="hover:bg-blue-600 px-2 hover:text-white border"
+          onClick={() => {
+            result[0].onClick();
+          }}
+        >
+          {result[0].label}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <AutoHeightTextarea
       spellCheck={false}
@@ -90,21 +107,28 @@ export const ${name} = \`${text}\`;
 };
 
 export const extractString = (name: string, str: string): string => {
-  if (['"', "'", "`"].includes(str.charAt(0))) {
+  if (str.charAt(0) === "(" && str.charAt(str.length - 1) === ")") {
+    let substr= str.slice(1, -1);
+    if (['"', "'", "`"].includes(substr.charAt(0))) {
+      if (substr.charAt(substr.length - 1) === substr.charAt(0)) {
+        return substr;
+      }
+    }
+  } else if (['"', "'", "`"].includes(str.charAt(0))) {
     if (str.charAt(str.length - 1) === str.charAt(0)) {
       return str;
     }
-  } else {
-    let no_region = removeRegion(str);
-    if (no_region.startsWith(`export const ${name} =`)) {
-      if (no_region.endsWith(";")) {
-        no_region = no_region.slice(0, -1);
-      }
-      return extractString(
-        name,
-        no_region.slice(`export const ${name} =`.length).trim()
-      );
+  }
+
+  let no_region = removeRegion(str);
+  if (no_region.startsWith(`export const ${name} =`)) {
+    if (no_region.endsWith(";")) {
+      no_region = no_region.slice(0, -1);
     }
+    return extractString(
+      name,
+      no_region.slice(`export const ${name} =`.length).trim()
+    );
   }
   return "";
 };

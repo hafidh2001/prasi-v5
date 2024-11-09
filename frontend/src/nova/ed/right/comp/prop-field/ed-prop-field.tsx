@@ -83,8 +83,8 @@ export const EdPropField = (arg: {
         </div>
       ) : (
         <>
-          {field.type === "string" && <EdPropString {...arg} />}
-          {field.type === "option" && <EdPropOption {...arg} />}
+          {field.meta?.type === "text" && <EdPropString {...arg} />}
+          {field.meta?.type === "option" && <EdPropOption {...arg} />}
         </>
       )}
     </div>

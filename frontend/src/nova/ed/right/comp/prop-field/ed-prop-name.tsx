@@ -9,12 +9,13 @@ export const EdPropName = ({
   field: FNCompDef;
   onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }) => {
+  const label = field.label || name;
   return (
     <div
       onClick={onClick}
       className="flex items-center pl-3 select-none flex-1 max-w-[100px] overflow-hidden"
     >
-      {field.label || name}
+      {label === "_" ? "" : label}
     </div>
   );
 };

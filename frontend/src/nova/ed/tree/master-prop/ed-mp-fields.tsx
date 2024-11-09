@@ -58,6 +58,11 @@ export const FieldCode = (arg: {
     value: arg.value || arg.default || "",
   });
 
+  useEffect(() => {
+    local.value = arg.value || arg.default || "",
+    local.render();
+  }, [arg.value]);
+
   return (
     <label className="flex border-b flex-1">
       <div className="w-[50px] p-1">{arg.label}</div>
@@ -78,7 +83,7 @@ export const FieldCode = (arg: {
             <MonacoRaw
               id="field-code"
               lang="typescript"
-              value={arg.value || ""}
+              value={local.value || ""}
               onChange={(val) => {
                 local.value = val;
                 clearTimeout(local.timeout);
@@ -164,10 +169,13 @@ export const FieldDropdown = (arg: {
   list: { label: string; value: string }[];
 }) => {
   const local = useLocal({ value: "", timeout: null as any });
+  
   useEffect(() => {
     local.value = arg.value;
     local.render();
   }, [arg.value]);
+
+
   return (
     <label className="flex border-b">
       <div className="w-[50px] p-1">{arg.label}</div>

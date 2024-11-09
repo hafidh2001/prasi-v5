@@ -10,6 +10,8 @@ import {
   FieldDropdown,
   FieldString,
 } from "./ed-mp-fields";
+import { IItem } from "utils/types/item";
+import { current } from "immer";
 
 export const EdMasterPropBodyBasic: FC<{
   name: string;
@@ -85,29 +87,34 @@ export const EdMasterPropBodyBasic: FC<{
             })),
           ]}
           onChange={(value) => {
-            getActiveTree(p).update(`Set Group to ${value}`, ({ tree }) => {
-              if (tree.type === "item") {
-                if (tree.component) {
-                  if (value) {
-                    const new_name = value + _name;
+            getActiveTree(p).update(
+              `Set Group to ${value.substring(0, -2)}`,
+              ({ tree }) => {
+                if (tree.type === "item") {
+                  if (tree.component) {
+                    if (value) {
+                      const old_group = name.split("__").shift();
+                      const old_name = old_group ? name : _name;
+                      const new_name = value + _name;
 
-                    tree.component.props[new_name] =
-                      tree.component.props[_name];
-                    delete tree.component.props[_name];
-                    p.ui.tree.comp.active = new_name;
-                  } else {
-                    const new_name = name.split("__").pop() || name;
-
-                    if (new_name !== name) {
                       tree.component.props[new_name] =
-                        tree.component.props[name];
-                      delete tree.component.props[name];
+                        tree.component.props[old_name];
+                      delete tree.component.props[old_name];
                       p.ui.tree.comp.active = new_name;
+                    } else {
+                      const new_name = name.split("__").pop() || name;
+
+                      if (new_name !== name) {
+                        tree.component.props[new_name] =
+                          tree.component.props[name];
+                        delete tree.component.props[name];
+                        p.ui.tree.comp.active = new_name;
+                      }
                     }
                   }
                 }
               }
-            });
+            );
           }}
         />
       )}
@@ -115,7 +122,7 @@ export const EdMasterPropBodyBasic: FC<{
         label="Type"
         buttons={[
           {
-            label: "TEXT",
+            label: "Text",
             checked() {
               if (is_group) return false;
               if (prop.meta?.type !== "content-element")
@@ -153,7 +160,7 @@ export const EdMasterPropBodyBasic: FC<{
             },
           },
           {
-            label: "OPTIONS",
+            label: "Options",
             checked() {
               if (is_group) return false;
 
@@ -214,7 +221,7 @@ export const EdMasterPropBodyBasic: FC<{
           },
           !name.includes("__") || is_group
             ? {
-                label: "GROUP",
+                label: "Group",
                 checked() {
                   if (is_group) return true;
                   return false;
@@ -236,6 +243,73 @@ export const EdMasterPropBodyBasic: FC<{
             : undefined,
         ]}
       />
+      {prop.type === "option" && (
+        <FieldButtons
+          label="Mode"
+          buttons={[
+            {
+              label: "Button",
+              checked: () => {
+                return (
+                  prop.meta?.option_mode === "button" || !prop.meta?.option_mode
+                );
+              },
+              check: () => {
+                getActiveTree(p).update(
+                  `Prop ${name} Set Button`,
+                  ({ tree }) => {
+                    if (tree.type === "item") {
+                      let meta = prepMeta(tree, name);
+                      if (meta) {
+                        meta.option_mode = "button";
+                      }
+                    }
+                  }
+                );
+              },
+            },
+            {
+              label: "Dropdown",
+              checked: () => {
+                return prop.meta?.option_mode === "dropdown";
+              },
+              check: () => {
+                getActiveTree(p).update(
+                  `Prop ${name} Set Dropdown`,
+                  ({ tree }) => {
+                    if (tree.type === "item") {
+                      let meta = prepMeta(tree, name);
+                      if (meta) {
+                        meta.option_mode = "dropdown";
+                      }
+                    }
+                  }
+                );
+              },
+            },
+            {
+              label: "Checkbox",
+              checked: () => {
+                return prop.meta?.option_mode === "checkbox";
+              },
+              check: () => {
+                getActiveTree(p).update(
+                  `Prop ${name} Set Checkbox`,
+                  ({ tree }) => {
+                    if (tree.type === "item") {
+                      let meta = prepMeta(tree, name);
+                      if (meta) {
+                        meta.option_mode = "checkbox";
+                      }
+                    }
+                  }
+                );
+              },
+            },
+          ]}
+        />
+      )}
+
       {prop.type === "option" && (
         <FieldCode
           label="Option"
@@ -263,18 +337,10 @@ export const EdMasterPropBodyBasic: FC<{
 
             getActiveTree(p).update(`Prop ${name} Set Options`, ({ tree }) => {
               if (tree.type === "item") {
-                if (tree.component) {
-                  let meta = tree.component.props[_name].meta;
-                  if (!tree.component.props[_name].meta) {
-                    tree.component.props[_name].meta = {
-                      type: "text",
-                    };
-                    meta = tree.component.props[_name].meta;
-                  }
-                  if (meta) {
-                    meta.options = val;
-                    meta.optionsBuilt = source_built;
-                  }
+                let meta = prepMeta(tree, name);
+                if (meta) {
+                  meta.options = val;
+                  meta.optionsBuilt = source_built;
                 }
               }
             });
@@ -282,17 +348,47 @@ export const EdMasterPropBodyBasic: FC<{
         />
       )}
 
-      <FieldButtons
-        label="Mode"
-        buttons={[
-          { label: "Dropdown", checked: () => false, check: () => {} },
-          { label: "Button", checked: () => false, check: () => {} },
-        ]}
-      />
+      {!is_group && (
+        <FieldCode
+          label="Value"
+          default="''"
+          value={prop.value}
+          onChange={async (val) => {
+            const source_built = (
+              await jscript.transform?.(val.trim(), {
+                jsx: "transform",
+                format: "cjs",
+                logLevel: "silent",
+                loader: "tsx",
+              })
+            )?.code;
+
+            getActiveTree(p).update(`Prop ${name} Set Options`, ({ tree }) => {
+              if (tree.type === "item" && tree.component) {
+                tree.component.props[name].value = val;
+                tree.component.props[name].valueBuilt = source_built;
+              }
+            });
+          }}
+        />
+      )}
       <div className="p-1 flex justify-start"></div>
       {/* <pre className="whitespace-pre text-xs ">
         {JSON.stringify(prop, null, 2)}
       </pre> */}
     </>
   );
+};
+
+const prepMeta = (tree: IItem, name: string) => {
+  if (tree.component) {
+    let meta = tree.component.props[name].meta;
+    if (!tree.component.props[name].meta) {
+      tree.component.props[name].meta = {
+        type: "text",
+      };
+      meta = tree.component.props[name].meta;
+    }
+    return meta;
+  }
 };

@@ -10,7 +10,7 @@ export const updateActiveCodeFromServer = (p: PG) => {
       const prop_name = p.ui.comp.prop.active;
       if (prop_name) {
         let source =
-          getActiveNode(p)?.item.component?.props[prop_name].value || "";
+          getActiveNode(p)?.item.component?.props[prop_name]?.value || "";
 
         p.script.do_edit(async () => source.trim().split("\n"));
       }
