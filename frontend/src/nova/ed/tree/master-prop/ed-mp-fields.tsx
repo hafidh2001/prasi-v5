@@ -52,7 +52,11 @@ export const FieldCode = (arg: {
   onChange?: (value: string) => void;
   onBlur?: (value: string) => void;
 }) => {
-  const local = useLocal({ open: false, timeout: null as any });
+  const local = useLocal({
+    open: false,
+    timeout: null as any,
+    value: arg.value || arg.default || "",
+  });
 
   return (
     <label className="flex border-b flex-1">
@@ -62,8 +66,7 @@ export const FieldCode = (arg: {
           local.open = open;
 
           if (open && !arg.value && arg.default) {
-            arg.value = arg.default;
-            arg.onChange?.(arg.value);
+            arg.onChange?.(local.value);
           }
 
           local.render();
@@ -77,6 +80,7 @@ export const FieldCode = (arg: {
               lang="typescript"
               value={arg.value || ""}
               onChange={(val) => {
+                local.value = val;
                 clearTimeout(local.timeout);
                 local.timeout = setTimeout(() => {
                   arg.onChange?.(val);

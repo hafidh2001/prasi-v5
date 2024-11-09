@@ -305,7 +305,9 @@ export const codeUpdate = {
                     const cprop =
                       mcomp?.content_tree.component?.props[q.prop_name];
                     if (cprop) {
-                      comp.props[q.prop_name] = cprop;
+                      comp.props[q.prop_name] = JSON.parse(
+                        JSON.stringify(cprop)
+                      );
                       name = q.prop_name;
                       prop = comp.props[q.prop_name];
                     }

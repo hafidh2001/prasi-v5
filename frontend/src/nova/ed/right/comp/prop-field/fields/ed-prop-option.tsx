@@ -32,7 +32,7 @@ export const EdPropOption = ({
   const resetValue = (input_value?: string) => {
     const src = field.meta?.optionsBuilt || field.meta?.options;
     if (src) {
-      let value = input_value || prop.value || "";
+      let value = input_value || prop?.value || "";
 
       const extracted_str = extractString(name, value.trim());
       if (extracted_str) {
