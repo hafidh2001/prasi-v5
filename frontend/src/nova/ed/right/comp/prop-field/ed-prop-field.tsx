@@ -5,6 +5,7 @@ import { IItem } from "utils/types/item";
 import { FNCompDef } from "utils/types/meta-fn";
 import { EdPropName } from "./ed-prop-name";
 import { EdPropString } from "./fields/ed-prop-string";
+import { EdPropOption } from "./fields/ed-prop-option";
 
 export const EdPropField = (arg: {
   name: string;
@@ -81,7 +82,10 @@ export const EdPropField = (arg: {
           </div>
         </div>
       ) : (
-        <>{field.type === "string" && <EdPropString {...arg} />}</>
+        <>
+          {field.type === "string" && <EdPropString {...arg} />}
+          {field.type === "option" && <EdPropOption {...arg} />}
+        </>
       )}
     </div>
   );

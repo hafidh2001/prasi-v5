@@ -73,6 +73,7 @@ export const ViComp: FC<{
   if (edit_comp_id === comp_id) {
     instance_id = undefined;
   }
+
   return (
     //@ts-ignore
     <ViItem

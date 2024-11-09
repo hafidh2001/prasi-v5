@@ -171,12 +171,12 @@ export const Dropdown: FC<
       }
       {...elProp}
       className={cx(
-        "dropdown bg-white px-2 relative flex items-stretch",
+        "dropdown bg-white relative flex items-stretch",
         elProp.className
       )}
     >
       <>
-        <div className="pointer-events-none absolute right-0 bottom-0 top-0 bg-white flex items-center justify-center w-[30px] ">
+        <div className="pointer-events-none absolute right-0 bottom-0 top-0 bg-white flex items-center justify-center w-[20px] ">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="15"
@@ -193,7 +193,7 @@ export const Dropdown: FC<
           </svg>
         </div>
         <input
-          className={cx("cursor-pointer outline-none input flex-1")}
+          className={cx("pl-1 cursor-pointer outline-none input flex-1")}
           type="string"
           placeholder={elProp.placeholder}
           spellCheck={false}

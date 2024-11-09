@@ -10,31 +10,36 @@ export const compArgs = (
   db: any,
   api: any
 ) => {
+  const inject = {} as any;
   const args: Record<string, any> = { ...existing };
   if (item.component?.props) {
     const comp_id = item.component.id;
     const comp = comps[comp_id];
 
-    const inject = {} as any;
     if (comp.component) {
       for (const [k, prop] of Object.entries(comp.component.props)) {
         if (!k.endsWith("__")) {
-          const iprop = item.component.props[k];
+          let iprop = item.component.props[k];
           if (!iprop) {
-            inject[k] = null;
-          } else {
-            try {
-              const exports = (window as any).exports;
-              const args = {
-                ...exports,
-                db,
-                api,
-                ...existing,
-              };
-              const fn = new Function(...Object.keys(args), iprop.valueBuilt);
-              inject[k] = fn(...Object.values(args));
-            } catch (e) {}
+            //@ts-ignore
+            iprop = prop;
           }
+
+          try {
+            let src = iprop.valueBuilt || iprop.value;
+            const exports = (window as any).exports;
+            const args = {
+              ...exports,
+              db,
+              api,
+              ...existing,
+            };
+            if (!src.startsWith(`//prasi-prop`)) {
+              src = `return ${src}`;
+            }
+            const fn = new Function(...Object.keys(args), src);
+            inject[k] = fn(...Object.values(args));
+          } catch (e) {}
         }
       }
     }
@@ -116,7 +121,7 @@ ${src.substring(`//prasi-prop`.length + 1)}`;
       }
     }
   }
-  return args;
+  return { ...inject, ...args };
 };
 
 export const replacement = {
