@@ -1,5 +1,11 @@
+import { getActiveNode } from "crdt/node/get-node-by-id";
+import { active } from "logic/active";
+import { EDGlobal } from "logic/ed-global";
+import { monacoRegisterSource } from "popup/script/code/js/create-model";
+import { registerPrettier } from "popup/script/code/js/register-prettier";
 import { MonacoRaw } from "popup/script/code/monaco-raw";
 import { useEffect } from "react";
+import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
 
@@ -59,14 +65,14 @@ export const FieldCode = (arg: {
   });
 
   useEffect(() => {
-    local.value = arg.value || arg.default || "",
-    local.render();
+    (local.value = arg.value || arg.default || ""), local.render();
   }, [arg.value]);
 
   return (
     <label className="flex border-b flex-1">
       <div className="w-[50px] p-1">{arg.label}</div>
       <Popover
+        placement="right"
         onOpenChange={(open) => {
           local.open = open;
 
@@ -90,6 +96,19 @@ export const FieldCode = (arg: {
                 local.timeout = setTimeout(() => {
                   arg.onChange?.(val);
                 }, 500);
+              }}
+              onMount={({ monaco }) => {
+                const props = Object.keys(
+                  active.comp?.snapshot.component?.props || {}
+                )
+                  .filter((e) => !e.endsWith("__"))
+                  .map((prop) => `const ${prop} = null as any;`);
+                registerPrettier(monaco);
+                monacoRegisterSource(
+                  monaco,
+                  props.join("\n"),
+                  "file:///prop-typings.d.ts"
+                );
               }}
             />
           </div>
@@ -169,12 +188,11 @@ export const FieldDropdown = (arg: {
   list: { label: string; value: string }[];
 }) => {
   const local = useLocal({ value: "", timeout: null as any });
-  
+
   useEffect(() => {
     local.value = arg.value;
     local.render();
   }, [arg.value]);
-
 
   return (
     <label className="flex border-b">
