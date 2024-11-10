@@ -15,7 +15,12 @@ import { getActiveTree } from "logic/active";
 
 export const EdCompProp = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
-  const local = useLocal({ comp_id: "", loading: false });
+  const local = useLocal({
+    comp_id: "",
+    loading: false,
+    hidden: {} as Record<string, boolean>,
+    render_timeout: null as any,
+  });
   const node = getActiveNode(p);
   const ui = p.ui.comp.prop;
   const comp_id = node?.item.component?.id || "";
@@ -23,6 +28,37 @@ export const EdCompProp = () => {
   const comp = comp_def?.content_tree.component;
   const instance = node?.item?.component;
   useEffect(() => {
+    p.ui.comp.prop.render_prop_editor = (immediate) => {
+      clearTimeout(local.render_timeout);
+      const exec = () => {
+        local.loading = false;
+        local.hidden = {};
+        const item = node?.item;
+        if (item && comp_def.content_tree.component) {
+          const prop_values = p.viref.comp_props[item.id];
+          const args = { ...prop_values };
+          for (const [k, v] of Object.entries(
+            comp_def.content_tree.component.props
+          )) {
+            if (v.visible) {
+              const fn = new Function(
+                ...Object.keys(args),
+                `return ${v.visible}`
+              );
+              if (!fn(...Object.values(args))) {
+                local.hidden[k] = true;
+              }
+            }
+          }
+        }
+        local.render();
+      };
+      if (immediate) exec();
+      else {
+        local.render_timeout = setTimeout(exec, 50);
+      }
+    };
+
     if (local.comp_id !== comp_id) {
       if (!local.loading) {
         local.loading = true;
@@ -32,8 +68,7 @@ export const EdCompProp = () => {
           waitUntil(() => {
             return !p.comp.pending.has(comp_id);
           }).then(async () => {
-            local.loading = false;
-            local.render();
+            p.ui.comp.prop.render_prop_editor(true);
 
             const item = p.comp.loaded[comp_id].content_tree;
             if (!item.component && p.sync) {
@@ -50,8 +85,7 @@ export const EdCompProp = () => {
             }
           });
         } else {
-          local.loading = false;
-          local.render();
+          p.ui.comp.prop.render_prop_editor(true);
         }
       }
     }
@@ -73,6 +107,7 @@ export const EdCompProp = () => {
   return (
     <div className="flex flex-1 text-sm flex-col items-stretch">
       {props.map(([name, field]) => {
+        if (local.hidden[name]) return null;
         if (field.meta?.type === "content-element") return null;
 
         const { is_group, is_group_child, group_name, group_expanded } =

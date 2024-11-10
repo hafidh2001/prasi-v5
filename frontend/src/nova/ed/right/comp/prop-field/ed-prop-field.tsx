@@ -6,6 +6,7 @@ import { FNCompDef } from "utils/types/meta-fn";
 import { EdPropName } from "./ed-prop-name";
 import { EdPropString } from "./fields/ed-prop-string";
 import { EdPropOption } from "./fields/ed-prop-option";
+import { useEffect } from "react";
 
 export const EdPropField = (arg: {
   name: string;
@@ -17,6 +18,10 @@ export const EdPropField = (arg: {
   const ui = p.ui.comp.prop;
 
   const is_jsx = field.meta?.type === "content-element";
+
+  useEffect(() => {
+    p.ui.comp.prop.render_prop_editor();
+  }, [instance.props[name]?.value]);
 
   return (
     <div

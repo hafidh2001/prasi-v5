@@ -72,7 +72,44 @@ export const EDGlobal = {
         },
         context_name: "",
         context_event: null as null | React.MouseEvent<HTMLElement, MouseEvent>,
-        expanded: {} as Record<string, Record<string, boolean>>,
+        get expanded() {
+          let ex = (this as any).__expanded as Record<
+            string,
+            Record<string, boolean>
+          >;
+
+          if (!ex) {
+            let root = {} as any;
+            try {
+              root = JSON.parse(
+                localStorage.getItem("prasi-code-prop-expanded") || "{}"
+              );
+            } catch (e) {}
+            (this as any).__expanded = new Proxy(root, {
+              get(target, p, receiver) {
+                if (!target[p]) {
+                  target[p] = {};
+                }
+
+                return new Proxy(target[p], {
+                  get(target, p, receiver) {
+                    return target[p];
+                  },
+                  set(target, p, value, receiver) {
+                    target[p] = value;
+                    localStorage.setItem(
+                      "prasi-code-prop-expanded",
+                      JSON.stringify(root)
+                    );
+                    return true;
+                  },
+                });
+              },
+            });
+          }
+          return (this as any).__expanded;
+        },
+        render_prop_editor: (force?: boolean) => {},
       },
     },
     tree: {
