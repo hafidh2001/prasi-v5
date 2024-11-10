@@ -115,7 +115,9 @@ export const ${name} = \`${text}\`;
           })}
         </div>
       )}
-      {mode === "checkbox" && <EdPropCheckbox {...arg} />}
+      {mode === "checkbox" && (
+        <EdPropCheckbox {...arg} options={local.options} value={local.value} />
+      )}
     </div>
   );
 };

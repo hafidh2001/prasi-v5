@@ -359,7 +359,7 @@ export const EdMasterPropBodyBasic: FC<{
 
       {!is_group && (
         <FieldCode
-          label="Value"
+          label="Default"
           default="''"
           value={prop.value}
           onChange={async (val) => {
