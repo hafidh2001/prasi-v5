@@ -63,6 +63,7 @@ export const EDGlobal = {
       creating_id: "",
       loading_id: "",
       last_edit_ids: [] as string[],
+      re_eval_item_ids: new Set<string>(),
       prop: {
         get active() {
           return localStorage.getItem("prasi-code-active-prop") || "";

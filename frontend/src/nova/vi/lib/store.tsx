@@ -42,6 +42,8 @@ const viRef = {
 
   resetCompInstance: (comp_id: string) => {},
   resetLocal: () => {},
+
+  vscode_exports: {} as Record<string, any>,
 };
 export type ViRef = typeof viRef;
 

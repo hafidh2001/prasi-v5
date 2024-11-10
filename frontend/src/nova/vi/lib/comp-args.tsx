@@ -8,7 +8,8 @@ export const compArgs = (
   comps: ViComps,
   existing: any,
   db: any,
-  api: any
+  api: any,
+  vscode_exports: any
 ) => {
   const inject = {} as any;
   const args: Record<string, any> = { ...existing };
@@ -27,9 +28,8 @@ export const compArgs = (
 
           try {
             let src = iprop.valueBuilt || iprop.value;
-            const exports = (window as any).exports;
             const args = {
-              ...exports,
+              ...vscode_exports,
               db,
               api,
               ...existing,

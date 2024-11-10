@@ -209,6 +209,7 @@ export const codeUpdate = {
               `export const ${q.prop_name} =`,
               "return"
             );
+            this.p?.ui.comp.re_eval_item_ids.add(q.id);
           } else {
             const lines = q.source.split("\n").map((e) => {
               if (e.startsWith("export const")) {
@@ -338,6 +339,6 @@ export const codeUpdate = {
           });
         }
       );
-    }, 500);
+    }, 200);
   },
 };

@@ -27,6 +27,7 @@ export const ViComp: FC<{
     local_value,
     instanced,
     edit_comp_id,
+    vscode_exports,
   } = useVi(({ state, ref, action }) => ({
     comps: ref.comps,
     load: ref.loader.comps,
@@ -40,6 +41,7 @@ export const ViComp: FC<{
     api: ref.api,
     instanced: ref.instanced,
     edit_comp_id: ref.edit_comp_id,
+    vscode_exports: ref.vscode_exports,
   }));
 
   const comp_id = item.component!.id;
@@ -61,7 +63,8 @@ export const ViComp: FC<{
         comps,
         { ...comp_args, ...local_args },
         db,
-        api
+        api,
+        vscode_exports
       );
       instantiate(item);
     }

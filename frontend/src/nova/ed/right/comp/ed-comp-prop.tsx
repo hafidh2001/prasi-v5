@@ -3,7 +3,7 @@ import { getActiveNode } from "crdt/node/get-node-by-id";
 import { EDGlobal } from "logic/ed-global";
 import { ChevronDown, ChevronRight, Sticker } from "lucide-react";
 import { waitUntil } from "prasi-utils";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { Menu, MenuItem } from "utils/ui/context-menu";
@@ -27,14 +27,50 @@ export const EdCompProp = () => {
   const comp_def = p.comp.loaded[comp_id];
   const comp = comp_def?.content_tree.component;
   const instance = node?.item?.component;
+  const item = node?.item!;
+  const should_re_eval_props = p.ui.comp.re_eval_item_ids.has(item.id);
+
   useEffect(() => {
-    p.ui.comp.prop.render_prop_editor = (immediate) => {
+    if (should_re_eval_props) {
+      if (!p.viref.comp_props) {
+        p.viref.comp_props = {};
+      }
+      p.viref.comp_props[item.id] = {};
+      p.ui.comp.re_eval_item_ids.delete(item.id);
+      const inject = p.viref.comp_props[item.id];
+      for (const [k, prop] of Object.entries(comp?.props || {})) {
+        inject[k] = "";
+        try {
+          const iprop = instance?.props[k];
+          if (!iprop) continue;
+          let src = iprop.valueBuilt || iprop.value;
+          const exports = p.viref.vscode_exports || {};
+          const args = {
+            ...exports,
+          };
+          if (!src.startsWith(`//prasi-prop`)) {
+            src = `return ${src}`;
+          }
+          const fn = new Function(...Object.keys(args), src);
+          inject[k] = fn(...Object.values(args));
+        } catch (e) {}
+      }
+      p.ui.comp.prop.render_prop_editor();
+    }
+  }, [should_re_eval_props]);
+
+  p.ui.comp.prop.render_prop_editor = useCallback(
+    (immediate) => {
       clearTimeout(local.render_timeout);
-      const exec = () => {
+      const exec = async () => {
         local.loading = false;
         local.hidden = {};
         const item = node?.item;
         if (item && comp_def.content_tree.component) {
+          if (!p.viref.comp_props) {
+            await waitUntil(() => p.viref.comp_props);
+          }
+
           const prop_values = p.viref.comp_props[item.id];
           const args = { ...prop_values };
           for (const [k, v] of Object.entries(
@@ -57,8 +93,11 @@ export const EdCompProp = () => {
       else {
         local.render_timeout = setTimeout(exec, 50);
       }
-    };
+    },
+    [p.viref.comp_props?.[item.id]]
+  );
 
+  useEffect(() => {
     if (local.comp_id !== comp_id) {
       if (!local.loading) {
         local.loading = true;

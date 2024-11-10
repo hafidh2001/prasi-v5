@@ -10,16 +10,14 @@ import { IItem } from "utils/types/item";
 import { FNCompDef } from "utils/types/meta-fn";
 import { Dropdown } from "utils/ui/dropdown";
 import { extractString } from "./ed-prop-string";
+import { EdPropCheckbox } from "./ed-prop-checkbox";
 
-export const EdPropOption = ({
-  name,
-  field,
-  instance,
-}: {
+export const EdPropOption = (arg: {
   name: string;
   field: FNCompDef;
   instance: Exclude<IItem["component"], undefined>;
 }) => {
+  const { name, field, instance } = arg;
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({
     options: [] as { label: string; value: string }[],
@@ -117,6 +115,7 @@ export const ${name} = \`${text}\`;
           })}
         </div>
       )}
+      {mode === "checkbox" && <EdPropCheckbox {...arg} />}
     </div>
   );
 };
