@@ -33,7 +33,24 @@ export const EdMasterPropBodyBasic: FC<{
   ];
 
   return (
-    <>
+    <div
+      className={cx(
+        "flex items-stretch flex-col",
+        css`
+          .mp-field {
+            &:hover {
+              .mp-label {
+                background: #3c56d8;
+                color: white;
+              }
+            }
+          }
+          .mp-label {
+            width: 55px;
+          }
+        `
+      )}
+    >
       <FieldString
         label="Name"
         value={_name}
@@ -372,11 +389,24 @@ export const EdMasterPropBodyBasic: FC<{
           }}
         />
       )}
+
+      <FieldCode
+        label="Visible"
+        default="true"
+        value={prop.visible}
+        onChange={async (val) => {
+          getActiveTree(p).update(`Prop ${name} Set Visible`, ({ tree }) => {
+            if (tree.type === "item" && tree.component) {
+              tree.component.props[name].visible = val;
+            }
+          });
+        }}
+      />
       <div className="p-1 flex justify-start"></div>
       {/* <pre className="whitespace-pre text-xs ">
         {JSON.stringify(prop, null, 2)}
       </pre> */}
-    </>
+    </div>
   );
 };
 

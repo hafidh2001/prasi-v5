@@ -11,6 +11,7 @@ import { EdPropField } from "./prop-field/ed-prop-field";
 import { sortProp } from "../../tree/parts/sort-prop";
 import { propGroupInfo } from "../../tree/parts/prop-group-info";
 import set from "lodash.set";
+import { getActiveTree } from "logic/active";
 
 export const EdCompProp = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -71,17 +72,17 @@ export const EdCompProp = () => {
 
   return (
     <div className="flex flex-1 text-sm flex-col items-stretch">
-      {props.map(([key, field]) => {
+      {props.map(([name, field]) => {
         if (field.meta?.type === "content-element") return null;
 
         const { is_group, is_group_child, group_name, group_expanded } =
-          propGroupInfo(p, [key, field], comp_id);
+          propGroupInfo(p, [name, field], comp_id);
 
         if (is_group) {
           if (!is_group_child) {
             return (
               <div
-                key={key}
+                key={name}
                 className={cx(
                   "border-b py-1 select-none flex items-center cursor-pointer hover:bg-blue-50"
                 )}
@@ -119,7 +120,7 @@ export const EdCompProp = () => {
             } else {
               return (
                 <div
-                  key={key}
+                  key={name}
                   className={cx(css`
                     > div > .pl-3 {
                       border-left: 10px solid #ececeb;
@@ -127,7 +128,7 @@ export const EdCompProp = () => {
                     }
                   `)}
                 >
-                  <EdPropField name={key} field={field} instance={instance} />
+                  <EdPropField name={name} field={field} instance={instance} />
                 </div>
               );
             }
@@ -135,7 +136,12 @@ export const EdCompProp = () => {
         }
 
         return (
-          <EdPropField key={key} name={key} field={field} instance={instance} />
+          <EdPropField
+            key={name}
+            name={name}
+            field={field}
+            instance={instance}
+          />
         );
       })}
 
@@ -154,6 +160,26 @@ export const EdCompProp = () => {
               ui.active = ui.context_name;
               p.ui.popup.script.open = true;
               p.render();
+            }}
+          />
+          <MenuItem
+            label="Reset"
+            onClick={() => {
+              getActiveTree(p).update(
+                `Reset ${ui.context_name} Prop`,
+                ({ findNode }) => {
+                  const n = findNode(node.item.id);
+                  if (n) {
+                    const comp_prop =
+                      comp_def.content_tree.component?.props[ui.context_name];
+                    const prop = n.item.component?.props[ui.context_name];
+                    if (prop && comp_prop) {
+                      prop.value = comp_prop.value;
+                      prop.valueBuilt = comp_prop.valueBuilt;
+                    }
+                  }
+                }
+              );
             }}
           />
         </Menu>

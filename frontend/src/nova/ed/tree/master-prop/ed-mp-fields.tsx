@@ -22,8 +22,8 @@ export const FieldButtons = (arg: {
   });
 
   return (
-    <div className="flex border-b">
-      <div className="w-[50px] p-1">{arg.label}</div>
+    <label className="mp-field flex border-b">
+      <div className="mp-label p-1">{arg.label}</div>
       <div className="flex space-x-1 items-center px-1 border-l">
         {arg.buttons.map((e, idx) => {
           if (!e) return null;
@@ -47,7 +47,7 @@ export const FieldButtons = (arg: {
           );
         })}
       </div>
-    </div>
+    </label>
   );
 };
 export const FieldCode = (arg: {
@@ -69,8 +69,8 @@ export const FieldCode = (arg: {
   }, [arg.value]);
 
   return (
-    <label className="flex border-b flex-1">
-      <div className="w-[50px] p-1">{arg.label}</div>
+    <label className="mp-field flex border-b flex-1">
+      <div className="mp-label p-1">{arg.label}</div>
       <Popover
         placement="right"
         onOpenChange={(open) => {
@@ -114,14 +114,14 @@ export const FieldCode = (arg: {
           </div>
         }
         className={cx(
-          "border-l flex items-center flex-1",
+          "border-l flex items-center flex-1 cursor-pointer",
           local.open && "bg-blue-500"
         )}
       >
         <div
           className={cx(
-            "border m-1 px-2 cursor-pointer",
-            local.open && "border-white text-white"
+            "border m-1 px-2 ",
+            local.open ? "border-transparent text-white" : "bg-white hover:bg-blue-500 hover:text-white"
           )}
         >
           Edit Code
@@ -144,8 +144,8 @@ export const FieldString = (arg: {
     local.render();
   }, [arg.value]);
   return (
-    <label className="flex border-b">
-      <div className="w-[50px] p-1">{arg.label}</div>
+    <label className="mp-field flex border-b">
+      <div className="mp-label p-1">{arg.label}</div>
       <input
         type="text"
         className="p-1 flex-1 border-l outline-none focus:bg-blue-100"
@@ -195,8 +195,8 @@ export const FieldDropdown = (arg: {
   }, [arg.value]);
 
   return (
-    <label className="flex border-b">
-      <div className="w-[50px] p-1">{arg.label}</div>
+    <label className="mp-field flex border-b">
+      <div className="mp-label p-1">{arg.label}</div>
       <select
         className="py-1 flex-1 border-l outline-none focus:bg-blue-100"
         value={local.value}

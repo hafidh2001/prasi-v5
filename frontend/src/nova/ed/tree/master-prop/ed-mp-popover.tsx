@@ -50,7 +50,7 @@ export const EdMasterPropDetail: FC<{ children: any; onClose: () => void }> = ({
                 <>
                   <div className="bg-purple-600 p-2 pb-0 flex items-end justify-between">
                     <div className="flex items-end justify-between">
-                      {["basic", "advanced"].map((e) => {
+                      {["basic"].map((e) => {
                         return (
                           <div
                             key={e}
