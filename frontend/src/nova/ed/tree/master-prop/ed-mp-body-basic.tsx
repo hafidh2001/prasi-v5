@@ -27,6 +27,7 @@ export const EdMasterPropBodyBasic: FC<{
     group = group_part[0] + "__";
     _name = group_part[1];
   }
+  const meta = propMeta(prop);
 
   const groups = [
     ...new Set(Object.keys(props).filter((n) => n.endsWith("__"))),
@@ -142,8 +143,8 @@ export const EdMasterPropBodyBasic: FC<{
             label: "Text",
             checked() {
               if (is_group) return false;
-              if (prop.meta?.type !== "content-element")
-                return prop.type === "string";
+              const meta = propMeta(prop);
+              if (meta.type !== "content-element") return meta.type === "text";
 
               return false;
             },
@@ -160,17 +161,8 @@ export const EdMasterPropBodyBasic: FC<{
                     } else if (name.includes("__")) {
                       _name = name;
                     }
-                    let meta = tree.component.props[_name].meta;
-                    if (!tree.component.props[_name].meta) {
-                      tree.component.props[_name].meta = {
-                        type: "text",
-                      };
-                      meta = tree.component.props[_name].meta;
-                    }
-                    if (meta) {
-                      meta.type = "text";
-                    }
-                    tree.component.props[_name].type = "string";
+                    let meta = prepMeta(tree, name);
+                    if (meta) meta.type = "text";
                   }
                 }
               });
@@ -181,7 +173,10 @@ export const EdMasterPropBodyBasic: FC<{
             checked() {
               if (is_group) return false;
 
-              return prop.type === "option";
+              const meta = propMeta(prop);
+              if (meta.type !== "content-element")
+                return meta.type === "option";
+              return false;
             },
             check() {
               getActiveTree(p).update(`Set Type to OPTIONS`, ({ tree }) => {
@@ -197,10 +192,8 @@ export const EdMasterPropBodyBasic: FC<{
                       _name = name;
                     }
 
-                    tree.component.props[_name].meta = {
-                      type: "text",
-                    };
-                    tree.component.props[_name].type = "option";
+                    let meta = prepMeta(tree, name);
+                    if (meta) meta.type = "option";
                   }
                 }
               });
@@ -211,7 +204,8 @@ export const EdMasterPropBodyBasic: FC<{
             checked() {
               if (is_group) return false;
 
-              return prop.meta?.type === "content-element";
+              const meta = propMeta(prop);
+              return meta.type === "content-element";
             },
             check() {
               getActiveTree(p).update(`Set Type to JSX`, ({ tree }) => {
@@ -227,10 +221,8 @@ export const EdMasterPropBodyBasic: FC<{
                       _name = name;
                     }
 
-                    tree.component.props[_name].meta = {
-                      type: "content-element",
-                    };
-                    tree.component.props[_name].type = "string";
+                    const meta = prepMeta(tree, name);
+                    if (meta) meta.type = "content-element";
                   }
                 }
               });
@@ -260,7 +252,7 @@ export const EdMasterPropBodyBasic: FC<{
             : undefined,
         ]}
       />
-      {prop.type === "option" && (
+      {meta.type === "option" && (
         <FieldButtons
           label="Mode"
           buttons={[
@@ -327,7 +319,7 @@ export const EdMasterPropBodyBasic: FC<{
         />
       )}
 
-      {prop.type === "option" && (
+      {meta.type === "option" && (
         <FieldCode
           label="Option"
           default={`\
@@ -421,4 +413,13 @@ const prepMeta = (tree: IItem, name: string) => {
     }
     return meta;
   }
+};
+
+const propMeta = (prop: FNCompDef) => {
+  if (!prop.meta) {
+    return {
+      type: "text",
+    };
+  }
+  return prop.meta;
 };
