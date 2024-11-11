@@ -3,15 +3,18 @@ import set from "lodash.set";
 import { active } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import {
+  CheckCheck,
   LayoutTemplate,
   PanelLeftClose,
   PanelLeftOpen,
   PanelRightOpen,
+  Save,
   ScrollText,
 } from "lucide-react";
 import { closeEditor } from "popup/script/ed-workbench";
 import { useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
+import { useLocal } from "utils/react/use-local";
 import { Tooltip } from "utils/ui/tooltip";
 
 export const navPrevItem = (p: PG) => {
@@ -67,6 +70,9 @@ export const navNextItem = (p: PG) => {
 
 export const EdTopBar = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
+  const local = useLocal({});
+  if (p.ui.page.topbar_render !== local.render)
+    p.ui.page.topbar_render = local.render;
 
   const ui = {
     "ui.right.tab": p.ui.right.tab,
@@ -199,6 +205,36 @@ export const EdTopBar = () => {
             <ScrollText size={12} /> <div>Code</div>
           </div>
         </div>
+        {p.ui.page.saving && (
+          <div
+            className={cx(
+              "flex items-center",
+              !p.ui.page.saved ? "text-purple-600" : "text-green-700"
+            )}
+          >
+            <Save
+              size={15}
+              strokeWidth={1.5}
+              className={cx(
+                !p.ui.page.saved
+                  ? "animate-pulse duration-500"
+                  : ""
+              )}
+            />
+            {p.ui.page.saved && (
+              <div className="-ml-[10px] rounded-md -mb-2 px-[2px] bg-white">
+                <CheckCheck
+                  size={11}
+                  strokeWidth={3}
+                  className="text-green-700"
+                />
+              </div>
+            )}
+            <div className={cx("text-[9px]")}>
+              {p.ui.page.saved ? "Saved" : "Saving..."}
+            </div>
+          </div>
+        )}
       </div>
       <div></div>
       <div className="flex flex-row-reverse items-stretch">

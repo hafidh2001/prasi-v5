@@ -22,7 +22,11 @@ type ITEM_ID = string;
 type VAR_ID = string;
 
 export const loadPageTree = (
-  p: { comp: { loaded: Record<string, EComp>; pending: Set<string> } },
+  p: {
+    comp: { loaded: Record<string, EComp>; pending: Set<string> };
+    ui: any;
+    render: () => void;
+  },
   sync: ReturnType<typeof createClient>,
   page_id: string,
   arg?: {
@@ -40,6 +44,17 @@ export const loadPageTree = (
   const wsync = new WebsocketProvider(wsurl.toString(), `page-${page_id}`, doc);
 
   doc.on("update", async (update, origin) => {
+    if (p.ui.page.saving) {
+      clearTimeout(p.ui.page.saved);
+      p.ui.page.saved = true;
+      p.ui.page.saving = setTimeout(() => {
+        p.ui.page.saving = false;
+        p.ui.page.saved = true;
+        p.ui.page.topbar_render();
+      }, 3000);
+      p.ui.page.topbar_render();
+    }
+
     const content_tree = immer.get();
     tree.nodes = flattenTree(content_tree.childs, {
       visit(item) {
@@ -109,6 +124,10 @@ export const loadPageTree = (
         findNode: (id: string) => null | PNode;
       }) => void
     ) {
+      p.ui.page.saving = true;
+      p.ui.page.saved = false;
+      p.ui.page.topbar_render();
+
       const _fn = (tree: EPage["content_tree"]) => {
         sync.page.pending_action(page_id, action_name);
         fn({

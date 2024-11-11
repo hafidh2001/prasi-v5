@@ -49,7 +49,12 @@ export const EDGlobal = {
     history: [] as { comp_id?: string; item_id: string; ui?: any }[],
   },
   ui: {
-    page: { loaded: false },
+    page: {
+      loaded: false,
+      saving: false,
+      saved: false,
+      topbar_render: () => {},
+    },
     panel: {
       left: localStorage.getItem("prasi-panel-left") !== "n",
       right: localStorage.getItem("prasi-panel-right") !== "n",
