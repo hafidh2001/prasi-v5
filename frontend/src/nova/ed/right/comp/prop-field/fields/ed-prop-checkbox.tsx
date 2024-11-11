@@ -1,10 +1,18 @@
-import { ChevronDown } from "lucide-react";
+import { active } from "logic/active";
+import { EDGlobal } from "logic/ed-global";
+import { ChevronDown, Scaling, Search } from "lucide-react";
+import { extractRegion } from "popup/script/code/js/migrate-code";
+import { codeUpdate } from "popup/script/code/prasi-code-update";
 import { useEffect } from "react";
+import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { IItem } from "utils/types/item";
 import { FNCompDef } from "utils/types/meta-fn";
 import { Popover } from "utils/ui/popover";
 import { Tooltip } from "utils/ui/tooltip";
+import { extractValue } from "./extract-value";
+import { original } from "immer";
+import { Resizable } from "re-resizable";
 
 type MetaOption = {
   label: string;
@@ -20,71 +28,175 @@ export const EdPropCheckbox = ({
   field,
   instance,
   options,
-  value,
 }: {
   name: string;
   field: FNCompDef;
   instance: Exclude<IItem["component"], undefined>;
   options: MetaOption[];
-  value: string;
 }) => {
+  const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({
     open: false,
+    original_value: "",
+    has_code: false,
+    value: [] as MetaOption[],
+    search: {
+      text: "",
+      focus: false,
+    },
+    size: undefined as undefined | { width: number; height: number },
   });
+
+  useEffect(() => {
+    const size = localStorage.getItem("ed-prop-checkbox-size");
+    if (size) {
+      try {
+        local.size = JSON.parse(size);
+      } catch (e) {}
+    }
+
+    if (!local.size)
+      local.size = { width: 250, height: document.body.clientHeight - 100 };
+
+    let prop = instance.props[name];
+    const e = extractValue(p, name, prop);
+    if (e) {
+      local.original_value = e.original_value;
+      local.value = e.value;
+      local.has_code = e.has_code;
+      try {
+        local.value = JSON.parse(e.value);
+      } catch (e) {}
+    }
+    local.render();
+  }, [instance.props[name]?.value]);
+
   return (
     <div className="flex space-x-1 p-1">
       <Popover
         onOpenChange={(open) => {
           local.open = open;
           local.render();
-
-          // if (!open) {
-          //   onChange(JSON.stringify(local.pendingVal), null as any);
-          // } else {
-          //   local.pendingVal = null;
-          //   local.render();
-          // }
         }}
         open={local.open}
+        placement="left"
         content={
-          <div
+          <Resizable
             className={cx(
-              "flex flex-col min-w-[200px] bg-white overflow-auto",
+              "flex flex-col bg-white relative min-w-[250px]",
               css`
                 max-height: ${document.body.clientHeight - 100}px;
               `
             )}
+            minHeight={document.body.clientHeight - 100}
+            defaultSize={local.size}
+            onResizeStop={(_, __, div) => {
+              local.size = {
+                width: div.clientWidth,
+                height: div.clientHeight,
+              };
+              localStorage.setItem(
+                "ed-prop-checkbox-size",
+                JSON.stringify(local.size)
+              );
+              local.render();
+            }}
           >
-            {Array.isArray(options) &&
-              options.map((item, idx) => {
-                const val: any[] = Array.isArray(value) ? value : [];
-                const found = val.find((e) => {
-                  if (!item.options) {
-                    return e === item.value;
-                  } else {
-                    if (typeof e === "object" && e.value === item.value) {
-                      return true;
-                    }
-                    return false;
-                  }
-                });
-                return (
-                  <SingleCheckbox
-                    item={item}
-                    idx={idx}
-                    val={val}
-                    key={idx}
-                    depth={0}
-                    onChange={(val) => {
-                      // onChange(JSON.stringify(val), item);
-                      local.render();
-                    }}
-                    found={found}
-                    render={local.render}
-                  />
-                );
-              })}
-          </div>
+            <div
+              className={cx(
+                "border-b flex items-stretch",
+                local.search.focus && "bg-blue-50 outline-blue-500 outline-2"
+              )}
+            >
+              <div className="flex items-center justify-center p-1">
+                <Search size={14} />
+              </div>
+              <input
+                type="search"
+                autoFocus
+                placeholder="Search..."
+                className="flex p-1 outline-none bg-transparent flex-1"
+                value={local.search.text}
+                onChange={(e) => {
+                  local.search.text = e.currentTarget.value;
+                  local.render();
+                }}
+                onFocus={() => {
+                  local.search.focus = true;
+                  local.render();
+                }}
+                onBlur={() => {
+                  local.search.focus = false;
+                  local.render();
+                }}
+              />
+              {/* {local.size && (
+                <div
+                  className="cursor-pointer flex items-center justify-center p-1"
+                  onClick={() => {
+                    localStorage.removeItem("ed-prop-checkbox-size");
+                    local.size = undefined;
+                    local.open = false;
+                    local.render();
+                  }}
+                >
+                  <Scaling size={14} />
+                </div>
+              )} */}
+            </div>
+            <div className="flex-1 overflow-y-auto relative">
+              <div className="absolute inset-0">
+                {Array.isArray(options) &&
+                  options.map((item, idx) => {
+                    const val: any[] = Array.isArray(local.value)
+                      ? local.value
+                      : [];
+                    const found = val.find((e) => {
+                      if (!item.options) {
+                        return e === item.value;
+                      } else {
+                        if (typeof e === "object" && e.value === item.value) {
+                          return true;
+                        }
+                        return false;
+                      }
+                    });
+                    return (
+                      <SingleCheckbox
+                        item={item}
+                        idx={idx}
+                        val={val}
+                        key={idx}
+                        depth={0}
+                        search={local.search.text.toLowerCase()}
+                        onChange={(val) => {
+                          local.value = val;
+                          local.render();
+
+                          const region = extractRegion(
+                            instance.props[name].value || ""
+                          );
+                          let value = "";
+                          if (region.length > 0) {
+                            value = `${region.join("\n")}`;
+                          }
+
+                          value += `
+
+export const ${name} = ${JSON.stringify(val, null, 2)};
+`;
+                          codeUpdate.push(p, active.item_id, value, {
+                            prop_name: name,
+                          });
+                        }}
+                        found={found}
+                        render={local.render}
+                      />
+                    );
+                  })}
+              </div>
+            </div>
+          </Resizable>
         }
         asChild
       >
@@ -97,10 +209,10 @@ export const EdPropCheckbox = ({
         >
           <div className="flex-1 flex items-center">
             <div className="px-1">
-              {Array.isArray(value)
-                ? value.length === 0
+              {Array.isArray(local.value)
+                ? local.value.length === 0
                   ? "Select Item"
-                  : `${value.length} selected`
+                  : `${local.value.length} selected`
                 : `Select Item`}
             </div>
           </div>
@@ -121,12 +233,14 @@ const SingleCheckbox = ({
   depth,
   found,
   render,
+  search,
 }: {
   item: MetaOption;
   idx: number;
   depth: number;
   val: any[];
   found: any;
+  search: string;
   onChange: (val: MetaOption[], item: MetaOption) => void;
   render: () => void;
 }) => {
@@ -174,6 +288,10 @@ const SingleCheckbox = ({
       toggleCheck();
     }
   }, []);
+
+  if (search && !item.label.toLowerCase().includes(search)) {
+    return null;
+  }
 
   return (
     <>
@@ -241,8 +359,7 @@ const SingleCheckbox = ({
         </div>
       </div>
 
-      {item.options &&
-        found &&
+      {!!(item.options && (found || search)) &&
         item.options.map((child, idx) => {
           const sub_found = found.checked.find((e: any) => {
             if (!item.options) {
@@ -263,6 +380,7 @@ const SingleCheckbox = ({
               depth={depth + 1}
               val={found.checked}
               found={sub_found}
+              search={search}
               onChange={(newval) => {
                 onChange(val, child);
                 render();

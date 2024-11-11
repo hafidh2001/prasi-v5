@@ -9,8 +9,8 @@ import { useLocal } from "utils/react/use-local";
 import { IItem } from "utils/types/item";
 import { FNCompDef } from "utils/types/meta-fn";
 import { Dropdown } from "utils/ui/dropdown";
-import { extractString } from "./ed-prop-string";
 import { EdPropCheckbox } from "./ed-prop-checkbox";
+import { extractString } from "./extract-value";
 
 export const EdPropOption = (arg: {
   name: string;
@@ -116,7 +116,7 @@ export const ${name} = \`${text}\`;
         </div>
       )}
       {mode === "checkbox" && (
-        <EdPropCheckbox {...arg} options={local.options} value={local.value} />
+        <EdPropCheckbox {...arg} options={local.options} />
       )}
     </div>
   );

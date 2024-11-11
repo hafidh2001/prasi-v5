@@ -30,9 +30,10 @@ export const EdTreeNodeName: FC<{
   const item = node.item;
   const isRenaming = p.ui.tree.rename_id === item.id;
 
+  const local_name = getActiveTree(p)?.script_models?.[item.id]?.local?.name;
   return (
     <div className="text-[14px] relative flex flex-col justify-center cursor-pointer flex-1">
-      <div className="flex flex-col">
+      <div className="flex flex-row">
         {isRenaming ? (
           <input
             className={cx(
@@ -120,6 +121,14 @@ export const EdTreeNodeName: FC<{
               </div>
             ) : (
               <Name p={p} node={node} render_params={render_params} />
+            )}
+
+            {local_name && (
+              <div className="flex flex-1 items-center justify-center">
+                <div className="border border-blue-600 text-blue-600 node-text px-1 rounded-xs text-[9px] font-mono">
+                  {local_name}
+                </div>
+              </div>
             )}
           </>
         )}

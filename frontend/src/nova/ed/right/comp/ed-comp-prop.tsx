@@ -66,7 +66,12 @@ export const EdCompProp = () => {
         local.loading = false;
         local.hidden = {};
         const item = node?.item;
-        if (item && comp_def.content_tree.component) {
+
+        if (!p.comp.loaded[comp_id]) {
+          await waitUntil(() => p.comp.loaded[comp_id]);
+        }
+
+        if (item && comp_def?.content_tree?.component) {
           if (!p.viref.comp_props) {
             await waitUntil(() => p.viref.comp_props);
           }

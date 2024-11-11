@@ -29,6 +29,7 @@ export type ViProp = {
   edit_comp_id?: string;
   enable_preload?: boolean;
   enable_cache_js?: boolean;
+  vscode_exports?: Record<string, any>;
   set_ref?: (ref: ViRef) => void;
 };
 
