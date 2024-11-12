@@ -60,7 +60,6 @@ export const EdTreeAction = ({
   const has_content = !!item.content;
   const has_loop = !!item.loop;
   const has_event = has_content || has_loop;
-  const has_error = p.viref.dev_item_error?.[item.id];
   return (
     <div className="flex items-center pr-1 space-x-1">
       {has_event && (
@@ -99,11 +98,6 @@ export const EdTreeAction = ({
         (comp.editable && comp.id === active.comp?.id) ||
         child_jsx_has_script) && (
         <>
-          {has_error && (
-            <div className="node-text text-red-600 rounded-sm border-red-500 px-1 border flex items-center text-[9px]">
-              <TriangleAlert size={12} className="mr-1" /> ERROR
-            </div>
-          )}
           {has_js && (
             <div className="node-text text-[9px] text-orange-500 ml-1">JS</div>
           )}

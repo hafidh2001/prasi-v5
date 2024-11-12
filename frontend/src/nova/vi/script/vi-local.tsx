@@ -15,7 +15,7 @@ export const createViLocal = (
     effect: (local: any) => void;
     children: any;
   }) => {
-    if (opt.value[render_mode] === 'auto') {
+    if (opt.value[render_mode] === "auto") {
       return (
         <ViLocalAutoRender
           {...opt}

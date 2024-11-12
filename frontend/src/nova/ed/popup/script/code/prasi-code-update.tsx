@@ -227,6 +227,18 @@ export const codeUpdate = {
             }
 
             if (q.local_name) {
+              try {
+                const local_name = (q.source || "")
+                  .split(`= defineLocal`)
+                  .shift()
+                  ?.split("const ")
+                  .pop()
+                  ?.trim();
+                if (local_name) {
+                  q.local_name = local_name;
+                }
+              } catch (e) {}
+
               source = `const local_name = "${q.local_name}";\n${source}`;
             }
 
@@ -258,6 +270,7 @@ export const codeUpdate = {
                   format: "cjs",
                   logLevel: "silent",
                   loader: "tsx",
+                  minify: false,
                 })
               )?.code;
               if (q.prop_name) {

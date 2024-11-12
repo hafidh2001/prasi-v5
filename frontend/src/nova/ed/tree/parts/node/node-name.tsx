@@ -1,7 +1,7 @@
 import { NodeModel, RenderParams } from "@minoru/react-dnd-treeview";
 import { getActiveTree } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
-import { RectangleEllipsis } from "lucide-react";
+import { RectangleEllipsis, Scroll, TriangleAlert } from "lucide-react";
 import { waitUntil } from "prasi-utils";
 import { FC, ReactNode, useEffect, useState } from "react";
 import { useGlobal } from "utils/react/use-global";
@@ -22,7 +22,8 @@ export const formatItemName = (name: string) => {
 export const EdTreeNodeName: FC<{
   raw: NodeModel<PNode>;
   render_params: RenderParams;
-}> = ({ raw, render_params }) => {
+  is_active: boolean;
+}> = ({ raw, render_params, is_active }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({ rename: raw.data?.item.name || "" });
   const node = raw.data;
@@ -31,6 +32,7 @@ export const EdTreeNodeName: FC<{
   const isRenaming = p.ui.tree.rename_id === item.id;
 
   const local_name = getActiveTree(p)?.script_models?.[item.id]?.local?.name;
+  const has_error = p.viref.dev_item_error?.[item.id];
   return (
     <div className="text-[14px] relative flex flex-col justify-center cursor-pointer flex-1">
       <div className="flex flex-row">
@@ -123,11 +125,30 @@ export const EdTreeNodeName: FC<{
               <Name p={p} node={node} render_params={render_params} />
             )}
 
-            {local_name && (
-              <div className="flex flex-1 items-center justify-center">
-                <div className="border border-blue-600 text-blue-600 node-text px-1 rounded-xs text-[9px] font-mono">
-                  {local_name}
-                </div>
+            {(local_name || has_error) && (
+              <div className="flex flex-1 items-center justify-end mr-1">
+                {local_name && (
+                  <div
+                    className={cx(
+                      "border border-blue-600 text-blue-600 node-text px-1 rounded-[2px] flex items-center text-[9px] font-mono",
+                      !is_active && "bg-white"
+                    )}
+                  >
+                    <Scroll size={9} className="mr-1" />
+                    {local_name}
+                  </div>
+                )}
+
+                {has_error && (
+                  <div
+                    className={cx(
+                      "node-text text-red-600 rounded-[2px] border-red-500 px-1 border flex items-center text-[9px] ",
+                      !is_active && "bg-white"
+                    )}
+                  >
+                    <TriangleAlert size={12} className="mr-1" /> ERROR
+                  </div>
+                )}
               </div>
             )}
           </>

@@ -214,7 +214,11 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
           />
         )}
         <EdTreeNodeIndent raw={raw} render_params={render_params} />
-        <EdTreeNodeName raw={raw} render_params={render_params} />
+        <EdTreeNodeName
+          raw={raw}
+          is_active={is_active}
+          render_params={render_params}
+        />
         {p.ui.comp.creating_id !== item.id &&
           p.ui.comp.loading_id !== item.id && (
             <EdTreeAction raw={raw} render_params={render_params} />

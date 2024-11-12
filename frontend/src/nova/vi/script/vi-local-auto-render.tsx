@@ -32,10 +32,11 @@ export const ViLocalAutoRender = (opt: {
     };
     local_value[item.id].proxy.set = ref(local_value[item.id].proxy);
   }
+
   const internal = local_value[item.id] as {
     __version: number;
     __autorender: boolean;
-    __item_id: string;  
+    __item_id: string;
     proxy: any;
   };
 

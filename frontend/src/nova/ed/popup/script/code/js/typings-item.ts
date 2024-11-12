@@ -52,6 +52,7 @@ const navigate: (url: string,
 const params: any;
 const props = null as {className: string} & Record<string, any>; 
 const children = null as any;
+const Loop = null as (<T extends any>(arg: { list: T[], render?: (item: T, index: number) => ReactNode } ) => ReactElement);
 const Local = null as (<T extends Record<string, any>>(arg: {
     name: string;
     idx?: any;

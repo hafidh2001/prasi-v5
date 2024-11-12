@@ -17,6 +17,8 @@ import { useSnapshot } from "valtio";
 import { IF } from "./script/vi-if";
 import { ErrorBox } from "./lib/error-box";
 import { waitUntil } from "prasi-utils";
+import { useLocal } from "utils/react/use-local";
+import { createViLoop } from "./script/vi-loop";
 
 export const ViScript: FC<{
   item: DeepReadonly<IItem>;
@@ -66,6 +68,7 @@ export const ViScript: FC<{
   const internal = script_instance[item.id] as {
     Local: any;
     PassProp: any;
+    Loop: any;
     ScriptComponent: any;
     item: DeepReadonly<IItem>;
     watch_auto_render: Record<string, any>;
@@ -78,7 +81,7 @@ export const ViScript: FC<{
     internal.item = item;
     internal.Local = createViLocal(item, local_value, local_render);
     internal.PassProp = createViPassProp(item, pass_props_parents, __idx);
-
+    internal.Loop = createViLoop(item);
     if (internal.watch_auto_render) {
       for (const cleanupAutoDispatch of Object.values(
         internal.watch_auto_render
@@ -140,6 +143,7 @@ export const ViScript: FC<{
     defineLocal,
     PassProp: internal.PassProp,
     Local: internal.Local,
+    Loop: internal.Loop,
     React,
     IF,
     __result: result,
