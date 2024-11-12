@@ -1,7 +1,13 @@
 import { NodeModel, RenderParams } from "@minoru/react-dnd-treeview";
 import { getActiveTree } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
-import { RectangleEllipsis, Scroll, TriangleAlert } from "lucide-react";
+import {
+  ListStart,
+  RectangleEllipsis,
+  Scroll,
+  StretchHorizontal,
+  TriangleAlert,
+} from "lucide-react";
 import { waitUntil } from "prasi-utils";
 import { FC, ReactNode, useEffect, useState } from "react";
 import { useGlobal } from "utils/react/use-global";
@@ -31,7 +37,9 @@ export const EdTreeNodeName: FC<{
   const item = node.item;
   const isRenaming = p.ui.tree.rename_id === item.id;
 
-  const local_name = getActiveTree(p)?.script_models?.[item.id]?.local?.name;
+  const script_model = getActiveTree(p)?.script_models?.[item.id];
+  const local_name = script_model?.local?.name;
+  const loop_name = script_model?.loop?.name;
   const has_error = p.viref.dev_item_error?.[item.id];
   return (
     <div className="text-[14px] relative flex flex-col justify-center cursor-pointer flex-1">
@@ -125,8 +133,19 @@ export const EdTreeNodeName: FC<{
               <Name p={p} node={node} render_params={render_params} />
             )}
 
-            {(local_name || has_error) && (
+            {(local_name || loop_name || has_error) && (
               <div className="flex flex-1 items-center justify-end mr-1">
+                {loop_name && (
+                  <div
+                    className={cx(
+                      "border border-blue-600 text-blue-600 node-text px-1 rounded-[2px] flex items-center text-[9px] font-mono",
+                      !is_active && "bg-white"
+                    )}
+                  >
+                    <StretchHorizontal size={9} className="mr-1" />
+                    {loop_name}
+                  </div>
+                )}
                 {local_name && (
                   <div
                     className={cx(

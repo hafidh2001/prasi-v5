@@ -4,7 +4,7 @@ import get from "lodash.get";
 import { cutCode, jscript } from "utils/script/jscript";
 import { traverse } from "utils/script/parser/traverse";
 import { parseItemLocal } from "./parse-item-local";
-import { parseItemPassProp } from "./parse-item-passprop";
+import { parseItemPassPropAndLoop } from "./parse-item-passprop";
 import { replaceString } from "./replace-string";
 import { JSXElement, JSXElementName } from "utils/script/parser/oxc-types";
 
@@ -66,38 +66,62 @@ export const parseItemCode = (model: ScriptModel) => {
                 d.init?.type === "CallExpression" &&
                 d.id.type === "Identifier"
               ) {
-                if (
-                  d.init.callee.type === "Identifier" &&
-                  d.init.callee.name === "defineLocal"
-                ) {
-                  model.local.name = d.id.name;
-                  model.local.value = `{
-
-      }`;
-                  const value = d.init.arguments.find(
-                    (e) => e.type === "ObjectExpression"
-                  );
-                  if (value && value.type === "ObjectExpression") {
-                    const local_value = value.properties.find(
-                      (e) =>
-                        e.type === "ObjectProperty" &&
-                        e.key.type === "Identifier" &&
-                        e.key.name === "value"
+                if (d.init.callee.type === "Identifier") {
+                  if (d.init.callee.name === "defineLocal") {
+                    model.local.name = d.id.name;
+                    model.local.value = `{}`;
+                    const value = d.init.arguments.find(
+                      (e) => e.type === "ObjectExpression"
                     );
-                    if (local_value?.type === "ObjectProperty") {
-                      model.local.value = cutCode(
-                        model.source,
-                        local_value.value,
-                        -2
+                    if (value && value.type === "ObjectExpression") {
+                      const local_value = value.properties.find(
+                        (e) =>
+                          e.type === "ObjectProperty" &&
+                          e.key.type === "Identifier" &&
+                          e.key.name === "value"
                       );
+                      if (local_value?.type === "ObjectProperty") {
+                        model.local.value = cutCode(
+                          model.source,
+                          local_value.value,
+                          -2
+                        );
+                      }
                     }
-                  }
 
-                  exports[d.id.name] = {
-                    name: d.id.name,
-                    type: "local",
-                    value: model.local.value,
-                  };
+                    exports[d.id.name] = {
+                      name: d.id.name,
+                      type: "local",
+                      value: model.local.value,
+                    };
+                  } else if (d.init.callee.name === "defineLoop") {
+                    model.loop.name = d.id.name;
+                    model.loop.list = `[]`;
+                    const value = d.init.arguments.find(
+                      (e) => e.type === "ObjectExpression"
+                    );
+                    if (value && value.type === "ObjectExpression") {
+                      const list_value = value.properties.find(
+                        (e) =>
+                          e.type === "ObjectProperty" &&
+                          e.key.type === "Identifier" &&
+                          e.key.name === "value"
+                      );
+                      if (list_value?.type === "ObjectProperty") {
+                        model.loop.list = cutCode(
+                          model.source,
+                          list_value.value,
+                          -2
+                        );
+                      }
+                    }
+
+                    exports[d.id.name] = {
+                      name: d.id.name,
+                      type: "loop",
+                      list: model.loop.list,
+                    };
+                  }
                 } else {
                   const dec = d.init.arguments[0] as ObjectExpression;
                   if (dec.properties) {
@@ -182,7 +206,7 @@ export const parseItemCode = (model: ScriptModel) => {
                           if (val.endsWith("(")) {
                             val = cutCode(model.source, parent_node.callee, -2);
                           }
-                          parseItemPassProp({
+                          parseItemPassPropAndLoop({
                             name,
                             node,
                             model,
@@ -209,7 +233,7 @@ export const parseItemCode = (model: ScriptModel) => {
         if (!model.prop_name) {
           parseItemLocal({ name, node, model, replacements, exports });
           if (!(node as any).__processed) {
-            parseItemPassProp({ name, node, model, exports });
+            parseItemPassPropAndLoop({ name, node, model, exports });
           }
         }
       },

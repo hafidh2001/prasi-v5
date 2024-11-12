@@ -78,7 +78,7 @@ export const EdViRoot = memo(() => {
 });
 
 const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
-  (({ item, is_layout, ViRender, __idx, instance_id }) => {
+  (({ item, is_layout, ViRender, merged, instance_id }) => {
     const local = useLocal({
       ctx_menu: null as any,
       item: null as null | IItem,
@@ -90,7 +90,7 @@ const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
         <ViRender
           item={item}
           is_layout={is_layout}
-          __idx={__idx}
+          merged={merged}
           instance_id={instance_id}
           div_props={({ item, ref, instance_id }) => ({
             contentEditable: item.type === "text" ? true : undefined,

@@ -5,15 +5,15 @@ import { ViComp } from "./vi-comp";
 import { ViItem } from "./vi-item";
 import { useVi } from "./lib/store";
 import { DIV_PROPS } from "./lib/gen-parts";
-import { DIV_PROPS_OPT } from "./lib/types";
+import { DIV_PROPS_OPT, ViMergedProps } from "./lib/types";
 
 export const ViRender: FC<{
   item: DeepReadonly<IItem>;
   is_layout: boolean;
   div_props?: (opt: DIV_PROPS_OPT) => DIV_PROPS;
-  __idx?: string | number;
   instance_id?: string;
-}> = ({ item, is_layout, div_props, __idx, instance_id }) => {
+  merged?: ViMergedProps;
+}> = ({ item, is_layout, div_props, instance_id, merged }) => {
   const { wrapper } = useVi(({ ref }) => ({
     wrapper: ref.wrapper,
   }));
@@ -27,8 +27,8 @@ export const ViRender: FC<{
       <Wrapper
         item={item as any}
         is_layout={is_layout}
-        __idx={__idx}
         instance_id={instance_id}
+        merged={merged}
         ViRender={item.component?.id ? ViComp : ViItem}
       />
     );
@@ -38,7 +38,7 @@ export const ViRender: FC<{
     return (
       <ViComp
         item={item}
-        __idx={__idx}
+        merged={merged}
         is_layout={is_layout}
         div_props={div_props}
       />
@@ -47,9 +47,9 @@ export const ViRender: FC<{
     return (
       <ViItem
         item={item}
-        __idx={__idx}
         is_layout={is_layout}
         div_props={div_props}
+        merged={merged}
         instance_id={instance_id}
       />
     );

@@ -21,9 +21,6 @@ const viRef = {
   comp_props: {} as Record<ITEM_ID, Record<VAR_NAME, any>>,
   var_items: {} as Record<VAR_ID, { var: IVar<any>; item: IItem }>,
 
-  local_value: {} as Record<ITEM_ID, Record<VAR_NAME, any>>,
-  pass_prop_value: {} as Record<ITEM_ID, Record<string | number, any>>,
-
   wrapper: null as null | ViWrapperType,
   cache_js: true as boolean,
   instanced: {} as Record<ITEM_ID, any>,
@@ -37,8 +34,6 @@ const viRef = {
 
   dev_item_error: {} as Record<string, any>,
   dev_tree_render: {} as Record<string, () => void>,
-
-  script_instance: {} as Record<string, any>,
 
   resetCompInstance: (comp_id: string) => {},
   resetLocal: () => {},
@@ -91,8 +86,6 @@ export const useVi = defineStore({
       ref.mode = mode;
       ref.edit_comp_id = edit_comp_id || "";
       ref.resetLocal = () => {
-        ref.script_instance = {};
-        ref.local_value = {};
         ref.dev_tree_render = {};
         ref.dev_item_error = {};
       };

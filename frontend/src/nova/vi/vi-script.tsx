@@ -1,24 +1,19 @@
 import { rapidhash_fast } from "crdt/node/rapidhash";
 import { DeepReadonly } from "popup/flow/runtime/types";
-import React, { FC, ReactElement, useEffect, useRef, useState } from "react";
+import { waitUntil } from "prasi-utils";
+import React, { FC, ReactElement, useEffect } from "react";
+import { useLocal } from "utils/react/use-local";
 import { IItem } from "utils/types/item";
+import { useSnapshot } from "valtio";
+import { ErrorBox } from "./lib/error-box";
 import { parentCompArgs } from "./lib/parent-comp-args";
-import {
-  local_name,
-  parentLocalArgs,
-  render_mode,
-} from "./lib/parent-local-args";
-import { parentPassProps } from "./lib/parent-pass-props";
 import { scriptArgs } from "./lib/script-args";
 import { useVi } from "./lib/store";
-import { createViLocal } from "./script/vi-local";
-import { createViPassProp } from "./script/vi-pass-prop";
-import { useSnapshot } from "valtio";
+import { ViMergedProps } from "./lib/types";
 import { IF } from "./script/vi-if";
-import { ErrorBox } from "./lib/error-box";
-import { waitUntil } from "prasi-utils";
-import { useLocal } from "utils/react/use-local";
+import { createViLocal, local_name, render_mode } from "./script/vi-local";
 import { createViLoop } from "./script/vi-loop";
+import { createViPassProp } from "./script/vi-pass-prop";
 
 export const ViScript: FC<{
   item: DeepReadonly<IItem>;
@@ -30,20 +25,27 @@ export const ViScript: FC<{
         className: string;
       };
     };
-  __idx?: string | number;
+  merged?: ViMergedProps;
   instance_id?: string;
   render: () => void;
-}> = ({ item, childs, props, __idx, render }) => {
+}> = ({ item, childs, props, merged, render }) => {
+  const internal = useLocal({
+    Local: undefined as any,
+    PassProp: undefined as any,
+    Loop: undefined as any,
+    item: undefined as any,
+    ScriptComponent: null as any,
+    watch_auto_render: {} as Record<string, any>,
+    arg_hash: "",
+    value: {} as Record<string, any>,
+  });
   const {
     comp_props_parents,
-    pass_props_parents,
     parents,
     db,
     api,
-    local_value,
     cache_js,
     local_render,
-    script_instance,
     dev_item_error: dev_item_error,
     dev_tree_render,
   } = useVi(({ ref }) => ({
@@ -51,37 +53,26 @@ export const ViScript: FC<{
     parents: ref.item_parents,
     db: ref.db,
     api: ref.api,
-    local_value: ref.local_value,
-    pass_props_parents: ref.pass_prop_value,
     cache_js: ref.cache_js,
     local_render: ref.local_render,
-    script_instance: ref.script_instance,
     dev_item_error: ref.dev_item_error,
     dev_tree_render: ref.dev_tree_render,
   }));
 
   local_render[item.id] = render;
-
-  if (!script_instance[item.id]) {
-    script_instance[item.id] = {};
-  }
-  const internal = script_instance[item.id] as {
-    Local: any;
-    PassProp: any;
-    Loop: any;
-    ScriptComponent: any;
-    item: DeepReadonly<IItem>;
-    watch_auto_render: Record<string, any>;
-    arg_hash: string;
-  };
   const result = { children: null as any };
   const script_args = scriptArgs({ item, childs, props, result });
 
-  if (item !== internal.item) {
+  const _merged: ViMergedProps = {
+    ...merged,
+    __internal: { ...merged?.__internal },
+  };
+
+  if (internal.item !== item) {
     internal.item = item;
-    internal.Local = createViLocal(item, local_value, local_render);
-    internal.PassProp = createViPassProp(item, pass_props_parents, __idx);
-    internal.Loop = createViLoop(item);
+    internal.Local = createViLocal(item, internal.value, local_render, _merged);
+    internal.PassProp = createViPassProp(item, _merged);
+    internal.Loop = createViLoop(item, childs, _merged);
     if (internal.watch_auto_render) {
       for (const cleanupAutoDispatch of Object.values(
         internal.watch_auto_render
@@ -101,11 +92,6 @@ export const ViScript: FC<{
   }, []);
 
   const comp_args = parentCompArgs(parents, comp_props_parents, item.id);
-  const local_args = parentLocalArgs(local_value, parents, item.id);
-
-  const passprops_args = __idx
-    ? parentPassProps(pass_props_parents, parents, item.id, __idx)
-    : {};
 
   for (const [k, v] of Object.entries(comp_args)) {
     if (typeof v === "object" && v && (v as any).__jsx) {
@@ -113,12 +99,13 @@ export const ViScript: FC<{
     }
   }
 
-  for (const [k, v] of Object.entries(local_args)) {
+  const valtio_snapshot = {} as Record<string, any>;
+  for (const [k, v] of Object.entries(_merged)) {
     if (v.__autorender && v.proxy && v.__item_id !== item.id) {
-      local_args[k] = useSnapshot(v.proxy);
+      valtio_snapshot[k] = useSnapshot(v.proxy);
       // this is a hack to make valtio only watch accessed properties
       // and not all properties of the object
-      local_args[k].__autorender;
+      valtio_snapshot[k].__autorender;
     }
   }
 
@@ -132,15 +119,20 @@ export const ViScript: FC<{
     return arg.value;
   };
 
+  const defineLoop = (arg: { list: any[]; loop_name: string }) => {
+    return arg;
+  };
+
   const final_args = {
     ...comp_args,
     ...script_args,
-    ...local_args,
-    ...passprops_args,
+    ..._merged,
+    ...valtio_snapshot,
     db,
     api,
     __js: removeRegion(item.adv!.js || ""),
     defineLocal,
+    defineLoop,
     PassProp: internal.PassProp,
     Local: internal.Local,
     Loop: internal.Loop,

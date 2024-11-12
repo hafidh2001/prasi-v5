@@ -37,6 +37,13 @@ export type ViWrapperType = FC<{
   item: IItem;
   is_layout: boolean;
   ViRender: typeof ViRender;
-  __idx?: string | number;
+  merged?: ViMergedProps;
   instance_id?: string;
 }>;
+
+export type ViMergedProps = {
+  __internal: Record<
+    string,
+    { type: "loop" | "passprop" | "local"; from_id: string }
+  >;
+} & Record<string, any>;

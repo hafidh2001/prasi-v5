@@ -24,6 +24,7 @@ export type ScriptModel = {
   comp_def?: EComp;
   title: string;
   local: { name: string; value: string; auto_render: boolean };
+  loop: { name: string; list: string };
   extracted_content: string;
   model?: ReturnType<typeof monacoCreateModel> & { _ignoreChanges?: any };
   [source_sym]: string;
@@ -78,6 +79,7 @@ export const loadScriptModels = async (
               path_ids: path_id,
               name: `file:///${file}.tsx`,
               local: { name: "", value: "", auto_render: false },
+              loop: { name: "", list: "" },
               extracted_content: "",
               source_hash,
               ready: false,
@@ -122,6 +124,7 @@ export const loadScriptModels = async (
           path_names: path_name,
           path_ids: path_id,
           title: item.name,
+          loop: { name: "", list: "" },
           local: { name: "", value: "", auto_render: false },
           extracted_content: "",
           source_hash,

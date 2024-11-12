@@ -195,6 +195,7 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
                     codeUpdate.push(p, model.id, value, {
                       local_name: model.local?.name,
                       prop_name: model.prop_name,
+                      loop_name: model.loop?.name
                     });
                   }
                 }}

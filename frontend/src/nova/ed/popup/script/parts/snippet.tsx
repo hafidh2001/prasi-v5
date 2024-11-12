@@ -110,6 +110,47 @@ export default () => (
                   return [
                     wrapImports([
                       ...imports.filter((e, idx) => {
+                        if (e.startsWith("const loop_name")) {
+                          p_idx = idx;
+                          return false;
+                        }
+                        if (p_idx > 0 && idx >= p_idx) return false;
+                        return true;
+                      }),
+                      `\
+const loop_name = "item";
+export const item_idx = 0 as number;
+`,
+                    ]),
+                    `\
+export const item = defineLoop({
+  list: [1, 2, 3],
+  loop_name
+})
+
+export default () => (
+  <div {...props} className={cx(props.className, "")}>
+    <Loop bind={item} />
+  </div>
+)
+`,
+                  ];
+                });
+              }}
+            >
+              &lt;Loop /&gt;
+            </Button>
+            <Button
+              className={cx(btn_style)}
+              onClick={() => {
+                local.open = false;
+                local.render();
+                p.script.snippet_pasted = true;
+                p.script.do_edit(async ({ imports, wrapImports }) => {
+                  let p_idx = 0;
+                  return [
+                    wrapImports([
+                      ...imports.filter((e, idx) => {
                         if (e.startsWith("export const pass_prop_list")) {
                           p_idx = idx;
                           return false;
@@ -118,22 +159,17 @@ export default () => (
                         return true;
                       }),
                       `\
-const pass_prop_list = [1, 2, 3];
-export const pass_prop = {
-  item: null as unknown as (typeof pass_prop_list)[number]
-}
+
 const PassProp: React.FC<
-  { key: any; children: any } & Record<string, any>
+  {  children: any } & Record<string, any>
 > = null as any`,
                     ]),
                     `\
 export default () => (
   <div {...props} className={cx(props.className, "")}>
-    {[1, 2, 3].map((item, idx) => (
-      <PassProp key={idx} item={item}>
-        { children }
-      </PassProp>
-    ))}
+    <PassProp sample={"hello"}>
+      { children }
+    </PassProp>
   </div>
 )
 `,

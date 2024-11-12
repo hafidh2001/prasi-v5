@@ -196,6 +196,6 @@ export const jscript = {
 };
 
 export const cutCode = (code: string, pos: any, offset?: number) => {
-  // return code.substring(pos.start + (offset || 0), pos.end + (offset || 0));
+  return code.substring(pos.start + (offset || 0), pos.end + (offset || 0));
   return code.substring(pos.start, pos.end);
 };

@@ -6,16 +6,15 @@ import { compArgs } from "./lib/comp-args";
 import { DIV_PROPS } from "./lib/gen-parts";
 import { parentCompArgs } from "./lib/parent-comp-args";
 import { useVi } from "./lib/store";
-import { DIV_PROPS_OPT } from "./lib/types";
+import { DIV_PROPS_OPT, ViMergedProps } from "./lib/types";
 import { ViItem } from "./vi-item";
-import { parentLocalArgs } from "./lib/parent-local-args";
 
 export const ViComp: FC<{
   item: DeepReadonly<IItem>;
   is_layout: boolean;
   div_props?: (opt: DIV_PROPS_OPT) => DIV_PROPS;
-  __idx?: string | number;
-}> = ({ item, is_layout, div_props, __idx }) => {
+  merged?: ViMergedProps;
+}> = ({ item, is_layout, div_props, merged }) => {
   const {
     comps,
     instances,
@@ -24,7 +23,6 @@ export const ViComp: FC<{
     parents,
     db,
     api,
-    local_value,
     instanced,
     edit_comp_id,
     vscode_exports,
@@ -33,7 +31,6 @@ export const ViComp: FC<{
     load: ref.loader.comps,
     instances: ref.comp.instances,
     loaded: ref.comp.loaded,
-    local_value: ref.local_value,
     instantiate: action.instantiateComp,
     ref_comp_props: ref.comp_props,
     parents: ref.item_parents,
@@ -57,11 +54,10 @@ export const ViComp: FC<{
     ) {
       instanced[item.id] = item;
       const comp_args = parentCompArgs(parents, ref_comp_props, item.id);
-      const local_args = parentLocalArgs(local_value, parents, item.id);
       ref_comp_props[item.id] = compArgs(
         item,
         comps,
-        { ...comp_args, ...local_args },
+        { ...comp_args, ...merged },
         db,
         api,
         vscode_exports
@@ -81,10 +77,10 @@ export const ViComp: FC<{
     //@ts-ignore
     <ViItem
       item={instance}
-      __idx={__idx}
       is_layout={is_layout}
       div_props={div_props}
       instance_id={instance_id}
+      merged={merged}
     />
   );
 };

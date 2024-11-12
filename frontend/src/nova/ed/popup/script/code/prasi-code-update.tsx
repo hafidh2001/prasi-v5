@@ -99,11 +99,22 @@ export const remountPrasiModels = (arg: {
           const local_name = region.find((e) =>
             e.trim().startsWith("const local_name")
           );
+
           if (local_name) {
             m.local = {
               auto_render: false,
               name: new Function(`${local_name}; return local_name;`)(),
               value: m.local?.value || "",
+            };
+          }
+
+          const loop_name = region.find((e) =>
+            e.trim().startsWith("const loop_name")
+          );
+          if (loop_name) {
+            m.loop = {
+              name: loop_name,
+              list: m.loop?.list || "",
             };
           }
 
@@ -131,7 +142,7 @@ export const remountPrasiModels = (arg: {
       registerEditorOpener(editor, monaco, p);
       monacoEnableJSX(editor, monaco);
 
-      if ((m.model as any)?.__isDisposing) return;
+      if ((m.model as any)?.__isDisposing || m.model.isDisposed()) return;
       editor.setModel(m.model);
 
       editor.restoreViewState(foldRegionVState(m.model.getLinesContent()));
@@ -169,13 +180,18 @@ export const codeUpdate = {
       prop_name?: string;
       source_built?: string | null;
       local_name?: string;
+      loop_name?: string;
     }
   >,
   push(
     p: PG,
     id: string,
     source: string,
-    arg?: { prop_name?: string; local_name?: string }
+    arg?: {
+      prop_name?: string;
+      local_name?: string;
+      loop_name?: string;
+    }
   ) {
     this.p = p;
     const tree = getActiveTree(p);
@@ -240,6 +256,22 @@ export const codeUpdate = {
               } catch (e) {}
 
               source = `const local_name = "${q.local_name}";\n${source}`;
+            }
+
+            if (q.loop_name) {
+              try {
+                const loop_name = (q.source || "")
+                  .split(`= defineLoop`)
+                  .shift()
+                  ?.split("const ")
+                  .pop()
+                  ?.trim();
+                if (loop_name) {
+                  q.loop_name = loop_name;
+                }
+              } catch (e) {}
+
+              source = `const loop_name = "${q.loop_name}"\n${source}`;
             }
 
             let replace = { replacement: "", start: 0, end: 0 };

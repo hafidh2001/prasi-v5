@@ -1,22 +1,24 @@
 import { DeepReadonly } from "popup/flow/runtime/types";
-import { useEffect, useRef } from "react";
+import { ReactElement, useEffect } from "react";
 import { IItem } from "utils/types/item";
-import { getVersion, proxy, ref, useSnapshot } from "valtio";
-import { local_name } from "vi/lib/parent-local-args";
+import { getVersion, proxy, ref } from "valtio";
+import { local_name } from "./vi-local";
+import { ViMergedProps } from "vi/lib/types";
 
 export const ViLocalAutoRender = (opt: {
   name: string;
   value: any;
   effect: (local: any) => void;
-  children: any;
+  children: ReactElement;
   item: DeepReadonly<IItem>;
   local_value: Record<string, any>;
   local_render: Record<string, () => void>;
+  merged: ViMergedProps;
 }) => {
   const { local_render, local_value, item, value, effect, children } = opt;
 
-  if (!local_value[item.id]) {
-    local_value[item.id] = {
+  if (!local_value[opt.name]) {
+    local_value[opt.name] = {
       __autorender: true,
       [local_name]: value[local_name],
       __version: 0,
@@ -30,10 +32,12 @@ export const ViLocalAutoRender = (opt: {
         }),
       }),
     };
-    local_value[item.id].proxy.set = ref(local_value[item.id].proxy);
+    local_value[opt.name].proxy.set = ref(local_value[opt.name].proxy);
   }
 
-  const internal = local_value[item.id] as {
+  opt.merged[opt.name] = local_value[opt.name];
+
+  const internal = local_value[opt.name] as {
     __version: number;
     __autorender: boolean;
     __item_id: string;

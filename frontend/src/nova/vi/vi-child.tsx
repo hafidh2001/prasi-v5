@@ -3,13 +3,14 @@ import { FC } from "react";
 import { IItem } from "utils/types/item";
 import { ViRender } from "./vi-render";
 import { useVi } from "./lib/store";
+import { ViMergedProps } from "./lib/types";
 
 export const ViChilds: FC<{
   item: DeepReadonly<{ id: string; childs: IItem[] }>;
   is_layout: boolean;
-  __idx?: string | number;
   instance_id?: string;
-}> = ({ item, is_layout, __idx, instance_id }) => {
+  merged?: ViMergedProps;
+}> = ({ item, is_layout, instance_id, merged }) => {
   const { parents } = useVi(({ state, ref }) => ({
     parents: ref.item_parents,
   }));
@@ -20,7 +21,7 @@ export const ViChilds: FC<{
     return (
       <ViRender
         key={child.id}
-        __idx={__idx}
+        merged={merged}
         instance_id={instance_id}
         item={child}
         is_layout={is_layout}

@@ -1,9 +1,13 @@
 import { ScriptModel } from "crdt/node/load-script-models";
-import { JSXElement, JSXElementName } from "utils/script/parser/oxc-types";
+import {
+  JSXAttribute,
+  JSXElement,
+  JSXElementName,
+} from "utils/script/parser/oxc-types";
 import { SingleExportVar } from "./parse-item-types";
 import { cutCode } from "utils/script/jscript";
 
-export const parseItemPassProp = ({
+export const parseItemPassPropAndLoop = ({
   name,
   node,
   model,
@@ -17,8 +21,9 @@ export const parseItemPassProp = ({
   map?: { value?: string; item: string; idx?: string };
 }) => {
   if (name.type === "JSXIdentifier") {
-    if (name.name === "PassProp") {
-      (node as any).__processed = true;
+    if (name.name === "Loop") {
+      let name = "";
+      let val = "";
       for (const attr of node.openingElement.attributes) {
         if (
           attr.type === "JSXAttribute" &&
@@ -26,21 +31,34 @@ export const parseItemPassProp = ({
           attr.value
         ) {
           const prop_name = attr.name.name;
-
-          let value = "any";
-          let expr: any = attr.value;
-          if (attr.value.type === "JSXExpressionContainer") {
-            expr = attr.value.expression;
+          if (prop_name === "name") {
+            name = getValue(attr, model);
+          } else if (
+            prop_name === "list" &&
+            attr.value.type === "JSXExpressionContainer"
+          ) {
+            val = cutCode(model.source, attr.value.expression, -2);
           }
-          if (expr.type === "StringLiteral") {
-            value = "string";
-          } else if (expr.type === "BooleanLiteral") {
-            value = "boolean";
-          } else if (expr.type === "NumericLiteral") {
-            value = "number";
-          } else if (expr.type === "TSAsExpression") {
-            value = cutCode(model.source, expr.typeAnnotation, -2);
-          } 
+        }
+      }
+
+      if (name && val) {
+        exports[name] = {
+          type: "loop",
+          name: name,
+          list: val,
+        };
+      }
+    }
+    if (name.name === "PassProp") {
+      for (const attr of node.openingElement.attributes) {
+        if (
+          attr.type === "JSXAttribute" &&
+          attr.name.type === "JSXIdentifier" &&
+          attr.value
+        ) {
+          const prop_name = attr.name.name;
+          const value = getTypings(attr, model);
 
           if (prop_name !== "key") {
             exports[prop_name] = {
@@ -53,5 +71,42 @@ export const parseItemPassProp = ({
         }
       }
     }
+    (node as any).__processed = true;
   }
+};
+
+const getTypings = (attr: JSXAttribute, model: ScriptModel) => {
+  let value = "any";
+  let expr: any = attr.value;
+  if (attr.value?.type === "JSXExpressionContainer") {
+    expr = attr.value.expression;
+  }
+  if (expr.type === "StringLiteral") {
+    value = "string";
+  } else if (expr.type === "BooleanLiteral") {
+    value = "boolean";
+  } else if (expr.type === "NumericLiteral") {
+    value = "number";
+  } else if (expr.type === "TSAsExpression") {
+    value = cutCode(model.source, expr.typeAnnotation, -2);
+  }
+  return value;
+};
+
+const getValue = (attr: JSXAttribute, model: ScriptModel) => {
+  let value = "";
+  let expr: any = attr.value;
+  if (attr.value?.type === "JSXExpressionContainer") {
+    expr = attr.value.expression;
+  }
+  if (expr.type === "StringLiteral") {
+    value = expr.value;
+  } else if (expr.type === "BooleanLiteral") {
+    value = expr.value;
+  } else if (expr.type === "NumericLiteral") {
+    value = expr.value;
+  } else if (expr.type === "TSAsExpression") {
+    value = cutCode(model.source, expr.typeAnnotation, -2);
+  }
+  return value;
 };

@@ -25,14 +25,14 @@ export const generateImports = (
         );
         result.push(
           `const { ${v
-            .map((e) => e.name)
+            .map(importMap)
             .filter((e) => e)
             .join(", ")} } = p_${id};`
         );
       } else {
         result.push(
           `import { ${v
-            .map((e) => e.name)
+            .map(importMap)
             .filter((e) => e)
             .join(", ")} } from "./${id}"; /* ${models[id].title.trim()} */`
         );
@@ -41,6 +41,13 @@ export const generateImports = (
   }
 
   return result.length > 0 ? `\n` + result.join("\n") : "";
+};
+
+const importMap = (e: { name: string; type: string }) => {
+  if (e.type === "loop") {
+    return `${e.name}_idx, ${e.name}`;
+  }
+  return e.name;
 };
 
 const mergeParentVars = (

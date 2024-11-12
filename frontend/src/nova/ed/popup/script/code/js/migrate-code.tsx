@@ -1,6 +1,6 @@
 import { ScriptModel } from "crdt/node/load-script-models";
 import { generateImports } from "./generate-imports";
-import { generatePassProp } from "./generate-passprop";
+import { generatePassPropAndLoop } from "./generate-passprop";
 
 export const extractRegion = (code: string) => {
   if (code.startsWith("// #region")) {
@@ -33,7 +33,7 @@ export const migrateCode = (
   debug?: boolean
 ) => {
   const code = model.source;
-  const { local } = model;
+  const { local, loop } = model;
 
   if (code.startsWith("// #region")) {
     const lines = code.split("\n");
@@ -66,6 +66,16 @@ ${main_code}`;
 export const ${local.name} = defineLocal({
   name: local_name,
   value: ${local.value}
+});
+`;
+  }
+
+  if (loop) {
+    inject = `
+
+export const ${loop.name} = defineLoop({
+  name: local_name,
+  list: ${loop.list}
 });
 `;
   }
@@ -113,7 +123,7 @@ const generateRegion = (
   }
 ) => {
   const imports = generateImports(model, models, opt?.debug);
-  const passprop = generatePassProp(model);
+  const passprop = generatePassPropAndLoop(model);
   return `\
 // #region generated⠀
 // Do not modify code inside region, any modification will be lost.
@@ -121,6 +131,14 @@ const generateRegion = (
 import React from "react";\
 ${opt?.inject_start || ""}\
 ${model.local.name ? `const local_name = "${model.local.name}"` : ""}\
+${
+  model.loop.name
+    ? `\
+const loop_name = "${model.loop.name}"
+export const ${model.loop.name}_idx = 0 as number;\
+`
+    : ""
+}\
 ${imports}${passprop}${opt?.inject_end || ""}
 
 // #endregion`;

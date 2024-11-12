@@ -1,46 +1,31 @@
 import { DeepReadonly } from "popup/flow/runtime/types";
 import { IItem } from "utils/types/item";
+import { ViMergedProps } from "vi/lib/types";
 
 export const createViPassProp = (
   item: DeepReadonly<IItem>,
-  pass_props: Record<string, Record<string | number, any>>,
-  __idx?: string | number,
-  instance_id?: string
+  merged: ViMergedProps
 ) => {
-  return function (
-    this: any,
-    arg: { children: any } & Record<string, any>,
-    ...props: any[]
-  ) {
+  return function (this: any, arg: { children: any } & Record<string, any>) {
     const idx = arg.idx || "0";
 
-    if (!pass_props[item.id]) {
-      pass_props[item.id] = {};
-    }
-
-    if (!pass_props[item.id][idx]) {
-      pass_props[item.id][idx] = {};
-    }
+    let children = arg.children;
 
     for (const [k, v] of Object.entries(arg)) {
-      if (k === "children") continue;
-      pass_props[item.id][idx][k] = v;
+      if (k !== "children") {
+        merged[k] = v;
+        merged.__internal[k] = { from_id: item.id, type: "passprop" };
+      }
     }
 
-    if (typeof __idx !== "undefined") {
-      pass_props[item.id][idx].__idx = __idx;
-    }
-
-    let children = arg.children;
     if (isWritable(arg.children, "key")) {
       children.key = idx;
-      children.props.__idx = idx;
-      children.props.instance_id = instance_id;
+      children.props.merged = merged;
     } else {
       children = {
         ...arg.children,
         key: idx,
-        props: { ...arg.children.props, __idx: idx, instance_id },
+        props: { ...arg.children.props, merged: merged },
       };
     }
 

@@ -28,10 +28,10 @@ export const EdCompProp = () => {
   const comp = comp_def?.content_tree.component;
   const instance = node?.item?.component;
   const item = node?.item!;
-  const should_re_eval_props = p.ui.comp.re_eval_item_ids.has(item.id);
+  const should_re_eval_props = p.ui.comp.re_eval_item_ids.has(item?.id);
 
   useEffect(() => {
-    if (should_re_eval_props) {
+    if (should_re_eval_props && item) {
       if (!p.viref.comp_props) {
         p.viref.comp_props = {};
       }
@@ -103,7 +103,7 @@ export const EdCompProp = () => {
   );
 
   useEffect(() => {
-    if (local.comp_id !== comp_id) {
+    if (item && local.comp_id !== comp_id) {
       if (!local.loading) {
         local.loading = true;
         local.comp_id = comp_id;
@@ -135,7 +135,7 @@ export const EdCompProp = () => {
     }
   }, [comp_id]);
 
-  if (!node || !instance || !comp || local.loading) {
+  if (!item || !node || !instance || !comp || local.loading) {
     return (
       <div className="flex items-center justify-center flex-1 w-full text-sm h-full flex-col text-center space-y-1">
         <Sticker size={40} strokeWidth={1} />
@@ -242,7 +242,7 @@ export const EdCompProp = () => {
             }}
           />
           <MenuItem
-            label="Reset"
+            label="Reset to default"
             onClick={() => {
               getActiveTree(p).update(
                 `Reset ${ui.context_name} Prop`,

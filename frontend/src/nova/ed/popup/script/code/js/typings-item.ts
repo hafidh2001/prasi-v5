@@ -17,6 +17,13 @@ type DeepReadonly<T> = T extends Function
   : T extends object
     ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
     : T;
+
+const defineLoop: <T extends any>(arg: {
+  list: T[],
+  loop_name: string;
+  key?: (arg: { item:T,index:number })=> any
+}) => T
+ 
 const defineLocal: <
   T extends Record<string, any>,
   MODE extends "auto" | "manual"
@@ -52,7 +59,7 @@ const navigate: (url: string,
 const params: any;
 const props = null as {className: string} & Record<string, any>; 
 const children = null as any;
-const Loop = null as (<T extends any>(arg: { list: T[], render?: (item: T, index: number) => ReactNode } ) => ReactElement);
+const Loop = null as ((arg: {bind: any}) => ReactElement);
 const Local = null as (<T extends Record<string, any>>(arg: {
     name: string;
     idx?: any;

@@ -6,4 +6,9 @@ export type SingleExportVar =
       name: string;
       value: string;
       map?: { value?: string; item: string; idx?: string };
+    }
+  | {
+      type: "loop";
+      name: string;
+      list: string;
     };

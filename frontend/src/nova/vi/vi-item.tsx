@@ -5,15 +5,15 @@ import { DIV_PROPS, viDivProps } from "./lib/gen-parts";
 import { useVi } from "./lib/store";
 import { ViChilds } from "./vi-child";
 import { ViScript } from "./vi-script";
-import { DIV_PROPS_OPT } from "./lib/types";
+import { DIV_PROPS_OPT, ViMergedProps } from "./lib/types";
 
 export const ViItem: FC<{
   item: DeepReadonly<IItem>;
   is_layout: boolean;
   div_props?: (opt: DIV_PROPS_OPT) => DIV_PROPS;
-  __idx?: string | number;
+  merged?: ViMergedProps;
   instance_id?: string;
-}> = ({ item, is_layout, div_props, __idx, instance_id }) => {
+}> = ({ item, is_layout, div_props, instance_id, merged }) => {
   const { page, mode, ref } = useVi(({ state, ref, action }) => ({
     page: ref.page,
     db: ref.db,
@@ -33,8 +33,8 @@ export const ViItem: FC<{
     childs = (
       //@ts-ignore
       <ViChilds
-        __idx={__idx}
         item={page.root}
+        merged={merged}
         instance_id={instance_id}
         is_layout={is_layout}
       />
@@ -52,7 +52,6 @@ export const ViItem: FC<{
       if (item.childs) {
         childs = (
           <ViChilds
-            __idx={__idx}
             item={item}
             instance_id={instance_id}
             is_layout={is_layout}
@@ -65,9 +64,9 @@ export const ViItem: FC<{
   if (item.adv?.js) {
     return (
       <ViScript
-        __idx={__idx}
         item={item}
         childs={childs}
+        merged={merged}
         props={props}
         instance_id={instance_id}
         render={() => render({})}

@@ -1,6 +1,6 @@
 import { ScriptModel } from "crdt/node/load-script-models";
 
-export const generatePassProp = (model: ScriptModel) => {
+export const generatePassPropAndLoop = (model: ScriptModel) => {
   let result = "";
 
   const vars: Record<string, string> = {};
@@ -11,6 +11,7 @@ export const generatePassProp = (model: ScriptModel) => {
       idx: "",
     },
   };
+  const loop = { name: "", array_type: "" };
   for (const e of Object.values(model.exports)) {
     if (e.type === "passprop") {
       if (e.name !== "key") {
@@ -24,6 +25,10 @@ export const generatePassProp = (model: ScriptModel) => {
           }
         }
       }
+    }
+    if (e.type === "loop") {
+      loop.name = e.name;
+      loop.array_type = e.list;
     }
   }
 
@@ -39,7 +44,7 @@ ${Object.entries(vars)
   .map((e) => `${e[0]}: null as unknown as ${e[1]}`)
   .join(",\n")}
 }
-const PassProp: React.FC<{ key: any; children: any } & typeof pass_prop & Record<string, any>> = null as any
+const PassProp: React.FC<{ key?: any; children: any } & typeof pass_prop & Record<string, any>> = null as any
 ;`;
   }
 
