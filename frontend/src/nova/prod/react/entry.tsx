@@ -16,10 +16,10 @@ export const isPreview = () => {
 
 export const PrasiEntry = () => {
   const { status, init, mode, page } = useProdState(
-    ({ state: s, action: a }) => ({
+    ({ state: s, action: a, ref }) => ({
       status: s.status.router,
       mode: s.mode,
-      page: s.page,
+      page: ref.page,
       init: a.initRouter,
     })
   );

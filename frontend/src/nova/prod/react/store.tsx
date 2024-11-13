@@ -27,6 +27,7 @@ export const useProdState = defineStore({
     comps: {} as Record<string, EBaseComp>,
     page: null as null | PageRoute,
     layout: { id: "", root: null as null | EPage["content_tree"] },
+    vscode_exports: {} as any,
   },
   state: {
     ts: Date.now(),
@@ -48,12 +49,22 @@ export const useProdState = defineStore({
     initRouter() {
       if (s.status.router === "init") {
         s.status.router = "loading";
+
+        const site_id = (window as any)?._prasi?.site_id;
+        const fn = new Function(
+          location.hostname === "prasi.avolut.com" ||
+          location.pathname.startsWith(`/prod/${site_id}`)
+            ? `return import('/prod/${site_id}/index.js');`
+            : `return import('/index.js');`
+        );
+
         loadRouter().then(({ router, pages, site, layout }) => {
-          update((s) => {
+          update(async (s) => {
             s.site = site;
             r.layout = layout;
             r.router = router;
             r.pages = pages;
+            r.vscode_exports = await fn();
 
             if (site.api_url) {
               r.api = apiProxy(site.api_url);

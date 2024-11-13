@@ -59,6 +59,7 @@ export const ProdRouter = memo(() => {
               layout={layout as any}
               db={db}
               api={api}
+              vscode_exports={ref.vscode_exports}
               loader={{
                 async comps() {},
                 async pages(ids) {
