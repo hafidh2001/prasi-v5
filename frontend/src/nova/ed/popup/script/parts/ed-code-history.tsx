@@ -76,7 +76,6 @@ export const EdCodeHistory: FC<{
                   const index = local.list.findIndex(
                     (item) => item.id === history_id
                   );
-                  console.log(index, local.list, history_id);
 
                   if (index > 0) {
                     const back = local.list[index - 1].id;

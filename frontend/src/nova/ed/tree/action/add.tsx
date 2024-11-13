@@ -59,7 +59,6 @@ export const animalNames = [
   "cow",
   "crab",
   "deer",
-  "dog",
   "dove",
   "duck",
   "eagle",

@@ -120,11 +120,15 @@ export default () => (
                   .toLowerCase();
                 let item_name_tried = false;
                 while (merged[name]) {
-                  if (name !== item_name && !item_name_tried) {
-                    name = item_name;
+                  if (
+                    !item_name.toLowerCase().includes("item") &&
+                    name !== `${item_name}_item` &&
+                    !item_name_tried
+                  ) {
+                    name = `${item_name}_item`;
                     item_name_tried = true;
                   } else {
-                    name = `${animalNames[Math.floor(Math.random() * animalNames.length)]}`;
+                    name = `${animalNames[Math.floor(Math.random() * animalNames.length)]}_item`;
                   }
                 }
                 if (model.loop) {

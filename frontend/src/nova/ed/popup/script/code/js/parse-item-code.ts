@@ -184,6 +184,7 @@ export const parseItemCode = (model: ScriptModel) => {
 
               let idx = "";
               if (
+                idx_expr &&
                 idx_expr.type === "FormalParameter" &&
                 idx_expr.pattern.type === "Identifier"
               ) {

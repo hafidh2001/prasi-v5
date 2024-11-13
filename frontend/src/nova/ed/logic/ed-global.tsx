@@ -222,6 +222,7 @@ export const EDGlobal = {
             id: string;
             name: string;
             id_component_group: string | null;
+            component_ext?: { id: number }[];
           }[],
           groups: [] as { id: string; name: string }[],
           nodes: [] as NodeModel<CompPickerNode>[],

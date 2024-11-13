@@ -213,9 +213,10 @@ export const EdTopBar = () => {
             )}
           >
             <Save
-              size={15}
+              size={12}
               strokeWidth={1.5}
               className={cx(
+                "mr-1",
                 !p.ui.page.saved
                   ? "animate-pulse duration-500"
                   : ""

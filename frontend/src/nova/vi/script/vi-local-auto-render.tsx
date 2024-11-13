@@ -1,7 +1,7 @@
 import { DeepReadonly } from "popup/flow/runtime/types";
 import { ReactElement, useEffect } from "react";
 import { IItem } from "utils/types/item";
-import { getVersion, proxy, ref } from "valtio";
+import { getVersion, proxy, ref, useSnapshot } from "valtio";
 import { local_name } from "./vi-local";
 import { ViMergedProps } from "vi/lib/types";
 

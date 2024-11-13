@@ -7,16 +7,24 @@ import { CompPickerNode } from "./render-picker-node";
 import { compPickerToNodes } from "./to-nodes";
 import { Check } from "lucide-react";
 import { formatItemName } from "../../../tree/parts/node/node-name";
+import { useLocal } from "utils/react/use-local";
 
 export const RPNComponent: FC<{
   node: NodeModel<CompPickerNode>;
   prm: RenderParams;
   checked: boolean;
   onCheck: (item_id: string) => void;
-}> = ({ node, checked, onCheck }) => {
+  onRightClick: (arg: {
+    event: React.MouseEvent<HTMLElement, MouseEvent>;
+    comp_id: string;
+  }) => void;
+}> = ({ node, checked, onCheck, onRightClick }) => {
   const item = node.data;
   const p = useGlobal(EDGlobal, "EDITOR");
+  const local = useLocal({});
   if (!item) return <></>;
+  item.render = local.render;
+
   const popup = p.ui.popup.comp;
   const data = p.ui.popup.comp.data;
   let folder_item_count = 0;
@@ -60,6 +68,10 @@ export const RPNComponent: FC<{
 
   return (
     <div
+      onContextMenu={(e) => {
+        e.preventDefault();
+        onRightClick({ event: e, comp_id: item.id });
+      }}
       className={cx(
         "flex flex-col bg-white hover:bg-blue-50 cursor-pointer ",
         css`
@@ -68,6 +80,11 @@ export const RPNComponent: FC<{
           }
           &:hover .btn {
             opacity: 1;
+          }
+
+          &:hover {
+            outline: 1px solid #1f9cf0;
+            border: 1px solid #1f9cf0;
           }
         `,
         item.id === p.page.cur.id && `bg-blue-50`,
@@ -80,6 +97,19 @@ export const RPNComponent: FC<{
       )}
       onClick={(e) => {}}
     >
+      {item.ext && (
+        <img
+          onClick={() => {
+            if (popup.on_pick) {
+              popup.on_pick(item.id);
+              popup.on_pick = null;
+              p.render();
+            }
+          }}
+          src={`/comp_img/${item.id}`}
+          className="h-[100px] bg-white"
+        />
+      )}
       <div className={cx("flex items-stretch")}>
         <Name
           name={item.name}
@@ -142,9 +172,7 @@ const Name: FC<{ id: string; name: string; onClick: () => void }> = ({
         `
       )}
     >
-      <div>
-        {formatItemName(name)}
-      </div>
+      <div>{formatItemName(name)}</div>
       <div className={"text-[8px] opacity-70"}>{id}</div>
     </div>
   );

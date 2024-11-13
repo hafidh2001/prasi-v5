@@ -43,9 +43,7 @@ export const EdTreeNodeName: FC<{
   const script_model = getActiveTree(p)?.script_models?.[item.id];
   const local_name = script_model?.local?.name;
   const loop_name = script_model?.loop?.name;
-  if (item.name === "snake") {
-    console.log(script_model.loop);
-  }
+
   const has_error = p.viref.dev_item_error?.[item.id];
   return (
     <div className="text-[14px] relative flex flex-col justify-center cursor-pointer flex-1">

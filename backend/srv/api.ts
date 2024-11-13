@@ -3,6 +3,8 @@ export const apiDefinition = [
   await import("./api/_dbs"),
   await import("./api/_proxy"),
   await import("./api/comp-load"),
+  await import("./api/comp-img"),
+  await import("./api/comp-ext"),
   await import("./api/comp-history"),
   await import("./api/site-prod"),
   await import("./api/site-load"),

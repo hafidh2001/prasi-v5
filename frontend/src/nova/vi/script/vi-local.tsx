@@ -16,6 +16,7 @@ export const createViLocal = (
   return (opt: {
     name: string;
     value: any;
+    proxy?: any;
     effect: (local: any) => void;
     children: any;
   }) => {

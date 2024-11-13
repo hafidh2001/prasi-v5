@@ -68,6 +68,8 @@ export const ViScript: FC<{
     __internal: { ...merged?.__internal },
   };
 
+  const valtio_snapshot = {} as Record<string, any>;
+
   if (internal.item !== item) {
     internal.item = item;
     internal.Local = createViLocal(item, internal.value, local_render, _merged);
@@ -81,6 +83,15 @@ export const ViScript: FC<{
       }
     }
     internal.watch_auto_render = {};
+  }
+
+  for (const [k, v] of Object.entries(_merged)) {
+    if (v.__autorender && v.proxy && v.__item_id !== item.id) {
+      valtio_snapshot[k] = useSnapshot(v.proxy);
+      // this is a hack to make valtio only watch accessed properties
+      // and not all properties of the object
+      valtio_snapshot[k].__autorender;
+    }
   }
 
   useEffect(() => {
@@ -99,16 +110,6 @@ export const ViScript: FC<{
     }
   }
 
-  const valtio_snapshot = {} as Record<string, any>;
-  for (const [k, v] of Object.entries(_merged)) {
-    if (v.__autorender && v.proxy && v.__item_id !== item.id) {
-      valtio_snapshot[k] = useSnapshot(v.proxy);
-      // this is a hack to make valtio only watch accessed properties
-      // and not all properties of the object
-      valtio_snapshot[k].__autorender;
-    }
-  }
-
   const defineLocal = (arg: {
     name: string;
     value: any;
@@ -116,6 +117,18 @@ export const ViScript: FC<{
   }) => {
     arg.value[local_name] = arg.name;
     arg.value[render_mode] = arg.render_mode;
+    if (arg.render_mode === "auto") {
+      arg.value.set = new Proxy(
+        {},
+        {
+          get(target, p, receiver) {
+            return internal.value[arg.name]?.proxy?.[p];
+          },
+        }
+      );
+    } else {
+      arg.value.render = render;
+    }
     return arg.value;
   };
 

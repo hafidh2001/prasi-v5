@@ -17,6 +17,7 @@ import {
   compRenderPickerNode,
 } from "./comp-picker/render-picker-node";
 import { compPickerToNodes } from "./comp-picker/to-nodes";
+import { EdCompPickerCtxMenu } from "./comp-picker/ctx-menu";
 
 const ID_PRASI_UI = "13143272-d4e3-4301-b790-2b3fd3e524e6";
 
@@ -27,6 +28,11 @@ export const EdPopCompPicker = () => {
     tab: "Components",
     checked: new Set<string>(),
     shift: false,
+    ctx_menu: {
+      event: undefined as any,
+      comp_id: "",
+    },
+    edit_id: "",
   });
 
   const popup = p.ui.popup.comp;
@@ -70,6 +76,7 @@ export const EdPopCompPicker = () => {
           id: true,
           name: true,
           id_component_group: true,
+          component_ext: { select: { id: true } },
         },
       });
       compPickerToNodes(p);
@@ -523,6 +530,18 @@ export const EdPopCompPicker = () => {
                                     local.checked.add(item_id);
                                   }
                                 },
+                                {
+                                  edit_id: local.edit_id,
+                                  closeEdit() {
+                                    local.edit_id = "";
+                                    local.render();
+                                  },
+                                  activate({ comp_id, event }) {
+                                    local.ctx_menu.event = event;
+                                    local.ctx_menu.comp_id = comp_id;
+                                    local.render();
+                                  },
+                                },
                                 group_len[node.id]
                               )
                             }
@@ -535,6 +554,22 @@ export const EdPopCompPicker = () => {
               </>
             )}
           </div>
+          {local.ctx_menu && (
+            <EdCompPickerCtxMenu
+              {...local.ctx_menu}
+              onEdit={() => {
+                local.ctx_menu.event = undefined;
+                local.edit_id = local.ctx_menu.comp_id;
+                local.ctx_menu.comp_id = "";
+                local.render();
+              }}
+              onClose={() => {
+                local.ctx_menu.event = undefined;
+                local.ctx_menu.comp_id = "";
+                local.render();
+              }}
+            />
+          )}
         </div>
       </Modal>
     </>
