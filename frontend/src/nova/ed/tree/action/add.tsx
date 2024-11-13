@@ -6,7 +6,7 @@ import { IItem } from "utils/types/item";
 export const edActionAdd = async (p: PG, item?: IItem) => {
   const new_item: IItem = item || {
     id: createId(),
-    name: `${names[Math.floor(Math.random() * names.length)]}`,
+    name: `${animalNames[Math.floor(Math.random() * animalNames.length)]}`,
     type: "item",
     childs: [],
   };
@@ -45,7 +45,7 @@ export const edActionAdd = async (p: PG, item?: IItem) => {
   activateItem(p, new_item.id);
 };
 
-const names = [
+export const animalNames = [
   "ant",
   "ape",
   "bat",

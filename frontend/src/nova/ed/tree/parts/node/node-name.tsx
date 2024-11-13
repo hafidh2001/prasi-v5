@@ -2,6 +2,9 @@ import { NodeModel, RenderParams } from "@minoru/react-dnd-treeview";
 import { getActiveTree } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import {
+  BetweenHorizontalStart,
+  ChartNoAxesGantt,
+  ListMinus,
   ListStart,
   RectangleEllipsis,
   Scroll,
@@ -40,6 +43,9 @@ export const EdTreeNodeName: FC<{
   const script_model = getActiveTree(p)?.script_models?.[item.id];
   const local_name = script_model?.local?.name;
   const loop_name = script_model?.loop?.name;
+  if (item.name === "snake") {
+    console.log(script_model.loop);
+  }
   const has_error = p.viref.dev_item_error?.[item.id];
   return (
     <div className="text-[14px] relative flex flex-col justify-center cursor-pointer flex-1">
@@ -134,22 +140,22 @@ export const EdTreeNodeName: FC<{
             )}
 
             {(local_name || loop_name || has_error) && (
-              <div className="flex flex-1 items-center justify-end mr-1">
+              <div className="flex flex-1 items-center justify-end">
                 {loop_name && (
                   <div
                     className={cx(
-                      "border border-blue-600 text-blue-600 node-text px-1 rounded-[2px] flex items-center text-[9px] font-mono",
+                      " text-green-600 node-text px-1 border-r flex items-center text-[9px] font-mono",
                       !is_active && "bg-white"
                     )}
                   >
-                    <StretchHorizontal size={9} className="mr-1" />
+                    <ListMinus strokeWidth={2} size={9} className="mr-1" />
                     {loop_name}
                   </div>
                 )}
                 {local_name && (
                   <div
                     className={cx(
-                      "border border-blue-600 text-blue-600 node-text px-1 rounded-[2px] flex items-center text-[9px] font-mono",
+                      " text-blue-600 node-text px-1 border-r flex items-center text-[9px] font-mono",
                       !is_active && "bg-white"
                     )}
                   >

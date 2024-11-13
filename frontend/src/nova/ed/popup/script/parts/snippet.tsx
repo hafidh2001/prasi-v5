@@ -1,4 +1,5 @@
 import { getActiveNode } from "crdt/node/get-node-by-id";
+import { active, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import {
   ChevronDown,
@@ -11,6 +12,8 @@ import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { Button } from "utils/ui/form/Button";
 import { Popover } from "utils/ui/popover";
+import { mergeParentVars } from "../code/js/generate-imports";
+import { animalNames } from "../../../tree/action/add";
 
 export const EdCodeSnippet: FC<{}> = ({}) => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -105,6 +108,28 @@ export default () => (
                 local.open = false;
                 local.render();
                 p.script.snippet_pasted = true;
+                let name = "item";
+
+                const tree = getActiveTree(p);
+                const models = tree.script_models;
+                const model = models[active.item_id];
+
+                const merged = mergeParentVars(model, models);
+                const item_name = tree.nodes.map[active.item_id].item?.name
+                  .replace(/[\W_]+/g, "_")
+                  .toLowerCase();
+                let item_name_tried = false;
+                while (merged[name]) {
+                  if (name !== item_name && !item_name_tried) {
+                    name = item_name;
+                    item_name_tried = true;
+                  } else {
+                    name = `${animalNames[Math.floor(Math.random() * animalNames.length)]}`;
+                  }
+                }
+                if (model.loop) {
+                  model.loop.name = name;
+                }
                 p.script.do_edit(async ({ imports, wrapImports }) => {
                   let p_idx = 0;
                   return [
@@ -118,19 +143,19 @@ export default () => (
                         return true;
                       }),
                       `\
-const loop_name = "item";
-export const item_idx = 0 as number;
+export const ${name}_idx = 0 as number;
+const loop_name = "${name}";
 `,
                     ]),
                     `\
-export const item = defineLoop({
+export const ${name} = defineLoop({
   list: [1, 2, 3],
   loop_name
 })
 
 export default () => (
   <div {...props} className={cx(props.className, "")}>
-    <Loop bind={item} />
+    <Loop bind={${name}} />
   </div>
 )
 `,

@@ -113,7 +113,7 @@ export const remountPrasiModels = (arg: {
           );
           if (loop_name) {
             m.loop = {
-              name: loop_name,
+              name: new Function(`${loop_name}; return loop_name;`)(),
               list: m.loop?.list || "",
             };
           }

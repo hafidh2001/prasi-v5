@@ -50,7 +50,7 @@ const importMap = (e: { name: string; type: string }) => {
   return e.name;
 };
 
-const mergeParentVars = (
+export const mergeParentVars = (
   model: ScriptModel,
   models: Record<string, ScriptModel>,
   debug?: boolean

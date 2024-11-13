@@ -134,8 +134,8 @@ ${model.local.name ? `const local_name = "${model.local.name}"` : ""}\
 ${
   model.loop.name
     ? `\
-const loop_name = "${model.loop.name}"
-export const ${model.loop.name}_idx = 0 as number;\
+export const ${model.loop.name}_idx = 0 as number;
+const loop_name = "${model.loop.name}"\
 `
     : ""
 }\
