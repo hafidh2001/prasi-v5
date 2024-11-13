@@ -1,12 +1,11 @@
 import { waitUntil } from "prasi-utils";
 import { validate } from "uuid";
+import { crdt_comps, crdt_pages } from "../../ws/crdt/shared";
 import { dir } from "../dir";
 import { editor } from "../editor";
 import { parseTypeDef } from "../parser/parse-type-def";
 import { compressed } from "../server/compressed";
 import type { ServerCtx } from "../server/ctx";
-import { siteLoaded, siteLoading } from "./site";
-import { crdt_comps, crdt_pages } from "../../ws/crdt/shared";
 
 export const prasiLoader = async ({
   pathname,

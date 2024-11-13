@@ -7,7 +7,6 @@ import { useLocal } from "utils/react/use-local";
 import { jscript } from "utils/script/jscript";
 import { Loading } from "utils/ui/loading";
 import { defineScriptEdit } from "../parts/do-edit";
-import { defaultCode } from "./js/default-code";
 import { Monaco, MonacoEditor } from "./js/enable-jsx";
 import { jsxColorScheme } from "./js/jsx-style";
 import { registerPrettier } from "./js/register-prettier";

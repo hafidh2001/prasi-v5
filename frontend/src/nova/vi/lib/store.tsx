@@ -22,7 +22,6 @@ const viRef = {
   var_items: {} as Record<VAR_ID, { var: IVar<any>; item: IItem }>,
 
   wrapper: null as null | ViWrapperType,
-  cache_js: true as boolean,
   instanced: {} as Record<ITEM_ID, any>,
 
   page: null as null | ViPage,

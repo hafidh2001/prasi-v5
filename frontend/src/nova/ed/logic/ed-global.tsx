@@ -42,6 +42,8 @@ export const EDGlobal = {
     search: {
       text: "",
     },
+    typings_vscode: ``,
+    typings_entry: ``,
   },
   nav: {
     navigating: false,

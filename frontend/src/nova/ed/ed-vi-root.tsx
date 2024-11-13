@@ -26,9 +26,23 @@ export const EdViRoot = memo(() => {
         p.render();
       },
     }),
+    exports: {
+      status: "init" as "init" | "loading" | "done",
+      values: {},
+    },
   }).current;
   const [, _set] = useState({});
   const render = () => _set({});
+  useEffect(() => {
+    (async () => {
+      ref.exports.status = "loading";
+      const fn = new Function(`return import('/prod/${p.site.id}/index.js');`);
+      ref.exports.values = await fn();
+      ref.exports.status = "done";
+      (window as any).exports = ref.exports.values;
+      render();
+    })();
+  }, []);
 
   p.ui.editor.render = render;
   if (!p.page.cur) return <Loading />;
@@ -52,7 +66,7 @@ export const EdViRoot = memo(() => {
 
   return (
     <>
-      {!ref.page.root ? (
+      {!ref.page.root || ref.exports.status !== "done" ? (
         <Loading />
       ) : (
         <StoreProvider>
@@ -66,10 +80,10 @@ export const EdViRoot = memo(() => {
             mode={p.mode}
             enable_preload={false}
             wrapper={ref.wrapper}
-            enable_cache_js={false}
-            set_ref={(ref) => {
+            setRef={(ref) => {
               p.viref = ref;
             }}
+            vscode_exports={ref.exports.values}
           />
         </StoreProvider>
       )}

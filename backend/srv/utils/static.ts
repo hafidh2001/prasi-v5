@@ -30,7 +30,7 @@ export const staticFile = async (
   const static_file = {
     scanning: false,
     paths: new Set<string>(),
-    rescan() {}, // rescan will be overwritten below.
+    async rescan() {}, // rescan will be overwritten below.
     serve: (ctx: ServerCtx, arg?: { prefix?: string; debug?: boolean }) => {
       let pathname = ctx.url.pathname || "";
       if (arg?.prefix && pathname) {
@@ -86,8 +86,13 @@ export const staticFile = async (
 
         static_file.paths.add(join(path, file));
 
+        let type = mime.getType(file);
+        if (file.endsWith(".ts")) {
+          type = "application/javascript";
+        }
+
         addRoute(internal.router, undefined, `/${file}`, {
-          mime: mime.getType(file),
+          mime: type,
           path: file,
           fullpath: join(path, file),
         });
@@ -98,10 +103,13 @@ export const staticFile = async (
   await scan();
 
   static_file.rescan = () => {
-    clearTimeout(internal.rescan_timeout);
-    internal.rescan_timeout = setTimeout(() => {
-      scan();
-    }, 300);
+    return new Promise<void>((resolve) => {
+      clearTimeout(internal.rescan_timeout);
+      internal.rescan_timeout = setTimeout(async () => {
+        await scan();
+        resolve();
+      }, 300);
+    });
   };
 
   return static_file;

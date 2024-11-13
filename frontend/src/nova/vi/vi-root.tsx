@@ -14,28 +14,23 @@ export const ViRoot: FC<ViProp> = ({
   api,
   mode,
   wrapper,
-  enable_cache_js,
   enable_preload,
-  set_ref,
+  setRef: set_ref,
   edit_comp_id,
+  vscode_exports,
 }) => {
-  const {
-    syncProp,
-    ref,
-    resetCompInstance,
-  } = useVi(({ action, ref, state }) => ({
-    syncProp: action.syncProp,
-    ref,
-    resetCompInstance: action.resetCompInstance,
-  }));
+  const { syncProp, ref, resetCompInstance } = useVi(
+    ({ action, ref, state }) => ({
+      syncProp: action.syncProp,
+      ref,
+      resetCompInstance: action.resetCompInstance,
+    })
+  );
 
+  ref.vscode_exports = vscode_exports;
   ref.resetCompInstance = resetCompInstance;
 
   if (set_ref) set_ref(ref);
-
-  if (typeof enable_cache_js !== "undefined") {
-    ref.cache_js = enable_cache_js;
-  }
 
   if (!ref.init) {
     ref.init = true;

@@ -44,7 +44,7 @@ export const ViScript: FC<{
     parents,
     db,
     api,
-    cache_js,
+    vscode_exports,
     local_render,
     dev_item_error: dev_item_error,
     dev_tree_render,
@@ -53,10 +53,10 @@ export const ViScript: FC<{
     parents: ref.item_parents,
     db: ref.db,
     api: ref.api,
-    cache_js: ref.cache_js,
     local_render: ref.local_render,
     dev_item_error: ref.dev_item_error,
     dev_tree_render: ref.dev_tree_render,
+    vscode_exports: ref.vscode_exports,
   }));
 
   local_render[item.id] = render;
@@ -137,6 +137,7 @@ export const ViScript: FC<{
   };
 
   const final_args = {
+    ...vscode_exports,
     ...comp_args,
     ...script_args,
     ..._merged,

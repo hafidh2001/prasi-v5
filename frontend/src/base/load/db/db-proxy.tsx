@@ -3,6 +3,7 @@ import { get, set } from "idb-keyval";
 import { pack } from "msgpackr";
 import { fetchViaProxy, getProxyUrl } from "../proxy";
 import { gzipSync } from "fflate";
+import { waitUntil } from "prasi-utils";
 
 const schema_promise = {
   tables: {} as Record<string, any>,
@@ -10,12 +11,13 @@ const schema_promise = {
   rels: {} as Record<string, any>,
 };
 
-const db_mode = {} as Record<string, "msgpack" | "json">;
+const db_mode = {} as Record<string, "checking" | "msgpack" | "json">;
 const encode = new TextEncoder().encode;
 export const dbProxy = (dburl: string) => {
   const name = "";
 
   if (dburl && !db_mode[dburl]) {
+    db_mode[dburl] = "checking";
     fetchSendDb(
       {
         table: "check",
@@ -194,6 +196,27 @@ export const fetchSendDb = async (
   const load = async () => {
     let body: any = params;
     let result = null;
+    if (params.action === "check") {
+      result = await fetchViaProxy(
+        url,
+        body,
+        {
+          "content-type": "application/json",
+        },
+        false
+      );
+
+      try {
+        if (typeof result === "string") return JSON.parse(result);
+      } catch (e) {}
+      return result;
+    }
+    if (!db_mode[dburl] || db_mode[dburl] === "checking") {
+      await waitUntil(
+        () => !(!db_mode[dburl] || db_mode[dburl] === "checking")
+      );
+    }
+
     if (db_mode[dburl] === "msgpack") {
       body = gzipSync(new Uint8Array(pack(params)), {});
       const res = await fetch(getProxyUrl(url), { method: "POST", body });

@@ -15,12 +15,39 @@ import { typingsItem } from "./js/typings-item";
 
 export const reloadPrasiModels = async (p: PG, from: string) => {
   const tree = getActiveTree(p);
+  if (!p.script.typings_vscode) {
+    const res = await fetch(`/prod/${p.site.id}/typings/index.d.ts`);
+    p.script.typings_vscode = await res.text();
+    const def = await fetch(`/prod/${p.site.id}/_prasi/type_def`);
+    const entry = await def.json();
+    p.script.typings_entry = `
+declare global {
+  import * as _ from "index"
+  ${Object.entries(entry)
+    .map(([name, type]) => {
+      return `
+${type} ${name} = _.${name};`;
+    })
+    .join("\n")}
+}
+export {}
+`;
+  }
+
   await tree.reloadScriptModels();
 
   return [
     {
       name: "file:///typings-item.ts",
       source: typingsItem,
+    },
+    {
+      name: "file:///typings-vscode.d.ts",
+      source: p.script.typings_vscode,
+    },
+    {
+      name: "file:///typings-entry.d.ts",
+      source: p.script.typings_entry,
     },
     ...Object.values(tree.script_models),
   ] as ScriptModel[];
