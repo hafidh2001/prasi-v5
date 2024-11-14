@@ -16,7 +16,13 @@ const encode = new TextEncoder().encode;
 export const dbProxy = (dburl: string) => {
   const name = "";
 
-  if (dburl && !db_mode[dburl]) {
+  let is_url_valid = false;
+  try {
+    new URL(dburl);
+    is_url_valid = true;
+  } catch (e) {}
+
+  if (is_url_valid && dburl && !db_mode[dburl]) {
     db_mode[dburl] = "checking";
     fetchSendDb(
       {
@@ -37,6 +43,7 @@ export const dbProxy = (dburl: string) => {
     {},
     {
       get(_, table: string) {
+        if (!is_url_valid) return null;
         if (table === "_batch") {
           return {
             update: async (batch: any) => {
