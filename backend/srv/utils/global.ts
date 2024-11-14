@@ -9,6 +9,10 @@ export type PrasiSite = {
   status: "init" | "loading" | "ready";
   building: boolean;
   rsbuild?: Subprocess;
+  config: {
+    disable_lib?: boolean;
+    api_url?: string;
+  };
   promises: ((site: any) => void)[];
   watcher: Record<string, FSWatcher>;
   change_timeout: any;

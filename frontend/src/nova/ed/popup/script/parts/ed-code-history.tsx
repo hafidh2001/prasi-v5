@@ -11,7 +11,7 @@ import {
   Sticker,
 } from "lucide-react";
 import { Resizable } from "re-resizable";
-import { FC, useEffect } from "react";
+import { FC } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { LoadingSpinner } from "utils/ui/loading";

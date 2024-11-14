@@ -11,6 +11,8 @@ import {
   Save,
   ScrollText,
 } from "lucide-react";
+import { EdBundle } from "popup/build/ed-build";
+import { EdSave } from "popup/build/ed-save";
 import { closeEditor } from "popup/script/ed-workbench";
 import { useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
@@ -205,37 +207,9 @@ export const EdTopBar = () => {
             <ScrollText size={12} /> <div>Code</div>
           </div>
         </div>
-        {p.ui.page.saving && (
-          <div
-            className={cx(
-              "flex items-center",
-              !p.ui.page.saved ? "text-purple-600" : "text-green-700"
-            )}
-          >
-            <Save
-              size={12}
-              strokeWidth={1.5}
-              className={cx(
-                "mr-1",
-                !p.ui.page.saved
-                  ? "animate-pulse duration-500"
-                  : ""
-              )}
-            />
-            {p.ui.page.saved && (
-              <div className="-ml-[10px] rounded-md -mb-2 px-[2px] bg-white">
-                <CheckCheck
-                  size={11}
-                  strokeWidth={3}
-                  className="text-green-700"
-                />
-              </div>
-            )}
-            <div className={cx("text-[9px]")}>
-              {p.ui.page.saved ? "Saved" : "Saving..."}
-            </div>
-          </div>
-        )}
+
+        <EdBundle />
+        <EdSave />
       </div>
       <div></div>
       <div className="flex flex-row-reverse items-stretch">

@@ -1,8 +1,9 @@
 import { waitUntil } from "prasi-utils";
 import { prasiLoader } from "../utils/loader/prasi-prod";
-import { loadSite, siteLoaded, siteLoading } from "../utils/loader/site";
+import { rebuildSite, siteLoaded, siteLoading } from "../utils/loader/site";
 import type { ServerCtx } from "../utils/server/ctx";
 import { prodIndex } from "../utils/server/prod-index";
+import { editor } from "../utils/editor";
 
 export default {
   url: "/prod/:site_id/**",
@@ -12,7 +13,7 @@ export default {
     const pathname = params._ as string;
     if (!siteLoaded(site_id)) {
       if (!siteLoading(site_id)) {
-        loadSite(site_id);
+        editor.site.load(site_id);
       }
       if (pathname.endsWith(".js")) {
         return new Response(

@@ -11,7 +11,7 @@ import { c } from "../color";
 import { buildFrontendTypings } from "../build/frontend-typings";
 import type { PrasiSite } from "../global";
 
-export const loadSite = async (
+export const rebuildSite = async (
   site_id: string,
   opt?: { force_reload?: boolean }
 ) => {
@@ -29,6 +29,7 @@ export const loadSite = async (
     building: false,
     promises: [],
     watcher: {},
+    config: {},
     change_timeout: null,
   };
   const site = g.site[site_id];
@@ -57,7 +58,7 @@ export const loadSite = async (
     }
     if (!site.building) {
       site.building = true;
-      await rebuildSite(site);
+      await executeRebuildSite(site);
       site.building = false;
       site.status = "ready";
     }
@@ -77,7 +78,7 @@ export const siteLoading = (site_id: string) => {
   return false;
 };
 
-const rebuildSite = async (site: PrasiSite) => {
+const executeRebuildSite = async (site: PrasiSite) => {
   const path = `/code/${site.id}/site/src`;
   const logPath = dir.data(`${path}/log/frontend.log`);
   await dirAsync(dir.data(`${path}/log`));

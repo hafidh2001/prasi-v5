@@ -1,7 +1,7 @@
 import { pack, unpack } from "msgpackr";
 import type { editor } from ".";
-import { loadSite } from "../loader/site";
-import { cacheResolve } from "../server/cache-resolve";
+import { rebuildSite } from "../loader/site";
+import { loadCache } from "../server/load-cache";
 
 export const editorSiteLoad = async (
   ed: typeof editor,
@@ -15,19 +15,34 @@ export const editorSiteLoad = async (
     }
   }
 
-  loadSite(site_id);
-
-  return await cacheResolve({
-    cached: () => ed.cache.tables.site.find({ where: { site_id } })[0],
-    resolve: (cached) => unpack(cached.data),
-    load: () => _db.site.findFirst({ where: { id: site_id } }),
-    store: (result, cached) => {
+  const site = await loadCache({
+    is_cached() {
+      const res = ed.cache.tables.site.find({ where: { site_id } })[0]?.data;
+      if (res) {
+        return unpack(res);
+      }
+      return undefined;
+    },
+    load() {
+      return _db.site.findFirst({ where: { id: site_id } });
+    },
+    save(result, is_new) {
+      let id = undefined;
+      if (!is_new) {
+        id = ed.cache.tables.site.find({ where: { site_id } })[0].id;
+      }
       ed.cache.tables.site.save({
-        id: cached?.id,
-        data: pack(result),
+        id,
+        data: new Uint8Array(pack(result)),
         site_id,
         ts: Date.now(),
       });
     },
   });
+
+  if (site) {
+    rebuildSite(site.id);
+  }
+
+  return site;
 };

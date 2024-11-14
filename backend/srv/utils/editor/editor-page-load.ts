@@ -1,6 +1,6 @@
 import { pack, unpack } from "msgpackr";
-import { cacheResolve } from "../server/cache-resolve";
 import type { editor } from ".";
+import { loadCache } from "../server/load-cache";
 
 export const editorPageLoad = async (
   ed: typeof editor,
@@ -14,10 +14,15 @@ export const editorPageLoad = async (
     }
   }
 
-  return await cacheResolve({
-    cached: () => ed.cache.tables.page.find({ where: { page_id } })[0],
-    resolve: (cached) => unpack(cached.root),
-    load: () => {
+  const res = await loadCache({
+    is_cached() {
+      const res = ed.cache.tables.page.find({ where: { page_id } })[0].root;
+      if (res) {
+        return unpack(res);
+      }
+      return res;
+    },
+    load() {
       return _db.page.findFirst({
         where: { id: page_id, is_deleted: false },
         select: {
@@ -33,13 +38,18 @@ export const editorPageLoad = async (
         },
       });
     },
-    store: (result, cached) => {
+    save(data, is_new) {
+      let id = undefined;
+      if (!is_new) {
+        id = ed.cache.tables.page.find({ where: { page_id } })[0].id;
+      }
       ed.cache.tables.page.save({
-        id: cached?.id,
-        root: new Uint8Array(pack(result)),
+        id,
+        root: new Uint8Array(pack(data)),
         page_id,
         ts: Date.now(),
       });
     },
   });
+  return res;
 };

@@ -17,6 +17,7 @@ import {
   createSiteCrdt,
   MAX_HISTORY_SIZE,
 } from "./shared";
+import { validate } from "uuid";
 
 const crdt_loading = new Set<string>();
 
@@ -35,12 +36,18 @@ export const wsPageClose = (ws: ServerWebSocket<WSContext>) => {
 
 export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
   const page_id = ws.data.pathname.substring(`/crdt/page-`.length);
+
+  if (!validate(page_id)) {
+    console.warn("Invalid page_id:" + page_id);
+    return;
+  }
   if (!crdt_pages[page_id]) {
     if (crdt_loading.has(page_id)) {
       await waitUntil(() => crdt_pages[page_id]);
       crdt_loading.delete(page_id);
     } else {
       crdt_loading.add(page_id);
+
       const db_page = await _db.page.findFirst({
         where: { id: page_id },
         select: { content_tree: true, id_site: true, url: true },

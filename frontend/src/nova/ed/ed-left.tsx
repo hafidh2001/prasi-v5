@@ -60,24 +60,19 @@ export const EdLeft = () => {
           </div>
 
           <div className={cx("flex items-stretch")}>
-            <Tooltip content="Rebuild" asChild>
-              <div
-                className="btn transition-all flex items-center justify-center hover:bg-blue-600"
-                dangerouslySetInnerHTML={{ __html: iconRebuildLarge }}
-              />
-            </Tooltip>
-            <Tooltip content="VSCode" asChild>
+            {/* <Tooltip content="VSCode" asChild>
               <div
                 className="btn transition-all flex items-center justify-center hover:bg-blue-600"
                 dangerouslySetInnerHTML={{ __html: iconVSCode }}
               />
-            </Tooltip>
+            </Tooltip> */}
 
-            <Tooltip content="Deploy" asChild>
+            <Tooltip content="Deploy" asChild className="btn transition-all hover:bg-blue-600 flex items-center space-x-1">
               <div
-                className="btn transition-all flex items-center justify-center hover:bg-blue-600"
+                className=" flex items-center justify-center "
                 dangerouslySetInnerHTML={{ __html: iconServer }}
               />
+              <div>Deploy</div>
             </Tooltip>
           </div>
         </div>
