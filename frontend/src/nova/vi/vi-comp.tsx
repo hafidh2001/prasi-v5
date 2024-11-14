@@ -14,7 +14,8 @@ export const ViComp: FC<{
   is_layout: boolean;
   div_props?: (opt: DIV_PROPS_OPT) => DIV_PROPS;
   merged?: ViMergedProps;
-}> = ({ item, is_layout, div_props, merged }) => {
+  standalone?: string;
+}> = ({ item, is_layout, div_props, merged, standalone }) => {
   const {
     comps,
     instances,

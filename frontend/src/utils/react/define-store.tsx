@@ -53,21 +53,23 @@ export const defineStore = function <
   }[];
 }) {
   return <Z extends object>(
-    selector: (arg: { ref: R; state: Snapshot<T>; action: K }) => Z
+    selector: (arg: { ref: R; state: Snapshot<T>; action: K }) => Z,
+    instance_name?: string
   ) => {
+    const name = init.name + instance_name;
     const internal = useRef({
       mounted: true,
     });
 
     const store = useContext(store_ctx);
     const init_ctx = store.ctx;
-    if (!init_ctx[init.name] && init.state) {
-      init_ctx[init.name] = {
+    if (!init_ctx[name] && init.state) {
+      init_ctx[name] = {
         state: proxy(init.state),
         ref: init.ref || {},
       };
     }
-    const ctx = init_ctx[init.name];
+    const ctx = init_ctx[name];
 
     const ref = ctx.ref;
     const state = useSnapshot(ctx.state);

@@ -10,7 +10,8 @@ export const ViChilds: FC<{
   is_layout: boolean;
   instance_id?: string;
   merged?: ViMergedProps;
-}> = ({ item, is_layout, instance_id, merged }) => {
+  standalone?: string;
+}> = ({ item, is_layout, instance_id, merged, standalone }) => {
   const { parents } = useVi(({ state, ref }) => ({
     parents: ref.item_parents,
   }));
@@ -25,6 +26,7 @@ export const ViChilds: FC<{
         instance_id={instance_id}
         item={child}
         is_layout={is_layout}
+        standalone={standalone}
       />
     );
   });

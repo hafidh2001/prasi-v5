@@ -44,14 +44,11 @@ export const Loading: FC<{
   alt?: ReactElement;
   pointer?: boolean;
 }> = ({ children, className, show, backdrop, note, alt, pointer }) => {
-  const local = useLocal(
-    {
-      icon: <div className="px-4 py-1">Loading...</div>,
-      value: 0.111,
-      ival: null as any,
-    },
-    () => {}
-  );
+  const local = useLocal({
+    icon: <div className="px-4 py-1">Loading...</div>,
+    value: 0.111,
+    ival: null as any,
+  });
   useEffect(() => {
     local.ival = setInterval(() => {
       local.value += 0.1333;

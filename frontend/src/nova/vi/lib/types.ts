@@ -4,7 +4,7 @@ import { IItem } from "utils/types/item";
 import { ViRender } from "vi/vi-render";
 import { ViRef } from "./store";
 
-export type ViPage = {
+export type ViPageRoot = {
   id: string;
   root: EPage["content_tree"];
   url: string;
@@ -15,8 +15,8 @@ export type DIV_PROPS_OPT = { item: IItem; ref: ViRef; instance_id?: string };
 export type ViComps = Record<string, IItem>;
 
 export type ViProp = {
-  page: ViPage;
-  layout?: ViPage;
+  page: ViPageRoot;
+  layout?: ViPageRoot;
   comps: ViComps;
   db: any;
   api: any;
@@ -37,6 +37,7 @@ export type ViWrapperType = FC<{
   is_layout: boolean;
   ViRender: typeof ViRender;
   merged?: ViMergedProps;
+  standalone?:string;
   instance_id?: string;
 }>;
 

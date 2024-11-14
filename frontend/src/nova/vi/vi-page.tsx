@@ -1,15 +1,29 @@
 import { DeepReadonly } from "popup/flow/runtime/types";
+import { FC } from "react";
+import { IItem } from "utils/types/item";
 import { ErrorBox } from "./lib/error-box";
 import { useVi } from "./lib/store";
+import { ViPageRoot } from "./lib/types";
 import { ViRender } from "./vi-render";
-import { IItem } from "utils/types/item";
 
-export const ViPage = () => {
-  const { page, layout, parents } = useVi(({ ref }) => ({
-    page: ref.page,
-    layout: ref.layout,
-    parents: ref.item_parents,
-  }));
+export const ViPage: FC<{ init?: { page: ViPageRoot; name: string } }> = ({
+  init,
+}) => {
+  const { layout, parents, ref } = useVi(
+    ({ ref }) => ({
+      page: ref.page,
+      layout: ref.layout,
+      parents: ref.item_parents,
+      ref,
+    }),
+    init?.name
+  );
+
+  let page = ref.page;
+  if (init?.page) {
+    ref.page = init.page;
+    page = ref.page;
+  }
 
   const is_layout = !!layout?.root;
   const content_tree = (is_layout

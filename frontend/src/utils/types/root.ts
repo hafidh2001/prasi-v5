@@ -1,10 +1,3 @@
-import { IItem } from "./item";
+import { EPageContentTree } from "logic/types";
 
-export type IRoot = {
-  id: "root";
-  type: "root";
-  id_page?: string;
-  responsive?: "mobile" | "desktop";
-  childs: IItem[];
-  component_ids?: string[];
-};
+export type IRoot = EPageContentTree;

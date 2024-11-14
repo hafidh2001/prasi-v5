@@ -51,11 +51,14 @@ export const EDGlobal = {
     history: [] as { comp_id?: string; item_id: string; ui?: any }[],
   },
   ui: {
+    topbar: {
+      render: () => {},
+      mode: "page" as "page" | "bundle" | "deploy",
+    },
     page: {
       loaded: false,
       saving: false,
       saved: false,
-      topbar_render: () => {},
     },
     panel: {
       left: localStorage.getItem("prasi-panel-left") !== "n",

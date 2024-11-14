@@ -38,11 +38,7 @@ const start = async () => {
 
   if (el) {
     react.root = createRoot(el);
-    react.root.render(
-      <StrictMode>
-        <Root />
-      </StrictMode>
-    );
+    react.root.render(<Root />);
   }
 };
 

@@ -1,4 +1,5 @@
 import { NodeModel } from "@minoru/react-dnd-treeview";
+import { PanelLeftClose } from "lucide-react";
 import { useEffect } from "react";
 import { useGlobal } from "../../../../utils/react/use-global";
 import { useLocal } from "../../../../utils/react/use-local";
@@ -32,14 +33,14 @@ export const EdTreeSearch = () => {
           local.render();
         }
       }}
-      className="flex-1"
+      className="flex-1 flex items-stretch"
       onMouseLeave={() => {
         local.hover = false;
         local.render();
       }}
     >
       <form
-        className="flex items-stretch h-[24px] "
+        className="flex flex-1 items-stretch h-[24px] "
         autoComplete="off"
         onSubmit={(e) => {
           e.preventDefault();
@@ -91,6 +92,22 @@ export const EdTreeSearch = () => {
           }}
         />
       </form>
+
+      <div
+        className="flex items-center px-1 cursor-pointer hover:text-blue-600"
+        onClick={() => {
+          if (!p.ui.panel.left) {
+            p.ui.panel.left = true;
+            localStorage.setItem("prasi-panel-left", "y");
+          } else {
+            p.ui.panel.left = false;
+            localStorage.setItem("prasi-panel-left", "n");
+          }
+          p.render();
+        }}
+      >
+        <PanelLeftClose size={15} />
+      </div>
       {/* {(local.focus || local.hover || p.ui.tree.search.value) && (
         <div className="p-1 bg-white text-xs border-t flex space-x-1 justify-between">
           <div className="flex space-x-1">

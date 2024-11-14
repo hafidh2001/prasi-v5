@@ -27,6 +27,7 @@ export const ViScript: FC<{
     };
   merged?: ViMergedProps;
   instance_id?: string;
+  standalone?: string;
   render: () => void;
 }> = ({ item, childs, props, merged, render }) => {
   const internal = useLocal({

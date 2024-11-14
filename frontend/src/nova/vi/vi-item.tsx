@@ -13,7 +13,8 @@ export const ViItem: FC<{
   div_props?: (opt: DIV_PROPS_OPT) => DIV_PROPS;
   merged?: ViMergedProps;
   instance_id?: string;
-}> = ({ item, is_layout, div_props, instance_id, merged }) => {
+  standalone?: string;
+}> = ({ item, is_layout, div_props, instance_id, merged, standalone }) => {
   const { page, mode, ref } = useVi(({ state, ref, action }) => ({
     page: ref.page,
     db: ref.db,
@@ -37,6 +38,7 @@ export const ViItem: FC<{
         merged={merged}
         instance_id={instance_id}
         is_layout={is_layout}
+        standalone={standalone}
       />
     );
   } else {
@@ -55,6 +57,7 @@ export const ViItem: FC<{
             item={item}
             instance_id={instance_id}
             is_layout={is_layout}
+            standalone={standalone}
           />
         );
       }
@@ -70,6 +73,7 @@ export const ViItem: FC<{
         props={props}
         instance_id={instance_id}
         render={() => render({})}
+        standalone={standalone}
       />
     );
   }

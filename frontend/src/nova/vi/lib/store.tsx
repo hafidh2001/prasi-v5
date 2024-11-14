@@ -1,7 +1,7 @@
 import { DeepReadonly } from "popup/flow/runtime/types";
 import { IItem, IVar } from "utils/types/item";
 import { defineStore } from "../../../utils/react/define-store";
-import { ViComps, ViPage, ViWrapperType } from "./types";
+import { ViComps, ViPageRoot, ViWrapperType } from "./types";
 
 type ITEM_ID = string;
 type VAR_NAME = string;
@@ -24,8 +24,8 @@ const viRef = {
   wrapper: null as null | ViWrapperType,
   instanced: {} as Record<ITEM_ID, any>,
 
-  page: null as null | ViPage,
-  layout: null as null | ViPage,
+  page: null as null | ViPageRoot,
+  layout: null as null | ViPageRoot,
   comp: { instances: {} as Record<string, IItem>, loaded: new Set<string>() },
 
   edit_comp_id: "",
@@ -38,6 +38,8 @@ const viRef = {
   resetLocal: () => {},
 
   vscode_exports: {} as Record<string, any>,
+
+  standalone: false
 };
 export type ViRef = typeof viRef;
 
@@ -69,8 +71,8 @@ export const useVi = defineStore({
       mode,
       edit_comp_id,
     }: {
-      page: ViPage;
-      layout?: ViPage;
+      page: ViPageRoot;
+      layout?: ViPageRoot;
       comps: ViComps;
       db: any;
       api: any;

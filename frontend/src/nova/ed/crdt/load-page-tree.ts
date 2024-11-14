@@ -50,9 +50,9 @@ export const loadPageTree = (
       p.ui.page.saving = setTimeout(() => {
         p.ui.page.saving = false;
         p.ui.page.saved = true;
-        p.ui.page.topbar_render();
+        p.ui.topbar.render();
       }, 3000);
-      p.ui.page.topbar_render();
+      p.ui.topbar.render();
     }
 
     const content_tree = immer.get();
@@ -126,7 +126,7 @@ export const loadPageTree = (
     ) {
       p.ui.page.saving = true;
       p.ui.page.saved = false;
-      p.ui.page.topbar_render();
+      p.ui.topbar.render();
 
       const _fn = (tree: EPage["content_tree"]) => {
         sync.page.pending_action(page_id, action_name);

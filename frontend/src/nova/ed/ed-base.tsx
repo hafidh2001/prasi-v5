@@ -140,6 +140,8 @@ export const EdBase = () => {
         w.pointer_active = true;
       }}
     >
+      <EdTopBar />
+
       <PanelGroup autoSaveId="prasi-editor-left" direction="horizontal">
         <Panel
           hidden={!p.ui.panel.left}
@@ -149,8 +151,6 @@ export const EdBase = () => {
         </Panel>
         <PanelResizeHandle />
         <Panel defaultSize={78} className="flex flex-col">
-          <EdTopBar />
-
           <PanelGroup autoSaveId="prasi-editor-right" direction="horizontal">
             <Panel className="flex">
               {p.status === "page-not-found" ? (

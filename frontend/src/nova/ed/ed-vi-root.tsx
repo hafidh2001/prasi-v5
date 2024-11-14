@@ -8,7 +8,7 @@ import { StoreProvider } from "utils/react/define-store";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { Loading } from "utils/ui/loading";
-import { ViComps, ViPage, ViWrapperType } from "vi/lib/types";
+import { ViComps, ViPageRoot, ViWrapperType } from "vi/lib/types";
 import { ViRoot } from "vi/vi-root";
 import { EdTreeCtxMenu } from "./tree/parts/ctx-menu";
 import { IItem } from "utils/types/item";
@@ -18,7 +18,7 @@ export const EdViRoot = memo(() => {
   const ref = useRef({
     db: dbProxy(p.site.config.api_url),
     api: apiProxy(p.site.config.api_url),
-    page: null as ViPage | null,
+    page: null as ViPageRoot | null,
     comps: {} as ViComps,
     wrapper: ViWrapper({
       p,

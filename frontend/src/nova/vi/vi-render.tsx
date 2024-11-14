@@ -13,10 +13,15 @@ export const ViRender: FC<{
   div_props?: (opt: DIV_PROPS_OPT) => DIV_PROPS;
   instance_id?: string;
   merged?: ViMergedProps;
-}> = ({ item, is_layout, div_props, instance_id, merged }) => {
-  const { wrapper } = useVi(({ ref }) => ({
-    wrapper: ref.wrapper,
-  }));
+  standalone?: string;
+}> = ({ item, is_layout, div_props, instance_id, merged, standalone }) => {
+  const { wrapper, ref } = useVi(
+    ({ ref }) => ({
+      wrapper: ref.wrapper,
+      ref,
+    }),
+    standalone
+  );
 
   if (item.hidden) return null;
 
@@ -29,6 +34,7 @@ export const ViRender: FC<{
         is_layout={is_layout}
         instance_id={instance_id}
         merged={merged}
+        standalone={standalone}
         ViRender={item.component?.id ? ViComp : ViItem}
       />
     );
@@ -41,6 +47,7 @@ export const ViRender: FC<{
         merged={merged}
         is_layout={is_layout}
         div_props={div_props}
+        standalone={standalone}
       />
     );
   } else {
@@ -51,6 +58,7 @@ export const ViRender: FC<{
         div_props={div_props}
         merged={merged}
         instance_id={instance_id}
+        standalone={standalone}
       />
     );
   }

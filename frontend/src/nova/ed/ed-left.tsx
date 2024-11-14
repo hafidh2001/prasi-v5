@@ -29,54 +29,6 @@ export const EdLeft = () => {
   return (
     <div className={cx("flex flex-1 flex-col relative border-r select-none")}>
       <div className="absolute inset-0 flex flex-col overflow-hidden">
-        <div
-          className={cx(
-            "h-[35px] border-b flex p-1 items-stretch text-[12px] justify-between",
-            css`
-              .btn {
-                padding: 0px 5px;
-                &:hover {
-                  border-radius: 3px;
-                  color: white;
-                  cursor: pointer;
-                }
-              }
-            `
-          )}
-        >
-          <div className="flex items-stretch">
-            <EdSitePicker />
-            <Tooltip content="Logout" asChild>
-              <div
-                onClick={() => {
-                  if (confirm("Logout ?")) {
-                    location.href = "/logout";
-                  }
-                }}
-                className="bg-slate-100 self-center hover:text-white cursor-pointer w-[22px] h-[22px] rounded-sm ml-1 transition-all flex items-center justify-center hover:bg-blue-600"
-                dangerouslySetInnerHTML={{ __html: iconLogout }}
-              ></div>
-            </Tooltip>
-          </div>
-
-          <div className={cx("flex items-stretch")}>
-            {/* <Tooltip content="VSCode" asChild>
-              <div
-                className="btn transition-all flex items-center justify-center hover:bg-blue-600"
-                dangerouslySetInnerHTML={{ __html: iconVSCode }}
-              />
-            </Tooltip> */}
-
-            <Tooltip content="Deploy" asChild className="btn transition-all hover:bg-blue-600 flex items-center space-x-1">
-              <div
-                className=" flex items-center justify-center "
-                dangerouslySetInnerHTML={{ __html: iconServer }}
-              />
-              <div>Deploy</div>
-            </Tooltip>
-          </div>
-        </div>
-
         {p.status === "page-not-found" ? (
           <div className="flex items-center justify-center flex-1 text-sm">
             <TreeDeciduous size={40} strokeWidth={1} className="mr-1" />

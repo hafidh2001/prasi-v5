@@ -3,21 +3,30 @@ import set from "lodash.set";
 import { active } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import {
-  CheckCheck,
+  Bolt,
+  Book,
+  BookCopy,
+  BookOpenText,
+  Cog,
+  ExternalLink,
   LayoutTemplate,
-  PanelLeftClose,
+  LibraryBig,
+  Newspaper,
+  Notebook,
   PanelLeftOpen,
   PanelRightOpen,
-  Save,
   ScrollText,
+  Settings,
+  Settings2,
 } from "lucide-react";
-import { EdBundle } from "popup/build/ed-build";
 import { EdSave } from "popup/build/ed-save";
 import { closeEditor } from "popup/script/ed-workbench";
-import { useEffect } from "react";
+import { FC, ReactElement, useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { Tooltip } from "utils/ui/tooltip";
+import { CPrasi } from "./cprasi/cprasi";
+import { Popover } from "utils/ui/popover";
 
 export const navPrevItem = (p: PG) => {
   p.nav.navigating = true;
@@ -73,8 +82,7 @@ export const navNextItem = (p: PG) => {
 export const EdTopBar = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({});
-  if (p.ui.page.topbar_render !== local.render)
-    p.ui.page.topbar_render = local.render;
+  if (p.ui.topbar.render !== local.render) p.ui.topbar.render = local.render;
 
   const ui = {
     "ui.right.tab": p.ui.right.tab,
@@ -103,33 +111,85 @@ export const EdTopBar = () => {
   const can_next = p.nav.cursor <= p.nav.history.length - 1;
   const can_back = p.nav.cursor - 2 >= 0;
 
+  const topbar_mode = p.ui.topbar.mode;
   return (
     <div
       className={cx(
-        "min-h-[35px] h-[35px] border-b flex items-stretch text-[12px] justify-between "
+        "min-h-[35px] h-[35px] border-b flex items-stretch text-[12px] justify-between relative",
+        "",
+        css`
+          .btn {
+            height: 24px;
+          }
+        `
       )}
     >
       <div className="flex items-stretch">
-        <div
-          className="flex items-center px-2 cursor-pointer hover:bg-blue-600 hover:text-white border-r"
-          onClick={() => {
-            if (!p.ui.panel.left) {
-              p.ui.panel.left = true;
-              localStorage.setItem("prasi-panel-left", "y");
-            } else {
-              p.ui.panel.left = false;
-              localStorage.setItem("prasi-panel-left", "n");
-            }
-            p.render();
-          }}
-        >
-          {p.ui.panel.left ? (
-            <PanelLeftClose size={15} />
-          ) : (
+        <ButtonBox>
+          <Button
+            className={cx(
+              "border rounded-sm rounded-r-none border-r-0 btn px-2 py-[2px] flex items-center space-x-1",
+              "hover:bg-blue-100 bg-white"
+            )}
+            popover={{
+              content: (
+                <CPrasi
+                  id="b480c554-577d-4d66-8949-2a3e982973ac"
+                  name="setting"
+                  size="500x500"
+                />
+              ),
+            }}
+          >
+            <Settings2 size={12} />
+          </Button>
+          <Button
+            className={cx(
+              "border border-r-0 btn px-2 py-[2px] flex items-center space-x-1",
+              "hover:bg-blue-100 bg-white"
+            )}
+          >
+            <img src="/img/vscode.svg" width={12} />
+          </Button>
+          <Button
+            className={cx(
+              "border border-r-0 btn px-2 py-[2px] flex items-center space-x-1",
+              "hover:bg-blue-100 bg-white"
+            )}
+          >
+            <BookOpenText size={12} />
+            <div className="capitalize">{p.site.name}</div>
+          </Button>
+          <Button
+            className={cx(
+              "border rounded-sm rounded-l-none btn px-2 py-[2px] flex items-center space-x-1",
+              "hover:bg-blue-100 bg-white"
+            )}
+          >
+            <Newspaper size={12} />{" "}
+            <div className="capitalize">{p.page.cur.name}</div>
+          </Button>
+        </ButtonBox>
+        {!p.ui.panel.left && (
+          <div
+            className="flex items-center m-1 cursor-pointer hover:text-blue-600"
+            onClick={() => {
+              if (!p.ui.panel.left) {
+                p.ui.panel.left = true;
+                localStorage.setItem("prasi-panel-left", "y");
+              } else {
+                p.ui.panel.left = false;
+                localStorage.setItem("prasi-panel-left", "n");
+              }
+              p.render();
+            }}
+          >
             <PanelLeftOpen size={15} />
-          )}
-        </div>
-        <div className="flex items-center">
+          </div>
+        )}
+      </div>
+      <div className="flex items-stretch absolute inset-0 justify-center pointer-events-none">
+        <div className="flex items-center pointer-events-auto">
           <Tooltip
             content={
               <div className="flex items-center space-x-2">
@@ -177,42 +237,43 @@ export const EdTopBar = () => {
             <TriangleIcon />
           </Tooltip>
         </div>
-        <div className="flex cursor-pointer items-center px-2  select-none">
-          <div
+
+        <ButtonBox>
+          <Button
             className={cx(
-              "border border-r-0 rounded-l-sm px-2 py-[2px] flex items-center space-x-1",
-              !p.ui.popup.script.open
-                ? "bg-blue-600 text-white border-blue-600"
-                : "hover:bg-blue-100"
-            )}
-            onClick={() => {
-              closeEditor(p);
-              p.render();
-            }}
-          >
-            <LayoutTemplate size={12} /> <div>Design</div>
-          </div>
-          <div
-            className={cx(
-              "border border-l-0 rounded-r-sm px-2 py-[2px] flex items-center space-x-1",
-              p.ui.popup.script.open
+              "border rounded-sm rounded-r-none",
+              topbar_mode === "page" && p.ui.popup.script.open
                 ? "bg-orange-600 text-white border-orange-600"
-                : "hover:bg-orange-100"
+                : "hover:bg-orange-100 text-slate-600 bg-white"
             )}
             onClick={() => {
+              p.ui.topbar.mode = "page";
               p.ui.popup.script.open = true;
               p.render();
             }}
           >
             <ScrollText size={12} /> <div>Code</div>
-          </div>
-        </div>
+          </Button>
 
-        <EdBundle />
+          <Button
+            className={cx(
+              "border rounded-sm rounded-l-none border-l-0",
+              topbar_mode === "page" && !p.ui.popup.script.open
+                ? "bg-green-600 text-white border-green-600"
+                : "hover:bg-green-100 text-slate-600 bg-white"
+            )}
+            onClick={() => {
+              p.ui.topbar.mode = "page";
+              closeEditor(p);
+              p.render();
+            }}
+          >
+            <LayoutTemplate size={12} /> <div>Design</div>
+          </Button>
+        </ButtonBox>
         <EdSave />
       </div>
-      <div></div>
-      <div className="flex flex-row-reverse items-stretch">
+      <div className="flex justify-end pr-1 items-stretch">
         {!p.ui.panel.right && (
           <div
             className="flex items-center m-1 cursor-pointer hover:text-blue-600"
@@ -230,6 +291,12 @@ export const EdTopBar = () => {
             <PanelRightOpen size={15} />
           </div>
         )}
+
+        <ButtonBox>
+          <Button>
+            <ExternalLink size={12} /> <div>Preview</div>
+          </Button>
+        </ButtonBox>
       </div>
     </div>
   );
@@ -252,4 +319,37 @@ const TriangleIcon = () => {
       ></path>
     </svg>
   );
+};
+
+const ButtonBox: FC<{ children: any }> = ({ children }) => {
+  return (
+    <div className="flex cursor-pointer items-center ml-1 pointer-events-auto select-none">
+      {children}
+    </div>
+  );
+};
+
+const Button: FC<{
+  children: any;
+  className?: string;
+  popover?: { content: ReactElement };
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
+}> = ({ children, onClick, className, popover }) => {
+  const content = (
+    <div
+      className={cx(
+        " btn px-2 py-[2px] flex items-center space-x-1",
+        className || "bg-white border rounded-sm hover:bg-blue-100"
+      )}
+      onClick={onClick}
+    >
+      {children}
+    </div>
+  );
+
+  if (popover) {
+    return <Popover content={popover.content}>{content}</Popover>;
+  }
+
+  return content;
 };
