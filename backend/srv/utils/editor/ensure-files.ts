@@ -3,7 +3,11 @@ import { copyAsync, dirAsync, exists } from "fs-jetpack";
 import { dirname } from "path";
 import { dir } from "../dir";
 
-export const ensureFiles = async (path: string, site_id: string) => {
+export const ensureFiles = async (
+  path: string,
+  site_id: string,
+  opt: { disable_lib: boolean }
+) => {
   const _dir = dir.data(path);
   if (!exists(_dir)) {
     await dirAsync(_dir);
@@ -29,9 +33,17 @@ export const ensureFiles = async (path: string, site_id: string) => {
       const exists = await file.exists();
 
       if (!exists) {
-        const from = dir.root(`${tdir}/${t}`);
-        await dirAsync(dirname(to));
-        await copyAsync(from, to);
+        if (t === "index_tsx" && opt.disable_lib) {
+          await Bun.write(
+            to,
+            `\
+import "app/css/build.css";`
+          );
+        } else {
+          const from = dir.root(`${tdir}/${t}`);
+          await dirAsync(dirname(to));
+          await copyAsync(from, to);
+        }
       } else if (["typings/global.d.ts", ".vscode/settings.json"].includes(f)) {
         const from = dir.root(`${tdir}/${t}`);
         await Bun.write(to, await Bun.file(from).arrayBuffer());

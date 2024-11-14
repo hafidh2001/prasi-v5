@@ -41,6 +41,7 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
     console.warn("Invalid page_id:" + page_id);
     return;
   }
+  
   if (!crdt_pages[page_id]) {
     if (crdt_loading.has(page_id)) {
       await waitUntil(() => crdt_pages[page_id]);

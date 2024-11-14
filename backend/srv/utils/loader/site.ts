@@ -29,14 +29,25 @@ export const rebuildSite = async (
     building: false,
     promises: [],
     watcher: {},
-    config: {},
+    config: null as any,
     change_timeout: null,
   };
+
   const site = g.site[site_id];
   if (site.watcher) {
     for (const [k, watcher] of Object.entries(site.watcher)) {
       watcher.removeAllListeners().close();
       delete site.watcher[k];
+    }
+  }
+
+  if (!site.config) {
+    const s = await _db.site.findFirst({
+      where: { id: site_id },
+      select: { config: true },
+    });
+    if (s) {
+      site.config = s.config as any;
     }
   }
 
@@ -56,6 +67,7 @@ export const rebuildSite = async (
     } else {
       site.status = "loading";
     }
+
     if (!site.building) {
       site.building = true;
       await executeRebuildSite(site);
@@ -86,14 +98,16 @@ const executeRebuildSite = async (site: PrasiSite) => {
   const logFile = Bun.file(logPath);
   await Bun.write(logFile, `loading site...`);
 
-  if (!(await existsAsync(dir.data(`${path}/lib`)))) {
-    appendFile(logPath, "\ncloning lib...");
+  if (!site.config.disable_lib) {
+    if (!(await existsAsync(dir.data(`${path}/lib`)))) {
+      appendFile(logPath, "\ncloning lib...");
 
-    await $`git clone https://github.com/avolut/prasi-lib lib`
-      .cwd(dir.data(path))
-      .quiet();
+      await $`git clone https://github.com/avolut/prasi-lib lib`
+        .cwd(dir.data(path))
+        .quiet();
+    }
   }
-  await ensureFiles(path, site.id);
+  await ensureFiles(path, site.id, { disable_lib: !!site.config.disable_lib });
 
   appendFile(logPath, "\nnpm install...");
   await $`npm i`.cwd(dir.data(path)).quiet();

@@ -14,13 +14,13 @@ export const editorPageLoad = async (
     }
   }
 
-  const res = await loadCache({
+  const page = await loadCache({
     is_cached() {
-      const res = ed.cache.tables.page.find({ where: { page_id } })[0].root;
-      if (res) {
-        return unpack(res);
+      const res = ed.cache.tables.page.find({ where: { page_id } });
+      if (res && Array.isArray(res) && !!res[0]) {
+        return unpack(res[0].root);
       }
-      return res;
+      return undefined;
     },
     load() {
       return _db.page.findFirst({
@@ -51,5 +51,5 @@ export const editorPageLoad = async (
       });
     },
   });
-  return res;
+  return page;
 };

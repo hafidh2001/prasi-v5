@@ -41,7 +41,7 @@ export const editorSiteLoad = async (
   });
 
   if (site) {
-    rebuildSite(site.id);
+    await rebuildSite(site.id);
   }
 
   return site;

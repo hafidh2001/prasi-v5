@@ -8,10 +8,11 @@ export const loadCache = async <T>(arg: {
   if (!cached) {
     const data = await load();
     save(data, true);
-  } else {
-    load().then((data) => {
-      save(data, true);
-    });
+    return data;
   }
+  load().then((data) => {
+    save(data, true);
+  });
+
   return cached;
 };
