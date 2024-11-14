@@ -4,9 +4,11 @@ import { useLocal } from "utils/react/use-local";
 import { IRoot } from "utils/types/root";
 import { LoadingSpinner } from "utils/ui/loading";
 import { validate } from "uuid";
+import { ViComps } from "vi/lib/types";
 import { ViPage } from "vi/vi-page";
 
-const cache = {} as Record<string, IRoot>;
+const page_cache = {} as Record<string, IRoot>;
+const component_cache = {} as ViComps;
 
 export const CPrasi: FC<{ id: string; size?: string; name: string }> = ({
   id,
@@ -15,7 +17,7 @@ export const CPrasi: FC<{ id: string; size?: string; name: string }> = ({
 }) => {
   const local = useLocal(
     {
-      root: cache[id],
+      root: page_cache[id],
       load: async () => {},
       size: localStorage.getItem("prasi-size-" + name) || size,
     },
@@ -28,13 +30,33 @@ export const CPrasi: FC<{ id: string; size?: string; name: string }> = ({
           });
           if (page) {
             local.root = page.content_tree as any;
-            cache[id] = local.root;
+            page_cache[id] = local.root;
+            if (local.root.component_ids) {
+              const pending_ids = local.root.component_ids.filter(
+                (e) => !component_cache[e]
+              );
+              if (pending_ids.length > 0) {
+                const comps = await _db.component.findMany({
+                  where: {
+                    id: {
+                      in: pending_ids,
+                    },
+                  },
+                  select: { id: true, content_tree: true },
+                });
+                for (const comp of comps) {
+                  component_cache[comp.id] = comp.content_tree as any;
+                }
+              }
+            }
           }
         }
 
         local.render();
       };
-      local.load();
+      if (!page_cache[id] || location.hostname === "localhost") {
+        local.load();
+      }
     }
   );
 
@@ -43,6 +65,7 @@ export const CPrasi: FC<{ id: string; size?: string; name: string }> = ({
       init={{
         name,
         page: { root: local.root, id, url: "" },
+        comps: component_cache,
       }}
     />
   ) : (

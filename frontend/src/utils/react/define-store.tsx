@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { getVersion, proxy, Snapshot, useSnapshot } from "valtio";
+import { proxy, Snapshot, useSnapshot } from "valtio";
 
 const default_ctx = { ctx: {} as any, render() {} };
 const store_ctx = createContext<{
@@ -56,7 +56,7 @@ export const defineStore = function <
     selector: (arg: { ref: R; state: Snapshot<T>; action: K }) => Z,
     instance_name?: string
   ) => {
-    const name = init.name + instance_name;
+    const name = init.name + (instance_name ? `-${instance_name}` : ``);
     const internal = useRef({
       mounted: true,
     });

@@ -3,12 +3,12 @@ import { FC } from "react";
 import { IItem } from "utils/types/item";
 import { ErrorBox } from "./lib/error-box";
 import { useVi } from "./lib/store";
-import { ViPageRoot } from "./lib/types";
+import { ViComps, ViPageRoot } from "./lib/types";
 import { ViRender } from "./vi-render";
 
-export const ViPage: FC<{ init?: { page: ViPageRoot; name: string } }> = ({
-  init,
-}) => {
+export const ViPage: FC<{
+  init?: { comps: ViComps; page: ViPageRoot; name: string };
+}> = ({ init }) => {
   const { layout, parents, ref } = useVi(
     ({ ref }) => ({
       page: ref.page,
@@ -20,7 +20,7 @@ export const ViPage: FC<{ init?: { page: ViPageRoot; name: string } }> = ({
   );
 
   let page = ref.page;
-  if (init?.page) {
+  if (init) {
     ref.page = init.page;
     page = ref.page;
   }
@@ -38,7 +38,11 @@ export const ViPage: FC<{ init?: { page: ViPageRoot; name: string } }> = ({
 
           return (
             <ErrorBox key={item.id}>
-              <ViRender item={item} is_layout={is_layout} />
+              <ViRender
+                item={item}
+                is_layout={is_layout}
+                standalone={init?.name}
+              />
             </ErrorBox>
           );
         })}
