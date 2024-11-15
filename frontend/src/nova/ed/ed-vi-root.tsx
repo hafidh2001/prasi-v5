@@ -12,6 +12,7 @@ import { ViComps, ViPageRoot, ViWrapperType } from "vi/lib/types";
 import { ViRoot } from "vi/vi-root";
 import { EdTreeCtxMenu } from "./tree/parts/ctx-menu";
 import { IItem } from "utils/types/item";
+import { _prasi } from "./cprasi/_prasi";
 
 export const EdViRoot = memo(() => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -35,12 +36,24 @@ export const EdViRoot = memo(() => {
   const render = () => _set({});
   useEffect(() => {
     (async () => {
-      ref.exports.status = "loading";
-      const fn = new Function(`return import('/prod/${p.site.id}/index.js');`);
-      ref.exports.values = await fn();
-      ref.exports.status = "done";
-      (window as any).exports = ref.exports.values;
-      render();
+      if (
+        location.pathname.startsWith("/ed/a0170f25-a9d9-4646-a970-f1c2e5747971")
+      ) {
+        ref.exports.values = {
+          _prasi: _prasi,
+        };
+        ref.exports.status = "done";
+        render();
+      } else {
+        ref.exports.status = "loading";
+        const fn = new Function(
+          `return import('/prod/${p.site.id}/index.js');`
+        );
+        ref.exports.values = await fn();
+        ref.exports.status = "done";
+        (window as any).exports = ref.exports.values;
+        render();
+      }
     })();
   }, []);
 
