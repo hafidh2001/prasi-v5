@@ -32,7 +32,7 @@ export const ErrorBox = withErrorBoundary(
           <div className="text-[10px] font-bold text-red-900 self-stretch px-1">
             ERROR {node?.item.name ? "[" + node.item.name + "]:" : ""}
           </div>
-          <p className="border-b border-red-300 px-1 pb-1 min-w-[100px]">
+          <p className="border-b border-red-300 text-black px-1 pb-1 min-w-[100px]">
             {!local.retrying ? <>{(error as any).message}</> : <>Retrying...</>}
           </p>
           <div className="p-1">
@@ -47,7 +47,7 @@ export const ErrorBox = withErrorBoundary(
                   resetError();
                 }, 100);
               }}
-              className="bg-white border border-white hover:border-red-400 hover:bg-red-50 rounded px-2"
+              className="bg-white border text-black border-white hover:border-red-400 hover:bg-red-50 rounded px-2"
             >
               Try again
             </button>

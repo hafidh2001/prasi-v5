@@ -12,7 +12,7 @@ import { ViComps, ViPageRoot, ViWrapperType } from "vi/lib/types";
 import { ViRoot } from "vi/vi-root";
 import { EdTreeCtxMenu } from "./tree/parts/ctx-menu";
 import { IItem } from "utils/types/item";
-import { _prasi } from "./cprasi/_prasi";
+import { prasi } from "./cprasi/prasi";
 
 export const EdViRoot = memo(() => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -40,7 +40,7 @@ export const EdViRoot = memo(() => {
         location.pathname.startsWith("/ed/a0170f25-a9d9-4646-a970-f1c2e5747971")
       ) {
         ref.exports.values = {
-          _prasi: _prasi,
+          prasi,
         };
         ref.exports.status = "done";
         render();

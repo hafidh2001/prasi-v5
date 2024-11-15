@@ -29,7 +29,7 @@ export const ViScript: FC<{
   instance_id?: string;
   standalone?: string;
   render: () => void;
-}> = ({ item, childs, props, merged, render }) => {
+}> = ({ item, childs, props, merged, render, standalone }) => {
   const internal = useLocal({
     Local: undefined as any,
     PassProp: undefined as any,
@@ -49,16 +49,19 @@ export const ViScript: FC<{
     local_render,
     dev_item_error: dev_item_error,
     dev_tree_render,
-  } = useVi(({ ref }) => ({
-    comp_props_parents: ref.comp_props,
-    parents: ref.item_parents,
-    db: ref.db,
-    api: ref.api,
-    local_render: ref.local_render,
-    dev_item_error: ref.dev_item_error,
-    dev_tree_render: ref.dev_tree_render,
-    vscode_exports: ref.vscode_exports,
-  }));
+  } = useVi(
+    ({ ref }) => ({
+      comp_props_parents: ref.comp_props,
+      parents: ref.item_parents,
+      db: ref.db,
+      api: ref.api,
+      local_render: ref.local_render,
+      dev_item_error: ref.dev_item_error,
+      dev_tree_render: ref.dev_tree_render,
+      vscode_exports: ref.vscode_exports,
+    }),
+    standalone
+  );
 
   local_render[item.id] = render;
   const result = { children: null as any };

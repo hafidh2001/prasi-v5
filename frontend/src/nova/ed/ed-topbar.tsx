@@ -4,13 +4,17 @@ import { active } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import {
   BookOpenText,
+  Cloudy,
   ExternalLink,
   LayoutTemplate,
+  Leaf,
   Newspaper,
   PanelLeftOpen,
   PanelRightOpen,
   ScrollText,
   Settings2,
+  TreeDeciduous,
+  Trees,
 } from "lucide-react";
 import { EdSave } from "popup/build/ed-save";
 import { closeEditor } from "popup/script/ed-workbench";
@@ -121,37 +125,21 @@ export const EdTopBar = () => {
         <ButtonBox>
           <Button
             className={cx(
-              "border rounded-sm rounded-r-none border-r-0 btn px-2 py-[2px] flex items-center space-x-1",
+              "border border-r-0 btn px-2 py-[2px] flex items-center space-x-1",
               "hover:bg-blue-100 bg-white"
             )}
             popover={{
               content: (
                 <CPrasi
                   id="b480c554-577d-4d66-8949-2a3e982973ac"
-                  name="setting"
+                  name="site"
                   size="500x500"
                 />
               ),
             }}
           >
-            <Settings2 size={12} />
-          </Button>
-          <Button
-            className={cx(
-              "border border-r-0 btn px-2 py-[2px] flex items-center space-x-1",
-              "hover:bg-blue-100 bg-white"
-            )}
-          >
-            <img src="/img/vscode.svg" width={12} />
-          </Button>
-          <Button
-            className={cx(
-              "border border-r-0 btn px-2 py-[2px] flex items-center space-x-1",
-              "hover:bg-blue-100 bg-white"
-            )}
-          >
-            <BookOpenText size={12} />
-            <div className="capitalize">{p.site.name}</div>
+            <Trees  size={12} />
+            <div>Site</div>
           </Button>
           <Button
             className={cx(
@@ -159,8 +147,14 @@ export const EdTopBar = () => {
               "hover:bg-blue-100 bg-white"
             )}
           >
-            <Newspaper size={12} />{" "}
+            <Leaf size={12} />
             <div className="capitalize">{p.page.cur.name}</div>
+          </Button>
+        </ButtonBox>
+
+        <ButtonBox>
+          <Button>
+            <img src="/img/vscode.svg" width={12} />
           </Button>
         </ButtonBox>
         {!p.ui.panel.left && (

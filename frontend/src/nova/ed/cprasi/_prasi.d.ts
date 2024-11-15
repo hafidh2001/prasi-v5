@@ -1,5 +1,5 @@
-declare module "_prasi" {
-    export const _prasi: {
-        moka: string;
+declare module "prasi" {
+    export const prasi: {
+        fwqp: string;
     };
 }

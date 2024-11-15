@@ -49,8 +49,8 @@ export {}
       {
         name: "file:///editor-typings.ts",
         source: `\
-import * as _editor from "_prasi"; 
-declare global { const _prasi = _editor._prasi; }`,
+import * as _editor from "prasi"; 
+declare global { const prasi = _editor.prasi; }`,
       }
     );
   }

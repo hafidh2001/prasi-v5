@@ -23,21 +23,27 @@ export const buildFrontendTypings = async (site_id: string) => {
   await tsc.exited;
 };
 
+const build_running = {
+  prasi: false,
+};
 export const buildPrasiTypings = async () => {
-  const cmd = [
-    ...`${dir.root(
-      platform() === "win32"
-        ? "node_modules/.bin/tsc.exe"
-        : "node_modules/.bin/tsc"
-    )} _prasi.tsx --watch --moduleResolution node --emitDeclarationOnly --outFile _prasi.d.ts --declaration --noEmit false`.split(
-      " "
-    ),
-  ];
-  
-  const tsc = Bun.spawn({
-    cmd,
-    cwd: dir.root(`/frontend/src/nova/ed/cprasi`),
-    stdio: ["ignore", "ignore", "ignore"],
-  });
-  await tsc.exited;
+  if (!build_running.prasi) {
+    build_running.prasi = true;
+    const cmd = [
+      ...`${dir.root(
+        platform() === "win32"
+          ? "node_modules/.bin/tsc.exe"
+          : "node_modules/.bin/tsc"
+      )} prasi.tsx --watch --moduleResolution node --emitDeclarationOnly --outFile _prasi.d.ts --declaration --noEmit false`.split(
+        " "
+      ),
+    ];
+
+    const tsc = Bun.spawn({
+      cmd,
+      cwd: dir.root(`/frontend/src/nova/ed/cprasi`),
+      stdio: ["ignore", "ignore", "ignore"],
+    });
+    await tsc.exited;
+  }
 };

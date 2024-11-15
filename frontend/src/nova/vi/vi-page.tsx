@@ -23,6 +23,7 @@ export const ViPage: FC<{
   if (init) {
     ref.page = init.page;
     ref.vscode_exports = init.exports;
+    ref.comps = init.comps;
     page = ref.page;
   }
 

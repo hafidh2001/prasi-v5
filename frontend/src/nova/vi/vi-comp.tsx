@@ -27,20 +27,23 @@ export const ViComp: FC<{
     instanced,
     edit_comp_id,
     vscode_exports,
-  } = useVi(({ state, ref, action }) => ({
-    comps: ref.comps,
-    load: ref.loader.comps,
-    instances: ref.comp.instances,
-    loaded: ref.comp.loaded,
-    instantiate: action.instantiateComp,
-    ref_comp_props: ref.comp_props,
-    parents: ref.item_parents,
-    db: ref.db,
-    api: ref.api,
-    instanced: ref.instanced,
-    edit_comp_id: ref.edit_comp_id,
-    vscode_exports: ref.vscode_exports,
-  }));
+  } = useVi(
+    ({ state, ref, action }) => ({
+      comps: ref.comps,
+      load: ref.loader.comps,
+      instances: ref.comp.instances,
+      loaded: ref.comp.loaded,
+      instantiate: action.instantiateComp,
+      ref_comp_props: ref.comp_props,
+      parents: ref.item_parents,
+      db: ref.db,
+      api: ref.api,
+      instanced: ref.instanced,
+      edit_comp_id: ref.edit_comp_id,
+      vscode_exports: ref.vscode_exports,
+    }),
+    standalone
+  );
 
   const comp_id = item.component!.id;
   const loading_component = <LoadingSpinner />;
@@ -82,6 +85,7 @@ export const ViComp: FC<{
       div_props={div_props}
       instance_id={instance_id}
       merged={merged}
+      standalone={standalone}
     />
   );
 };

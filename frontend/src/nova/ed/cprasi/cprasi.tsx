@@ -6,7 +6,7 @@ import { LoadingSpinner } from "utils/ui/loading";
 import { validate } from "uuid";
 import { ViComps } from "vi/lib/types";
 import { ViPage } from "vi/vi-page";
-import { _prasi } from "./_prasi";
+import { prasi } from "./prasi";
 
 const page_cache = {} as Record<string, IRoot>;
 const component_cache = {} as ViComps;
@@ -68,7 +68,7 @@ export const CPrasi: FC<{ id: string; size?: string; name: string }> = ({
           name,
           page: { root: local.root, id, url: "" },
           comps: component_cache,
-          exports: { _prasi: _prasi },
+          exports: { prasi },
         }}
       />
     </div>
