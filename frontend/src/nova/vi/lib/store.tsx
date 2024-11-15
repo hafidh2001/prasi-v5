@@ -89,6 +89,9 @@ export const useVi = defineStore({
         ref.dev_item_error = {};
       };
       for (const id of Object.keys(comps)) {
+        if (!(ref.comp.loaded instanceof Set)) {
+          ref.comp.loaded = new Set();
+        }
         ref.comp.loaded.add(id);
       }
     },

@@ -13,6 +13,21 @@ export const EdPopCompGroup = () => {
         component_site: { some: { id_site: p.site.id } },
       },
     });
+
+    if (local.groups.length === 0) {
+      await _db.component_group.create({
+        data: {
+          name: "Site Components",
+          component_site: { create: { id_site: p.site.id } },
+        },
+      });
+      local.groups = await _db.component_group.findMany({
+        where: {
+          component_site: { some: { id_site: p.site.id } },
+        },
+      });
+    }
+
     local.render();
   });
 

@@ -1,0 +1,12 @@
+diff --git a/esm/vs/editor/common/model/textModel.js b/esm/vs/editor/common/model/textModel.js
+index 92bbf91d421a45172ff04c2bac1025e433300b62..6f417fc636c49cb8c97e1fed429d8ff52a0e5498 100644
+--- a/esm/vs/editor/common/model/textModel.js
++++ b/esm/vs/editor/common/model/textModel.js
+@@ -1197,6 +1197,7 @@ let TextModel = class TextModel extends Disposable {
+         return result;
+     }
+     deltaDecorations(oldDecorations, newDecorations, ownerId = 0) {
++        if (this._isDisposed) return;
+         this._assertNotDisposed();
+         if (!oldDecorations) {
+             oldDecorations = [];

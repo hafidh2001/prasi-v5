@@ -47,6 +47,7 @@ export const edActionNewComp = (
         active.comp = await loadCompTree({
           sync: p.sync,
           id: comp.id,
+          p,
           on_update(ctree) {
             const id = comp.id;
             if (p.viref.resetCompInstance) p.viref.resetCompInstance(id);
