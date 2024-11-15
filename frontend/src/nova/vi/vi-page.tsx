@@ -7,7 +7,7 @@ import { ViComps, ViPageRoot } from "./lib/types";
 import { ViRender } from "./vi-render";
 
 export const ViPage: FC<{
-  init?: { comps: ViComps; page: ViPageRoot; name: string };
+  init?: { comps: ViComps; page: ViPageRoot; name: string; exports: any };
 }> = ({ init }) => {
   const { layout, parents, ref } = useVi(
     ({ ref }) => ({
@@ -22,6 +22,7 @@ export const ViPage: FC<{
   let page = ref.page;
   if (init) {
     ref.page = init.page;
+    ref.vscode_exports = init.exports;
     page = ref.page;
   }
 

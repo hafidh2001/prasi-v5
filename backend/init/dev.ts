@@ -1,6 +1,8 @@
 import { $, spawn } from "bun";
 import { Readable } from "node:stream";
 import { c } from "../srv/utils/color";
+import { buildPrasiTypings } from "../srv/utils/build/frontend-typings";
+
 declare global {
   var reloadCount: number;
 }
@@ -34,13 +36,14 @@ const run = async (rsbuild_command: string, cwd: string, kind: string) => {
         is_ready = true;
       }
     } else {
-      process.stdout.write(kind+ ' ');
+      process.stdout.write(kind + " ");
       process.stdout.write(x);
     }
   }
 };
 
 if (globalThis.reloadCount === 1) {
+  buildPrasiTypings();
   const dev = {
     backend: $`bun run --silent --watch --no-clear-screen backend/srv/server.ts dev`,
     frontend: run(

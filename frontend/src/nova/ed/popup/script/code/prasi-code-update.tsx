@@ -36,6 +36,26 @@ export {}
 
   await tree.reloadScriptModels();
 
+  const editor_typings = [] as any[];
+  if (
+    location.pathname.startsWith("/ed/a0170f25-a9d9-4646-a970-f1c2e5747971")
+  ) {
+    const res = await fetch(`/_prasi/editor-typings.d.ts`);
+    editor_typings.push(
+      {
+        name: "file:///editor-typings.d.ts",
+        source: await res.text(),
+      },
+      {
+        name: "file:///editor-typings.ts",
+        source: `\
+import * as _editor from "_prasi"; 
+declare global { const _prasi = _editor._prasi; }`,
+      }
+    );
+    console.log(editor_typings)
+  }
+
   return [
     {
       name: "file:///typings-item.ts",
@@ -49,6 +69,7 @@ export {}
       name: "file:///typings-entry.d.ts",
       source: p.script.typings_entry,
     },
+    ...editor_typings,
     ...Object.values(tree.script_models),
   ] as ScriptModel[];
 };

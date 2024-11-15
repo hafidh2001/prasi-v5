@@ -1,3 +1,4 @@
+import { dir } from "../utils/dir";
 import { editor } from "../utils/editor";
 import { compressed } from "../utils/server/compressed";
 import type { ServerCtx } from "../utils/server/ctx";
@@ -8,6 +9,10 @@ export default {
     const { params, req, query_params } = ctx;
     const path = params._;
     switch (true) {
+      case path === "editor-typings.d.ts":
+        return new Response(
+          Bun.file(dir.root(`/frontend/src/nova/ed/cprasi/_prasi.d.ts`))
+        );
       case path.startsWith("load.js"): {
         const res = await editor.load_cached({
           type: "prasi-load-js",
