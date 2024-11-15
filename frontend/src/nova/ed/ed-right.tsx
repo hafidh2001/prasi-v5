@@ -7,6 +7,8 @@ import {
   PanelRightClose,
   PanelRightOpen,
   SquareChartGantt,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import { useGlobal } from "utils/react/use-global";
 import { EdVarList } from "./popup/vars/ed-var-list";
@@ -47,35 +49,41 @@ export const EdRight = () => {
         </div>
         {is_comp && <EdCompTitle />}
         {!is_comp && (
-          <div className="flex items-end pt-2">
-            {["style", "events", "vars"].map((tab) => {
-              return (
-                <div
-                  className={cx(
-                    "px-2 flex items-center h-[27px] border cursor-pointer hover:text-blue-600 border-b-0 text-xs -mb-[1px] capitalize rounded-t-sm",
-                    p.ui.right.tab === tab ? "bg-white" : "border-transparent",
-                    css`
-                      svg {
-                        width: 12px;
-                        height: 12px;
-                        margin-right: 3px;
-                      }
-                    `
-                  )}
-                  onClick={() => {
-                    localStorage.setItem("prasi-panel-right-tab", tab);
-                    p.ui.right.tab = tab as any;
-                    p.render();
-                  }}
-                  key={tab}
-                >
-                  {tab === "style" && (
-                    <>
-                      <SquareChartGantt />
-                      Style
-                    </>
-                  )}
-                  {/* {tab === "events" && (
+          <div className="flex justify-between items-stretch flex-1">
+            <div className="flex items-end pt-2 flex-1">
+              {[
+                "style",
+                // , "events", "vars"
+              ].map((tab) => {
+                return (
+                  <div
+                    className={cx(
+                      "px-2 flex items-center h-[27px] border cursor-pointer hover:text-blue-600 border-b-0 text-xs -mb-[1px] capitalize rounded-t-sm",
+                      p.ui.right.tab === tab
+                        ? "bg-white"
+                        : "border-transparent",
+                      css`
+                        svg {
+                          width: 12px;
+                          height: 12px;
+                          margin-right: 3px;
+                        }
+                      `
+                    )}
+                    onClick={() => {
+                      localStorage.setItem("prasi-panel-right-tab", tab);
+                      p.ui.right.tab = tab as any;
+                      p.render();
+                    }}
+                    key={tab}
+                  >
+                    {tab === "style" && (
+                      <>
+                        <SquareChartGantt />
+                        Style
+                      </>
+                    )}
+                    {/* {tab === "events" && (
                     <>
                       <AudioWaveform />
                       Events
@@ -87,9 +95,40 @@ export const EdRight = () => {
                       Variables
                     </>
                   )} */}
-                </div>
-              );
-            })}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="pr-2 flex items-center">
+              <div
+                className={cx(
+                  "flex items-center font-mono text-[8px] space-x-1 border rounded-sm cursor-pointer",
+                  p.ui.page.ruler
+                    ? "border-green-800 text-green-800"
+                    : "border-slate-400 text-slate-600",
+                  css`
+                    padding-left: 5px;
+                    .on-off {
+                      padding: 0px 5px;
+                      width: 25px;
+                      text-align: center;
+                    }
+                  `
+                )}
+                onClick={() => {
+                  p.ui.page.ruler = !p.ui.page.ruler;
+                  p.render();
+                }}
+              >
+                <div>Ruler</div>
+                {p.ui.page.ruler ? (
+                  <div className="bg-green-800 text-white on-off">ON</div>
+                ) : (
+                  <div className="bg-slate-600 text-white on-off">OFF</div>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -99,8 +138,8 @@ export const EdRight = () => {
           {!is_comp && (
             <>
               {p.ui.right.tab === "style" && <EdStyleAll />}
-              {p.ui.right.tab === "events" && <EdEvents />}
-              {p.ui.right.tab === "vars" && <EdVarList />}
+              {/* {p.ui.right.tab === "events" && <EdEvents />}
+              {p.ui.right.tab === "vars" && <EdVarList />} */}
             </>
           )}
           {is_comp && <EdCompProp />}

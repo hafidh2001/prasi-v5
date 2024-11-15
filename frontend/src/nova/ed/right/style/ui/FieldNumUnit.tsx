@@ -13,6 +13,7 @@ export const FieldNumUnit: FC<{
   disabled?: boolean | string;
   enableWhenDrag?: boolean;
   dashIfEmpty?: boolean;
+  className?: string
 }> = ({
   icon,
   value,
@@ -24,6 +25,7 @@ export const FieldNumUnit: FC<{
   disabled,
   positiveOnly,
   enableWhenDrag,
+  className
 }) => {
   const local = useLocal({
     val: 0,
@@ -137,8 +139,17 @@ export const FieldNumUnit: FC<{
 
   return (
     <>
-      <div className="field-num flex flex-row items-stretch justify-between bg-white border border-transparent btn-hover h-full">
-        <div className="flex cursor-ew-resize" onPointerDown={onStart}>
+      <div
+        className={cx(
+          "field-num flex flex-row items-stretch justify-between bg-white border border-transparent btn-hover h-full",
+          className,
+          parseInt(local.val_str) &&
+            css`
+              border-color: blue !important;
+            `
+        )}
+      >
+        <div className="icon flex cursor-ew-resize" onPointerDown={onStart}>
           {icon && (
             <div
               className="flex items-center justify-center opacity-50 ml-1"
@@ -163,10 +174,33 @@ export const FieldNumUnit: FC<{
                 outline: none;
                 font-size: 11px;
               `,
-              !!disabled && "text-center text-gray-400"
+              !!disabled && "text-center text-gray-400",
+              enableWhenDrag &&
+                css`
+                  cursor: text !important;
+                `,
+              enableWhenDrag &&
+                local.focus &&
+                css`
+                  cursor: black !important;
+                `
             )}
-            disabled={!!disabled}
-            value={typeof disabled === "string" ? disabled : local.val_str}
+            disabled={
+              enableWhenDrag ? (local.focus ? false : !!disabled) : !!disabled
+            }
+            onPointerDown={(e) => {
+              if (enableWhenDrag) {
+                local.focus = true;
+                local.render();
+              }
+            }}
+            value={
+              typeof disabled === "string"
+                ? enableWhenDrag && local.focus
+                  ? local.val_str
+                  : disabled
+                : local.val_str
+            }
             onFocus={(e) => {
               e.currentTarget.select();
               local.focus = true;

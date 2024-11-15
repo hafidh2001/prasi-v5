@@ -30,7 +30,7 @@ export const PanelBorder: FC<{
       corner.push(v);
     });
     let uniqueCorner = uniq(corner);
-    if (uniqueCorner.length > 1 && corner.length === 4) {
+    if (uniqueCorner.length > 1) {
       return {
         isMix: true,
         value: "Mixed",
@@ -277,174 +277,23 @@ export const PanelBorder: FC<{
             </div>
           </Tooltip>
         </div>
-        <div
-          className={cx(
-            "flex flex-row text-xs items-center pl-2",
+        <div className="flex flex-1 justify-center">
+          <div
+            className={cx(
+              "flex flex-row text-xs items-center pl-2",
 
-            css`
-              .field-num {
-                border: 1px solid #d1d1d1;
-                height: 25px;
-                width: 45px !important;
-                margin-right: 5px;
-                margin-bottom: 5px;
-              }
-            `
-          )}
-        >
-          <Tooltip asChild content="Border Left">
-            <div>
-              <FieldNumUnit
-                positiveOnly
-                hideUnit
-                icon={
-                  <div className="text-lg text-gray-700">
-                    <svg
-                      width="15"
-                      height="15"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fill="currentColor"
-                        d="M3.5 21a1 1 0 0 1-1-1V4a1 1 0 0 1 2 0v16a1 1 0 0 1-1 1Z"
-                      />
-                      <circle
-                        cx="7.5"
-                        cy="12"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="11.5"
-                        cy="12"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="15.5"
-                        cy="12"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="19.5"
-                        cy="12"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="7.5"
-                        cy="4"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="11.5"
-                        cy="4"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="15.5"
-                        cy="4"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="19.5"
-                        cy="4"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="19.5"
-                        cy="8"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="19.5"
-                        cy="16"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="11.5"
-                        cy="8"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="11.5"
-                        cy="16"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="7.5"
-                        cy="20"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="11.5"
-                        cy="20"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="15.5"
-                        cy="20"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="19.5"
-                        cy="20"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                    </svg>
-                  </div>
+              css`
+                .field-num {
+                  border: 1px solid #d1d1d1;
+                  height: 25px;
+                  width: 45px !important;
+                  margin-right: 5px;
+                  margin-bottom: 5px;
                 }
-                value={get(params, "stroke.l") + "px"}
-                update={(val) => {
-                  let data = {
-                    ...params.stroke,
-                    l: parseInt(val.replaceAll("px", "")),
-                  };
-                  update("border", {
-                    ...params,
-                    stroke: data as any,
-                  });
-                  let isMixed = detectMixed(data);
-                  local.isBorderMix = isMixed.isMix;
-                  local.borderVal = isMixed.value;
-                  local.render();
-                }}
-              />
-            </div>
-          </Tooltip>
-
-          <div className="flex flex-col">
-            <Tooltip asChild content="Border Top">
+              `
+            )}
+          >
+            <Tooltip asChild content="Border Left">
               <div>
                 <FieldNumUnit
                   positiveOnly
@@ -459,116 +308,116 @@ export const PanelBorder: FC<{
                       >
                         <path
                           fill="currentColor"
-                          d="M20 4.5H4a1 1 0 0 1 0-2h16a1 1 0 0 1 0 2Z"
+                          d="M3.5 21a1 1 0 0 1-1-1V4a1 1 0 0 1 2 0v16a1 1 0 0 1-1 1Z"
                         />
                         <circle
-                          cx="12"
-                          cy="7.5"
+                          cx="7.5"
+                          cy="12"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="12"
-                          cy="11.5"
+                          cx="11.5"
+                          cy="12"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="12"
-                          cy="15.5"
+                          cx="15.5"
+                          cy="12"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="12"
-                          cy="19.5"
+                          cx="19.5"
+                          cy="12"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="20"
-                          cy="7.5"
+                          cx="7.5"
+                          cy="4"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="20"
-                          cy="11.5"
+                          cx="11.5"
+                          cy="4"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="20"
-                          cy="15.5"
+                          cx="15.5"
+                          cy="4"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="20"
-                          cy="19.5"
+                          cx="19.5"
+                          cy="4"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="16"
-                          cy="19.5"
+                          cx="19.5"
+                          cy="8"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="8"
-                          cy="19.5"
+                          cx="19.5"
+                          cy="16"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="16"
-                          cy="11.5"
+                          cx="11.5"
+                          cy="8"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="8"
-                          cy="11.5"
+                          cx="11.5"
+                          cy="16"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="4"
-                          cy="7.5"
+                          cx="7.5"
+                          cy="20"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="4"
-                          cy="11.5"
+                          cx="11.5"
+                          cy="20"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="4"
-                          cy="15.5"
+                          cx="15.5"
+                          cy="20"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="4"
-                          cy="19.5"
+                          cx="19.5"
+                          cy="20"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
@@ -576,11 +425,11 @@ export const PanelBorder: FC<{
                       </svg>
                     </div>
                   }
-                  value={get(params, "stroke.t") + "px"}
+                  value={get(params, "stroke.l") + "px"}
                   update={(val) => {
                     let data = {
                       ...params.stroke,
-                      t: parseInt(val.replaceAll("px", "")),
+                      l: parseInt(val.replaceAll("px", "")),
                     };
                     update("border", {
                       ...params,
@@ -594,7 +443,310 @@ export const PanelBorder: FC<{
                 />
               </div>
             </Tooltip>
-            <Tooltip asChild content="Border Bottom">
+
+            <div className="flex flex-col">
+              <Tooltip asChild content="Border Top">
+                <div>
+                  <FieldNumUnit
+                    positiveOnly
+                    hideUnit
+                    icon={
+                      <div className="text-lg text-gray-700">
+                        <svg
+                          width="15"
+                          height="15"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            fill="currentColor"
+                            d="M20 4.5H4a1 1 0 0 1 0-2h16a1 1 0 0 1 0 2Z"
+                          />
+                          <circle
+                            cx="12"
+                            cy="7.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="12"
+                            cy="11.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="12"
+                            cy="15.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="12"
+                            cy="19.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="20"
+                            cy="7.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="20"
+                            cy="11.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="20"
+                            cy="15.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="20"
+                            cy="19.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="16"
+                            cy="19.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="8"
+                            cy="19.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="16"
+                            cy="11.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="8"
+                            cy="11.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="4"
+                            cy="7.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="4"
+                            cy="11.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="4"
+                            cy="15.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="4"
+                            cy="19.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                        </svg>
+                      </div>
+                    }
+                    value={get(params, "stroke.t") + "px"}
+                    update={(val) => {
+                      let data = {
+                        ...params.stroke,
+                        t: parseInt(val.replaceAll("px", "")),
+                      };
+                      update("border", {
+                        ...params,
+                        stroke: data as any,
+                      });
+                      let isMixed = detectMixed(data);
+                      local.isBorderMix = isMixed.isMix;
+                      local.borderVal = isMixed.value;
+                      local.render();
+                    }}
+                  />
+                </div>
+              </Tooltip>
+              <Tooltip asChild content="Border Bottom">
+                <div>
+                  <FieldNumUnit
+                    positiveOnly
+                    hideUnit
+                    icon={
+                      <div className="text-lg text-gray-700">
+                        <svg
+                          width="15"
+                          height="15"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            fill="currentColor"
+                            d="M20 21.5H4a1 1 0 0 1 0-2h16a1 1 0 0 1 0 2Z"
+                          />
+                          <circle
+                            cx="12"
+                            cy="16.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="12"
+                            cy="12.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="12"
+                            cy="8.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="12"
+                            cy="4.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="4"
+                            cy="16.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="4"
+                            cy="12.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="4"
+                            cy="8.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="4"
+                            cy="4.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="8"
+                            cy="4.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="16"
+                            cy="4.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="8"
+                            cy="12.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="16"
+                            cy="12.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="20"
+                            cy="16.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="20"
+                            cy="12.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="20"
+                            cy="8.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                          <circle
+                            cx="20"
+                            cy="4.5"
+                            r="1"
+                            fill="currentColor"
+                            opacity=".5"
+                          />
+                        </svg>
+                      </div>
+                    }
+                    value={get(params, "stroke.b") + "px"}
+                    update={(val) => {
+                      let data = {
+                        ...params.stroke,
+                        b: parseInt(val.replaceAll("px", "")),
+                      };
+                      update("border", {
+                        ...params,
+                        stroke: data as any,
+                      });
+                      let isMixed = detectMixed(data);
+                      local.isBorderMix = isMixed.isMix;
+                      local.borderVal = isMixed.value;
+                      local.render();
+                    }}
+                  />
+                </div>
+              </Tooltip>
+            </div>
+            <Tooltip asChild content="Border Right">
               <div>
                 <FieldNumUnit
                   positiveOnly
@@ -609,116 +761,116 @@ export const PanelBorder: FC<{
                       >
                         <path
                           fill="currentColor"
-                          d="M20 21.5H4a1 1 0 0 1 0-2h16a1 1 0 0 1 0 2Z"
+                          d="M20.5 21a1 1 0 0 1-1-1V4a1 1 0 0 1 2 0v16a1 1 0 0 1-1 1Z"
                         />
                         <circle
-                          cx="12"
-                          cy="16.5"
+                          cx="16.5"
+                          cy="12"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="12"
-                          cy="12.5"
+                          cx="12.5"
+                          cy="12"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="12"
-                          cy="8.5"
+                          cx="8.5"
+                          cy="12"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="12"
-                          cy="4.5"
+                          cx="4.5"
+                          cy="12"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="4"
-                          cy="16.5"
+                          cx="16.5"
+                          cy="20"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="4"
-                          cy="12.5"
+                          cx="12.5"
+                          cy="20"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="4"
-                          cy="8.5"
+                          cx="8.5"
+                          cy="20"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="4"
-                          cy="4.5"
+                          cx="4.5"
+                          cy="20"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="8"
-                          cy="4.5"
+                          cx="4.5"
+                          cy="16"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="16"
-                          cy="4.5"
+                          cx="4.5"
+                          cy="8"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="8"
-                          cy="12.5"
+                          cx="12.5"
+                          cy="16"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="16"
-                          cy="12.5"
+                          cx="12.5"
+                          cy="8"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="20"
-                          cy="16.5"
+                          cx="16.5"
+                          cy="4"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="20"
-                          cy="12.5"
+                          cx="12.5"
+                          cy="4"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="20"
-                          cy="8.5"
+                          cx="8.5"
+                          cy="4"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
                         />
                         <circle
-                          cx="20"
-                          cy="4.5"
+                          cx="4.5"
+                          cy="4"
                           r="1"
                           fill="currentColor"
                           opacity=".5"
@@ -726,11 +878,11 @@ export const PanelBorder: FC<{
                       </svg>
                     </div>
                   }
-                  value={get(params, "stroke.b") + "px"}
+                  value={get(params, "stroke.r") + "px"}
                   update={(val) => {
                     let data = {
                       ...params.stroke,
-                      b: parseInt(val.replaceAll("px", "")),
+                      r: parseInt(val.replaceAll("px", "")),
                     };
                     update("border", {
                       ...params,
@@ -745,156 +897,6 @@ export const PanelBorder: FC<{
               </div>
             </Tooltip>
           </div>
-          <Tooltip asChild content="Border Right">
-            <div>
-              <FieldNumUnit
-                positiveOnly
-                hideUnit
-                icon={
-                  <div className="text-lg text-gray-700">
-                    <svg
-                      width="15"
-                      height="15"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fill="currentColor"
-                        d="M20.5 21a1 1 0 0 1-1-1V4a1 1 0 0 1 2 0v16a1 1 0 0 1-1 1Z"
-                      />
-                      <circle
-                        cx="16.5"
-                        cy="12"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="12.5"
-                        cy="12"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="8.5"
-                        cy="12"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="4.5"
-                        cy="12"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="16.5"
-                        cy="20"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="12.5"
-                        cy="20"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="8.5"
-                        cy="20"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="4.5"
-                        cy="20"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="4.5"
-                        cy="16"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="4.5"
-                        cy="8"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="12.5"
-                        cy="16"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="12.5"
-                        cy="8"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="16.5"
-                        cy="4"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="12.5"
-                        cy="4"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="8.5"
-                        cy="4"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                      <circle
-                        cx="4.5"
-                        cy="4"
-                        r="1"
-                        fill="currentColor"
-                        opacity=".5"
-                      />
-                    </svg>
-                  </div>
-                }
-                value={get(params, "stroke.r") + "px"}
-                update={(val) => {
-                  let data = {
-                    ...params.stroke,
-                    r: parseInt(val.replaceAll("px", "")),
-                  };
-                  update("border", {
-                    ...params,
-                    stroke: data as any,
-                  });
-                  let isMixed = detectMixed(data);
-                  local.isBorderMix = isMixed.isMix;
-                  local.borderVal = isMixed.value;
-                  local.render();
-                }}
-              />
-            </div>
-          </Tooltip>
         </div>
       </div>
 
@@ -982,199 +984,214 @@ export const PanelBorder: FC<{
             </div>
           </Tooltip>
         </div>
-        <div
-          className={cx(
-            "flex flex-row text-xs flex-wrap",
-            css`
-              width: 100px;
+        <div className="flex flex-1 justify-center">
+          <div
+            className={cx(
+              "flex flex-row text-xs flex-wrap",
+              css`
+                width: 100px;
 
-              .field-num {
-                height: 25px;
-                border: 1px solid #d1d1d1;
-                margin-right: 5px;
-                margin-bottom: 5px;
-              }
-            `
-          )}
-        >
-          <Tooltip asChild content="Corner Top Left">
-            <div>
-              <FieldNumUnit
-                positiveOnly
-                hideUnit
-                icon={
-                  <div className="text-lg text-gray-700">
-                    <svg
-                      width="15"
-                      height="15"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fill="none"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="1.5"
-                        d="m4 16.01l.01-.011M4 20.01l.01-.011M8 20.01l.01-.011m3.99.011l.01-.011m3.99.011l.01-.011m3.99.011l.01-.011M20 16.01l.01-.011M20 12.01l.01-.011M20 8.01l.01-.011M20 4.01l.01-.011M16 4.01l.01-.011M4 12V4h8v8H4Z"
-                      />
-                    </svg>
-                  </div>
+                .field-num {
+                  height: 25px;
+                  border: 1px solid #d1d1d1;
+                  margin-right: 5px;
+                  margin-bottom: 5px;
                 }
-                value={get(params, "rounded.tl") + "px"}
-                update={(val) => {
-                  update("border", {
-                    ...params,
-                    rounded: {
+              `
+            )}
+          >
+            <Tooltip asChild content="Corner Top Left">
+              <div>
+                <FieldNumUnit
+                  positiveOnly
+                  hideUnit
+                  className={css`
+                    border-top-left-radius: 8px;
+                  `}
+                  icon={
+                    <div className="text-lg text-gray-700">
+                      <svg
+                        width="15"
+                        height="15"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fill="none"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.5"
+                          d="m4 16.01l.01-.011M4 20.01l.01-.011M8 20.01l.01-.011m3.99.011l.01-.011m3.99.011l.01-.011m3.99.011l.01-.011M20 16.01l.01-.011M20 12.01l.01-.011M20 8.01l.01-.011M20 4.01l.01-.011M16 4.01l.01-.011M4 12V4h8v8H4Z"
+                        />
+                      </svg>
+                    </div>
+                  }
+                  value={get(params, "rounded.tl") + "px"}
+                  update={(val) => {
+                    update("border", {
+                      ...params,
+                      rounded: {
+                        ...params.rounded,
+                        tl: parseInt(val.replaceAll("px", "")),
+                      } as any,
+                    });
+                    let isMixed = detectMixed({
                       ...params.rounded,
                       tl: parseInt(val.replaceAll("px", "")),
-                    } as any,
-                  });
-                  let isMixed = detectMixed({
-                    ...params.rounded,
-                    tl: parseInt(val.replaceAll("px", "")),
-                  });
-                  local.isMix = isMixed.isMix;
+                    });
+                    local.isMix = isMixed.isMix;
 
-                  local.render();
-                }}
-              />
-            </div>
-          </Tooltip>
+                    local.render();
+                  }}
+                />
+              </div>
+            </Tooltip>
 
-          <Tooltip asChild content="Corner Top Right">
-            <div>
-              <FieldNumUnit
-                positiveOnly
-                hideUnit
-                icon={
-                  <div className="text-lg text-gray-700">
-                    <svg
-                      width="15"
-                      height="15"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fill="none"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="1.5"
-                        d="m20.01 16.01l-.01-.011m.01 4.011l-.01-.011m-3.99.011l-.01-.011m-3.99.011l-.01-.011m-3.99.011L8 19.999m-3.99.011L4 19.999m.01-3.989L4 15.999m.01-3.989L4 11.999m.01-3.989L4 7.999m.01-3.989L4 3.999m4.01.011L8 3.999M20.01 12V4h-8v8h8Z"
-                      />
-                    </svg>
-                  </div>
-                }
-                value={get(params, "rounded.tr") + "px"}
-                update={(val) => {
-                  update("border", {
-                    ...params,
-                    rounded: {
+            <Tooltip asChild content="Corner Top Right">
+              <div>
+                <FieldNumUnit
+                  positiveOnly
+                  hideUnit
+                  className={css`
+                    border-top-right-radius: 8px;
+                  `}
+                  icon={
+                    <div className="text-lg text-gray-700">
+                      <svg
+                        width="15"
+                        height="15"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fill="none"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.5"
+                          d="m20.01 16.01l-.01-.011m.01 4.011l-.01-.011m-3.99.011l-.01-.011m-3.99.011l-.01-.011m-3.99.011L8 19.999m-3.99.011L4 19.999m.01-3.989L4 15.999m.01-3.989L4 11.999m.01-3.989L4 7.999m.01-3.989L4 3.999m4.01.011L8 3.999M20.01 12V4h-8v8h8Z"
+                        />
+                      </svg>
+                    </div>
+                  }
+                  value={get(params, "rounded.tr") + "px"}
+                  update={(val) => {
+                    update("border", {
+                      ...params,
+                      rounded: {
+                        ...params.rounded,
+                        tr: parseInt(val.replaceAll("px", "")),
+                      } as any,
+                    });
+                    let isMixed = detectMixed({
                       ...params.rounded,
                       tr: parseInt(val.replaceAll("px", "")),
-                    } as any,
-                  });
-                  let isMixed = detectMixed({
-                    ...params.rounded,
-                    tr: parseInt(val.replaceAll("px", "")),
-                  });
-                  local.isMix = isMixed.isMix;
+                    });
+                    local.isMix = isMixed.isMix;
 
-                  local.render();
-                }}
-              />
-            </div>
-          </Tooltip>
+                    local.render();
+                  }}
+                />
+              </div>
+            </Tooltip>
 
-          <Tooltip asChild content="Corner Bottom Left">
-            <div>
-              <FieldNumUnit
-                positiveOnly
-                hideUnit
-                icon={
-                  <div className="text-lg text-gray-700">
-                    <svg
-                      width="15"
-                      height="15"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fill="none"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="1.5"
-                        d="m4 8l.01.011M4 4l.01.011M8 4l.01.011M12 4l.01.011M16 4l.01.011M20 4l.01.011M20 8l.01.011M20 12l.01.011M20 16l.01.011M20 20l.01.011M16 20l.01.011M4 12.01v8h8v-8H4Z"
-                      />
-                    </svg>
-                  </div>
-                }
-                value={get(params, "rounded.bl") + "px"}
-                update={(val) => {
-                  update("border", {
-                    ...params,
-                    rounded: {
+            <Tooltip asChild content="Corner Bottom Left">
+              <div>
+                <FieldNumUnit
+                  positiveOnly
+                  hideUnit
+                  className={css`
+                    border-bottom-left-radius: 8px;
+                  `}
+                  icon={
+                    <div className="text-lg text-gray-700">
+                      <svg
+                        width="15"
+                        height="15"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fill="none"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.5"
+                          d="m4 8l.01.011M4 4l.01.011M8 4l.01.011M12 4l.01.011M16 4l.01.011M20 4l.01.011M20 8l.01.011M20 12l.01.011M20 16l.01.011M20 20l.01.011M16 20l.01.011M4 12.01v8h8v-8H4Z"
+                        />
+                      </svg>
+                    </div>
+                  }
+                  value={get(params, "rounded.bl") + "px"}
+                  update={(val) => {
+                    update("border", {
+                      ...params,
+                      rounded: {
+                        ...params.rounded,
+                        bl: parseInt(val.replaceAll("px", "")),
+                      } as any,
+                    });
+                    let isMixed = detectMixed({
                       ...params.rounded,
                       bl: parseInt(val.replaceAll("px", "")),
-                    } as any,
-                  });
-                  let isMixed = detectMixed({
-                    ...params.rounded,
-                    bl: parseInt(val.replaceAll("px", "")),
-                  });
-                  local.isMix = isMixed.isMix;
+                    });
+                    local.isMix = isMixed.isMix;
 
-                  local.render();
-                }}
-              />
-            </div>
-          </Tooltip>
-          <Tooltip asChild content="Corner Bottom Right">
-            <div>
-              <FieldNumUnit
-                positiveOnly
-                hideUnit
-                icon={
-                  <div className="text-lg text-gray-700">
-                    <svg
-                      width="15"
-                      height="15"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fill="none"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="1.5"
-                        d="m20.01 8l-.01.011M20.01 4l-.01.011M16.01 4l-.01.011M12.01 4l-.01.011M8.01 4L8 4.011M4.01 4L4 4.011M4.01 8L4 8.011M4.01 12l-.01.011M4.01 16l-.01.011M4.01 20l-.01.011M8.01 20l-.01.011m12.01-8.001v8h-8v-8h8Z"
-                      />
-                    </svg>
-                  </div>
-                }
-                value={get(params, "rounded.br") + "px"}
-                update={(val) => {
-                  update("border", {
-                    ...params,
-                    rounded: {
+                    local.render();
+                  }}
+                />
+              </div>
+            </Tooltip>
+
+            <Tooltip asChild content="Corner Bottom Right">
+              <div>
+                <FieldNumUnit
+                  positiveOnly
+                  hideUnit
+                  className={css`
+                    border-bottom-right-radius: 8px;
+                  `}
+                  icon={
+                    <div className="text-lg text-gray-700">
+                      <svg
+                        width="15"
+                        height="15"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fill="none"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.5"
+                          d="m20.01 8l-.01.011M20.01 4l-.01.011M16.01 4l-.01.011M12.01 4l-.01.011M8.01 4L8 4.011M4.01 4L4 4.011M4.01 8L4 8.011M4.01 12l-.01.011M4.01 16l-.01.011M4.01 20l-.01.011M8.01 20l-.01.011m12.01-8.001v8h-8v-8h8Z"
+                        />
+                      </svg>
+                    </div>
+                  }
+                  value={get(params, "rounded.br") + "px"}
+                  update={(val) => {
+                    update("border", {
+                      ...params,
+                      rounded: {
+                        ...params.rounded,
+                        br: parseInt(val.replaceAll("px", "")),
+                      } as any,
+                    });
+                    let isMixed = detectMixed({
                       ...params.rounded,
                       br: parseInt(val.replaceAll("px", "")),
-                    } as any,
-                  });
-                  let isMixed = detectMixed({
-                    ...params.rounded,
-                    br: parseInt(val.replaceAll("px", "")),
-                  });
-                  local.isMix = isMixed.isMix;
+                    });
+                    local.isMix = isMixed.isMix;
 
-                  local.render();
-                }}
-              />
-            </div>
-          </Tooltip>
+                    local.render();
+                  }}
+                />
+              </div>
+            </Tooltip>
+          </div>
         </div>
       </div>
     </div>

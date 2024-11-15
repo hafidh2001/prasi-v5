@@ -56,6 +56,13 @@ export const EDGlobal = {
       mode: "page" as "page" | "bundle" | "deploy",
     },
     page: {
+      ids: new Set<string>(),
+      get ruler() {
+        return localStorage.getItem("prasi-ui-ruler") !== "n";
+      },
+      set ruler(value) {
+        localStorage.setItem("prasi-ui-ruler", value ? "y" : "n");
+      },
       loaded: false,
       saving: false,
       saved: false,

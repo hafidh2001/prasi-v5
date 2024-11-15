@@ -80,13 +80,10 @@ export const PanelFont: FC<{
         <Tooltip content={"Font Size"} asChild>
           <div
             className={cx(
-              "bg-white p-[2px] border border-gray-300 flex items-stretch",
+              "bg-white p-[2px] flex-1 border border-gray-300 flex items-stretch",
               css`
                 input {
-                  width: 20px !important;
-                }
-                .field-num {
-                  width: 55px !important;
+                  width: 100%;
                 }
               `
             )}
@@ -113,6 +110,8 @@ export const PanelFont: FC<{
                 </div>
               }
               value={(font.size === 0 ? 15 : font.size) + "px"}
+              disabled={!font.size ? "DEFAULT" : false}
+              enableWhenDrag
               update={(size) => {
                 update("font", {
                   ...font,
@@ -135,10 +134,11 @@ export const PanelFont: FC<{
             `
           )}
         >
-          <Tooltip content={"Font Height"} asChild>
+          <Tooltip content={"Line Height"} asChild>
             <div className="flex-1 flex items-center">
               <FieldNumUnit
                 positiveOnly
+                enableWhenDrag
                 icon={
                   <div
                     className={cx(

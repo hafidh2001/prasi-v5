@@ -61,19 +61,21 @@ export const EdStyleAll: FC<{ as_child?: boolean }> = ({ as_child }) => {
     <>
       <SideBox>
         <PanelAutoLayout mode={p.mode} value={item} update={update} />
-        <PanelPadding
-          id={active.item_id}
-          value={item}
-          mode={p.mode}
-          update={update}
-        />
+      </SideBox>
+      <div className="flex items-stretch justify-between border-t pt-1 px-2 pb-2">
         <PanelDimension
           value={item}
           mode={p.mode}
           id={active.item_id}
           update={update}
         />
-      </SideBox>
+        <PanelPadding
+          id={active.item_id}
+          value={item}
+          mode={p.mode}
+          update={update}
+        />
+      </div>
       <SideLabel>BACKGROUND</SideLabel>
       <SideBox>
         <PanelBackground value={item} mode={p.mode} update={update} />
@@ -86,7 +88,6 @@ export const EdStyleAll: FC<{ as_child?: boolean }> = ({ as_child }) => {
       <SideBox>
         <PanelBorder value={item} mode={p.mode} update={update} />
       </SideBox>
-
     </>
   );
 

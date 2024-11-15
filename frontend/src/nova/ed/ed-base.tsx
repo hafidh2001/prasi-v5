@@ -166,13 +166,21 @@ export const EdBase = () => {
                     <div
                       className={cx(
                         "w-full h-full flex flex-1 relative overflow-auto",
-                        p.mode === "mobile" ? "flex-col items-center" : ""
+                        p.mode === "mobile" ? "flex-col items-center" : "",
+                        css``
                       )}
                       onContextMenu={(e) => {
                         e.preventDefault();
                       }}
                     >
-                      <div className={mainStyle(p)}>
+                      <div
+                        className={cx(
+                          mainStyle(p),
+                          p.ui.page.ruler && rulerCSS
+                        )}
+                      >
+                        {p.ui.page.ruler && <Ruler />}
+
                         <EdViRoot />
                       </div>
                     </div>
@@ -292,3 +300,120 @@ export const mobileCSS = css`
     10px -10px,
     -10px 0px;
 `;
+
+const rulerCSS = cx(css`
+  --ruler-num-c: #888;
+  --ruler-num-fz: 10px;
+  --ruler-num-pi: 0.75ch;
+  --ruler-unit: 1px;
+  --ruler-x: 1;
+  --ruler-y: 1;
+
+  --ruler1-bdw: 1px;
+  --ruler1-c: #bbb;
+  --ruler1-h: 4px;
+  --ruler1-space: 5;
+
+  --ruler2-bdw: 1px;
+  --ruler2-c: #bbb;
+  --ruler2-h: 16px;
+  --ruler2-space: 50;
+
+  background-attachment: fixed;
+  background-image: linear-gradient(
+      90deg,
+      var(--ruler1-c) 0 var(--ruler1-bdw),
+      transparent 0
+    ),
+    linear-gradient(90deg, var(--ruler2-c) 0 var(--ruler2-bdw), transparent 0),
+    linear-gradient(0deg, var(--ruler1-c) 0 var(--ruler1-bdw), transparent 0),
+    linear-gradient(0deg, var(--ruler2-c) 0 var(--ruler2-bdw), transparent 0);
+  background-position: 0 0;
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  background-size:
+    calc(var(--ruler-unit) * var(--ruler1-space) * var(--ruler-x))
+      var(--ruler1-h),
+    calc(var(--ruler-unit) * var(--ruler2-space) * var(--ruler-x))
+      var(--ruler2-h),
+    var(--ruler1-h)
+      calc(var(--ruler-unit) * var(--ruler1-space) * var(--ruler-y)),
+    var(--ruler2-h)
+      calc(var(--ruler-unit) * var(--ruler2-space) * var(--ruler-y));
+
+  /* Ruler Numbers */
+  .ruler-x,
+  .ruler-y {
+    color: var(--ruler-num-c);
+    counter-reset: d 0;
+    display: flex;
+    font-size: var(--ruler-num-fz);
+    line-height: 1;
+    list-style: none;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+    position: fixed;
+    pointer-events: none !important;
+  }
+  .ruler-x {
+    height: var(--ruler2-h);
+    inset-block-start: 0;
+    inset-inline-start: calc(var(--ruler-unit) * var(--ruler2-space));
+    opacity: var(--ruler-x);
+    width: 100%;
+  }
+  .ruler-y {
+    flex-direction: column;
+    height: 100%;
+    inset-block-start: calc(var(--ruler-unit) * var(--ruler2-space));
+    inset-inline-start: 0;
+    opacity: var(--ruler-y);
+    width: var(--ruler2-h);
+  }
+  .ruler-x li {
+    align-self: flex-end;
+  }
+  .ruler-x li,
+  .ruler-y li {
+    counter-increment: d var(--ruler2-space);
+    flex: 0 0 calc(var(--ruler-unit) * var(--ruler2-space));
+  }
+  .ruler-x li::after {
+    content: counter(d) "";
+    line-height: 1;
+    padding-inline-start: var(--ruler-num-pi);
+  }
+  .ruler-y li::after {
+    content: counter(d) "";
+    display: block;
+    padding-inline-end: var(--ruler-num-pi);
+    transform: rotate(-90deg) translateY(-13px);
+    transform-origin: 100% 0%;
+    text-align: end;
+    width: 100%;
+  }
+`);
+const Ruler = () => {
+  return (
+    <>
+      <ul className="ruler-x">
+        {[
+          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+          21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37,
+          38, 39,
+        ].map((e) => (
+          <li key={e} />
+        ))}
+      </ul>
+      <ul className="ruler-y">
+        {[
+          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+          21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37,
+          38, 39,
+        ].map((e) => (
+          <li key={e} />
+        ))}
+      </ul>
+    </>
+  );
+};

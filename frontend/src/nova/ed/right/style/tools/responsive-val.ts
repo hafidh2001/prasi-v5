@@ -19,5 +19,6 @@ export const responsiveVal = <T>(
   if (!value) {
     value = defaultVal;
   }
+  if (typeof value === "object") return { ...value } as T;
   return value as T;
 };

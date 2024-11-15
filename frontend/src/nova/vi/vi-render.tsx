@@ -14,7 +14,16 @@ export const ViRender: FC<{
   instance_id?: string;
   merged?: ViMergedProps;
   standalone?: string;
-}> = ({ item, is_layout, div_props, instance_id, merged, standalone }) => {
+  wrapped?: boolean;
+}> = ({
+  item,
+  is_layout,
+  div_props,
+  instance_id,
+  merged,
+  standalone,
+  wrapped,
+}) => {
   const { wrapper } = useVi(
     ({ ref }) => ({
       wrapper: ref.wrapper,
@@ -25,7 +34,7 @@ export const ViRender: FC<{
 
   if (item.hidden) return null;
 
-  if (wrapper) {
+  if (wrapper && !wrapped) {
     const Wrapper = wrapper;
 
     return (
