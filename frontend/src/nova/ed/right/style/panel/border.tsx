@@ -5,13 +5,12 @@ import { FC } from "react";
 import { useLocal } from "utils/react/use-local";
 import { IItem } from "utils/types/item";
 import { FNBorder } from "utils/types/meta-fn";
+import { Dropdown } from "utils/ui/dropdown";
 import { Tooltip } from "utils/ui/tooltip";
 import { responsiveVal } from "../tools/responsive-val";
-import { Button } from "../ui/Button";
 import { FieldColor } from "../ui/FieldColor";
 import { FieldNumUnit } from "../ui/FieldNumUnit";
 import { dropdownProp } from "../ui/style";
-import { Dropdown } from "utils/ui/dropdown";
 
 type BorderUpdate = {
   border: FNBorder;
@@ -25,18 +24,6 @@ export const PanelBorder: FC<{
     style: "solid",
   });
   const detectMixed = (round: any) => {
-    let rounded: any = round;
-    let corner: any = [];
-    transform(rounded, (r, v, k) => {
-      corner.push(v);
-    });
-    let uniqueCorner = uniq(corner);
-    if (uniqueCorner.length > 1 && corner.length === 4) {
-      return true;
-    }
-    return false;
-  };
-  const detectMixedCorner = (round: any) => {
     let rounded: any = round;
     let corner: any = [];
     transform(rounded, (r, v, k) => {
@@ -84,11 +71,11 @@ export const PanelBorder: FC<{
       border: false,
     },
     async () => {
-      let isMixed = detectMixedCorner(params.rounded);
+      let isMixed = detectMixed(params.rounded);
       local.isMix = isMixed.isMix;
 
       if (isMixed.isMix) local.open = true;
-      let mixStroke = detectMixedCorner(params.stroke);
+      let mixStroke = detectMixed(params.stroke);
       local.isBorderMix = mixStroke.isMix;
 
       if (mixStroke.isMix) local.border = true;
@@ -98,21 +85,18 @@ export const PanelBorder: FC<{
 
   return (
     <div className="flex flex-col space-y-2">
-      <div className={cx("flex flex-row justify-between text-xs ")}>
-        <Tooltip content={"Background Size"}>
-          <div
-            className={cx(
-              "bg-white p-[2px] border border-gray-300 flex items-stretch",
-              css`
-                .border {
-                  width: 70px !important;
-                }
-                input {
-                  width: 100%;
-                }
-              `
-            )}
-          >
+      <div className={cx("flex flex-row text-xs space-x-1")}>
+        <div
+          className={cx(
+            "flex flex-col space-y-1 max-w-[60px]",
+            css`
+              .dropdown {
+                overflow: hidden;
+              }
+            `
+          )}
+        >
+          <Tooltip content={"Background Size"}>
             <Dropdown
               {...dropdownProp}
               value={params.style}
@@ -124,280 +108,342 @@ export const PanelBorder: FC<{
                 update("border", { ...params, style: val as any });
               }}
             />
-          </div>
-        </Tooltip>
-        <Tooltip content={"Stroke"} asChild>
-          <div
-            className={cx(
-              "bg-white p-[2px] border border-gray-300 flex items-stretch",
-              css`
-                input {
-                  width: 100% !important;
-                }
-                .field-num {
-                  width: 60px !important;
-                }
-              `
-            )}
-          >
-            <FieldNumUnit
-              positiveOnly
-              hideUnit
-              icon={
-                <div className="text-lg text-gray-700">
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fill="currentColor"
-                      d="M20 15H4c-.55 0-1 .45-1 1s.45 1 1 1h16c.55 0 1-.45 1-1s-.45-1-1-1zm0-5H4c-.55 0-1 .45-1 1v1c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-1c0-.55-.45-1-1-1zm0-6H4c-.55 0-1 .45-1 1v2c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V5c0-.55-.45-1-1-1zm.5 15h-17c-.28 0-.5.22-.5.5s.22.5.5.5h17c.28 0 .5-.22.5-.5s-.22-.5-.5-.5z"
-                    />
-                  </svg>
-                </div>
-              }
-              value={
-                get(detectMixedCorner(params.stroke), "isMix")
-                  ? ""
-                  : get(detectMixedCorner(params.stroke), "value") + ""
-              }
-              disabled={
-                get(detectMixedCorner(params.stroke), "isMix") ? "Mixed" : false
-              }
-              update={(val) => {
-                let value = parseInt(val.replaceAll("px", ""));
-                let data = {
-                  t: value,
-                  b: value,
-                  l: value,
-                  r: value,
-                };
-                update("border", {
-                  ...params,
-                  stroke: data,
-                });
-                let mixStroke = detectMixedCorner(data);
-                local.isBorderMix = mixStroke.isMix;
-
-                local.render();
-              }}
-            />
-          </div>
-        </Tooltip>
-        <Tooltip asChild content="Toggle Border" placement="top-end">
-          <div>
-            <Button
+          </Tooltip>
+          <Tooltip content={"Stroke"} asChild>
+            <div
               className={cx(
-                "flex-1",
+                "bg-white p-[2px] border border-gray-300 flex items-stretch",
                 css`
-                  width: 30px;
-                  max-width: 30px;
-                  height: 35px;
-                  min-width: 0px !important;
-                  background: ${local.border ? "#3c82f6" : "#fff"} !important;
-                  border-color: ${local.border
-                    ? "#7baeff"
-                    : "#d1d1d1"} !important;
+                  input {
+                    width: 100% !important;
+                  }
+                  .field-num {
+                    width: 60px !important;
+                  }
                 `
               )}
-              onClick={() => {
-                local.border = !local.border;
-                local.render();
-              }}
             >
-              <div className="text-lg text-gray-700">
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 8v8m16 0V8M8 4h8M8 20h8"
-                  />
-                </svg>
-              </div>
-            </Button>
-          </div>
-        </Tooltip>
-      </div>
-      {local.border ? (
-        <>
-          <div
-            className={cx(
-              "flex flex-row text-xs ",
-              css`
-                .field-num {
-                  height: 25px;
-                  border: 1px solid #d1d1d1;
+              <FieldNumUnit
+                positiveOnly
+                hideUnit
+                icon={
+                  <div className="text-lg text-gray-700 mr-1">
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 15 15"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <rect
+                        x="7"
+                        y="5.025"
+                        width="1"
+                        height="1"
+                        rx=".5"
+                        fill="currentColor"
+                      ></rect>
+                      <rect
+                        x="7"
+                        y="3.025"
+                        width="1"
+                        height="1"
+                        rx=".5"
+                        fill="currentColor"
+                      ></rect>
+                      <rect
+                        x="7"
+                        y="7.025"
+                        width="1"
+                        height="1"
+                        rx=".5"
+                        fill="currentColor"
+                      ></rect>
+                      <rect
+                        x="7"
+                        y="13.025"
+                        width="1"
+                        height="1"
+                        rx=".5"
+                        fill="currentColor"
+                      ></rect>
+                      <rect
+                        x="7"
+                        y="1.025"
+                        width="1"
+                        height="1"
+                        rx=".5"
+                        fill="currentColor"
+                      ></rect>
+                      <rect
+                        x="13"
+                        y="7.025"
+                        width="1"
+                        height="1"
+                        rx=".5"
+                        fill="currentColor"
+                      ></rect>
+                      <rect
+                        x="5"
+                        y="7.025"
+                        width="1"
+                        height="1"
+                        rx=".5"
+                        fill="currentColor"
+                      ></rect>
+                      <rect
+                        x="3"
+                        y="7.025"
+                        width="1"
+                        height="1"
+                        rx=".5"
+                        fill="currentColor"
+                      ></rect>
+                      <rect
+                        x="9"
+                        y="7.025"
+                        width="1"
+                        height="1"
+                        rx=".5"
+                        fill="currentColor"
+                      ></rect>
+                      <rect
+                        x="11"
+                        y="7.025"
+                        width="1"
+                        height="1"
+                        rx=".5"
+                        fill="currentColor"
+                      ></rect>
+                      <rect
+                        x="7"
+                        y="9.025"
+                        width="1"
+                        height="1"
+                        rx=".5"
+                        fill="currentColor"
+                      ></rect>
+                      <rect
+                        x="7"
+                        y="11.025"
+                        width="1"
+                        height="1"
+                        rx=".5"
+                        fill="currentColor"
+                      ></rect>
+                      <rect
+                        x="1"
+                        y="7.025"
+                        width="1"
+                        height="1"
+                        rx=".5"
+                        fill="currentColor"
+                      ></rect>
+                      <path
+                        d="M1 1.49994C1 1.2238 1.22386 0.999939 1.5 0.999939H6V1.99994H2V5.99994H1V1.49994ZM13 1.99994H9V0.999939H13.5C13.7761 0.999939 14 1.2238 14 1.49994V5.99994H13V1.99994ZM1 13.4999V8.99994H2V12.9999H6V13.9999H1.5C1.22386 13.9999 1 13.7761 1 13.4999ZM13 12.9999V8.99994H14V13.4999C14 13.7761 13.7761 13.9999 13.5 13.9999H9.5V12.9999H13Z"
+                        fill="currentColor"
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                      ></path>
+                    </svg>
+                  </div>
                 }
-              `,
-              css`
-                .field-num {
-                  width: 45px !important;
-                  border-right: 0px !important;
+                value={
+                  get(detectMixed(params.stroke), "isMix")
+                    ? ""
+                    : get(detectMixed(params.stroke), "value") + ""
                 }
-              `
-            )}
-          >
-            <Tooltip asChild content="Border Left">
-              <div>
-                <FieldNumUnit
-                  positiveOnly
-                  hideUnit
-                  icon={
-                    <div className="text-lg text-gray-700">
-                      <svg
-                        width="15"
-                        height="15"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fill="currentColor"
-                          d="M3.5 21a1 1 0 0 1-1-1V4a1 1 0 0 1 2 0v16a1 1 0 0 1-1 1Z"
-                        />
-                        <circle
-                          cx="7.5"
-                          cy="12"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="11.5"
-                          cy="12"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="15.5"
-                          cy="12"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="19.5"
-                          cy="12"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="7.5"
-                          cy="4"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="11.5"
-                          cy="4"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="15.5"
-                          cy="4"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="19.5"
-                          cy="4"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="19.5"
-                          cy="8"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="19.5"
-                          cy="16"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="11.5"
-                          cy="8"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="11.5"
-                          cy="16"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="7.5"
-                          cy="20"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="11.5"
-                          cy="20"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="15.5"
-                          cy="20"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="19.5"
-                          cy="20"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                      </svg>
-                    </div>
-                  }
-                  value={get(params, "stroke.l") + "px"}
-                  update={(val) => {
-                    let data = {
-                      ...params.stroke,
-                      l: parseInt(val.replaceAll("px", "")),
-                    };
-                    update("border", {
-                      ...params,
-                      stroke: data as any,
-                    });
-                    let isMixed = detectMixedCorner(data);
-                    local.isBorderMix = isMixed.isMix;
-                    local.borderVal = isMixed.value;
-                    local.render();
-                  }}
-                />
-              </div>
-            </Tooltip>
+                enableWhenDrag
+                disabled={
+                  get(detectMixed(params.stroke), "isMix") ? "Mixed" : false
+                }
+                update={(val) => {
+                  let value = parseInt(val.replaceAll("px", ""));
+                  let data = {
+                    t: value,
+                    b: value,
+                    l: value,
+                    r: value,
+                  };
+                  update("border", {
+                    ...params,
+                    stroke: data,
+                  });
+                  local.isBorderMix = false;
 
+                  local.render();
+                }}
+              />
+            </div>
+          </Tooltip>
+        </div>
+        <div
+          className={cx(
+            "flex flex-row text-xs items-center pl-2",
+
+            css`
+              .field-num {
+                border: 1px solid #d1d1d1;
+                height: 25px;
+                width: 45px !important;
+                margin-right: 5px;
+                margin-bottom: 5px;
+              }
+            `
+          )}
+        >
+          <Tooltip asChild content="Border Left">
+            <div>
+              <FieldNumUnit
+                positiveOnly
+                hideUnit
+                icon={
+                  <div className="text-lg text-gray-700">
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fill="currentColor"
+                        d="M3.5 21a1 1 0 0 1-1-1V4a1 1 0 0 1 2 0v16a1 1 0 0 1-1 1Z"
+                      />
+                      <circle
+                        cx="7.5"
+                        cy="12"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="11.5"
+                        cy="12"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="15.5"
+                        cy="12"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="19.5"
+                        cy="12"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="7.5"
+                        cy="4"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="11.5"
+                        cy="4"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="15.5"
+                        cy="4"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="19.5"
+                        cy="4"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="19.5"
+                        cy="8"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="19.5"
+                        cy="16"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="11.5"
+                        cy="8"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="11.5"
+                        cy="16"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="7.5"
+                        cy="20"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="11.5"
+                        cy="20"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="15.5"
+                        cy="20"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="19.5"
+                        cy="20"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                    </svg>
+                  </div>
+                }
+                value={get(params, "stroke.l") + "px"}
+                update={(val) => {
+                  let data = {
+                    ...params.stroke,
+                    l: parseInt(val.replaceAll("px", "")),
+                  };
+                  update("border", {
+                    ...params,
+                    stroke: data as any,
+                  });
+                  let isMixed = detectMixed(data);
+                  local.isBorderMix = isMixed.isMix;
+                  local.borderVal = isMixed.value;
+                  local.render();
+                }}
+              />
+            </div>
+          </Tooltip>
+
+          <div className="flex flex-col">
             <Tooltip asChild content="Border Top">
               <div>
                 <FieldNumUnit
@@ -540,157 +586,7 @@ export const PanelBorder: FC<{
                       ...params,
                       stroke: data as any,
                     });
-                    let isMixed = detectMixedCorner(data);
-                    local.isBorderMix = isMixed.isMix;
-                    local.borderVal = isMixed.value;
-                    local.render();
-                  }}
-                />
-              </div>
-            </Tooltip>
-            <Tooltip asChild content="Border Right">
-              <div>
-                <FieldNumUnit
-                  positiveOnly
-                  hideUnit
-                  icon={
-                    <div className="text-lg text-gray-700">
-                      <svg
-                        width="15"
-                        height="15"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fill="currentColor"
-                          d="M20.5 21a1 1 0 0 1-1-1V4a1 1 0 0 1 2 0v16a1 1 0 0 1-1 1Z"
-                        />
-                        <circle
-                          cx="16.5"
-                          cy="12"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="12.5"
-                          cy="12"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="8.5"
-                          cy="12"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="4.5"
-                          cy="12"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="16.5"
-                          cy="20"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="12.5"
-                          cy="20"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="8.5"
-                          cy="20"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="4.5"
-                          cy="20"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="4.5"
-                          cy="16"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="4.5"
-                          cy="8"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="12.5"
-                          cy="16"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="12.5"
-                          cy="8"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="16.5"
-                          cy="4"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="12.5"
-                          cy="4"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="8.5"
-                          cy="4"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                        <circle
-                          cx="4.5"
-                          cy="4"
-                          r="1"
-                          fill="currentColor"
-                          opacity=".5"
-                        />
-                      </svg>
-                    </div>
-                  }
-                  value={get(params, "stroke.r") + "px"}
-                  update={(val) => {
-                    let data = {
-                      ...params.stroke,
-                      r: parseInt(val.replaceAll("px", "")),
-                    };
-                    update("border", {
-                      ...params,
-                      stroke: data as any,
-                    });
-                    let isMixed = detectMixedCorner(data);
+                    let isMixed = detectMixed(data);
                     local.isBorderMix = isMixed.isMix;
                     local.borderVal = isMixed.value;
                     local.render();
@@ -840,7 +736,7 @@ export const PanelBorder: FC<{
                       ...params,
                       stroke: data as any,
                     });
-                    let isMixed = detectMixedCorner(data);
+                    let isMixed = detectMixed(data);
                     local.isBorderMix = isMixed.isMix;
                     local.borderVal = isMixed.value;
                     local.render();
@@ -849,13 +745,166 @@ export const PanelBorder: FC<{
               </div>
             </Tooltip>
           </div>
-        </>
-      ) : (
-        <></>
-      )}
+          <Tooltip asChild content="Border Right">
+            <div>
+              <FieldNumUnit
+                positiveOnly
+                hideUnit
+                icon={
+                  <div className="text-lg text-gray-700">
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fill="currentColor"
+                        d="M20.5 21a1 1 0 0 1-1-1V4a1 1 0 0 1 2 0v16a1 1 0 0 1-1 1Z"
+                      />
+                      <circle
+                        cx="16.5"
+                        cy="12"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="12.5"
+                        cy="12"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="8.5"
+                        cy="12"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="4.5"
+                        cy="12"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="16.5"
+                        cy="20"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="12.5"
+                        cy="20"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="8.5"
+                        cy="20"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="4.5"
+                        cy="20"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="4.5"
+                        cy="16"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="4.5"
+                        cy="8"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="12.5"
+                        cy="16"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="12.5"
+                        cy="8"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="16.5"
+                        cy="4"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="12.5"
+                        cy="4"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="8.5"
+                        cy="4"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                      <circle
+                        cx="4.5"
+                        cy="4"
+                        r="1"
+                        fill="currentColor"
+                        opacity=".5"
+                      />
+                    </svg>
+                  </div>
+                }
+                value={get(params, "stroke.r") + "px"}
+                update={(val) => {
+                  let data = {
+                    ...params.stroke,
+                    r: parseInt(val.replaceAll("px", "")),
+                  };
+                  update("border", {
+                    ...params,
+                    stroke: data as any,
+                  });
+                  let isMixed = detectMixed(data);
+                  local.isBorderMix = isMixed.isMix;
+                  local.borderVal = isMixed.value;
+                  local.render();
+                }}
+              />
+            </div>
+          </Tooltip>
+        </div>
+      </div>
+
+      <div className="text-[10px] select-none text-slate-400">
+        COLOR & ROUNDED CORNER
+      </div>
+
       <div
         className={cx(
-          "flex flex-row items-stretch justify-between text-xs ",
+          "flex flex-row items-stretch text-xs ",
           css`
             .field-num {
               border: 1px solid #d1d1d1;
@@ -863,327 +912,271 @@ export const PanelBorder: FC<{
           `
         )}
       >
-        <Tooltip asChild content={"Border Color"}>
-          <div
-            className={cx(
-              "bg-white p-[2px] border border-gray-300 flex items-stretch",
-              css`
-                .color-box {
-                  height: 25px !important;
-                  width: 50px;
-                }
-              `
-            )}
-          >
-            <FieldColor
-              popupID="border-color"
-              value={params.color}
-              update={(color) => {
-                update("border", { ...params, color });
-              }}
-            />
-          </div>
-        </Tooltip>
-        <Tooltip content="Corner">
-          <div
-            className={cx(
-              "",
-              css`
-                .field-num {
-                  width: 85px;
-                  height: 30px;
-                }
-              `
-            )}
-          >
-            <FieldNumUnit
-              positiveOnly
-              hideUnit
-              icon={
-                <div className="text-lg text-gray-700">
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fill="currentColor"
-                      d="M19 19h2v2h-2v-2zm0-2h2v-2h-2v2zM3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm0-4h2V3H3v2zm4 0h2V3H7v2zm8 16h2v-2h-2v2zm-4 0h2v-2h-2v2zm4 0h2v-2h-2v2zm-8 0h2v-2H7v2zm-4 0h2v-2H3v2zM21 8c0-2.76-2.24-5-5-5h-5v2h5c1.65 0 3 1.35 3 3v5h2V8z"
-                    />
-                  </svg>
-                </div>
-              }
-              width={"100%"}
-              enableWhenDrag
-              value={
-                get(detectMixedCorner(params.rounded), "isMix")
-                  ? ""
-                  : get(detectMixedCorner(params.rounded), "value") + ""
-              }
-              disabled={
-                get(detectMixedCorner(params.rounded), "isMix")
-                  ? "Mixed"
-                  : false
-              }
-              update={(val, setVal) => {
-                let result = updateAllCorner({
-                  value: parseInt(val.replaceAll("px", "")),
-                });
-                let isMixed = detectMixedCorner(result);
-                local.isMix = isMixed.isMix;
-
-                local.render();
-              }}
-            />
-          </div>
-        </Tooltip>
-        <Tooltip
-          asChild
-          content="Independent Rounded Corner"
-          placement="top-end"
-        >
-          <div>
-            <Button
+        <div className="flex flex-col space-y-1 mr-3">
+          <Tooltip asChild content={"Border Color"}>
+            <div
               className={cx(
-                "flex-1 flex flex-row items-center justify-center",
+                "bg-white p-[2px] border border-gray-300 flex items-center justify-center",
                 css`
-                  width: 30px;
-                  max-width: 30px;
-                  height: 30px;
-                  background: ${local.open
-                    ? "rgb(229,231,235)"
-                    : "#fff"} !important;
-                  border-color: #d1d1d1 !important;
+                  .color-box {
+                    height: 22px !important;
+                    width: 50px;
+                  }
                 `
               )}
-              onClick={() => {
-                local.open = !local.open;
-                local.render();
-              }}
             >
-              <div className="text-lg text-gray-700">
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M16 4h2a2 2 0 0 1 2 2v2m0 8v2a2 2 0 0 1-2 2h-2m-8 0H6a2 2 0 0 1-2-2v-2m0-8V6a2 2 0 0 1 2-2h2"
-                  />
-                </svg>
-              </div>
-            </Button>
-          </div>
-        </Tooltip>
-      </div>
-      {local.open ? (
-        <>
-          <div
-            className={cx(
-              "flex flex-row text-xs ",
-              css`
-                .field-num {
-                  height: 25px;
-                  border: 1px solid #d1d1d1;
+              <FieldColor
+                popupID="border-color"
+                value={params.color}
+                update={(color) => {
+                  update("border", { ...params, color });
+                }}
+              />
+            </div>
+          </Tooltip>
+          <Tooltip content="Corner">
+            <div
+              className={cx(css`
+                width: 55px;
+                height: 23px;
+              `)}
+            >
+              <FieldNumUnit
+                positiveOnly
+                hideUnit
+                icon={
+                  <div className="text-lg text-gray-700">
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fill="currentColor"
+                        d="M19 19h2v2h-2v-2zm0-2h2v-2h-2v2zM3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm0-4h2V3H3v2zm4 0h2V3H7v2zm8 16h2v-2h-2v2zm-4 0h2v-2h-2v2zm4 0h2v-2h-2v2zm-8 0h2v-2H7v2zm-4 0h2v-2H3v2zM21 8c0-2.76-2.24-5-5-5h-5v2h5c1.65 0 3 1.35 3 3v5h2V8z"
+                      />
+                    </svg>
+                  </div>
                 }
-              `,
-              css`
-                .field-num {
-                  width: 45px !important;
-                  border-right: 0px !important;
+                width={"100%"}
+                enableWhenDrag
+                value={
+                  get(detectMixed(params.rounded), "isMix")
+                    ? ""
+                    : get(detectMixed(params.rounded), "value") + ""
                 }
-              `
-            )}
-          >
-            <Tooltip asChild content="Corner Top Right">
-              <div>
-                <FieldNumUnit
-                  positiveOnly
-                  hideUnit
-                  icon={
-                    <div className="text-lg text-gray-700">
-                      <svg
-                        width="15"
-                        height="15"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fill="none"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.5"
-                          d="m20.01 16.01l-.01-.011m.01 4.011l-.01-.011m-3.99.011l-.01-.011m-3.99.011l-.01-.011m-3.99.011L8 19.999m-3.99.011L4 19.999m.01-3.989L4 15.999m.01-3.989L4 11.999m.01-3.989L4 7.999m.01-3.989L4 3.999m4.01.011L8 3.999M20.01 12V4h-8v8h8Z"
-                        />
-                      </svg>
-                    </div>
-                  }
-                  value={get(params, "rounded.tr") + "px"}
-                  update={(val) => {
-                    update("border", {
-                      ...params,
-                      rounded: {
-                        ...params.rounded,
-                        tr: parseInt(val.replaceAll("px", "")),
-                      } as any,
-                    });
-                    let isMixed = detectMixedCorner({
-                      ...params.rounded,
-                      tr: parseInt(val.replaceAll("px", "")),
-                    });
-                    local.isMix = isMixed.isMix;
+                disabled={
+                  get(detectMixed(params.rounded), "isMix") ? "Mixed" : false
+                }
+                update={(val, setVal) => {
+                  let result = updateAllCorner({
+                    value: parseInt(val.replaceAll("px", "")),
+                  });
+                  let isMixed = detectMixed(result);
+                  local.isMix = isMixed.isMix;
 
-                    local.render();
-                  }}
-                />
-              </div>
-            </Tooltip>
+                  local.render();
+                }}
+              />
+            </div>
+          </Tooltip>
+        </div>
+        <div
+          className={cx(
+            "flex flex-row text-xs flex-wrap",
+            css`
+              width: 100px;
 
-            <Tooltip asChild content="Corner Top Left">
-              <div>
-                <FieldNumUnit
-                  positiveOnly
-                  hideUnit
-                  icon={
-                    <div className="text-lg text-gray-700">
-                      <svg
-                        width="15"
-                        height="15"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fill="none"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.5"
-                          d="m4 16.01l.01-.011M4 20.01l.01-.011M8 20.01l.01-.011m3.99.011l.01-.011m3.99.011l.01-.011m3.99.011l.01-.011M20 16.01l.01-.011M20 12.01l.01-.011M20 8.01l.01-.011M20 4.01l.01-.011M16 4.01l.01-.011M4 12V4h8v8H4Z"
-                        />
-                      </svg>
-                    </div>
-                  }
-                  value={get(params, "rounded.tl") + "px"}
-                  update={(val) => {
-                    update("border", {
-                      ...params,
-                      rounded: {
-                        ...params.rounded,
-                        tl: parseInt(val.replaceAll("px", "")),
-                      } as any,
-                    });
-                    let isMixed = detectMixedCorner({
+              .field-num {
+                height: 25px;
+                border: 1px solid #d1d1d1;
+                margin-right: 5px;
+                margin-bottom: 5px;
+              }
+            `
+          )}
+        >
+          <Tooltip asChild content="Corner Top Left">
+            <div>
+              <FieldNumUnit
+                positiveOnly
+                hideUnit
+                icon={
+                  <div className="text-lg text-gray-700">
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.5"
+                        d="m4 16.01l.01-.011M4 20.01l.01-.011M8 20.01l.01-.011m3.99.011l.01-.011m3.99.011l.01-.011m3.99.011l.01-.011M20 16.01l.01-.011M20 12.01l.01-.011M20 8.01l.01-.011M20 4.01l.01-.011M16 4.01l.01-.011M4 12V4h8v8H4Z"
+                      />
+                    </svg>
+                  </div>
+                }
+                value={get(params, "rounded.tl") + "px"}
+                update={(val) => {
+                  update("border", {
+                    ...params,
+                    rounded: {
                       ...params.rounded,
                       tl: parseInt(val.replaceAll("px", "")),
-                    });
-                    local.isMix = isMixed.isMix;
+                    } as any,
+                  });
+                  let isMixed = detectMixed({
+                    ...params.rounded,
+                    tl: parseInt(val.replaceAll("px", "")),
+                  });
+                  local.isMix = isMixed.isMix;
 
-                    local.render();
-                  }}
-                />
-              </div>
-            </Tooltip>
-            <Tooltip asChild content="Corner Bottom Left">
-              <div>
-                <FieldNumUnit
-                  positiveOnly
-                  hideUnit
-                  icon={
-                    <div className="text-lg text-gray-700">
-                      <svg
-                        width="15"
-                        height="15"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fill="none"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.5"
-                          d="m4 8l.01.011M4 4l.01.011M8 4l.01.011M12 4l.01.011M16 4l.01.011M20 4l.01.011M20 8l.01.011M20 12l.01.011M20 16l.01.011M20 20l.01.011M16 20l.01.011M4 12.01v8h8v-8H4Z"
-                        />
-                      </svg>
-                    </div>
-                  }
-                  value={get(params, "rounded.bl") + "px"}
-                  update={(val) => {
-                    update("border", {
-                      ...params,
-                      rounded: {
-                        ...params.rounded,
-                        bl: parseInt(val.replaceAll("px", "")),
-                      } as any,
-                    });
-                    let isMixed = detectMixedCorner({
+                  local.render();
+                }}
+              />
+            </div>
+          </Tooltip>
+
+          <Tooltip asChild content="Corner Top Right">
+            <div>
+              <FieldNumUnit
+                positiveOnly
+                hideUnit
+                icon={
+                  <div className="text-lg text-gray-700">
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.5"
+                        d="m20.01 16.01l-.01-.011m.01 4.011l-.01-.011m-3.99.011l-.01-.011m-3.99.011l-.01-.011m-3.99.011L8 19.999m-3.99.011L4 19.999m.01-3.989L4 15.999m.01-3.989L4 11.999m.01-3.989L4 7.999m.01-3.989L4 3.999m4.01.011L8 3.999M20.01 12V4h-8v8h8Z"
+                      />
+                    </svg>
+                  </div>
+                }
+                value={get(params, "rounded.tr") + "px"}
+                update={(val) => {
+                  update("border", {
+                    ...params,
+                    rounded: {
+                      ...params.rounded,
+                      tr: parseInt(val.replaceAll("px", "")),
+                    } as any,
+                  });
+                  let isMixed = detectMixed({
+                    ...params.rounded,
+                    tr: parseInt(val.replaceAll("px", "")),
+                  });
+                  local.isMix = isMixed.isMix;
+
+                  local.render();
+                }}
+              />
+            </div>
+          </Tooltip>
+
+          <Tooltip asChild content="Corner Bottom Left">
+            <div>
+              <FieldNumUnit
+                positiveOnly
+                hideUnit
+                icon={
+                  <div className="text-lg text-gray-700">
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.5"
+                        d="m4 8l.01.011M4 4l.01.011M8 4l.01.011M12 4l.01.011M16 4l.01.011M20 4l.01.011M20 8l.01.011M20 12l.01.011M20 16l.01.011M20 20l.01.011M16 20l.01.011M4 12.01v8h8v-8H4Z"
+                      />
+                    </svg>
+                  </div>
+                }
+                value={get(params, "rounded.bl") + "px"}
+                update={(val) => {
+                  update("border", {
+                    ...params,
+                    rounded: {
                       ...params.rounded,
                       bl: parseInt(val.replaceAll("px", "")),
-                    });
-                    local.isMix = isMixed.isMix;
+                    } as any,
+                  });
+                  let isMixed = detectMixed({
+                    ...params.rounded,
+                    bl: parseInt(val.replaceAll("px", "")),
+                  });
+                  local.isMix = isMixed.isMix;
 
-                    local.render();
-                  }}
-                />
-              </div>
-            </Tooltip>
-            <Tooltip asChild content="Corner Bottom Right">
-              <div>
-                <FieldNumUnit
-                  positiveOnly
-                  hideUnit
-                  icon={
-                    <div className="text-lg text-gray-700">
-                      <svg
-                        width="15"
-                        height="15"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fill="none"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.5"
-                          d="m20.01 8l-.01.011M20.01 4l-.01.011M16.01 4l-.01.011M12.01 4l-.01.011M8.01 4L8 4.011M4.01 4L4 4.011M4.01 8L4 8.011M4.01 12l-.01.011M4.01 16l-.01.011M4.01 20l-.01.011M8.01 20l-.01.011m12.01-8.001v8h-8v-8h8Z"
-                        />
-                      </svg>
-                    </div>
-                  }
-                  value={get(params, "rounded.br") + "px"}
-                  update={(val) => {
-                    update("border", {
-                      ...params,
-                      rounded: {
-                        ...params.rounded,
-                        br: parseInt(val.replaceAll("px", "")),
-                      } as any,
-                    });
-                    let isMixed = detectMixedCorner({
+                  local.render();
+                }}
+              />
+            </div>
+          </Tooltip>
+          <Tooltip asChild content="Corner Bottom Right">
+            <div>
+              <FieldNumUnit
+                positiveOnly
+                hideUnit
+                icon={
+                  <div className="text-lg text-gray-700">
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.5"
+                        d="m20.01 8l-.01.011M20.01 4l-.01.011M16.01 4l-.01.011M12.01 4l-.01.011M8.01 4L8 4.011M4.01 4L4 4.011M4.01 8L4 8.011M4.01 12l-.01.011M4.01 16l-.01.011M4.01 20l-.01.011M8.01 20l-.01.011m12.01-8.001v8h-8v-8h8Z"
+                      />
+                    </svg>
+                  </div>
+                }
+                value={get(params, "rounded.br") + "px"}
+                update={(val) => {
+                  update("border", {
+                    ...params,
+                    rounded: {
                       ...params.rounded,
                       br: parseInt(val.replaceAll("px", "")),
-                    });
-                    local.isMix = isMixed.isMix;
+                    } as any,
+                  });
+                  let isMixed = detectMixed({
+                    ...params.rounded,
+                    br: parseInt(val.replaceAll("px", "")),
+                  });
+                  local.isMix = isMixed.isMix;
 
-                    local.render();
-                  }}
-                />
-              </div>
-            </Tooltip>
-          </div>
-        </>
-      ) : (
-        <></>
-      )}
+                  local.render();
+                }}
+              />
+            </div>
+          </Tooltip>
+        </div>
+      </div>
     </div>
   );
 };

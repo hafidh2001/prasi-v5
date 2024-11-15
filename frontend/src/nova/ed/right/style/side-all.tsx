@@ -86,6 +86,7 @@ export const EdStyleAll: FC<{ as_child?: boolean }> = ({ as_child }) => {
       <SideBox>
         <PanelBorder value={item} mode={p.mode} update={update} />
       </SideBox>
+
     </>
   );
 

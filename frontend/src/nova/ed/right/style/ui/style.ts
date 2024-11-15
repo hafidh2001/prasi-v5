@@ -6,6 +6,7 @@ export const dropdownProp = {
         max-width: none;
         width: 87px;
         flex: 1;
+        font-size: 12px;
       }
     `
   ),

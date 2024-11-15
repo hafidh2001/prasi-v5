@@ -10,7 +10,7 @@ import {
   PanelLeftOpen,
   PanelRightOpen,
   ScrollText,
-  Settings2
+  Settings2,
 } from "lucide-react";
 import { EdSave } from "popup/build/ed-save";
 import { closeEditor } from "popup/script/ed-workbench";
@@ -284,6 +284,28 @@ export const EdTopBar = () => {
             <PanelRightOpen size={15} />
           </div>
         )}
+
+        <label className=" text-slate-400 flex items-center pr-1">
+          <div className=" px-1"> Zoom</div>
+          <select
+            value={p.ui.zoom}
+            onChange={(e) => {
+              p.ui.zoom = e.currentTarget.value;
+              localStorage.zoom = p.ui.zoom;
+              p.render();
+            }}
+          >
+            {["50%", "60%", "70%", "80%", "90%", "100%", "120%", "150%"].map(
+              (e) => {
+                return (
+                  <option key={e} value={e}>
+                    {e}
+                  </option>
+                );
+              }
+            )}
+          </select>
+        </label>
 
         <ButtonBox>
           <Button>
