@@ -62,14 +62,16 @@ export const CPrasi: FC<{ id: string; size?: string; name: string }> = ({
   );
 
   const content = local.root ? (
-    <ViPage
-      init={{
-        name,
-        page: { root: local.root, id, url: "" },
-        comps: component_cache,
-        exports: { _prasi: _prasi },
-      }}
-    />
+    <div className="flex flex-1 flex-col text-[15px]">
+      <ViPage
+        init={{
+          name,
+          page: { root: local.root, id, url: "" },
+          comps: component_cache,
+          exports: { _prasi: _prasi },
+        }}
+      />
+    </div>
   ) : (
     <div className="flex-1 flex items-center justify-center w-full h-full">
       <LoadingSpinner size={17} />
@@ -81,6 +83,7 @@ export const CPrasi: FC<{ id: string; size?: string; name: string }> = ({
     const h = local.size?.split("x")[1];
     return (
       <Resizable
+        className="flex-1 flex"
         defaultSize={{ width: w, height: h }}
         onResizeStop={(_, __, div) => {
           localStorage.setItem(

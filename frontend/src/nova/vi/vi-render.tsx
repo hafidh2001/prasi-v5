@@ -15,7 +15,7 @@ export const ViRender: FC<{
   merged?: ViMergedProps;
   standalone?: string;
 }> = ({ item, is_layout, div_props, instance_id, merged, standalone }) => {
-  const { wrapper, ref } = useVi(
+  const { wrapper } = useVi(
     ({ ref }) => ({
       wrapper: ref.wrapper,
       ref,

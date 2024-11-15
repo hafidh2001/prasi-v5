@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { proxy, Snapshot, useSnapshot } from "valtio";
+import { deepClone } from "./use-global";
 
 const default_ctx = { ctx: {} as any, render() {} };
 const store_ctx = createContext<{
@@ -66,7 +67,7 @@ export const defineStore = function <
     if (!init_ctx[name] && init.state) {
       init_ctx[name] = {
         state: proxy(init.state),
-        ref: init.ref || {},
+        ref: deepClone(init.ref || {}),
       };
     }
     const ctx = init_ctx[name];

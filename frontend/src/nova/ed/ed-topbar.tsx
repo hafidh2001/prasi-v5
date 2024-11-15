@@ -3,30 +3,23 @@ import set from "lodash.set";
 import { active } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import {
-  Bolt,
-  Book,
-  BookCopy,
   BookOpenText,
-  Cog,
   ExternalLink,
   LayoutTemplate,
-  LibraryBig,
   Newspaper,
-  Notebook,
   PanelLeftOpen,
   PanelRightOpen,
   ScrollText,
-  Settings,
-  Settings2,
+  Settings2
 } from "lucide-react";
 import { EdSave } from "popup/build/ed-save";
 import { closeEditor } from "popup/script/ed-workbench";
 import { FC, ReactElement, useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
+import { Popover } from "utils/ui/popover";
 import { Tooltip } from "utils/ui/tooltip";
 import { CPrasi } from "./cprasi/cprasi";
-import { Popover } from "utils/ui/popover";
 
 export const navPrevItem = (p: PG) => {
   p.nav.navigating = true;

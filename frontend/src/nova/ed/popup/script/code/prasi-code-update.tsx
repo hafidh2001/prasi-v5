@@ -53,7 +53,6 @@ import * as _editor from "_prasi";
 declare global { const _prasi = _editor._prasi; }`,
       }
     );
-    console.log(editor_typings)
   }
 
   return [

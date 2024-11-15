@@ -1,8 +1,8 @@
 import { getActiveNode } from "crdt/node/get-node-by-id";
-import { active } from "logic/active";
+import { active, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
-import { FC, useCallback } from "react";
-import { useGlobal } from "utils/react/use-global";
+import { FC, useCallback, useEffect } from "react";
+import { deepClone, useGlobal } from "utils/react/use-global";
 import { PanelAutoLayout } from "./panel/auto-layout";
 import { PanelBackground } from "./panel/background";
 import { PanelBorder } from "./panel/border";
@@ -11,17 +11,48 @@ import { PanelFont } from "./panel/font";
 import { PanelPadding } from "./panel/padding";
 import { SideBox } from "./ui/SideBox";
 import { SideLabel } from "./ui/SideLabel";
+import set from "lodash.set";
+import { useLocal } from "utils/react/use-local";
+import { IItem } from "utils/types/item";
+import { waitUntil } from "prasi-utils";
 
 export const EdStyleAll: FC<{ as_child?: boolean }> = ({ as_child }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
-
-  let item = getActiveNode(p)?.item;
+  const local = useLocal({ item: null as IItem | null, timeout: null as any });
   let is_inherit = false;
-  if (item?.component?.id) {
-  }
+
+  useEffect(() => {
+    let active_item = getActiveNode(p)?.item;
+    if (!active_item) {
+      waitUntil(() => getActiveNode(p)?.item).then(() => {
+        const active_item = getActiveNode(p)?.item;
+        if (active_item) {
+          local.item = deepClone(active_item);
+          local.render();
+        }
+      });
+    } else {
+      local.item = deepClone(active_item);
+      local.render();
+    }
+  }, [active.item_id]);
+  const item = local.item;
 
   const update = useCallback(async (key: any, value: any) => {
-    console.log(key, value);
+    if (local.item) {
+      set(local.item, key, value);
+      local.item = { ...local.item };
+      local.render();
+    }
+    clearTimeout(local.timeout);
+    local.timeout = setTimeout(() => {
+      getActiveTree(p).update(`Update style ${key}`, ({ findNode }) => {
+        const n = findNode(active.item_id);
+        if (n) {
+          set(n.item, key, value);
+        }
+      });
+    }, 100);
   }, []);
 
   if (!item) return null;

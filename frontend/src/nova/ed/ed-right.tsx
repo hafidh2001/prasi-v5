@@ -13,6 +13,7 @@ import { EdVarList } from "./popup/vars/ed-var-list";
 import { EdEvents } from "./right/events/ed-events";
 import { EdCompTitle } from "./right/comp/ed-comp-title";
 import { EdCompProp } from "./right/comp/ed-comp-prop";
+import { EdStyleAll } from "./right/style/side-all";
 
 export const EdRight = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -97,6 +98,7 @@ export const EdRight = () => {
         <div className="absolute inset-0">
           {!is_comp && (
             <>
+              {p.ui.right.tab === "style" && <EdStyleAll />}
               {p.ui.right.tab === "events" && <EdEvents />}
               {p.ui.right.tab === "vars" && <EdVarList />}
             </>

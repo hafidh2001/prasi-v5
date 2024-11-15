@@ -207,73 +207,63 @@ export const PanelFont: FC<{
         </div>
       </div>
 
-      <Tooltip
-        content={
-          <>
-            Font Family
-            <br />
-            Changing font family for current element.
-          </>
-        }
-      >
-        <Dropdown
-          {...dropdownProp}
-          value={local.font.name || "DEFAULT"}
-          items={Object.entries(fflist).map((e, idx) => {
-            return {
-              label: e[1].name,
-              value: e[1].name,
-            };
-          })}
-          popover={{
-            ...dropdownProp.popover,
-            renderItem(item, idx) {
-              if (typeof item === "string") return null;
-              if (!ft.loadedFonts) ft.loadedFonts = [];
-              if (
-                ft.loadedFonts.indexOf(item.value) < 0 &&
-                item.value !== "DEFAULT"
-              ) {
-                ft.loadedFonts.push(item.value);
-                const doc = document;
-                let weight = `:wght@${[300, 400, 500, 600].join(";")}`;
-                let fontName = item.value.replace(/ /g, "+");
-                const _href = `https://fonts.googleapis.com/css2?family=${fontName}${weight}&display=swap`;
-                if (!doc.querySelector(`link[href="${_href}]`)) {
-                  const link = doc.createElement("link");
-                  link.type = "text/css";
-                  link.rel = "stylesheet preload prefetch";
-                  link.as = "style";
-                  link.crossOrigin = "anonymous";
-                  link.href = _href;
-                  doc.head.appendChild(link);
-                }
-              }
-              return (
-                <div
-                  className={cx(
-                    item.value !== "DEFAULT" &&
-                      css`
-                        font-family: "${item.value}", "Inter";
-                      `
-                  )}
-                >
-                  {item.label}
-                </div>
-              );
-            },
-          }}
-          onChange={(val) => {
-            if (val) {
-              if (val === EmptyFont.name) {
-                update("font", { ...font, family: undefined });
-              } else {
-                update("font", { ...font, family: val });
+      <Dropdown
+        {...dropdownProp}
+        value={local.font.name || "DEFAULT"}
+        items={Object.entries(fflist).map((e, idx) => {
+          return {
+            label: e[1].name,
+            value: e[1].name,
+          };
+        })}
+        popover={{
+          ...dropdownProp.popover,
+          renderItem(item, idx) {
+            if (typeof item === "string") return null;
+            if (!ft.loadedFonts) ft.loadedFonts = [];
+            if (
+              ft.loadedFonts.indexOf(item.value) < 0 &&
+              item.value !== "DEFAULT"
+            ) {
+              ft.loadedFonts.push(item.value);
+              const doc = document;
+              let weight = `:wght@${[300, 400, 500, 600].join(";")}`;
+              let fontName = item.value.replace(/ /g, "+");
+              const _href = `https://fonts.googleapis.com/css2?family=${fontName}${weight}&display=swap`;
+              if (!doc.querySelector(`link[href="${_href}]`)) {
+                const link = doc.createElement("link");
+                link.type = "text/css";
+                link.rel = "stylesheet preload prefetch";
+                link.as = "style";
+                link.crossOrigin = "anonymous";
+                link.href = _href;
+                doc.head.appendChild(link);
               }
             }
-          }}
-        />
-      </Tooltip>
+            return (
+              <div
+                className={cx(
+                  item.value !== "DEFAULT" &&
+                    css`
+                      font-family: "${item.value}", "Inter";
+                    `
+                )}
+              >
+                {item.label}
+              </div>
+            );
+          },
+        }}
+        onChange={(val) => {
+          if (val) {
+            if (val === EmptyFont.name) {
+              update("font", { ...font, family: undefined });
+            } else {
+              update("font", { ...font, family: val });
+            }
+          }
+        }}
+      />
       <div className={cx("flex flex-row justify-between text-xs ")}>
         <BoxSep
           className={cx(
