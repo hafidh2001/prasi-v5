@@ -4,6 +4,7 @@ import { ExprPartAdd } from "./expr-parts-add";
 import { ExprPartBody } from "./expr-parts-body";
 import { ExprPartsStatic } from "./expr-parts-static";
 import { ExprPartsVar } from "./expr-parts-var";
+import { ESimpleType } from "popup/vars/lib/type";
 
 export const ExprPartsField: FC<{
   name: string;
@@ -30,7 +31,7 @@ export const ExprPartsField: FC<{
           }}
           content={field.label}
           disabled
-          expected_type={expected_type}
+          expected_type={expected_type as ESimpleType[]}
         />
       );
     } else {
