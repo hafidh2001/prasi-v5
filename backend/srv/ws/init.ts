@@ -6,6 +6,7 @@ import { wsPage, wsPageClose } from "./crdt/page";
 import { wsSync, wsSyncClose } from "./sync";
 
 export const initWS: WebSocketHandler<WSContext> = {
+  idleTimeout: 60 * 10,
   message(ws, raw) {
     const pathname = ws.data.pathname;
     if (pathname.startsWith("/sync")) {

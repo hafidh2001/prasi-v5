@@ -48,9 +48,16 @@ export const EdMasterPropDetail: FC<{ children: any; onClose: () => void }> = ({
                 <EdMasterPropBodyBasic name={name} prop={prop} props={props} />
               ) : (
                 <>
-                  <div className="bg-purple-600 p-2 pb-0 flex items-end justify-between">
+                  <div
+                    className={cx(
+                      "bg-purple-600 p-2 flex items-end justify-between",
+                      css`
+                        padding-bottom: 0 !important;
+                      `
+                    )}
+                  >
                     <div className="flex items-end justify-between">
-                      {["basic"].map((e) => {
+                      {["master prop"].map((e) => {
                         return (
                           <div
                             key={e}
@@ -94,13 +101,11 @@ export const EdMasterPropDetail: FC<{ children: any; onClose: () => void }> = ({
                       <Trash size={12} className="mr-1" /> <div>Remove</div>
                     </div>
                   </div>
-                  {p.ui.tree.comp.tab === "basic" && (
-                    <EdMasterPropBodyBasic
-                      name={name}
-                      prop={prop}
-                      props={props}
-                    />
-                  )}
+                  <EdMasterPropBodyBasic
+                    name={name}
+                    prop={prop}
+                    props={props}
+                  />
                 </>
               )}
             </>

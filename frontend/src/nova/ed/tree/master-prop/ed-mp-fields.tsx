@@ -1,11 +1,8 @@
-import { getActiveNode } from "crdt/node/get-node-by-id";
 import { active } from "logic/active";
-import { EDGlobal } from "logic/ed-global";
 import { monacoRegisterSource } from "popup/script/code/js/create-model";
 import { registerPrettier } from "popup/script/code/js/register-prettier";
 import { MonacoRaw } from "popup/script/code/monaco-raw";
 import { useEffect } from "react";
-import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
 
@@ -54,6 +51,7 @@ export const FieldCode = (arg: {
   label: string;
   value?: string;
   default?: string;
+  typings?: string;
   onBeforeChange?: (value: string) => string;
   onChange?: (value: string) => void;
   onBlur?: (value: string) => void;
@@ -109,6 +107,13 @@ export const FieldCode = (arg: {
                   props.join("\n"),
                   "file:///prop-typings.d.ts"
                 );
+                if (arg.typings) {
+                  monacoRegisterSource(
+                    monaco,
+                    arg.typings,
+                    "file:///arg-typings.d.ts"
+                  );
+                }
               }}
             />
           </div>
@@ -121,7 +126,9 @@ export const FieldCode = (arg: {
         <div
           className={cx(
             "border m-1 px-2 ",
-            local.open ? "border-transparent text-white" : "bg-white hover:bg-blue-500 hover:text-white"
+            local.open
+              ? "border-transparent text-white"
+              : "bg-white hover:bg-blue-500 hover:text-white"
           )}
         >
           Edit Code

@@ -142,33 +142,9 @@ const navSitePage = (p: PG) => {
       },
     });
 
-    if (e && e.id && e.id_site) {
-      location.href = `/ed/${e.id_site}/${e.id}`;
-    } else {
-      const e = await _db.page.findFirst({
-        where: {
-          is_deleted: false,
-          is_default_layout: false,
-          site: validate(params.site_id)
-            ? { id: params.site_id }
-            : {
-                org: {
-                  org_user: {
-                    some: {
-                      id_user: p.user.id,
-                    },
-                  },
-                },
-              },
-          name: {
-            contains: "home",
-            mode: "insensitive",
-          },
-        },
-        select: { id: true, id_site: true },
-      });
-
+    if (!p.page.cur?.id) {
       if (e && e.id && e.id_site) {
+        alert("2");
         location.href = `/ed/${e.id_site}/${e.id}`;
       } else {
         const e = await _db.page.findFirst({
@@ -186,34 +162,67 @@ const navSitePage = (p: PG) => {
                     },
                   },
                 },
+            name: {
+              contains: "home",
+              mode: "insensitive",
+            },
           },
           select: { id: true, id_site: true },
         });
-        if (e) {
-          if (e.id && e.id_site) location.href = `/ed/${e.id_site}/${e.id}`;
-          else {
-            p.status = "no-site";
-            p.render();
-          }
+
+        if (e && e.id && e.id_site) {
+          alert("3");
+
+          location.href = `/ed/${e.id_site}/${e.id}`;
         } else {
-          if (validate(params.site_id)) {
-            const page = await _db.page.create({
-              data: {
-                content_tree: {
-                  childs: [],
-                  id: "root",
-                  type: "root",
-                },
-                name: "home",
-                url: "/",
-                id_site: params.site_id,
-              },
-            });
-            location.href = `/ed/${params.site_id}/${page.id}`;
-            return;
+          const e = await _db.page.findFirst({
+            where: {
+              is_deleted: false,
+              is_default_layout: false,
+              site: validate(params.site_id)
+                ? { id: params.site_id }
+                : {
+                    org: {
+                      org_user: {
+                        some: {
+                          id_user: p.user.id,
+                        },
+                      },
+                    },
+                  },
+            },
+            select: { id: true, id_site: true },
+          });
+          if (e) {
+            if (e.id && e.id_site) {
+              alert("1");
+              location.href = `/ed/${e.id_site}/${e.id}`;
+            } else {
+              p.status = "no-site";
+              p.render();
+            }
           } else {
-            p.status = "no-site";
-            p.render();
+            if (validate(params.site_id)) {
+              const page = await _db.page.create({
+                data: {
+                  content_tree: {
+                    childs: [],
+                    id: "root",
+                    type: "root",
+                  },
+                  name: "home",
+                  url: "/",
+                  id_site: params.site_id,
+                },
+              });
+              alert("4");
+
+              location.href = `/ed/${params.site_id}/${page.id}`;
+              return;
+            } else {
+              p.status = "no-site";
+              p.render();
+            }
           }
         }
       }

@@ -109,11 +109,12 @@ export const EdTopBar = () => {
   const can_back = p.nav.cursor - 2 >= 0;
 
   const topbar_mode = p.ui.topbar.mode;
+  const disconnected = p.sync?.ws.readyState !== WebSocket.OPEN;
   return (
     <div
       className={cx(
         "min-h-[35px] h-[35px] border-b flex items-stretch text-[12px] justify-between relative",
-        "",
+        disconnected && "bg-red-600",
         css`
           .btn {
             height: 24px;
@@ -138,7 +139,7 @@ export const EdTopBar = () => {
               ),
             }}
           >
-            <Trees  size={12} />
+            <Trees size={12} />
             <div>Site</div>
           </Button>
           <Button
@@ -176,88 +177,92 @@ export const EdTopBar = () => {
         )}
       </div>
       <div className="flex items-stretch absolute inset-0 justify-center pointer-events-none">
-        <div className="flex items-center pointer-events-auto">
-          <Tooltip
-            content={
-              <div className="flex items-center space-x-2">
-                <div>Previous item</div>{" "}
-                <div className="border border-slate-600 border-b-2 px-1 rounded-sm">
-                  Ctrl + -
-                </div>
-                <div>OR</div>
-                <div className="border border-slate-600 border-b-2 px-1 rounded-sm">
-                  Win + -
-                </div>
-              </div>
-            }
-            className={cx(
-              "cursor-pointer pl-2",
-              can_back ? "hover:text-blue-600" : "text-slate-400"
-            )}
-            onClick={async () => {
-              navPrevItem(p);
-            }}
-          >
-            <TriangleIcon />
-          </Tooltip>
-          <Tooltip
-            content={
-              <div className="flex items-center space-x-2">
-                <div>Next item</div>{" "}
-                <div className="border border-slate-600 border-b-2 px-1 rounded-sm">
-                  Ctrl + =
-                </div>
-                <div>OR</div>
-                <div className="border border-slate-600 border-b-2 px-1 rounded-sm">
-                  Win + =
-                </div>
-              </div>
-            }
-            className={cx(
-              "cursor-pointer rotate-180",
-              can_next ? "hover:text-blue-600" : "text-slate-400"
-            )}
-            onClick={async () => {
-              navNextItem(p);
-            }}
-          >
-            <TriangleIcon />
-          </Tooltip>
-        </div>
+        {!disconnected && (
+          <>
+            <div className="flex items-center pointer-events-auto">
+              <Tooltip
+                content={
+                  <div className="flex items-center space-x-2">
+                    <div>Previous item</div>{" "}
+                    <div className="border border-slate-600 border-b-2 px-1 rounded-sm">
+                      Ctrl + -
+                    </div>
+                    <div>OR</div>
+                    <div className="border border-slate-600 border-b-2 px-1 rounded-sm">
+                      Win + -
+                    </div>
+                  </div>
+                }
+                className={cx(
+                  "cursor-pointer pl-2",
+                  can_back ? "hover:text-blue-600" : "text-slate-400"
+                )}
+                onClick={async () => {
+                  navPrevItem(p);
+                }}
+              >
+                <TriangleIcon />
+              </Tooltip>
+              <Tooltip
+                content={
+                  <div className="flex items-center space-x-2">
+                    <div>Next item</div>{" "}
+                    <div className="border border-slate-600 border-b-2 px-1 rounded-sm">
+                      Ctrl + =
+                    </div>
+                    <div>OR</div>
+                    <div className="border border-slate-600 border-b-2 px-1 rounded-sm">
+                      Win + =
+                    </div>
+                  </div>
+                }
+                className={cx(
+                  "cursor-pointer rotate-180",
+                  can_next ? "hover:text-blue-600" : "text-slate-400"
+                )}
+                onClick={async () => {
+                  navNextItem(p);
+                }}
+              >
+                <TriangleIcon />
+              </Tooltip>
+            </div>
 
-        <ButtonBox>
-          <Button
-            className={cx(
-              "border rounded-sm rounded-r-none",
-              topbar_mode === "page" && p.ui.popup.script.open
-                ? "bg-orange-600 text-white border-orange-600"
-                : "hover:bg-orange-100 text-slate-600 bg-white"
-            )}
-            onClick={() => {
-              p.ui.topbar.mode = "page";
-              p.ui.popup.script.open = true;
-              p.render();
-            }}
-          >
-            <ScrollText size={12} /> <div>Code</div>
-          </Button>
+            <ButtonBox>
+              <Button
+                className={cx(
+                  "border rounded-sm rounded-r-none",
+                  topbar_mode === "page" && p.ui.popup.script.open
+                    ? "bg-orange-600 text-white border-orange-600"
+                    : "hover:bg-orange-100 text-slate-600 bg-white"
+                )}
+                onClick={() => {
+                  p.ui.topbar.mode = "page";
+                  p.ui.popup.script.open = true;
+                  p.render();
+                }}
+              >
+                <ScrollText size={12} /> <div>Code</div>
+              </Button>
 
-          <Button
-            className={cx(
-              "border rounded-sm rounded-l-none border-l-0",
-              topbar_mode === "page" && !p.ui.popup.script.open
-                ? "bg-green-600 text-white border-green-600"
-                : "hover:bg-green-100 text-slate-600 bg-white"
-            )}
-            onClick={() => {
-              p.ui.topbar.mode = "page";
-              closeEditor(p);
-              p.render();
-            }}
-          >
-            <LayoutTemplate size={12} /> <div>Design</div>
-          </Button>
-        </ButtonBox>
+              <Button
+                className={cx(
+                  "border rounded-sm rounded-l-none border-l-0",
+                  topbar_mode === "page" && !p.ui.popup.script.open
+                    ? "bg-green-600 text-white border-green-600"
+                    : "hover:bg-green-100 text-slate-600 bg-white"
+                )}
+                onClick={() => {
+                  p.ui.topbar.mode = "page";
+                  closeEditor(p);
+                  p.render();
+                }}
+              >
+                <LayoutTemplate size={12} /> <div>Design</div>
+              </Button>
+            </ButtonBox>
+          </>
+        )}
         <EdSave />
       </div>
       <div className="flex justify-end pr-1 items-stretch">
@@ -279,27 +284,29 @@ export const EdTopBar = () => {
           </div>
         )}
 
-        <label className=" text-slate-400 flex items-center pr-1">
-          <div className=" px-1"> Zoom</div>
-          <select
-            value={p.ui.zoom}
-            onChange={(e) => {
-              p.ui.zoom = e.currentTarget.value;
-              localStorage.zoom = p.ui.zoom;
-              p.render();
-            }}
-          >
-            {["50%", "60%", "70%", "80%", "90%", "100%", "120%", "150%"].map(
-              (e) => {
-                return (
-                  <option key={e} value={e}>
-                    {e}
-                  </option>
-                );
-              }
-            )}
-          </select>
-        </label>
+        {!disconnected && (
+          <label className=" text-slate-400 flex items-center pr-1">
+            <div className=" px-1"> Zoom</div>
+            <select
+              value={p.ui.zoom}
+              onChange={(e) => {
+                p.ui.zoom = e.currentTarget.value;
+                localStorage.zoom = p.ui.zoom;
+                p.render();
+              }}
+            >
+              {["50%", "60%", "70%", "80%", "90%", "100%", "120%", "150%"].map(
+                (e) => {
+                  return (
+                    <option key={e} value={e}>
+                      {e}
+                    </option>
+                  );
+                }
+              )}
+            </select>
+          </label>
+        )}
 
         <ButtonBox>
           <Button>

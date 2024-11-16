@@ -21,9 +21,11 @@ import { EdPopCompGroup } from "./popup/comp/comp-group";
 import { EdPopCompPicker } from "./popup/comp/comp-picker";
 import { iconVSCode } from "./ui/icons";
 import { Sticker } from "lucide-react";
+import { useRef } from "react";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
+  const div = useRef<HTMLDivElement>(null);
 
   prasiKeybinding(p);
 
@@ -173,15 +175,24 @@ export const EdBase = () => {
                         e.preventDefault();
                       }}
                     >
-                      <div
-                        className={cx(
-                          mainStyle(p),
-                          p.ui.page.ruler && rulerCSS
-                        )}
-                      >
-                        {p.ui.page.ruler && <Ruler />}
-
+                      <div className={cx(mainStyle(p))} ref={div}>
                         <EdViRoot />
+                        {p.ui.page.ruler && (
+                          <div
+                            className={cx(
+                              "absolute inset-0 pointer-events-none contain-strict",
+                              div.current &&
+                                css`
+                                  top: ${div.current.scrollTop}px;
+                                  width: ${div.current.clientWidth}px;
+                                  height: ${div.current.clientHeight}px;
+                                `,
+                              p.ui.page.ruler && rulerCSS
+                            )}
+                          >
+                            <Ruler />
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}

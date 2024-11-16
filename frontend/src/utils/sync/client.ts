@@ -7,19 +7,16 @@ export const clientStartSync = (arg: {
   user_id: string;
   site_id?: string;
   page_id?: string;
+  connected: (sync: ReturnType<typeof createClient>) => void;
 }) => {
   arg.p.sync = undefined;
-  return new Promise<ReturnType<typeof createClient>>((done) => {
+  const reconnect = () => {
     const url = new URL(location.href);
     url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
     url.pathname = "/sync";
     const ws = new WebSocket(url);
-
     ws.onopen = () => {
       ws.send(pack({ action: "open", user_id: arg.user_id }));
-      setInterval(() => {
-        ws.send(pack({ action: "ping" }));
-      }, 90 * 1000);
     };
 
     ws.onmessage = async ({ data }) => {
@@ -29,12 +26,35 @@ export const clientStartSync = (arg: {
           conn_id: string;
         };
         if (msg.action === "connected") {
-          done(createClient(ws, arg.p, msg.conn_id));
+          if (arg.p.sync) {
+            arg.p.sync.ws = ws;
+            arg.p.sync.ping = setInterval(() => {
+              ws.send(pack({ action: "ping" }));
+            }, 90 * 1000);
+            arg.p.render();
+          } else {
+            arg.connected(
+              createClient(
+                ws,
+                arg.p,
+                msg.conn_id,
+                setInterval(() => {
+                  ws.send(pack({ action: "ping" }));
+                }, 90 * 1000)
+              )
+            );
+          }
         }
       }
     };
-    ws.onclose = () => {};
-  });
+    ws.onclose = () => {
+      arg.p.render();
+      setTimeout(() => {
+        reconnect();
+      }, 3000);
+    };
+  };
+  reconnect();
 };
 
 const send = (ws: WebSocket, msg: any) => {
@@ -43,9 +63,15 @@ const send = (ws: WebSocket, msg: any) => {
   }
 };
 
-export const createClient = (ws: WebSocket, p: any, conn_id: string) => ({
+export const createClient = (
+  ws: WebSocket,
+  p: any,
+  conn_id: string,
+  ping: any
+) => ({
   conn_id,
   ws,
+  ping,
   site: {
     load: async (id: string) => {
       return (await _api.site_load(id, { conn_id: p.user.conn_id })) as ESite;

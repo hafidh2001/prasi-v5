@@ -42,7 +42,7 @@ export type FNCompDef = {
   meta?: FNCompMeta;
 };
 type FNCompMeta = {
-  type: "file" | "text" | "option" | "content-element" | "button";
+  type: "file" | "text" | "option" | "content-element" | "list";
   options?: string;
   optionsBuilt?: string;
   option_mode?: "dropdown" | "button" | "checkbox";

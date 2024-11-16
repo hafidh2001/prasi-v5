@@ -3,6 +3,7 @@ import { EDGlobal } from "logic/ed-global";
 import { FC } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { jscript } from "utils/script/jscript";
+import { IItem } from "utils/types/item";
 import { FNCompDef } from "utils/types/meta-fn";
 import {
   FieldButtons,
@@ -10,8 +11,6 @@ import {
   FieldDropdown,
   FieldString,
 } from "./ed-mp-fields";
-import { IItem } from "utils/types/item";
-import { current } from "immer";
 
 export const EdMasterPropBodyBasic: FC<{
   name: string;
@@ -200,6 +199,35 @@ export const EdMasterPropBodyBasic: FC<{
             },
           },
           {
+            label: "List",
+            checked() {
+              if (is_group) return false;
+              const meta = propMeta(prop);
+              if (meta.type !== "content-element") return meta.type === "list";
+
+              return false;
+            },
+            check() {
+              getActiveTree(p).update(`Set Type to List`, ({ tree }) => {
+                if (tree.type === "item") {
+                  if (tree.component) {
+                    if (is_group) {
+                      _name = name.slice(0, -2);
+                      tree.component.props[_name] =
+                        tree.component.props[_name + "__"];
+                      delete tree.component.props[_name + "__"];
+                      p.ui.tree.comp.active = _name;
+                    } else if (name.includes("__")) {
+                      _name = name;
+                    }
+                    let meta = prepMeta(tree, name);
+                    if (meta) meta.type = "list";
+                  }
+                }
+              });
+            },
+          },
+          {
             label: "JSX",
             checked() {
               if (is_group) return false;
@@ -319,10 +347,12 @@ export const EdMasterPropBodyBasic: FC<{
         />
       )}
 
-      {meta.type === "option" && (
+      {(meta.type === "option" || meta.type === "list") && (
         <FieldCode
-          label="Option"
-          default={`\
+          label={meta.type === "option" ? "Option" : "List"}
+          default={
+            meta.type === "option"
+              ? `\
 [
   {
     label: "yes",
@@ -332,7 +362,22 @@ export const EdMasterPropBodyBasic: FC<{
     label: "no",
     value: "n",
   },
-]`}
+] as Options`
+              : `\
+[
+  {
+    type: "string",
+  }
+] as List`
+          }
+          typings={
+            meta.type === "list"
+              ? `\
+type List = { type: "string" }[] `
+              : `\
+type Options = ({ type: string, value: any} | string)[]
+              `
+          }
           value={prop.meta?.options}
           onChange={async (val) => {
             const source_built = (

@@ -24,7 +24,10 @@ type VAR_ID = string;
 export const loadPageTree = (
   p: {
     comp: { loaded: Record<string, EComp>; pending: Set<string> };
-    ui: any;
+    ui: {
+      page: { saved: boolean; saving: any };
+      topbar: { render: () => void };
+    };
     render: () => void;
   },
   sync: ReturnType<typeof createClient>,
@@ -45,7 +48,7 @@ export const loadPageTree = (
 
   doc.on("update", async (update, origin) => {
     if (p.ui.page.saving) {
-      clearTimeout(p.ui.page.saved);
+      clearTimeout(p.ui.page.saving);
       p.ui.page.saved = true;
       p.ui.page.saving = setTimeout(() => {
         p.ui.page.saving = false;

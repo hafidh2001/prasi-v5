@@ -1,3 +1,4 @@
+import set from "lodash.set";
 import { active, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import {
@@ -11,16 +12,14 @@ import {
   SquareCheckBig,
   Trash2,
 } from "lucide-react";
+import { useRef } from "react";
 import { List } from "react-movable";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { Tooltip } from "utils/ui/tooltip";
-import { EdMasterPropName } from "./ed-mp-name";
-import { useRef } from "react";
-import get from "lodash.get";
-import set from "lodash.set";
-import { sortProp } from "../parts/sort-prop";
 import { propGroupInfo } from "../parts/prop-group-info";
+import { sortProp } from "../parts/sort-prop";
+import { EdMasterPropName } from "./ed-mp-name";
 
 export const EdMasterProp = () => {
   const p = useGlobal(EDGlobal, "EDITOR");

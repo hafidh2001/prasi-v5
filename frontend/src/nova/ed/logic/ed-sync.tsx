@@ -30,21 +30,22 @@ export const initSync = (p: PG) => {
       user_id: p.user.id,
       site_id: params.site_id,
       page_id: params.page_id,
-    }).then(async (sync) => {
-      p.sync = sync;
-      p.status = "ready";
-      p.site = await p.sync!.site.load(params.site_id);
+      async connected(sync) {
+        p.sync = sync;
+        p.status = "ready";
+        p.site = await p.sync!.site.load(params.site_id);
 
-      const page = (await p.sync!.page.load(params.page_id)) as EPage;
-      if (!page) {
-        p.status = "page-not-found";
-        p.page.cur = null as any;
-      } else {
-        p.page.cur = page;
-      }
+        const page = (await p.sync!.page.load(params.page_id)) as EPage;
+        if (!page) {
+          p.status = "page-not-found";
+          p.page.cur = null as any;
+        } else {
+          p.page.cur = page;
+        }
 
-      console.log("🚀 Prasi Connected");
-      p.render();
+        console.log("🚀 Prasi Connected");
+        p.render();
+      },
     });
   }
 

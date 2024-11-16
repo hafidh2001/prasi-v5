@@ -25,7 +25,7 @@ export const EdCompTitle = () => {
       )}
     >
       <List />
-      {formatItemName(name || "")}
+      Component: {formatItemName(name || "")}
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import { getNodeById } from "crdt/node/get-node-by-id";
 import { active } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
-import { Check, ScrollText, Sticker, X } from "lucide-react";
+import { Check, CornerUpRight, Sticker, X } from "lucide-react";
 import { FC, useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
@@ -195,7 +195,7 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
                     codeUpdate.push(p, model.id, value, {
                       local_name: model.local?.name,
                       prop_name: model.prop_name,
-                      loop_name: model.loop?.name
+                      loop_name: model.loop?.name,
                     });
                   }
                 }}
@@ -215,10 +215,14 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
         >
           <X size={13} />
         </div>
-        <div className="flex items-center text-sm text-center flex-col justify-center flex-1">
-          <ScrollText className="mb-2" />
-          Please access component
-          <br /> props to edit script.
+        <div className="flex items-end select-none mt-10 p-5 text-sm text-end flex-col justify-start flex-1">
+          <CornerUpRight
+            width={80}
+            height={80}
+            strokeWidth={0.5}
+            className="-mr-5"
+          />
+          Please select<br/> a property to edit
         </div>
       </>
     );
@@ -387,7 +391,6 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
 
 export const closeEditor = (p: PG) => {
   p.viref?.resetLocal?.();
-  p.ui.comp.prop.active = "";
   p.ui.popup.script.open = false;
   p.render();
 };
