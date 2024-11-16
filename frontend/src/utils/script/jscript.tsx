@@ -92,7 +92,10 @@ export const jscript = {
           (async () => {
             const monaco = await import("monaco-editor");
             const monaco_react = await import("@monaco-editor/react");
-            monaco_react.loader.config({ monaco });
+
+            monaco_react.loader.config({
+              monaco,
+            });
 
             self.MonacoEnvironment = {
               getWorker(_, label: any) {
@@ -149,7 +152,6 @@ export const jscript = {
                 }
               },
             };
-            await monaco_react.loader.init();
             monaco.languages.css.cssDefaults.setOptions({
               data: {
                 dataProviders: {
@@ -157,6 +159,8 @@ export const jscript = {
                 },
               },
             });
+            await monaco_react.loader.init();
+
             const res = configureMonacoTailwindcss(monaco, {
               tailwindConfig: {
                 blocklist: [

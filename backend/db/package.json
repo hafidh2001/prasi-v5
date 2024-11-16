@@ -1,7 +1,7 @@
 {
   "name": "prasi-db",
   "dependencies": {
-    "@prisma/client": "5.19.1",
-    "prisma": "^5.19.1"
+    "@prisma/client": "5.21.1",
+    "prisma": "5.21.1 "
   }
 }

@@ -13,7 +13,7 @@ export const FieldNumUnit: FC<{
   disabled?: boolean | string;
   enableWhenDrag?: boolean;
   dashIfEmpty?: boolean;
-  className?: string
+  className?: string;
 }> = ({
   icon,
   value,
@@ -25,16 +25,17 @@ export const FieldNumUnit: FC<{
   disabled,
   positiveOnly,
   enableWhenDrag,
-  className
+  className,
 }) => {
   const local = useLocal({
     val: 0,
     val_str: "",
     focus: false,
     unit: "",
-    drag: { clientX: 0, old: 0 },
+    drag: { clientX: 0, old: 0, clientY: 0 },
     dragging: false,
     timeout: null as any,
+    direction: "h" as "h" | "v",
   });
 
   const update: typeof _update = useCallback(
@@ -86,10 +87,24 @@ export const FieldNumUnit: FC<{
   useEffect(() => {
     // Only change the value if the drag was actually started.
     const onUpdate = (event: any) => {
-      if (local.drag.clientX) {
-        local.val = Math.round(
-          local.drag.old + (event.clientX - local.drag.clientX)
-        );
+      if (local.drag.clientX || local.drag.clientY) {
+        if (
+          local.direction === "v" &&
+          local.drag.clientX !== event.clientX &&
+          Math.abs(local.drag.clientX - event.clientX) > 5
+        )
+          local.direction = "h";
+        if (
+          local.direction === "h" &&
+          local.drag.clientY !== event.clientY &&
+          Math.abs(local.drag.clientY - event.clientY) > 5
+        )
+          local.direction = "v";
+
+        local.val =
+          local.direction === "h"
+            ? Math.round(local.drag.old + (event.clientX - local.drag.clientX))
+            : Math.round(local.drag.old + (event.clientY - local.drag.clientY));
 
         if (positiveOnly && local.val < 0) {
           local.val = Math.max(0, local.val);
@@ -105,6 +120,7 @@ export const FieldNumUnit: FC<{
     // Stop the drag operation now.
     const onEnd = () => {
       local.drag.clientX = 0;
+      local.drag.clientY = 0;
       local.dragging = false;
       local.render();
     };
@@ -115,7 +131,13 @@ export const FieldNumUnit: FC<{
       document.removeEventListener("pointermove", onUpdate);
       document.removeEventListener("pointerup", onEnd);
     };
-  }, [local.drag.clientX, local.drag.old, local.val, update]);
+  }, [
+    local.drag.clientX,
+    local.drag.old,
+    local.drag.clientY,
+    local.val,
+    update,
+  ]);
 
   const onStart = useCallback(
     (event: React.MouseEvent) => {
@@ -131,6 +153,7 @@ export const FieldNumUnit: FC<{
         local.render();
 
         local.drag.clientX = event.clientX;
+        local.drag.clientY = event.clientY;
         local.drag.old = local.val;
       }
     },
@@ -229,7 +252,12 @@ export const FieldNumUnit: FC<{
         </div>
       </div>
       {local.dragging && (
-        <div className="fixed z-50 inset-0 cursor-ew-resize"></div>
+        <div
+          className={cx(
+            "fixed z-50 inset-0",
+            local.direction === "v" ? "cursor-ns-resize" : "cursor-ew-resize"
+          )}
+        ></div>
       )}
     </>
   );
