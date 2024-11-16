@@ -127,9 +127,6 @@ export const loadPageTree = (
         findNode: (id: string) => null | PNode;
       }) => void
     ) {
-      p.ui.page.saving = true;
-      p.ui.page.saved = false;
-      p.ui.topbar.render();
 
       const _fn = (tree: EPage["content_tree"]) => {
         sync.page.pending_action(page_id, action_name);
@@ -154,11 +151,14 @@ export const loadPageTree = (
         });
       };
 
-      let unwatch = undefined as any;
-      if (done) {
-        unwatch = immer.subscribe(() => {
-          unwatch();
-          const tree = immer.get();
+      const unwatch = immer.subscribe(() => {
+        p.ui.page.saving = true;
+        p.ui.page.saved = false;
+        p.ui.topbar.render();
+        unwatch();
+
+        const tree = immer.get();
+        if (done) {
           done({
             tree,
             findNode: (id) => {
@@ -166,8 +166,8 @@ export const loadPageTree = (
               return result;
             },
           });
-        });
-      }
+        }
+      });
 
       if (this.before_update) {
         this.before_update(() => immer.update(_fn));

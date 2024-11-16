@@ -160,7 +160,7 @@ export const EdTopBar = () => {
         </ButtonBox>
         {!p.ui.panel.left && (
           <div
-            className="flex items-center m-1 cursor-pointer hover:text-blue-600"
+            className="flex items-center ml-3 m-1 cursor-pointer hover:text-blue-600"
             onClick={() => {
               if (!p.ui.panel.left) {
                 p.ui.panel.left = true;

@@ -29,7 +29,7 @@ export const EdPropField = (arg: {
       <div
         className={cx(
           "border-b min-h-[30px] cursor-pointer relative flex items-stretch select-none",
-          ui.active === name
+          ui.active === name && p.ui.popup.script.open
             ? cx(
                 "bg-blue-600 text-white",
                 css`
@@ -47,7 +47,7 @@ export const EdPropField = (arg: {
           p.render();
         }}
       >
-        {ui.active === name && (
+        {ui.active === name && p.ui.popup.script.open && (
           <div
             className={cx(
               "flex items-center absolute left-0 bottom-0 top-0",

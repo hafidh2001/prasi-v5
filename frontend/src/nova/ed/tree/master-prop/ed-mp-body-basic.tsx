@@ -364,16 +364,14 @@ export const EdMasterPropBodyBasic: FC<{
   },
 ] as Options`
               : `\
-[
-  {
-    type: "string",
-  }
-] as List`
+({
+  type: "string"
+}) as ListStructure`
           }
           typings={
             meta.type === "list"
               ? `\
-type List = { type: "string" }[] `
+type ListStructure = { type: "string" } | { type: "object" }`
               : `\
 type Options = ({ type: string, value: any} | string)[]
               `
