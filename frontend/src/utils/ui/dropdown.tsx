@@ -52,15 +52,23 @@ export const Dropdown: FC<
     if (prop.items) {
       const val = prop.value || "";
       let idx = 0;
+      let found = false;
       for (const item of prop.items) {
         if (typeof item === "string" && item === val) {
           local.label = item;
           local.activeIdx = idx;
+          found = true;
         } else if (typeof item === "object" && item.value === val) {
           local.label = item.label;
           local.activeIdx = idx;
+          found = true;
         }
         idx++;
+      }
+      if (!found) {
+        local.label = "";
+        local.activeIdx = -1;
+        local.render();
       }
     }
   };

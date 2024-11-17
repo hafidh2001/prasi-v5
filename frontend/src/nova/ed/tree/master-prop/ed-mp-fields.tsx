@@ -56,12 +56,20 @@ export const FieldCode = (arg: {
   onChange?: (value: string) => void;
   onBlur?: (value: string) => void;
   onOpenChange?: (open: boolean) => void;
+  open?: boolean;
 }) => {
   const local = useLocal({
     open: false,
     timeout: null as any,
     value: arg.value || arg.default || "",
   });
+
+  useEffect(() => {
+    if (typeof arg.open === "boolean") {
+      local.open = arg.open;
+      local.render();
+    }
+  }, [arg.open]);
 
   useEffect(() => {
     (local.value = arg.value || arg.default || ""), local.render();

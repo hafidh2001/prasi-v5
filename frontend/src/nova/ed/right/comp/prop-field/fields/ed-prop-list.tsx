@@ -1,6 +1,6 @@
 import get from "lodash.get";
 import { active, getActiveTree } from "logic/active";
-import { EDGlobal } from "logic/ed-global";
+import { EDGlobal, PG } from "logic/ed-global";
 import {
   ChevronDown,
   ChevronRight,
@@ -8,7 +8,7 @@ import {
   PlusCircle,
   Trash,
 } from "lucide-react";
-import { FC, Fragment, useEffect } from "react";
+import { FC, Fragment, useEffect, useRef } from "react";
 import { arrayMove, List } from "react-movable";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
@@ -19,6 +19,8 @@ import { FieldCode } from "../../../../tree/master-prop/ed-mp-fields";
 import { extractValue } from "./extract-value";
 import {
   createListItem,
+  getPropStructureByPath,
+  getPropValueByPath,
   ListStructure,
   LSObject,
   LSString,
@@ -26,21 +28,22 @@ import {
   PLCode,
   PLObject,
   PLString,
-  plStringify,
+  plStringifySingle,
   PLValue,
 } from "./prop-list/prop-list-util";
+import { Menu, MenuItem } from "utils/ui/context-menu";
 
 type PROP_NAME = string;
 
-const prop_list = {} as Record<
-  PROP_NAME,
-  {
-    structure: ListStructure;
-    value: PLValue[];
-    expand: boolean;
-    update_timeout: any;
-  }
->;
+const prop_list = {} as Record<PROP_NAME, PropListSingle>;
+type PropListSingle = {
+  structure: ListStructure;
+  value: PLValue[];
+  expand: boolean;
+  update_timeout: any;
+  ctx_path: (string | number)[];
+  ctx_menu: any;
+};
 
 export const EdPropListHead = (arg: {
   name: string;
@@ -76,6 +79,8 @@ export const EdPropListHead = (arg: {
         structure: structure(),
         value: parsePLValue(extracted.value),
         update_timeout: null as any,
+        ctx_menu: null,
+        ctx_path: [],
       };
     }
   }
@@ -84,59 +89,59 @@ export const EdPropListHead = (arg: {
   if (!prop) return null;
 
   return (
-    <div
-      className={cx(
-        "flex items-center justify-between border-l px-1 flex-1 hover:bg-blue-50 hover:text-black"
-      )}
-      onClick={() => {
-        prop.expand = prop.expand === undefined ? false : !prop.expand;
-        p.render();
-      }}
-    >
+    <>
       <div
-        className={cx(
-          "text-[10px] bg-white ml-1 px-1 rounded-sm flex items-center transition-all ",
-          !prop.expand && "border"
-        )}
-      >
-        {(prop.expand || typeof prop.expand === "undefined") && (
-          <>
-            Hide <ChevronDown size={10} className="ml-1" />
-          </>
-        )}
-
-        {prop.expand === false && (
-          <>
-            Show
-            <ChevronRight size={10} className="ml-1" />
-          </>
-        )}
-      </div>
-      <div
-        className="border pl-[3px] pr-[6px] flex items-center space-x-1 hover:bg-blue-600 hover:text-white rounded-sm text-xs bg-white"
-        onClick={(e) => {
-          e.stopPropagation();
-          const item = createListItem(prop.structure);
-          prop.value.push(item as any);
-          const source = `[${prop.value.map((e) => plStringify(e)).join(",")}]`;
-
-          getActiveTree(p).update(
-            `${"Add Item to Prop "} ${name}`,
-            ({ findNode }) => {
-              const n = findNode(active.item_id);
-
-              if (n && n.item.component?.props) {
-                n.item.component.props[name].value = source;
-                n.item.component.props[name].valueBuilt =
-                  n.item.component.props[name].value;
-              }
-            }
-          );
+        className={cx("flex items-center justify-between border-l px-1 flex-1")}
+        onClick={() => {
+          prop.expand = prop.expand === undefined ? false : !prop.expand;
+          p.render();
         }}
       >
-        <PlusCircle size={11} /> <div className="mt-[2px]">Add New</div>
+        <div
+          className={cx(
+            "text-[10px] bg-white ml-1 px-1 rounded-sm flex items-center transition-all ",
+            !prop.expand && "border"
+          )}
+        >
+          {(prop.expand || typeof prop.expand === "undefined") && (
+            <>
+              Hide <ChevronDown size={10} className="ml-1" />
+            </>
+          )}
+
+          {prop.expand === false && (
+            <>
+              Show
+              <ChevronRight size={10} className="ml-1" />
+            </>
+          )}
+        </div>
+        <div
+          className="border pl-[3px] pr-[6px] flex items-center space-x-1 hover:bg-blue-600 hover:text-white rounded-sm text-xs bg-white"
+          onClick={(e) => {
+            e.stopPropagation();
+            const item = createListItem(prop.structure);
+            prop.value.push(item as any);
+            const source = `[\n${prop.value.map((e) => plStringifySingle(e)).join(",\n")}\n]`;
+
+            getActiveTree(p).update(
+              `${"Add Item to Prop "} ${name}`,
+              ({ findNode }) => {
+                const n = findNode(active.item_id);
+
+                if (n && n.item.component?.props) {
+                  n.item.component.props[name].value = source;
+                  n.item.component.props[name].valueBuilt =
+                    n.item.component.props[name].value;
+                }
+              }
+            );
+          }}
+        >
+          <PlusCircle size={11} /> <div className="mt-[2px]">Add New</div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
@@ -146,31 +151,99 @@ export const EdPropList = (arg: {
   instance: Exclude<IItem["component"], undefined>;
 }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
-  const local = useLocal({});
+  const local = useLocal({ activeIdx: -1 });
+  const container = useRef<HTMLDivElement>(null);
 
   const name = arg.name;
   const prop = prop_list[name];
   if (!prop || (prop && !prop.expand)) return null;
 
-  const update = () => {
+  const update = (reset?: boolean) => {
     local.render();
     clearInterval(prop.update_timeout);
-    prop.update_timeout = setTimeout(() => {
-      const source = `[${prop.value.map((e) => plStringify(e)).join(",")}]`;
-      getActiveTree(p).update("Update Prop List", ({ findNode }) => {
-        const n = findNode(active.item_id);
-        if (n && n.item.component) {
-          n.item.component.props[name].value = source;
-          n.item.component.props[name].valueBuilt =
-            n.item.component.props[name].value;
-        }
-      });
-    }, 500);
+    prop.update_timeout = setTimeout(
+      () => {
+        const source = `[\n${prop.value.map((e) => plStringifySingle(e)).join(",\n")}\n]`;
+        getActiveTree(p).update("Update Prop List", ({ findNode }) => {
+          const n = findNode(active.item_id);
+          if (n && n.item.component) {
+            n.item.component.props[name].value = source;
+            n.item.component.props[name].valueBuilt =
+              n.item.component.props[name].value;
+          }
+
+          if (reset) {
+            delete prop_list[name];
+          }
+        });
+      },
+      reset ? 100 : 500
+    );
   };
 
+  let ctx_menu = null as null | PLValue;
+  if (prop.ctx_menu) {
+    ctx_menu = getPropValueByPath(prop.value, prop.ctx_path);
+  }
+
   return (
-    <div className={cx("flex items-stretch flex-col flex-1 bg-white")}>
+    <div
+      className={cx("flex items-stretch flex-col flex-1 bg-white")}
+      ref={container}
+    >
+      {prop.ctx_menu && (
+        <Menu
+          mouseEvent={prop.ctx_menu}
+          onClose={() => {
+            prop.ctx_menu = null;
+            p.render();
+          }}
+        >
+          <div
+            className="flex items-center px-1 text-[10px] space-x-[2px] border-b pointer-events-none"
+            tabIndex={undefined}
+          >
+            <div>{name}</div>
+            <ChevronRight size={10} />
+            {prop.ctx_path.map((e, idx) => {
+              return (
+                <Fragment key={idx}>
+                  <div>{typeof e === "number" ? e + 1 : e}</div>
+                  {idx < prop.ctx_path.length - 1 && <ChevronRight size={10} />}
+                </Fragment>
+              );
+            })}
+          </div>
+          {ctx_menu?.type !== "code" && (
+            <MenuItem
+              label="Convert to Code"
+              onClick={() => {
+                if (ctx_menu) {
+                  ctx_menu.value = `(${plStringifySingle(ctx_menu)})`;
+                  (ctx_menu as any).type = "code";
+                  update();
+                }
+              }}
+            />
+          )}
+          <MenuItem
+            label="Reset"
+            onClick={() => {
+              const st = getPropStructureByPath(prop.structure, prop.ctx_path);
+
+              if (st) {
+                const blank_value = createListItem(st);
+                for (const [k, v] of Object.entries(blank_value)) {
+                  (ctx_menu as any)[k] = v;
+                }
+                update(true);
+              }
+            }}
+          />
+        </Menu>
+      )}
       <List
+        container={container.current}
         lockVertically
         onChange={({ oldIndex, newIndex }) => {
           prop.value = arrayMove(prop.value, oldIndex, newIndex);
@@ -192,8 +265,20 @@ export const EdPropList = (arg: {
                 }
               `
             )}
+            onContextMenu={(e) => {
+              contextMenu(e, prop, [index!], p);
+            }}
+            onClick={() => {
+              if (typeof index === "number") {
+                local.activeIdx = index;
+                local.render();
+              }
+            }}
           >
             <Fragment key={1}>
+              {local.activeIdx === index && (
+                <div className="absolute inset-0 border-blue-500 border-2 z-10 pointer-events-none"></div>
+              )}
               <div className="grip w-[15px] cursor-ns-resize flex items-center justify-center border-r">
                 <GripVertical size={10} />
               </div>
@@ -207,6 +292,8 @@ export const EdPropList = (arg: {
                   <SString
                     structure={prop.structure}
                     value={item as PLString}
+                    prop={prop}
+                    path={[index!]}
                     onChange={(e) => {
                       if (typeof index === "number") {
                         prop.value[index] = { type: "string", value: e };
@@ -221,6 +308,8 @@ export const EdPropList = (arg: {
                   <SObject
                     structure={prop.structure}
                     value={item as PLObject}
+                    prop={prop}
+                    path={[index!]}
                     onChange={(e) => {
                       if (typeof index === "number") {
                         prop.value[index] = { type: "object", value: e };
@@ -261,21 +350,33 @@ export const EdPropList = (arg: {
 const SString: FC<{
   structure: LSString;
   value: PLString | PLCode;
+  path: (string | number)[];
+  prop: PropListSingle;
   onChange: (val: string) => void;
 }> = (arg) => {
+  const p = useGlobal(EDGlobal, "EDITOR");
   const { structure: s, value, onChange } = arg;
   const local = useLocal({ value: value?.value || "", focus: false });
 
   useEffect(() => {
-    if (!local.focus && typeof value === "object" && value?.value) {
+    if (
+      !local.focus &&
+      typeof value === "object" &&
+      typeof value?.value === "string"
+    ) {
       local.value = value.value;
       local.render();
     }
   }, [value]);
 
   return (
-    <div className="flex-1 flex">
-      {value.type !== "code" ? (
+    <div
+      className="flex-1 flex"
+      onContextMenu={(e) => {
+        contextMenu(e, arg.prop, arg.path, p);
+      }}
+    >
+      {value?.type !== "code" ? (
         <>
           {s.options ? (
             <>
@@ -317,7 +418,12 @@ const SString: FC<{
           )}
         </>
       ) : (
-        <SCode onChange={onChange} value={value as any} />
+        <SCode
+          onChange={onChange}
+          value={value as any}
+          path={arg.path}
+          prop={arg.prop}
+        />
       )}
     </div>
   );
@@ -326,8 +432,11 @@ const SString: FC<{
 const SObject: FC<{
   structure: LSObject;
   value: PLValue;
+  path: (string | number)[];
+  prop: PropListSingle;
   onChange: (val: any) => void;
 }> = (arg) => {
+  const p = useGlobal(EDGlobal, "EDITOR");
   const { structure: s, value, onChange } = arg;
   let cur = value as any;
   if (typeof value !== "object") {
@@ -343,37 +452,46 @@ const SObject: FC<{
         e.stopPropagation();
       }}
     >
-      {Object.entries(s.object).map(([name, st], idx) => {
-        const curval = get(cur, name);
-        return (
-          <div
-            key={idx}
-            className={cx(
-              "flex items-stretch bg-white",
-              idx > 0 && "border-t",
-              css`
-                &:hover > .label {
-                  color: blue;
-                }
-              `
-            )}
-          >
-            <div className="border-r flex items-center ml-1 pr-1 text-slate-400 label">
-              {name}
-            </div>
-            <div className="flex flex-1">
-              {value.type !== "code" ? (
-                <>
+      {value.type !== "code" ? (
+        <>
+          {Object.entries(s.object).map(([name, st], idx) => {
+            const curval = get(cur, name);
+            return (
+              <div
+                key={idx}
+                className={cx(
+                  "flex items-stretch bg-white",
+                  idx > 0 && "border-t",
+                  css`
+                    &:hover > .label {
+                      color: blue;
+                    }
+                  `
+                )}
+                onContextMenu={(e) => {
+                  contextMenu(e, arg.prop, [...arg.path, name], p);
+                }}
+              >
+                <div className="border-r flex items-center ml-1 pr-1 text-slate-400 label">
+                  {name}
+                </div>
+                <div className="flex flex-1">
                   {st.type === "string" && (
                     <SString
                       key={1}
                       structure={st}
                       value={curval as PLString}
+                      prop={arg.prop}
+                      path={[...arg.path, name]}
                       onChange={(e) => {
                         if (!cur[name]) {
                           cur[name] = { type: "string", value: e };
                         } else {
-                          cur[name] = { ...cur[name], value: e };
+                          if (!e) {
+                            cur[name] = { type: "string", value: "" };
+                          } else {
+                            cur[name] = { ...cur[name], value: e };
+                          }
                         }
                         onChange(cur);
                       }}
@@ -384,36 +502,72 @@ const SObject: FC<{
                     <SObject
                       key={1}
                       structure={st}
+                      prop={arg.prop}
+                      path={[...arg.path, name]}
                       value={curval as PLObject}
                       onChange={(e) => {
-                        cur[name] = { type: "object", value: e };
+                        if (cur[name] && cur[name].type === "code") {
+                          if (
+                            typeof e === "object" &&
+                            typeof e?.value !== "undefined"
+                          ) {
+                            console.log(e);
+                            cur[name] = e;
+                          } else {
+                            cur[name].value = e;
+                          }
+                        } else {
+                          cur[name] = { type: "object", value: e };
+                        }
                         onChange(cur);
                       }}
                     />
                   )}
-                </>
-              ) : (
-                <SCode
-                  onChange={(value) => {
-                    cur[name] = { type: "code", value };
-                    onChange(cur);
-                  }}
-                  value={value as any}
-                />
-              )}
-            </div>
-          </div>
-        );
-      })}
+                </div>
+              </div>
+            );
+          })}
+        </>
+      ) : (
+        <SCode
+          onChange={(src) => {
+            if (!src) {
+              const s = getPropStructureByPath(
+                arg.prop.structure,
+                arg.prop.ctx_path
+              );
+              if (typeof s !== "undefined") {
+                const blank_value = createListItem(s);
+                if (typeof blank_value === "string") {
+                  onChange({ type: "string", value: blank_value });
+                } else {
+                  onChange(blank_value);
+                }
+                return;
+              }
+            }
+            onChange(src);
+          }}
+          path={arg.path}
+          prop={arg.prop}
+          value={value as any}
+        />
+      )}
     </div>
   );
 };
 
 const SCode: FC<{
   value: PLCode;
+  path: (string | number)[];
+  prop: PropListSingle;
   onChange: (val: any) => void;
-}> = ({ value, onChange }) => {
-  const local = useLocal({ open: false, value: value?.value });
+}> = ({ value, onChange, prop, path }) => {
+  const p = useGlobal(EDGlobal, "EDITOR");
+  const local = useLocal({
+    open: prop.ctx_path.join(".") === path.join("."),
+    value: value?.value,
+  });
   return (
     <div
       className="flex-1 flex items-center p-1"
@@ -423,8 +577,12 @@ const SCode: FC<{
           e.preventDefault();
         }
       }}
+      onContextMenu={(e) => {
+        contextMenu(e, prop, path, p);
+      }}
     >
       <FieldCode
+        open={local.open}
         value={local.value}
         onOpenChange={(open) => {
           if (!open && local.value !== value.value) {
@@ -440,4 +598,23 @@ const SCode: FC<{
       />
     </div>
   );
+};
+
+const contextMenu = (
+  e: React.MouseEvent,
+  prop: PropListSingle,
+  path: (string | number)[],
+  p: PG
+) => {
+  e.stopPropagation();
+  e.preventDefault();
+  prop.ctx_path = path;
+
+  if (!prop.ctx_menu) {
+    prop.ctx_menu = e;
+    p.render();
+  } else {
+    prop.ctx_menu = null;
+    p.render();
+  }
 };

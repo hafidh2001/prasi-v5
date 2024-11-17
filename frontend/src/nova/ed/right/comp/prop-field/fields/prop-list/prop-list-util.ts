@@ -18,6 +18,31 @@ export type LSObject = {
 };
 export type ListStructure = LSString | LSObject;
 
+export const getPropStructureByPath = (
+  structure: ListStructure,
+  path: (string | number)[]
+): ListStructure | undefined => {
+  let current: ListStructure | undefined = structure;
+
+  for (const key of path) {
+    if (!current) {
+      return undefined; // Return undefined if the structure is invalid
+    }
+
+    if (typeof current === "object" && current.type === "object") {
+      if (typeof key === "string" && key in current.object) {
+        current = current.object[key]; // Navigate to the next object in the path
+      } else {
+        return undefined; // Key does not exist in the current object
+      }
+    } else {
+      return undefined; // Current is not an object or is an LSString
+    }
+  }
+
+  return current; // Return the found structure or undefined if not found
+};
+
 export const parsePLValue = (source: string): PLValue[] => {
   const parsed = jscript.parse?.(source);
 
@@ -34,7 +59,9 @@ export const parsePLValue = (source: string): PLValue[] => {
   return items;
 };
 
-export const plStringify = (value: PLValue): string => {
+const space = "  ";
+export const plStringifySingle = (value: PLValue, depth?: number): string => {
+  const indent = space.repeat(depth || 1);
   if (value.type === "string") {
     return `"${value.value}"`;
   } else if (value.type === "code") {
@@ -43,11 +70,49 @@ export const plStringify = (value: PLValue): string => {
     const items = [];
     for (const key in value.value) {
       const item = value.value[key];
-      items.push(`${key}: ${plStringify(item)}`);
+      items.push(`${key}: ${plStringifySingle(item, (depth || 1) + 1)}`);
     }
-    return `{${items.join(", ")}}`;
+    const closing = space.repeat((depth || 1) - 1);
+    return `{\n${indent}${items.join(`,\n${indent}`)}\n${closing}}`;
   }
   return "";
+};
+
+export const getPropValueByPath = (
+  value: PLValue[],
+  path: (string | number)[]
+): PLValue | null => {
+  // Start with the initial value (assumes value is an array)
+  let current: PLValue | undefined =
+    value.length > 0 ? value[path[0] as number] : undefined;
+
+  path.shift();
+  for (const key of path) {
+    // Check if 'current' is defined and is a PLObject
+    if (
+      current &&
+      current.type === "object" &&
+      typeof current.value === "object" &&
+      current.value !== null
+    ) {
+      // Cast to a Record
+      const next = current.value as Record<string, PLValue>;
+
+      // Check if the key exists in the next value
+      if (key in next) {
+        current = next[key as string]; // Move to the next property
+      } else {
+        // If the key is not found, return null
+        return null;
+      }
+    } else {
+      // If current is not an object, return null
+      return null;
+    }
+  }
+
+  // Return the found value or null if it doesn't exist
+  return current ?? null;
 };
 
 const parseSingle = (source: string, item: Expression) => {
