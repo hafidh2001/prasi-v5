@@ -15,6 +15,8 @@ import { bind } from "./lib/immer-yjs";
 import { findNodeById, flattenTree } from "./node/flatten-tree";
 import { loadScriptModels, ScriptModel } from "./node/load-script-models";
 import { TreeVarItems } from "./node/var-items";
+import { active } from "logic/active";
+import { waitUntil } from "prasi-utils";
 
 export type PageTree = ReturnType<typeof loadPageTree>;
 
@@ -66,12 +68,25 @@ export const loadPageTree = (
         }
       },
     });
-    await loadScriptModels(
-      p,
-      content_tree.childs,
-      tree.script_models,
-      tree.var_items
-    );
+
+    if (active.comp_id && !active.comp) {
+      waitUntil(() => active.comp).then(async () => {
+        await loadScriptModels(
+          p,
+          content_tree.childs,
+          tree.script_models,
+          tree.var_items
+        );
+        p.render();
+      });
+    } else {
+      await loadScriptModels(
+        p,
+        content_tree.childs,
+        tree.script_models,
+        tree.var_items
+      );
+    }
     arg?.loaded(content_tree);
   });
 

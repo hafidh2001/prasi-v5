@@ -68,9 +68,11 @@ export const mergeParentVars = (
   }
 
   for (const id of model.path_ids) {
-    if (model.id !== id || (model.id === id && active.comp?.snapshot.id === id)) {
+    if (
+      model.id !== id ||
+      (model.id === id && active.comp?.snapshot.id === id)
+    ) {
       const m = models[id];
-
 
       if (m) {
         for (const e of Object.values(m.exports)) {
@@ -78,9 +80,11 @@ export const mergeParentVars = (
         }
       }
 
-      if (models_map[id]?.length > 1) {
+      if (models_map[id]?.length >= 1) {
+
         for (const prop_name of models_map[id]) {
           const m = models[`${id}~${prop_name}`];
+
 
           if (m) {
             for (const e of Object.values(m.exports)) {

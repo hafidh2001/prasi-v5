@@ -46,7 +46,10 @@ export const activateComp = async (p: PG, comp_id: string) => {
 };
 
 export const loadCompTree = (opt: {
-  p: { comp: { loaded: Record<string, EComp>; pending: Set<string> } };
+  p: {
+    comp: { loaded: Record<string, EComp>; pending: Set<string> };
+    render: () => void;
+  };
   sync: ReturnType<typeof createClient>;
   id: string;
   on_update?: (comp: EBaseComp["content_tree"]) => void;
@@ -91,13 +94,27 @@ export const internalLoadCompTree = (
     });
 
     fg.prasi.updated_outside = true;
-    await loadScriptModels(
-      opt.p,
-      [content_tree],
-      component.script_models,
-      component.var_items,
-      opt.id
-    );
+
+    if (active.comp_id === comp_id && !active.comp) {
+      waitUntil(() => active.comp).then(async () => {
+        await loadScriptModels(
+          opt.p,
+          [content_tree],
+          component.script_models,
+          component.var_items,
+          opt.id
+        );
+        opt.p.render();
+      });
+    } else {
+      await loadScriptModels(
+        opt.p,
+        [content_tree],
+        component.script_models,
+        component.var_items,
+        opt.id
+      );
+    }
 
     if (opt.on_update) opt.on_update(content_tree);
     if (!state.loaded) {
