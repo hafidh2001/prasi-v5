@@ -132,6 +132,7 @@ export const EdBase = () => {
   }
 
   const script = p.ui.popup.script;
+  const component_loading = !!(active.comp_id && !active.comp);
   return (
     <div
       className={cx("flex flex-col flex-1", style)}
@@ -162,39 +163,45 @@ export const EdBase = () => {
                 </div>
               ) : (
                 <>
-                  {script.paned && script.open ? (
-                    <EdPopItemScript />
+                  {component_loading ? (
+                    <>COMPONENT LOADING</>
                   ) : (
-                    <div
-                      className={cx(
-                        "w-full h-full flex flex-1 relative overflow-auto",
-                        p.mode === "mobile" ? "flex-col items-center" : "",
-                        css``
-                      )}
-                      onContextMenu={(e) => {
-                        e.preventDefault();
-                      }}
-                    >
-                      <div className={cx(mainStyle(p))} ref={div}>
-                        <EdViRoot />
-                        {p.ui.page.ruler && (
-                          <div
-                            className={cx(
-                              "absolute inset-0 pointer-events-none contain-strict",
-                              div.current &&
-                                css`
-                                  top: ${div.current.scrollTop}px;
-                                  width: ${div.current.clientWidth}px;
-                                  height: ${div.current.clientHeight}px;
-                                `,
-                              p.ui.page.ruler && rulerCSS
+                    <>
+                      {script.paned && script.open ? (
+                        <EdPopItemScript />
+                      ) : (
+                        <div
+                          className={cx(
+                            "w-full h-full flex flex-1 relative overflow-auto",
+                            p.mode === "mobile" ? "flex-col items-center" : "",
+                            css``
+                          )}
+                          onContextMenu={(e) => {
+                            e.preventDefault();
+                          }}
+                        >
+                          <div className={cx(mainStyle(p))} ref={div}>
+                            <EdViRoot />
+                            {p.ui.page.ruler && (
+                              <div
+                                className={cx(
+                                  "absolute inset-0 pointer-events-none contain-strict",
+                                  div.current &&
+                                    css`
+                                      top: ${div.current.scrollTop}px;
+                                      width: ${div.current.clientWidth}px;
+                                      height: ${div.current.clientHeight}px;
+                                    `,
+                                  p.ui.page.ruler && rulerCSS
+                                )}
+                              >
+                                <Ruler />
+                              </div>
                             )}
-                          >
-                            <Ruler />
                           </div>
-                        )}
-                      </div>
-                    </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </>
               )}

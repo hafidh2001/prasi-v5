@@ -10,6 +10,7 @@ import { loopItem } from "./loop-item";
 import { rapidhash_fast as hash } from "./rapidhash";
 import { TreeVarItems } from "./var-items";
 import { active } from "logic/active";
+import { activateComp } from "crdt/load-comp-tree";
 
 const source_sym = Symbol("source");
 
@@ -36,7 +37,8 @@ export const loadScriptModels = async (
   p: { comp: { loaded: Record<string, EComp>; pending: Set<string> } },
   items: IItem[],
   result: Record<string, ScriptModel>,
-  var_items: TreeVarItems
+  var_items: TreeVarItems,
+  comp_id?: string
 ) => {
   if (!jscript.loaded) {
     await waitUntil(() => jscript.loaded);

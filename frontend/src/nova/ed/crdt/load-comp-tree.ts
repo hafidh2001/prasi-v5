@@ -95,7 +95,8 @@ export const internalLoadCompTree = (
       opt.p,
       [content_tree],
       component.script_models,
-      component.var_items
+      component.var_items,
+      opt.id
     );
 
     if (opt.on_update) opt.on_update(content_tree);
@@ -112,9 +113,11 @@ export const internalLoadCompTree = (
       map: {} as Record<string, PNode>,
       array: [] as PNode[],
     },
+
     get snapshot() {
       return immer.get();
     },
+
     history: async () => {
       return (await _api.comp_history(comp_id)) as {
         undo: SyncUndoItem[];
@@ -140,7 +143,8 @@ export const internalLoadCompTree = (
         opt.p,
         [content_tree],
         component.script_models,
-        component.var_items
+        component.var_items,
+        opt.id
       );
     },
     before_update: null as null | ((do_update: () => void) => void),
