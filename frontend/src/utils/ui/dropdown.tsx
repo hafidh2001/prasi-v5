@@ -44,6 +44,7 @@ export const Dropdown: FC<
 
   useEffect(() => {
     local.searching = false;
+    resetInputValue();
     local.render();
   }, [prop.value]);
 
@@ -97,6 +98,10 @@ export const Dropdown: FC<
     }
   }
 
+  if (local.activeIdx > items.length - 1) {
+    local.activeIdx = 0;
+  }
+
   return (
     <Popover
       open={local.open}
@@ -106,6 +111,9 @@ export const Dropdown: FC<
             return;
           }
           local.open = open;
+          local.searching = false;
+          local.search = "";
+          resetInputValue();
           local.render();
         }, 50);
       }}
@@ -119,15 +127,23 @@ export const Dropdown: FC<
         <>
           {items.length > 0 ? (
             <List
-              className={`${
-                items.length > 3
-                  ? "min-h-[140px] max-h-[350px]"
-                  : items.length === 3
-                    ? "min-h-[85px]"
-                    : items.length === 1
-                      ? "min-h-[30px]"
-                      : "min-h-[57px]"
-              } min-w-[200px] flex-1 w-full`}
+              className={cx(
+                `${
+                  items.length > 3
+                    ? "min-h-[140px] max-h-[350px]"
+                    : items.length === 3
+                      ? "min-h-[85px]"
+                      : items.length === 1
+                        ? "min-h-[30px]"
+                        : "min-h-[57px]"
+                } min-w-[200px] flex-1 w-full`,
+                css`
+                  .active {
+                    background-color: #3c82f6;
+                    color: white;
+                  }
+                `
+              )}
               data={items}
               ref={(el) => {
                 if (el && !local.scrolled) {
@@ -144,10 +160,9 @@ export const Dropdown: FC<
                   <div
                     key={typeof e === "string" ? e : e.value}
                     className={cx(
-                      "cursor-pointer px-1 h-[28px]",
+                      "cursor-pointer px-1 flex items-center leading-3 h-[28px]",
                       idx > 0 && "border-t",
-                      prop.value === (typeof e === "string" ? e : e.value) &&
-                        "active",
+                      idx === local.activeIdx && "active",
                       prop.popover?.itemClassName
                         ? prop.popover?.itemClassName
                         : "hover:bg-blue-100 px-2 whitespace-nowrap select-none"
@@ -155,6 +170,8 @@ export const Dropdown: FC<
                     onClick={() => {
                       local.open = false;
                       local.status === "init";
+                      local.search = "";
+                      local.searching = false;
                       if (prop.onChange) {
                         prop.onChange(
                           typeof e === "string" ? e : e.value,
@@ -214,17 +231,52 @@ export const Dropdown: FC<
           onChange={(e) => {
             local.searching = true;
             local.search = e.currentTarget.value;
+            local.open = true;
+
             local.render();
           }}
           onKeyDown={(e) => {
+            if (!local.open) {
+              local.open = true;
+              local.render();
+              return;
+            }
             if (e.key === "Enter") {
               local.searching = false;
               local.open = false;
+              const current = items[local.activeIdx];
+              if (current) {
+                if (prop.onChange) {
+                  const val =
+                    typeof current === "string" ? current : current.value;
+                  const idx = prop.items?.findIndex((e) => e === current);
+                  if (typeof idx === "number") {
+                    prop.onChange(val, idx, current);
+                  }
+                }
+              }
+              local.render();
+            } else if (e.key === "ArrowDown") {
+              e.preventDefault();
+              if (local.activeIdx >= items.length - 1) {
+                local.activeIdx = 0;
+              } else {
+                local.activeIdx++;
+              }
+              local.render();
+            } else if (e.key === "ArrowUp") {
+              e.preventDefault();
+              if (local.activeIdx === 0) {
+                local.activeIdx = items.length - 1;
+              } else {
+                local.activeIdx--;
+              }
               local.render();
             }
           }}
           ref={ref}
-          onFocus={() => {
+          onFocus={(e) => {
+            e.currentTarget.select();
             if (!local.open) {
               local.open = true;
               local.render();

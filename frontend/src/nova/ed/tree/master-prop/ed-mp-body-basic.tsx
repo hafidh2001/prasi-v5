@@ -374,7 +374,8 @@ export const EdMasterPropBodyBasic: FC<{
 type ListStructure = { 
   type: "string";
   placeholder?: string;
- } | { type: "object" }`
+  options?: ({ label: string; value: string } | string)[];
+ } | { type: "object", object: Record<string, ListStructure> }`
               : `\
 type Options = ({ type: string, value: any} | string)[]
               `

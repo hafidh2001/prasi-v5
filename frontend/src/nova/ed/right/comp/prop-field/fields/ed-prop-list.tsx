@@ -1,21 +1,30 @@
+import { active, getActiveTree } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import {
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
   GripVertical,
   PlusCircle,
   Trash,
 } from "lucide-react";
-import { FC, useEffect } from "react";
+import { FC, Fragment, useEffect } from "react";
+import { arrayMove, List } from "react-movable";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { IItem } from "utils/types/item";
 import { FNCompDef } from "utils/types/meta-fn";
 import { EdPropCode } from "./ed-prop-code";
 import { extractValue } from "./extract-value";
-import { active, getActiveTree } from "logic/active";
-import { arrayMove, List } from "react-movable";
+import get from "lodash.get";
+import { Dropdown } from "utils/ui/dropdown";
+
+type LSString = {
+  type: "string";
+  placeholder?: string;
+  options?: ({ label: string; value: string } | string)[];
+};
+type LSObject = { type: "object"; object: Record<string, ListStructure> };
+type ListStructure = LSString | LSObject;
 
 const expand = {} as Record<string, boolean>;
 export const EdPropListHead = (arg: {
@@ -104,14 +113,7 @@ export const EdPropListHead = (arg: {
   );
 };
 
-type LSString = {
-  type: "string";
-  placeholder?: string;
-  options?: ({ key: string; value: string } | string)[];
-};
-type ListStructureItem = LSString | { type: "object" };
-
-const createListItem = (structures: ListStructureItem) => {
+const createListItem = (structures: ListStructure) => {
   if (structures.type === "string") {
     return "";
   } else if (structures.type === "object") {
@@ -128,7 +130,7 @@ export const EdPropList = (arg: {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({
     value: [] as any[],
-    structure: null as ListStructureItem | null,
+    structure: null as ListStructure | null,
     has_code: false,
     original_value: "",
     timeout: null as any,
@@ -187,10 +189,18 @@ export const EdPropList = (arg: {
             {...props}
             key={props.key}
             tabIndex={undefined}
-            className="flex border-b items-stretch text-sm"
+            className={cx(
+              "relative text-sm flex items-stretch",
+              css`
+                &:hover > .grip {
+                  background: #3c82f6;
+                  color: white;
+                }
+              `
+            )}
           >
-            <>
-              <div className="w-[15px] cursor-ns-resize flex items-center justify-center border-r">
+            <Fragment key={1}>
+              <div className="grip w-[15px] cursor-ns-resize flex items-center justify-center border-r">
                 <GripVertical size={10} />
               </div>
               <div
@@ -201,7 +211,21 @@ export const EdPropList = (arg: {
               >
                 {s.type === "string" && (
                   <SString
-                    key={1}
+                    structure={s}
+                    value={item}
+                    onChange={(e) => {
+                      if (typeof index === "number") {
+                        local.value[index] = e;
+                        local.value = [...local.value];
+                        local.render();
+                        update();
+                      }
+                    }}
+                  />
+                )}
+
+                {s.type === "object" && (
+                  <SObject
                     structure={s}
                     value={item}
                     onChange={(e) => {
@@ -216,7 +240,7 @@ export const EdPropList = (arg: {
                 )}
               </div>
               <div
-                className="cursor-pointer flex items-center justify-center border-l p-1 hover:text-red-600"
+                className="cursor-pointer flex items-center justify-center border-l w-[18px] hover:text-red-600"
                 onPointerDown={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
@@ -231,7 +255,11 @@ export const EdPropList = (arg: {
               >
                 <Trash size={12} />
               </div>
-            </>
+            </Fragment>
+            <div
+              key={2}
+              className="border-b absolute -left-[2px] -right-[2px] bottom-0"
+            ></div>
           </li>
         )}
       />
@@ -244,21 +272,121 @@ const SString: FC<{
   value: string;
   onChange: (val: string) => void;
 }> = ({ structure: s, value, onChange }) => {
+  const local = useLocal({ value, focus: false });
+
+  useEffect(() => {
+    if (!local.focus) {
+      local.value = value;
+      local.render();
+    }
+  }, [value]);
+
   return (
     <div className="flex-1 flex">
-      <input
-        type="text"
-        className="flex-1 outline-none rounded-none p-1"
-        value={value}
-        placeholder={s.placeholder}
-        onClick={(e) => {
-          e.currentTarget.select();
-        }}
-        spellCheck={false}
-        onChange={(e) => {
-          onChange(e.currentTarget.value);
-        }}
-      />
+      {s.options ? (
+        <>
+          <Dropdown
+            items={s.options}
+            className="flex-1 outline-none rounded-none px-1 py-[2px]"
+            value={local.value}
+            onChange={(v) => {
+              local.value = v;
+              local.render();
+              onChange(v);
+            }}
+          />
+        </>
+      ) : (
+        <input
+          type="text"
+          className="flex-1 outline-none rounded-none px-1 py-[2px]"
+          value={local.value || ""}
+          placeholder={s.placeholder}
+          onClick={(e) => {
+            e.currentTarget.select();
+          }}
+          onFocus={() => {
+            local.focus = true;
+            local.render();
+          }}
+          onBlur={() => {
+            local.focus = false;
+            local.render();
+          }}
+          spellCheck={false}
+          onChange={(e) => {
+            local.value = e.currentTarget.value;
+            local.render();
+            onChange(e.currentTarget.value);
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+const SObject: FC<{
+  structure: LSObject;
+  value: any;
+  onChange: (val: any) => void;
+}> = ({ structure: s, value, onChange }) => {
+  let cur = value;
+  if (typeof value !== "object") {
+    cur = {};
+  }
+  return (
+    <div
+      className="flex-1 flex flex-col"
+      onPointerDown={(e) => {
+        e.stopPropagation();
+      }}
+    >
+      {Object.entries(s.object).map(([name, st], idx) => {
+        const curval = get(cur, name);
+        return (
+          <div
+            key={idx}
+            className={cx(
+              "flex items-stretch bg-white",
+              idx > 0 && "border-t",
+              css`
+                &:hover > .label {
+                  color: blue;
+                }
+              `
+            )}
+          >
+            <div className="border-r flex items-center ml-1 pr-1 text-slate-400 label">
+              {name}
+            </div>
+            <div className="flex flex-1">
+              {st.type === "string" && (
+                <SString
+                  key={1}
+                  structure={st}
+                  value={curval}
+                  onChange={(e) => {
+                    cur[name] = e;
+                    onChange(cur);
+                  }}
+                />
+              )}
+
+              {st.type === "object" && (
+                <SObject
+                  key={1}
+                  structure={st}
+                  value={curval}
+                  onChange={(e) => {
+                    cur[name] = e;
+                    onChange(cur);
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };
