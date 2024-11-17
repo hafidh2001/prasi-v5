@@ -127,7 +127,6 @@ export const loadPageTree = (
         findNode: (id: string) => null | PNode;
       }) => void
     ) {
-
       const _fn = (tree: EPage["content_tree"]) => {
         sync.page.pending_action(page_id, action_name);
         fn({

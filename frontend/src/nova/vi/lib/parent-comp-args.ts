@@ -7,6 +7,7 @@ export const parentCompArgs = (
   let cur_id = id;
   const args: any = {};
   let i = 0;
+
   while (parents[cur_id]) {
     if (ref_comps[cur_id]) {
       for (const [k, v] of Object.entries(ref_comps[cur_id])) {

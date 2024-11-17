@@ -15,13 +15,17 @@ export const ViItem: FC<{
   instance_id?: string;
   standalone?: string;
 }> = ({ item, is_layout, div_props, instance_id, merged, standalone }) => {
-  const { page, mode, ref } = useVi(({ state, ref, action }) => ({
-    page: ref.page,
-    db: ref.db,
-    api: ref.api,
-    mode: ref.mode,
-    ref,
-  }));
+  const { page, mode, ref, parents } = useVi(
+    ({ state, ref, action }) => ({
+      page: ref.page,
+      db: ref.db,
+      api: ref.api,
+      mode: ref.mode,
+      ref,
+      parents: ref.item_parents,
+    }),
+    standalone
+  );
   const [, render] = useState({});
 
   const props = viDivProps(item, {

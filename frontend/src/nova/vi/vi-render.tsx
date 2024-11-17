@@ -49,7 +49,6 @@ export const ViRender: FC<{
     );
   }
 
-
   if (item.component?.id) {
     return (
       <ViComp

@@ -91,7 +91,7 @@ export const EdPropListHead = (arg: {
   return (
     <>
       <div
-        className={cx("flex items-center justify-between border-l px-1 flex-1")}
+        className={cx("flex items-center justify-between px-1 flex-1")}
         onClick={() => {
           prop.expand = prop.expand === undefined ? false : !prop.expand;
           p.render();
@@ -105,7 +105,7 @@ export const EdPropListHead = (arg: {
         >
           {(prop.expand || typeof prop.expand === "undefined") && (
             <>
-              Hide <ChevronDown size={10} className="ml-1" />
+              <ChevronDown size={13}  />
             </>
           )}
 

@@ -57,15 +57,15 @@ export const ViComp: FC<{
       edit_comp_id === comp_id
     ) {
       instanced[item.id] = item;
-      const comp_args = parentCompArgs(parents, ref_comp_props, item.id);
       ref_comp_props[item.id] = compArgs(
         item,
         comps,
-        { ...comp_args, ...merged },
+        { ...merged },
         db,
         api,
         vscode_exports
       );
+
       instantiate(item);
     }
   }

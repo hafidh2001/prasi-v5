@@ -12,9 +12,12 @@ export const ViChilds: FC<{
   merged?: ViMergedProps;
   standalone?: string;
 }> = ({ item, is_layout, instance_id, merged, standalone }) => {
-  const { parents } = useVi(({ state, ref }) => ({
-    parents: ref.item_parents,
-  }));
+  const { parents } = useVi(
+    ({ state, ref }) => ({
+      parents: ref.item_parents,
+    }),
+    standalone
+  );
 
   const childs = item.childs;
   return childs.map((child) => {
