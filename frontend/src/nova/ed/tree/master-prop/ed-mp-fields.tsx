@@ -48,13 +48,14 @@ export const FieldButtons = (arg: {
   );
 };
 export const FieldCode = (arg: {
-  label: string;
+  label?: string;
   value?: string;
   default?: string;
   typings?: string;
   onBeforeChange?: (value: string) => string;
   onChange?: (value: string) => void;
   onBlur?: (value: string) => void;
+  onOpenChange?: (open: boolean) => void;
 }) => {
   const local = useLocal({
     open: false,
@@ -66,74 +67,86 @@ export const FieldCode = (arg: {
     (local.value = arg.value || arg.default || ""), local.render();
   }, [arg.value]);
 
+  const content = (
+    <Popover
+      placement="right"
+      onOpenChange={(open) => {
+        local.open = open;
+
+        if (arg.onOpenChange) {
+          arg.onOpenChange(open);
+        }
+        if (open && !arg.value && arg.default) {
+          arg.onChange?.(local.value);
+        }
+
+        local.render();
+      }}
+      open={local.open}
+      backdrop={arg.label ? false : true}
+      content={
+        <div className={cx("w-[600px] h-[400px]")}>
+          <MonacoRaw
+            id="field-code"
+            lang="typescript"
+            value={local.value || ""}
+            onChange={(val) => {
+              local.value = val;
+              clearTimeout(local.timeout);
+              local.timeout = setTimeout(() => {
+                arg.onChange?.(val);
+              }, 500);
+            }}
+            onMount={({ monaco }) => {
+              const props = Object.keys(
+                active.comp?.snapshot.component?.props || {}
+              )
+                .filter((e) => !e.endsWith("__"))
+                .map((prop) => `const ${prop} = null as any;`);
+              registerPrettier(monaco);
+              monacoRegisterSource(
+                monaco,
+                props.join("\n"),
+                "file:///prop-typings.d.ts"
+              );
+              if (arg.typings) {
+                monacoRegisterSource(
+                  monaco,
+                  arg.typings,
+                  "file:///arg-typings.d.ts"
+                );
+              }
+            }}
+          />
+        </div>
+      }
+      className={cx(
+        arg.label && "border-l px-1",
+        "flex items-center flex-1 cursor-pointer",
+        local.open && "bg-blue-500"
+      )}
+    >
+      <div
+        className={cx(
+          "border px-2 ",
+          local.open
+            ? "border-transparent text-white"
+            : "bg-white hover:bg-blue-500 hover:text-white"
+        )}
+      >
+        Edit Code
+      </div>{" "}
+    </Popover>
+  );
+
+  if (!arg.label) {
+    return content;
+  }
+
   return (
     <label className="mp-field flex border-b flex-1">
       <div className="mp-label p-1">{arg.label}</div>
-      <Popover
-        placement="right"
-        onOpenChange={(open) => {
-          local.open = open;
-
-          if (open && !arg.value && arg.default) {
-            arg.onChange?.(local.value);
-          }
-
-          local.render();
-        }}
-        open={local.open}
-        backdrop={false}
-        content={
-          <div className={cx("w-[600px] h-[400px]")}>
-            <MonacoRaw
-              id="field-code"
-              lang="typescript"
-              value={local.value || ""}
-              onChange={(val) => {
-                local.value = val;
-                clearTimeout(local.timeout);
-                local.timeout = setTimeout(() => {
-                  arg.onChange?.(val);
-                }, 500);
-              }}
-              onMount={({ monaco }) => {
-                const props = Object.keys(
-                  active.comp?.snapshot.component?.props || {}
-                )
-                  .filter((e) => !e.endsWith("__"))
-                  .map((prop) => `const ${prop} = null as any;`);
-                registerPrettier(monaco);
-                monacoRegisterSource(
-                  monaco,
-                  props.join("\n"),
-                  "file:///prop-typings.d.ts"
-                );
-                if (arg.typings) {
-                  monacoRegisterSource(
-                    monaco,
-                    arg.typings,
-                    "file:///arg-typings.d.ts"
-                  );
-                }
-              }}
-            />
-          </div>
-        }
-        className={cx(
-          "border-l flex items-center flex-1 cursor-pointer",
-          local.open && "bg-blue-500"
-        )}
-      >
-        <div
-          className={cx(
-            "border m-1 px-2 ",
-            local.open
-              ? "border-transparent text-white"
-              : "bg-white hover:bg-blue-500 hover:text-white"
-          )}
-        >
-          Edit Code
-        </div>{" "}
-      </Popover>
+      {content}
     </label>
   );
 };

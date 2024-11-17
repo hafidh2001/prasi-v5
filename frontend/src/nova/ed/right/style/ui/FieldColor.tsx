@@ -17,15 +17,17 @@ export const FieldColor: FC<{
 
   const local = useLocal({
     val: color.lastColorPicked || "",
+    update_timeout: null as any,
   });
 
   useEffect(() => {
-    if (value) {
-      color.lastColorPicked = value;
+    if (!color.openedPopupID[popupID]) {
+      if (value) {
+        color.lastColorPicked = value;
+      }
+      local.val = value || "";
+      local.render();
     }
-    local.val = value || "";
-
-    local.render();
   }, [value]);
 
   const onOpen = () => {
@@ -47,7 +49,14 @@ export const FieldColor: FC<{
   return (
     <FieldColorPicker
       value={local.val}
-      update={(val) => update(val)}
+      update={(val) => {
+        local.val = val;
+        local.render();
+        clearTimeout(local.update_timeout);
+        local.update_timeout = setTimeout(() => {
+          update(val);
+        }, 10);
+      }}
       onOpen={onOpen}
       onClose={onClose}
       open={color.openedPopupID[popupID]}

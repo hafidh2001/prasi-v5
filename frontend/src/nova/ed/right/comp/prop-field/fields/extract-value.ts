@@ -18,27 +18,30 @@ export const extractValue = (p: PG, name: string, prop: FNCompDef) => {
     }
   }
   original_value = prop.value;
+  let value = "";
+  if (typeof prop.value === "string") {
+    value = prop.value;
+    if (!value) {
+      has_code = false;
+      value = "";
+      return { original_value, value, has_code };
+    }
+    const extracted_str = extractString(name, value?.trim());
+    if (extracted_str) {
+      value = trim(extracted_str, `\`"'`);
+      has_code = false;
+    } else {
+      has_code = true;
+    }
 
-  let value = prop.value || "";
-  if (!value) {
-    has_code = false;
-    value = "";
-    return { original_value, value, has_code };
-  }
-
-  const extracted_str = extractString(name, value.trim());
-  if (extracted_str) {
-    value = trim(extracted_str, `\`"'`);
-    has_code = false;
+    if (value.trim().startsWith(`export const ${name} =`)) {
+      value = trim(
+        value.trim().substring(`export const ${name} =`.length).trim(),
+        ";"
+      );
+    }
   } else {
-    has_code = true;
-  }
-
-  if (value.trim().startsWith(`export const ${name} =`)) {
-    value = trim(
-      value.trim().substring(`export const ${name} =`.length).trim(),
-      ";"
-    );
+    console.log(prop.value);
   }
 
   return { original_value, value, has_code };
@@ -59,6 +62,7 @@ export const extractString = (name: string, str: string): string => {
   }
 
   let no_region = removeRegion(str);
+
   if (no_region.startsWith(`export const ${name} =`)) {
     if (no_region.endsWith(";")) {
       no_region = no_region.slice(0, -1);
@@ -68,5 +72,6 @@ export const extractString = (name: string, str: string): string => {
       no_region.slice(`export const ${name} =`.length).trim()
     );
   }
-  return "";
+
+  return no_region || "";
 };
