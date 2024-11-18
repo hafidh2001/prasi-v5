@@ -1,6 +1,11 @@
 import { ScriptModel } from "crdt/node/load-script-models";
 import { generateImports } from "./generate-imports";
 import { generatePassPropAndLoop } from "./generate-passprop";
+import { PG } from "logic/ed-global";
+import {
+  createListItem,
+  plStringifySingle,
+} from "../../../../right/comp/prop-field/fields/prop-list/prop-list-util";
 
 export const extractRegion = (code: string) => {
   if (code.startsWith("// #region")) {
@@ -30,28 +35,18 @@ export const removeRegion = (code: string) => {
 export const migrateCode = (
   model: ScriptModel,
   models: Record<string, ScriptModel>,
-  debug?: boolean
+  comp_id?: string
 ) => {
   const code = model.source;
   const { local, loop } = model;
 
-  if (code.startsWith("// #region")) {
+  if (code.startsWith("// #region") && !model.prop_name) {
     const lines = code.split("\n");
     const region_end = lines.findIndex((line) =>
       line.startsWith("// #endregion")
     );
     const main_code = lines.slice(region_end + 1).join("\n");
-
-    let region_code = "";
-
-    if (model.prop_name) {
-      const inject = injectCompProps(model);
-      region_code = generateRegion(model, models, {
-        inject_end: inject.join("\n"),
-      });
-    } else {
-      region_code = generateRegion(model, models);
-    }
+    const region_code = generateRegion(model, models);
 
     return `\
 ${region_code}
@@ -92,13 +87,27 @@ ${generateRegion(model, models, {
   inject_end: inject.join("\n"),
 })}
 
-export const ${model.prop_name} = ${model.extracted_content}`;
+export const ${model.prop_name} = ${compPropValue(model)}`;
   } else {
     return `\
 ${generateRegion(model, models)}${inject}
 
 export default () => (${model.extracted_content})`;
   }
+};
+
+const compPropValue = (model: ScriptModel) => {
+  if (model.prop_name) {
+    const prop = model.comp_def?.content_tree.component?.props[model.prop_name];
+    let value = model.extracted_content;
+
+    if (prop?.meta?.type === "list") {
+      const structure = new Function(`return ${prop.meta?.optionsBuilt || ""}`);
+      value = `[${plStringifySingle(createListItem(structure()))}]`;
+    }
+    return value;
+  }
+  return "''";
 };
 
 const injectCompProps = (model: ScriptModel) => {

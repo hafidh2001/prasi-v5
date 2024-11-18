@@ -1,3 +1,4 @@
+import { active } from "logic/active";
 import { EComp } from "logic/types";
 import { monacoCreateModel } from "popup/script/code/js/create-model";
 import { migrateCode } from "popup/script/code/js/migrate-code";
@@ -9,8 +10,7 @@ import { IItem } from "utils/types/item";
 import { loopItem } from "./loop-item";
 import { rapidhash_fast as hash } from "./rapidhash";
 import { TreeVarItems } from "./var-items";
-import { active } from "logic/active";
-import { activateComp } from "crdt/load-comp-tree";
+import { PG } from "logic/ed-global";
 
 const source_sym = Symbol("source");
 
@@ -21,6 +21,7 @@ export type ScriptModel = {
   id: string;
   path_names: string[];
   prop_name?: string;
+  prop_value?: string;
   path_ids: string[];
   comp_def?: EComp;
   title: string;
@@ -150,11 +151,12 @@ export const loadScriptModels = async (
       }
     }
   }
-
   for (const [k, v] of Object.entries(result)) {
     if (v.source && !v.ready) {
       try {
-        v.source = await jscript.prettier.format?.(migrateCode(v, result));
+        v.source = await jscript.prettier.format?.(
+          migrateCode(v, result, comp_id)
+        );
       } catch (e) {
         console.error(
           `[ERROR] When Formatting Code\n${v.title} ~> ${v.id}\n\n`,

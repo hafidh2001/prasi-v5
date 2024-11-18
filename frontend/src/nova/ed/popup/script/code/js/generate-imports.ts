@@ -76,15 +76,14 @@ export const mergeParentVars = (
 
       if (m) {
         for (const e of Object.values(m.exports)) {
+          if (e.name === m.local.name && model.id === id) continue;
           variables[e.name] = { id: m.id, type: e.type };
         }
       }
 
       if (models_map[id]?.length >= 1) {
-
         for (const prop_name of models_map[id]) {
           const m = models[`${id}~${prop_name}`];
-
 
           if (m) {
             for (const e of Object.values(m.exports)) {

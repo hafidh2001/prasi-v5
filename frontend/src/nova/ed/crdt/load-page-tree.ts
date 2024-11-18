@@ -122,6 +122,7 @@ export const loadPageTree = (
     async reloadScriptModels() {
       const content_tree = immer.get();
       tree.script_models = {};
+
       await loadScriptModels(
         p,
         content_tree.childs,
