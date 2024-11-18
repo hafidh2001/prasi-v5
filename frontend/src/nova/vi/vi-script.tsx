@@ -16,6 +16,7 @@ import { createViLoop } from "./script/vi-loop";
 import { createViPassProp } from "./script/vi-pass-prop";
 
 export const ViScript: FC<{
+  is_layout: boolean;
   item: DeepReadonly<IItem>;
   childs: ReactElement | null;
   props: React.ClassAttributes<HTMLDivElement> &
@@ -29,7 +30,7 @@ export const ViScript: FC<{
   instance_id?: string;
   standalone?: string;
   render: () => void;
-}> = ({ item, childs, props, merged, render, standalone }) => {
+}> = ({ is_layout, item, childs, props, merged, render, standalone }) => {
   const internal = useLocal({
     Local: undefined as any,
     PassProp: undefined as any,
@@ -111,7 +112,7 @@ export const ViScript: FC<{
   const jsx = {} as Record<string, any>;
   for (const [k, v] of Object.entries(comp_args)) {
     if (typeof v === "object" && v && (v as any).__jsx) {
-      jsx[k] = (v as any).__render(item, parents);
+      jsx[k] = (v as any).__render(item, parents, _merged, is_layout);
     }
   }
 

@@ -167,6 +167,10 @@ const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
                     });
                   }
                 : undefined,
+            onDoubleClick(e) {
+              p.ui.popup.script.open = true;
+              p.render();
+            },
             onPointerDown(e) {
               if (active.item_id === item.id) {
                 if (p.ui.editor.hover === "temporary-disabled") {

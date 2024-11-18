@@ -458,6 +458,6 @@ export const codeUpdate = {
           });
         }
       );
-    }, 200);
+    }, 1000);
   },
 };

@@ -2,11 +2,11 @@ import { ObjectExpression } from "@oxc-parser/wasm";
 import { ScriptModel } from "crdt/node/load-script-models";
 import get from "lodash.get";
 import { cutCode, jscript } from "utils/script/jscript";
+import { JSXElement, JSXElementName } from "utils/script/parser/oxc-types";
 import { traverse } from "utils/script/parser/traverse";
 import { parseItemLocal } from "./parse-item-local";
 import { parseItemPassPropAndLoop } from "./parse-item-passprop";
 import { replaceString } from "./replace-string";
-import { JSXElement, JSXElementName } from "utils/script/parser/oxc-types";
 
 export const parseItemCode = (model: ScriptModel) => {
   const replacements: Array<{

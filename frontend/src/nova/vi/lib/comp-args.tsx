@@ -56,25 +56,42 @@ export const compArgs = (
         if (content) {
           args[k] = {
             __jsx: true,
-            __LazyChild: ({
+            __Component: ({
               parents,
               parent,
+              merged,
+              is_layout,
             }: {
               parents: any;
               parent: any;
+              merged: any;
+              is_layout: boolean;
             }) => {
               parents[content.id] = parent.id;
               return (
                 <ViRender
-                  is_layout={false}
+                  is_layout={is_layout}
                   instance_id={item.id}
                   item={content}
                   standalone={standalone}
+                  merged={merged}
                 />
               );
             },
-            __render(parent: IItem, parents: Record<string, string>) {
-              return <this.__LazyChild parent={parent} parents={parents} />;
+            __render(
+              parent: IItem,
+              parents: Record<string, string>,
+              merged: any,
+              is_layout: boolean
+            ) {
+              return (
+                <this.__Component
+                  parent={parent}
+                  parents={parents}
+                  merged={merged}
+                  is_layout={is_layout}
+                />
+              );
             },
           };
         } else {

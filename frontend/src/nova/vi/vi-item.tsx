@@ -62,6 +62,7 @@ export const ViItem: FC<{
             instance_id={instance_id}
             is_layout={is_layout}
             standalone={standalone}
+            merged={merged}
           />
         );
       }
@@ -73,6 +74,7 @@ export const ViItem: FC<{
       <ViScript
         item={item}
         childs={childs}
+        is_layout={is_layout}
         merged={merged}
         props={props}
         instance_id={instance_id}

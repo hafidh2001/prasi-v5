@@ -58,47 +58,50 @@ export const loadScriptModels = async (
         for (const [name, master_prop] of Object.entries(props)) {
           let prop = item.component.props?.[name];
 
-          if (master_prop.meta?.type !== "content-element") {
-            if (name.endsWith("__")) continue;
-            const file = `${item.id}~${name}`;
+          if (name.endsWith("__")) continue;
+          const file = `${item.id}~${name}`;
 
-            if (!prop) {
-              prop = {
-                value: master_prop.value,
-                valueBuilt: master_prop.valueBuilt,
-              };
-            }
-            let prop_value = prop.value || "";
-            const source_hash = hash(prop_value).toString();
+          if (!prop && master_prop.meta?.type !== "content-element") {
+            prop = {
+              value: master_prop.value,
+              valueBuilt: master_prop.valueBuilt,
+            };
+          }
+          let prop_value = prop.value || "";
+          if (master_prop.meta?.type === "content-element") {
+            prop_value = "null as ReactElement";
+          }
 
-            if (result[file]?.source_hash !== source_hash) {
-              result[file] = {
-                id: item.id,
-                comp_def,
-                get source() {
-                  return this[source_sym];
-                },
-                set source(value: string) {
-                  this[source_sym] = value;
-                  this.source_hash = hash(value).toString();
-                  this.ready = false;
-                },
-                [source_sym]: prop_value,
-                title: `${item.name}.${name}`,
-                path_names: path_name,
-                prop_name: name,
-                path_ids: path_id,
-                name: `file:///${file}.tsx`,
-                local: { name: "", value: "", auto_render: false },
-                loop: { name: "", list: "" },
-                extracted_content: "",
-                source_hash,
-                ready: false,
-                exports: {},
-              };
-            }
-            result[file].title = `${item.name}.${name}`;
-          } else {
+          const source_hash = hash(prop_value).toString();
+
+          if (result[file]?.source_hash !== source_hash) {
+            result[file] = {
+              id: item.id,
+              comp_def,
+              get source() {
+                return this[source_sym];
+              },
+              set source(value: string) {
+                this[source_sym] = value;
+                this.source_hash = hash(value).toString();
+                this.ready = false;
+              },
+              [source_sym]: prop_value,
+              title: `${item.name}.${name}`,
+              path_names: path_name,
+              prop_name: name,
+              path_ids: path_id,
+              name: `file:///${file}.tsx`,
+              local: { name: "", value: "", auto_render: false },
+              loop: { name: "", list: "" },
+              extracted_content: "",
+              source_hash,
+              ready: false,
+              exports: {},
+            };
+          }
+          result[file].title = `${item.name}.${name}`;
+          if (master_prop.meta?.type === "content-element") {
             if (!prop && master_prop.content) {
               prop = { content: deepClone(master_prop.content) };
               item.component.props[name] = prop;

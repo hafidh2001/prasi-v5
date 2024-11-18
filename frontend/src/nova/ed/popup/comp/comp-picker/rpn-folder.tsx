@@ -82,7 +82,10 @@ export const RPNFolder: FC<{
                 }
               }
             }}
-            className="border px-1 bg-white flex-1 outline-none mr-1 border-blue-500 "
+            onFocus={(e) => {
+              e.currentTarget.select();
+            }}
+            className=" bg-white flex-1 outline-none mr-1 "
             onChange={(e) => {
               local.rename_to = e.currentTarget.value;
               local.render();
@@ -102,7 +105,7 @@ export const RPNFolder: FC<{
               <Name name={node.data?.name} />
 
               <div
-                className="ml-1 p-1 border border-transparent hover:border-slate-400 bg-white rounded-sm"
+                className="ml-1 my-[2px] p-1 border border-transparent hover:bg-blue-600 hover:text-white  bg-white rounded-[2px]"
                 onClick={(e) => {
                   e.stopPropagation();
                   local.rename_to = item.name;
@@ -115,14 +118,14 @@ export const RPNFolder: FC<{
               ></div>
               {folder_item_count === 0 && (
                 <div
-                  className="ml-1 p-1 border border-transparent hover:border-slate-400 bg-white rounded-sm"
+                  className="my-[2px] p-1 border border-transparent hover:bg-red-600 hover:text-white  bg-white text-red-600 rounded-[2px]"
                   onClick={async (e) => {
                     e.stopPropagation();
                     if (confirm("Delete empty folder?")) {
                       data.groups = data.groups.filter((e) => e.id !== item.id);
                       compPickerToNodes(p);
                       p.render();
-                      
+
                       await _db.component_group.delete({
                         where: { id: item.id },
                       });
