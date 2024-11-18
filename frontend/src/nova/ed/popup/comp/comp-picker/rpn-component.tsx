@@ -1,13 +1,12 @@
 import { NodeModel, RenderParams } from "@minoru/react-dnd-treeview";
 import { EDGlobal } from "logic/ed-global";
+import { Check } from "lucide-react";
 import { FC } from "react";
 import tc from "tinycolor2";
 import { useGlobal } from "utils/react/use-global";
-import { CompPickerNode } from "./render-picker-node";
-import { compPickerToNodes } from "./to-nodes";
-import { Check } from "lucide-react";
-import { formatItemName } from "../../../tree/parts/node/node-name";
 import { useLocal } from "utils/react/use-local";
+import { formatItemName } from "../../../tree/parts/node/node-name";
+import { CompPickerNode } from "./render-picker-node";
 
 export const RPNComponent: FC<{
   node: NodeModel<CompPickerNode>;
@@ -36,35 +35,6 @@ export const RPNComponent: FC<{
 
   const trash_folder = data.groups.find((e) => e.name === "__TRASH__");
   const isTrashed = node.parent === trash_folder?.id;
-
-  const delComponent = async (comp_id: string) => {
-    if (isTrashed) {
-      if (confirm("Permanently delete this component?")) {
-        // await _db.component.delete({
-        //   where: { id: comp_id },
-        // });
-        // await reloadCompPicker(p);
-        p.render();
-      }
-    } else if (trash_folder) {
-      if (confirm("Move component to trash?")) {
-        const found = data.comps.find((e) => e.id === item.id);
-        if (found) {
-          await _db.component.update({
-            where: { id: comp_id },
-            data: { id_component_group: trash_folder.id },
-            select: {
-              id: true,
-            },
-          });
-          found.id_component_group = trash_folder.id;
-          node.parent = trash_folder.id;
-          compPickerToNodes(p);
-          p.render();
-        }
-      }
-    }
-  };
 
   return (
     <div
@@ -122,32 +92,34 @@ export const RPNComponent: FC<{
             }
           }}
         />
-        <div
-          className={cx(
-            "transition-all flex justify-center items-center",
-            checked
-              ? "bg-red-600 text-white"
-              : "bg-white border-[4px] border-[#ccc] opacity-20 hover:opacity-100 hover:border-red-300 hover:bg-red-100 ",
-            css`
-              width: 25px;
-              &:hover {
-                .normal {
-                  display: none;
+        {!isTrashed && (
+          <div
+            className={cx(
+              "transition-all flex justify-center items-center",
+              checked
+                ? "bg-red-600 text-white"
+                : "bg-white border-[4px] border-[#ccc] opacity-20 hover:opacity-100 hover:border-red-300 hover:bg-red-100 ",
+              css`
+                width: 25px;
+                &:hover {
+                  .normal {
+                    display: none;
+                  }
+                  .over {
+                    display: block;
+                  }
                 }
-                .over {
-                  display: block;
-                }
-              }
-            `
-          )}
-          onClick={async (e) => {
-            e.stopPropagation();
-            onCheck(item.id);
-            p.render();
-          }}
-        >
-          {checked && <Check size={13} />}
-        </div>
+              `
+            )}
+            onClick={async (e) => {
+              e.stopPropagation();
+              onCheck(item.id);
+              p.render();
+            }}
+          >
+            {checked && <Check size={13} />}
+          </div>
+        )}
       </div>
     </div>
   );

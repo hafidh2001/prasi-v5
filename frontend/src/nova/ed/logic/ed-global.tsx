@@ -228,14 +228,16 @@ export const EDGlobal = {
       comp_group: {
         mouse_event: null as null | React.MouseEvent<HTMLElement, MouseEvent>,
         on_pick(group_id: string) {},
-        on_close() {},
+        on_close(group_id: string) {},
       },
       comp: {
         search: { value: "" },
+        tab: "Components",
         on_pick: null as null | ((comp_id: string) => void),
         render: () => {},
         picker_ref: null as null | HTMLDivElement,
-        status: "loading" as "loading" | "ready",
+        status: "loading" as "loading" | "ready" | "processing",
+        reload: async () => {},
         should_import: false,
         data: {
           comps: [] as {

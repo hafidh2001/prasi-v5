@@ -27,7 +27,7 @@ export const editorCompLoad = async (comp_ids: string[]) => {
   }
 
   const comps = await _db.component.findMany({
-    where: { id: { in: [...load_comp_ids] } },
+    where: { id: { in: [...load_comp_ids] }, deleted_at: null },
     select: {
       id: true,
       id_component_group: true,

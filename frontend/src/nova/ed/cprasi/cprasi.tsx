@@ -42,6 +42,7 @@ export const CPrasi: FC<{ id: string; size?: string; name: string }> = ({
                     id: {
                       in: pending_ids,
                     },
+                    deleted_at: null,
                   },
                   select: { id: true, content_tree: true },
                 });

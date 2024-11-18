@@ -229,7 +229,7 @@ export const prasiLoader = async ({
         const uncached_ids = ids.filter((id) => !result[id]);
         if (uncached_ids.length > 0) {
           const comps = await _db.component.findMany({
-            where: { id: { in: uncached_ids } },
+            where: { id: { in: uncached_ids }, deleted_at: null },
             select: { content_tree: true, id: true },
           });
           for (const comp of comps) {

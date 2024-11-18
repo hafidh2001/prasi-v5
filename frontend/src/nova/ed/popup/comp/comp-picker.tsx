@@ -25,7 +25,6 @@ export const EdPopCompPicker = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({
     tree_ref: null as TreeMethods | null,
-    tab: "Components",
     checked: new Set<string>(),
     shift: false,
     ctx_menu: {
@@ -68,9 +67,30 @@ export const EdPopCompPicker = () => {
           name: true,
         },
       });
+
+      if (!popup.data.groups.find((e) => e.name === "__TRASH__")) {
+        popup.data.groups.push(
+          await _db.component_group.create({
+            data: {
+              name: "__TRASH__",
+              component_site: {
+                create: { id_site: p.site.id },
+              },
+            },
+            select: {
+              id: true,
+              name: true,
+            },
+          })
+        );
+      }
+
       popup.data.comps = await _db.component.findMany({
         where: {
-          id_component_group: { in: popup.data.groups.map((e) => e.id) },
+          id_component_group: {
+            in: popup.data.groups.map((e) => e.id),
+          },
+          deleted_at: null,
         },
         select: {
           id: true,
@@ -84,8 +104,9 @@ export const EdPopCompPicker = () => {
     popup.status = "ready";
     p.render();
   };
+  popup.reload = reload;
   useEffect(() => {
-    if (!popup.on_pick) local.tab = "Components";
+    if (!popup.on_pick) popup.tab = "Components";
     else {
       (async () => {
         if (popup.data.groups.length === 0 || popup.data.comps.length === 0) {
@@ -97,7 +118,7 @@ export const EdPopCompPicker = () => {
 
   useEffect(() => {
     local.tree_ref?.openAll();
-  }, [popup.on_pick, local.tab]);
+  }, [popup.on_pick, popup.tab]);
 
   if (!popup.on_pick) return null;
 
@@ -105,7 +126,7 @@ export const EdPopCompPicker = () => {
   const group_len = {} as Record<string, number>;
   const trash_id = popup.data.groups.find((e) => e.name === "__TRASH__")?.id;
   let nodes =
-    local.tab === "Components"
+    popup.tab === "Components"
       ? popup.data.nodes.filter((e) => {
           if (e.data) {
             if (e.data.type === "comp") {
@@ -192,7 +213,6 @@ export const EdPopCompPicker = () => {
         }}
         fade={false}
       >
-        {/* {popup.import && <EdCompImport />} */}
         <div
           id="comp-picker"
           ref={(ref) => {
@@ -217,13 +237,13 @@ export const EdPopCompPicker = () => {
                             key={e}
                             className={cx(
                               "border cursor-pointer  -mb-[1px] px-2  hover:text-blue-500 hover:border-blue-500 hover:border-b-transparent select-none",
-                              local.tab === e &&
+                              popup.tab === e &&
                                 "bg-white border-b-transparent",
-                              local.tab !== e &&
+                              popup.tab !== e &&
                                 "text-slate-400 border-b-slate-200 border-transparent bg-transparent"
                             )}
                             onClick={() => {
-                              local.tab = e;
+                              popup.tab = e;
                               local.checked.clear();
                               p.render();
                             }}
@@ -234,7 +254,7 @@ export const EdPopCompPicker = () => {
                       })}
                     </div>
                     <div className="flex flex-1 mr-1 justify-end items-stretch">
-                      {local.checked.size > 0 && local.tab === "Components" && (
+                      {local.checked.size > 0 && popup.tab === "Components" && (
                         <div
                           className="bg-white text-xs border border-red-600 flex items-center text-red-600 px-2 mr-1 hover:border-red-800 my-1 hover:bg-blue-50 cursor-pointer"
                           onClick={async () => {
@@ -285,20 +305,28 @@ export const EdPopCompPicker = () => {
                         onClick={async () => {
                           const name = prompt("Folder Name:");
                           if (name) {
-                            popup.status = "loading";
+                            popup.status = "processing";
                             p.render();
-                            await _db.component_group.create({
-                              data: {
-                                name,
-                                component_site: {
-                                  create: {
-                                    id_site: p.site.id,
-                                    is_owner: true,
+                            popup.data.groups.push(
+                              await _db.component_group.create({
+                                data: {
+                                  name,
+                                  component_site: {
+                                    create: {
+                                      id_site: p.site.id,
+                                      is_owner: true,
+                                    },
                                   },
                                 },
-                              },
-                            });
-                            reload();
+                                select: {
+                                  id: true,
+                                  name: true,
+                                },
+                              })
+                            );
+                            compPickerToNodes(p);
+                            popup.status = "ready";
+                            p.render();
                           }
                         }}
                       >
@@ -413,7 +441,7 @@ export const EdPopCompPicker = () => {
                             padding-left: 30px;
                           }
                         `,
-                        local.tab === "Trash" &&
+                        popup.tab === "Trash" &&
                           css`
                             .tree-container {
                               padding-top: 10px;
@@ -421,7 +449,7 @@ export const EdPopCompPicker = () => {
                           `
                       )}
                     >
-                      {popup.picker_ref && popup.status === "ready" && (
+                      {popup.picker_ref && (
                         <DndProvider
                           backend={HTML5Backend}
                           options={getBackendOptions({
@@ -568,6 +596,18 @@ export const EdPopCompPicker = () => {
                 local.ctx_menu.comp_id = "";
                 local.render();
               }}
+            />
+          )}
+
+          {popup.status === "processing" && (
+            <Loading
+              backdrop={false}
+              className={css`
+                position: absolute;
+                inset: 0;
+                background: white;
+                opacity: 0.6 !important;
+              `}
             />
           )}
         </div>

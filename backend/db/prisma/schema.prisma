@@ -16,6 +16,7 @@ model component {
   type               String           @default("item")
   id_component_group String?          @db.Uuid
   props              Json             @default("[]")
+  deleted_at         DateTime?        @db.Timestamp(6)
   component_group    component_group? @relation(fields: [id_component_group], references: [id], onDelete: Cascade)
   component_ext      component_ext[]
 }

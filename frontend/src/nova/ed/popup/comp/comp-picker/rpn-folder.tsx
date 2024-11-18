@@ -19,6 +19,7 @@ export const RPNFolder: FC<{
   if (!item || item.name === "__TRASH__" || p.ui.popup.comp.search.value)
     return <></>;
 
+  const popup = p.ui.popup.comp;
   const data = p.ui.popup.comp.data;
   let folder_item_count = 0;
   if (item.type === "folder") {
@@ -118,12 +119,13 @@ export const RPNFolder: FC<{
                   onClick={async (e) => {
                     e.stopPropagation();
                     if (confirm("Delete empty folder?")) {
-                      await _db.component_group.delete({
-                        where: { id: item.id },
-                      });
                       data.groups = data.groups.filter((e) => e.id !== item.id);
                       compPickerToNodes(p);
                       p.render();
+                      
+                      await _db.component_group.delete({
+                        where: { id: item.id },
+                      });
                     }
                   }}
                   dangerouslySetInnerHTML={{
