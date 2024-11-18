@@ -89,7 +89,6 @@ export const loadPageTree = (
     }
     await arg?.loaded(content_tree);
     tree.nodes = flattenTree(content_tree.childs, p.comp.loaded);
-    console.log(tree.nodes.map);
   });
 
   const tree = {

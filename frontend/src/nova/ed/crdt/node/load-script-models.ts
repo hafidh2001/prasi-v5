@@ -11,6 +11,7 @@ import { loopItem } from "./loop-item";
 import { rapidhash_fast as hash } from "./rapidhash";
 import { TreeVarItems } from "./var-items";
 import { PG } from "logic/ed-global";
+import { deepClone } from "utils/react/use-global";
 
 const source_sym = Symbol("source");
 
@@ -47,49 +48,62 @@ export const loadScriptModels = async (
 
   await loopItem(
     items,
-    { active_comp_id: active.comp_id },
+    { active_comp_id: active.comp_id, comps: p.comp.loaded },
     async ({ item, path_name, path_id }) => {
       if (item.component?.id) {
         const comp_id = item.component.id;
         const comp_def = p.comp.loaded[comp_id];
+        const props = comp_def?.content_tree?.component?.props || {};
 
-        for (const [name, comp_prop] of Object.entries(
-          comp_def?.content_tree?.component?.props || {}
-        )) {
-          const prop = item.component.props?.[name] || comp_prop;
-          if (name.endsWith("__")) continue;
-          const file = `${item.id}~${name}`;
-          if (!prop) continue;
-          let prop_value = prop.value || "";
-          const source_hash = hash(prop_value).toString();
+        for (const [name, master_prop] of Object.entries(props)) {
+          let prop = item.component.props?.[name];
 
-          if (result[file]?.source_hash !== source_hash) {
-            result[file] = {
-              id: item.id,
-              comp_def,
-              get source() {
-                return this[source_sym];
-              },
-              set source(value: string) {
-                this[source_sym] = value;
-                this.source_hash = hash(value).toString();
-                this.ready = false;
-              },
-              [source_sym]: prop_value,
-              title: `${item.name}.${name}`,
-              path_names: path_name,
-              prop_name: name,
-              path_ids: path_id,
-              name: `file:///${file}.tsx`,
-              local: { name: "", value: "", auto_render: false },
-              loop: { name: "", list: "" },
-              extracted_content: "",
-              source_hash,
-              ready: false,
-              exports: {},
-            };
+          if (master_prop.meta?.type !== "content-element") {
+            if (name.endsWith("__")) continue;
+            const file = `${item.id}~${name}`;
+            let prop_value = prop.value || "";
+            const source_hash = hash(prop_value).toString();
+
+            if (!prop) {
+              prop = {
+                value: master_prop.value,
+                valueBuilt: master_prop.valueBuilt,
+              };
+            }
+
+            if (result[file]?.source_hash !== source_hash) {
+              result[file] = {
+                id: item.id,
+                comp_def,
+                get source() {
+                  return this[source_sym];
+                },
+                set source(value: string) {
+                  this[source_sym] = value;
+                  this.source_hash = hash(value).toString();
+                  this.ready = false;
+                },
+                [source_sym]: prop_value,
+                title: `${item.name}.${name}`,
+                path_names: path_name,
+                prop_name: name,
+                path_ids: path_id,
+                name: `file:///${file}.tsx`,
+                local: { name: "", value: "", auto_render: false },
+                loop: { name: "", list: "" },
+                extracted_content: "",
+                source_hash,
+                ready: false,
+                exports: {},
+              };
+            }
+            result[file].title = `${item.name}.${name}`;
+          } else {
+            if (!prop && master_prop.content) {
+              prop = { content: deepClone(master_prop.content) };
+              item.component.props[name] = prop;
+            }
           }
-          result[file].title = `${item.name}.${name}`;
         }
       }
       if (item.vars) {

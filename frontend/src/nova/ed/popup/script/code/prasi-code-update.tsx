@@ -86,7 +86,7 @@ export const remountPrasiModels = (arg: {
     monaco: Monaco;
     event: any;
   }) => void;
-  onMount?: (m: Partial<ScriptModel>) => void;
+  onMount?: (m?: Partial<ScriptModel>) => void;
 }) => {
   const { p, models, monaco, activeFileName, onChange, editor, onMount } = arg;
 
@@ -99,6 +99,7 @@ export const remountPrasiModels = (arg: {
   };
 
   const monacoModels = monaco.editor.getModels();
+  let on_mount_called = false;
   for (const m of models) {
     if (!m.source && m.name !== activeFileName) continue;
     if (!m.source) m.source = "";
@@ -181,36 +182,62 @@ export const remountPrasiModels = (arg: {
     }
 
     if (m.name === activeFileName && m.model && !m.model.isDisposed()) {
-      if (!m.model.getValue()) {
-        m.source = defaultCode().trim();
-        m.model.setValue(m.source);
-      }
-
-      registerEditorOpener(editor, monaco, p);
-      monacoEnableJSX(editor, monaco);
-
-      if ((m.model as any)?.__isDisposing || m.model.isDisposed()) return;
-      editor.setModel(m.model);
-
-      editor.restoreViewState(foldRegionVState(m.model.getLinesContent()));
-
-      if (onMount) onMount(m);
-
-      if (p.script.monaco_selection) {
-        let i = 0;
-        const ival = setInterval(() => {
-          if (i < 5) {
-            editor.focus();
-            editor.setSelection(p.script.monaco_selection);
-          } else {
-            p.script.monaco_selection = null;
-
-            clearInterval(ival);
+      setActiveModel({
+        m,
+        editor,
+        monaco,
+        p,
+        defaultCode,
+        onMount(m) {
+          if (onMount && !on_mount_called) {
+            on_mount_called = true;
+            onMount(m);
           }
-          i++;
-        }, 50);
-      }
+        },
+      });
     }
+  }
+};
+
+const setActiveModel = (arg: {
+  m: Partial<ScriptModel>;
+  defaultCode: () => string;
+  monaco: Monaco;
+  editor: MonacoEditor;
+  p: PG;
+  onMount?: (m?: Partial<ScriptModel>) => void;
+}) => {
+  const { m, defaultCode, monaco, editor, p, onMount } = arg;
+  if (!m.model) return;
+  if (!m.model.getValue()) {
+    m.source = defaultCode().trim();
+    m.model.setValue(m.source);
+  }
+
+  registerEditorOpener(editor, monaco, p);
+  monacoEnableJSX(editor, monaco);
+
+  if ((m.model as any)?.__isDisposing || m.model.isDisposed()) return;
+  editor.setModel(m.model);
+
+  editor.restoreViewState(foldRegionVState(m.model.getLinesContent()));
+  if (onMount) {
+    onMount(m);
+  }
+
+  if (p.script.monaco_selection) {
+    let i = 0;
+    const ival = setInterval(() => {
+      if (i < 5) {
+        editor.focus();
+        editor.setSelection(p.script.monaco_selection);
+      } else {
+        p.script.monaco_selection = null;
+
+        clearInterval(ival);
+      }
+      i++;
+    }, 50);
   }
 };
 

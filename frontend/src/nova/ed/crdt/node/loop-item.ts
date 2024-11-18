@@ -1,9 +1,10 @@
 import { IItem } from "utils/types/item";
 import { parsePropForJsx } from "./flatten-tree";
+import { EComp } from "logic/types";
 
 export const loopItem = async (
   items: IItem[],
-  opt: { active_comp_id?: string },
+  opt: { active_comp_id?: string; comps: Record<string, EComp> },
   fn: (arg: {
     item: IItem;
     parent?: IItem;
@@ -29,7 +30,7 @@ export const loopItem = async (
       path_id: [...path_id, item.id],
     });
     if (item.component?.id) {
-      const props = parsePropForJsx(item);
+      const props = parsePropForJsx(item, opt.comps);
       for (const prop of Object.values(props)) {
         await loopItem([prop], opt, fn, {
           parent: item,

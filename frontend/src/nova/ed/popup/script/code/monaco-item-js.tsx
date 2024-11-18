@@ -12,6 +12,7 @@ import { jsxColorScheme } from "./js/jsx-style";
 import { registerPrettier } from "./js/register-prettier";
 import { registerReact } from "./js/register-react";
 import { reloadPrasiModels, remountPrasiModels } from "./prasi-code-update";
+import { defaultCode } from "./js/default-code";
 
 export const MonacoItemJS: FC<{
   onChange?: (arg: {
@@ -82,7 +83,7 @@ export const MonacoItemJS: FC<{
   if (!Editor || (div && (!local.width || !local.height)))
     return (
       <div className="relative w-full h-full items-center justify-center flex flex-1">
-        <Loading backdrop={false} note="loading-monaco" />
+        <Loading backdrop={false} note="loading-editor" />
       </div>
     );
 
@@ -91,7 +92,7 @@ export const MonacoItemJS: FC<{
       {local.loading && (
         <div className="absolute inset-0">
           <div className="relative w-full h-full items-center justify-center flex flex-1">
-            <Loading backdrop={false} note="loading-monaco" />
+            <Loading backdrop={false} note="loading-script-model" />
           </div>
         </div>
       )}
@@ -100,7 +101,7 @@ export const MonacoItemJS: FC<{
         className={cx(jsxColorScheme, className)}
         loading={
           <div className="relative w-full h-full items-center justify-center flex flex-1">
-            <Loading backdrop={false} note="loading-monaco" />
+            <Loading backdrop={false} note="loading-monaco-editor" />
           </div>
         }
         width={local.width}
@@ -145,7 +146,11 @@ export const MonacoItemJS: FC<{
             editor,
             monaco,
             onChange,
-            onMount: () => {
+            onMount: (m) => {
+              if (!m) {
+                defaultCode.js(p);
+              }
+
               local.loading = false;
               local.render();
             },
