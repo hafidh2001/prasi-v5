@@ -1,11 +1,11 @@
-import { IContent } from "../types/general";
+import { IItem } from "utils/types/item";
 
 export const cssEditor = ({
   item,
   hover,
   active,
 }: {
-  item: IContent;
+  item: IItem;
   hover?: boolean;
   active?: boolean;
 }) => {

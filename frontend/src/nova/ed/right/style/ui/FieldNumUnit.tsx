@@ -1,5 +1,11 @@
+import { EDGlobal, PG } from "logic/ed-global";
 import React, { FC, ReactElement, useCallback, useEffect } from "react";
+import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
+
+export const num_drag = {
+  disable_highlight: (p: PG) => {},
+};
 
 export const FieldNumUnit: FC<{
   label?: string;
@@ -27,6 +33,7 @@ export const FieldNumUnit: FC<{
   enableWhenDrag,
   className,
 }) => {
+  const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({
     val: 0,
     val_str: "",
@@ -88,6 +95,8 @@ export const FieldNumUnit: FC<{
     // Only change the value if the drag was actually started.
     const onUpdate = (event: any) => {
       if (local.drag.clientX || local.drag.clientY) {
+        num_drag.disable_highlight(p);
+
         if (
           local.direction === "v" &&
           local.drag.clientX !== event.clientX &&

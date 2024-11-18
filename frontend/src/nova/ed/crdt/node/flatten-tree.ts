@@ -1,9 +1,10 @@
 import { NodeModel } from "@minoru/react-dnd-treeview";
 import { IItem } from "../../../../utils/types/item";
-import { PNode } from "../../logic/types";
+import { EComp, PNode } from "../../logic/types";
 
 export const flattenTree = (
   items: IItem[],
+  comps: Record<string, EComp>,
   opt?: {
     visit?: (item: IItem) => void;
     comp_id?: string;
@@ -31,9 +32,9 @@ export const flattenTree = (
     if (opt?.visit) opt.visit(item);
 
     if (item.component && opt?.comp_id !== item.component.id) {
-      const props = parsePropForJsx(item);
+      const props = parsePropForJsx(item, comps);
       for (const [name, pitem] of Object.entries(props)) {
-        flattenTree([pitem], opt, {
+        flattenTree([pitem], comps, opt, {
           parent: item,
           parent_comp: {
             is_jsx_root: true,
@@ -66,7 +67,7 @@ export const flattenTree = (
       (!item.component?.id ||
         (item.component.id && opt?.comp_id === item.component.id))
     ) {
-      flattenTree(item.childs, opt, {
+      flattenTree(item.childs, comps, opt, {
         parent: item,
         models: models,
         parent_comp: arg?.parent_comp
@@ -81,20 +82,26 @@ export const flattenTree = (
   return { array, map, models };
 };
 
-export const parsePropForJsx = (item: IItem) => {
+export const parsePropForJsx = (item: IItem, comps: Record<string, EComp>) => {
   const result = {} as Record<string, IItem>;
-  if (item.component)
-    for (const [name, prop] of Object.entries(item.component.props)) {
+  if (item.component) {
+    const comp = comps?.[item.component.id];
+    for (const [name, master_prop] of Object.entries(
+      comp?.content_tree.component?.props || item.component.props
+    )) {
+      const prop = item.component.props[name];
       if (prop && prop.meta?.type === "content-element" && prop.content) {
         result[name] = prop.content;
       }
     }
+  }
   return result;
 };
 
 export const findNodeById = (
   id: string,
   items: IItem[],
+  comps: Record<string, EComp>,
   arg?: {
     parent: IItem;
     parent_comp?: {
@@ -114,9 +121,9 @@ export const findNodeById = (
       };
 
     if (item.component) {
-      const props = parsePropForJsx(item);
+      const props = parsePropForJsx(item, comps);
       for (const [name, pitem] of Object.entries(props)) {
-        const found = findNodeById(id, [pitem], {
+        const found = findNodeById(id, [pitem], comps, {
           parent: item,
           parent_comp: {
             prop_name: name,
@@ -128,7 +135,7 @@ export const findNodeById = (
       }
     }
     if (item.childs) {
-      const found = findNodeById(id, item.childs, { parent: item });
+      const found = findNodeById(id, item.childs, comps, { parent: item });
       if (found) {
         return found;
       }

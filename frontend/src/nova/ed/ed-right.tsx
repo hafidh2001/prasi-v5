@@ -1,21 +1,11 @@
 import { getActiveNode } from "crdt/node/get-node-by-id";
 import { active } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
-import {
-  AudioWaveform,
-  Library,
-  PanelRightClose,
-  PanelRightOpen,
-  SquareChartGantt,
-  ToggleLeft,
-  ToggleRight,
-} from "lucide-react";
+import { PanelRightClose, SquareChartGantt } from "lucide-react";
 import { useGlobal } from "utils/react/use-global";
-import { EdVarList } from "./popup/vars/ed-var-list";
-import { EdEvents } from "./right/events/ed-events";
-import { EdCompTitle } from "./right/comp/ed-comp-title";
 import { EdCompProp } from "./right/comp/ed-comp-prop";
-import { EdStyleAll } from "./right/style/side-all";
+import { EdCompTitle } from "./right/comp/ed-comp-title";
+import { EdStyleAll } from "./right/style/ed-style-all";
 
 export const EdRight = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -27,9 +17,9 @@ export const EdRight = () => {
   }
   return (
     <>
-      <div className="flex border-b h-[30px] items-stretch bg-slate-100 select-none">
+      <div className="flex border-b relative h-[30px] items-stretch bg-slate-100 select-none">
         <div
-          className="flex items-center px-2 pt-1 cursor-pointer hover:text-blue-600"
+          className="flex  items-center px-2 pt-1 cursor-pointer hover:text-blue-600"
           onClick={() => {
             if (!p.ui.panel.right) {
               p.ui.panel.right = true;
@@ -41,12 +31,68 @@ export const EdRight = () => {
             p.render();
           }}
         >
-          {p.ui.panel.right ? (
-            <PanelRightClose size={15} />
-          ) : (
-            <PanelRightOpen size={15} />
-          )}
+          <PanelRightClose size={15} />
         </div>
+        {!is_comp && (
+          <div className="pr-2 flex items-center absolute right-0 top-[8px]">
+            <div
+              className={cx(
+                "flex items-center font-mono bg-white text-[8px] space-x-1 border rounded-sm cursor-pointer",
+                p.ui.editor.hover !== "disabled"
+                  ? "border-blue-800 text-blue-800"
+                  : "border-slate-400 text-slate-600",
+                css`
+                  padding-left: 5px;
+                  .on-off {
+                    padding: 0px 5px;
+                    width: 25px;
+                    text-align: center;
+                  }
+                `
+              )}
+              onClick={() => {
+                p.ui.editor.hover =
+                  p.ui.editor.hover !== "disabled" ? "disabled" : "enabled";
+                p.render();
+              }}
+            >
+              <div>Hover</div>
+              {p.ui.editor.hover !== "disabled" ? (
+                <div className="bg-blue-800 text-white on-off">ON</div>
+              ) : (
+                <div className="bg-slate-600 text-white on-off">OFF</div>
+              )}
+            </div>
+            <div
+              className={cx(
+                "flex items-center ml-1 font-mono bg-white text-[8px] space-x-1 border rounded-sm cursor-pointer",
+                p.ui.page.ruler
+                  ? "border-green-800 text-green-800"
+                  : "border-slate-400 text-slate-600",
+                css`
+                  padding-left: 5px;
+                  .on-off {
+                    padding: 0px 5px;
+                    width: 25px;
+                    text-align: center;
+                  }
+                `
+              )}
+              onClick={() => {
+                p.ui.page.ruler = !p.ui.page.ruler;
+                p.render();
+              }}
+            >
+              <div>Ruler</div>
+              {p.ui.page.ruler ? (
+                <div className="bg-green-800 text-white on-off">ON</div>
+              ) : (
+                <div className="bg-slate-600 text-white on-off">OFF</div>
+              )}
+            </div>
+          </div>
+        )}
+
         {is_comp && <EdCompTitle />}
         {!is_comp && (
           <div className="flex justify-between items-stretch flex-1">
@@ -98,36 +144,6 @@ export const EdRight = () => {
                   </div>
                 );
               })}
-            </div>
-
-            <div className="pr-2 flex items-center">
-              <div
-                className={cx(
-                  "flex items-center font-mono text-[8px] space-x-1 border rounded-sm cursor-pointer",
-                  p.ui.page.ruler
-                    ? "border-green-800 text-green-800"
-                    : "border-slate-400 text-slate-600",
-                  css`
-                    padding-left: 5px;
-                    .on-off {
-                      padding: 0px 5px;
-                      width: 25px;
-                      text-align: center;
-                    }
-                  `
-                )}
-                onClick={() => {
-                  p.ui.page.ruler = !p.ui.page.ruler;
-                  p.render();
-                }}
-              >
-                <div>Ruler</div>
-                {p.ui.page.ruler ? (
-                  <div className="bg-green-800 text-white on-off">ON</div>
-                ) : (
-                  <div className="bg-slate-600 text-white on-off">OFF</div>
-                )}
-              </div>
             </div>
           </div>
         )}

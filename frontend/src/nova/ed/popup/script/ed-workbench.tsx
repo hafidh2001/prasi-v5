@@ -222,7 +222,8 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
             strokeWidth={0.5}
             className="-mr-5"
           />
-          Please select<br/> a property to edit
+          Please select
+          <br /> a property to edit
         </div>
       </>
     );
@@ -274,10 +275,10 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
                               color: ${e.color};
                               border: 1px solid ${e.color};
                             `,
-                            "uppercase text-white text-[12px] cursor-pointer flex items-center justify-center transition-all hover:opacity-100 w-[40px] text-center tab-btn",
+                            "uppercase text-[12px] cursor-pointer flex items-center justify-center transition-all hover:opacity-100 w-[40px] text-center tab-btn",
                             mode === e.type
                               ? css`
-                                  background: ${e.color};
+                                  background: ${e.color} !important;
                                   color: white;
                                 `
                               : "opacity-30"

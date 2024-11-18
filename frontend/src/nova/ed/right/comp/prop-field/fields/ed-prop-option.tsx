@@ -41,9 +41,10 @@ export const EdPropOption = (arg: {
       }
       local.value = value;
 
-      const fn = new Function(`return ${src}`);
+      const comp_props = p.viref.comp_props[active.item_id];
+      const fn = new Function(...Object.keys(comp_props), `return ${src}`);
       try {
-        local.options = fn();
+        local.options = fn(...Object.values(comp_props));
 
         local.options = (local.options || []).map((e) => {
           if (typeof e === "string") {

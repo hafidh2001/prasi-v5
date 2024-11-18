@@ -68,6 +68,7 @@ export const loadCompTree = (opt: {
 export const internalLoadCompTree = (
   opt: Parameters<typeof loadCompTree>[0]
 ) => {
+  const p = opt.p;
   const comp_id = opt.id;
   const sync = opt.sync;
   const doc = new Doc();
@@ -84,7 +85,7 @@ export const internalLoadCompTree = (
 
   doc.on("update", async (update, origin) => {
     const content_tree = immer.get();
-    component.nodes = flattenTree([content_tree], {
+    component.nodes = flattenTree([content_tree], p.comp.loaded, {
       comp_id,
       visit(item) {
         if (item.component?.id && opt?.on_component) {
@@ -186,7 +187,7 @@ export const internalLoadCompTree = (
             done({
               tree,
               findNode: (id) => {
-                const result = findNodeById(id, tree.childs);
+                const result = findNodeById(id, tree.childs, p.comp.loaded);
                 return result;
               },
             });
@@ -197,18 +198,18 @@ export const internalLoadCompTree = (
         fn({
           tree,
           flatten: () => {
-            const result = flattenTree([tree], { comp_id });
+            const result = flattenTree([tree], p.comp.loaded, { comp_id });
             return result;
           },
           findNode: (id) => {
-            const result = findNodeById(id, [tree]);
+            const result = findNodeById(id, [tree], p.comp.loaded);
             return result;
           },
           findParent: (id) => {
-            const result = findNodeById(id, [tree]);
+            const result = findNodeById(id, [tree], p.comp.loaded);
 
             if (result?.parent) {
-              return findNodeById(result.parent.id, [tree]);
+              return findNodeById(result.parent.id, [tree], p.comp.loaded);
             }
             return null;
           },

@@ -28,7 +28,7 @@ export const PFPropCode: FC<{
         display: flex;
         align-items: stretch;
         justify-content: stretch;
-        contain: "contents";
+        contain: strict;
         > section {
           flex: 1;
           width: auto !important;

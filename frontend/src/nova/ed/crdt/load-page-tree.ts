@@ -35,7 +35,7 @@ export const loadPageTree = (
   sync: ReturnType<typeof createClient>,
   page_id: string,
   arg?: {
-    loaded: (content_tree: EPageContentTree) => void;
+    loaded: (content_tree: EPageContentTree) => void | Promise<void>;
     on_component?: (item: IItem) => void;
   }
 ) => {
@@ -61,7 +61,7 @@ export const loadPageTree = (
     }
 
     const content_tree = immer.get();
-    tree.nodes = flattenTree(content_tree.childs, {
+    tree.nodes = flattenTree(content_tree.childs, p.comp.loaded, {
       visit(item) {
         if (item.component?.id && arg?.on_component) {
           arg.on_component(item);
@@ -87,7 +87,8 @@ export const loadPageTree = (
         tree.var_items
       );
     }
-    arg?.loaded(content_tree);
+    await arg?.loaded(content_tree);
+    tree.nodes = flattenTree(content_tree.childs, p.comp.loaded);
   });
 
   const tree = {
@@ -147,18 +148,18 @@ export const loadPageTree = (
         fn({
           tree,
           flatten: () => {
-            const result = flattenTree(tree.childs);
+            const result = flattenTree(tree.childs, p.comp.loaded);
             return result;
           },
           findNode: (id) => {
-            const result = findNodeById(id, tree.childs);
+            const result = findNodeById(id, tree.childs, p.comp.loaded);
             return result;
           },
           findParent: (id) => {
-            const result = findNodeById(id, tree.childs);
+            const result = findNodeById(id, tree.childs, p.comp.loaded);
 
             if (result?.parent) {
-              return findNodeById(result.parent.id, tree.childs);
+              return findNodeById(result.parent.id, tree.childs, p.comp.loaded);
             }
             return null;
           },
@@ -176,7 +177,7 @@ export const loadPageTree = (
           done({
             tree,
             findNode: (id) => {
-              const result = findNodeById(id, tree.childs);
+              const result = findNodeById(id, tree.childs, p.comp.loaded);
               return result;
             },
           });

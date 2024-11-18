@@ -55,7 +55,7 @@ export const PrasiEntry = () => {
                   `
                 : "inset-0 overflow-auto",
               css`
-                contain: content;
+                contain: strict;
               `
             )}
           >

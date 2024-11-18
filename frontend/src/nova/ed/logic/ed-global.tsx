@@ -7,6 +7,7 @@ import { PageTree } from "../crdt/load-page-tree";
 import { CompPickerNode } from "../popup/comp/comp-picker/render-picker-node";
 import { EComp, EPage, ESite } from "./types";
 import { MonacoEditor } from "utils/script/typings";
+import { IItem } from "utils/types/item";
 
 export const EDGlobal = {
   mode: "" as "desktop" | "mobile",
@@ -23,6 +24,7 @@ export const EDGlobal = {
   page: {
     cur: null as unknown as EPage,
     tree: null as unknown as PageTree,
+    pending_instances: {} as Record<string, IItem>,
   },
   viref: {} as ViRef,
   comp: {
@@ -72,6 +74,12 @@ export const EDGlobal = {
       right: localStorage.getItem("prasi-panel-right") !== "n",
     },
     editor: {
+      get hover() {
+        return localStorage.getItem("prasi-ui-hover") || "enabled";
+      },
+      set hover(value) {
+        localStorage.setItem("prasi-ui-hover", value);
+      },
       render() {},
     },
     zoom: localStorage.zoom || "100%",

@@ -23,9 +23,7 @@ export const EdViRoot = memo(() => {
     comps: {} as ViComps,
     wrapper: ViWrapper({
       p,
-      render: () => {
-        p.render();
-      },
+      render: p.render,
     }),
     exports: {
       status: "init" as "init" | "loading" | "done",
@@ -122,9 +120,11 @@ const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
           standalone={standalone}
           wrapped={true}
           div_props={({ item, ref, instance_id }) => ({
+            //@ts-ignore
             contentEditable: item.type === "text" ? true : undefined,
             ref: (el) => {},
             onPointerEnter(e) {
+              //@ts-ignore
               if (instance_id) {
                 //@ts-ignore
                 const instance = ref.comp_props[instance_id];
@@ -169,6 +169,10 @@ const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
                 : undefined,
             onPointerDown(e) {
               if (active.item_id === item.id) {
+                if (p.ui.editor.hover === "temporary-disabled") {
+                  p.ui.editor.hover = "enabled";
+                }
+                render();
                 e.stopPropagation();
                 return;
               }
@@ -176,7 +180,6 @@ const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
               e.stopPropagation();
               e.preventDefault();
               p.ui.tree.prevent_tooltip = true;
-
               if (instance_id) {
                 //@ts-ignore
                 const instance = ref.comp_props[instance_id];

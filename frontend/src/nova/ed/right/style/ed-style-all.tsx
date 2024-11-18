@@ -15,6 +15,7 @@ import set from "lodash.set";
 import { useLocal } from "utils/react/use-local";
 import { IItem } from "utils/types/item";
 import { waitUntil } from "prasi-utils";
+import { num_drag } from "./ui/FieldNumUnit";
 
 export const EdStyleAll: FC<{ as_child?: boolean }> = ({ as_child }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -38,11 +39,22 @@ export const EdStyleAll: FC<{ as_child?: boolean }> = ({ as_child }) => {
   }, [active.item_id]);
   const item = local.item;
 
+  num_drag.disable_highlight = () => {
+    if (p.ui.editor.hover === "enabled") {
+      p.ui.editor.hover = "temporary-disabled";
+      p.render();
+    }
+  };
+
   const update = useCallback(async (key: any, value: any) => {
     if (local.item) {
       set(local.item, key, value);
       local.item = { ...local.item };
       local.render();
+      if (p.ui.editor.hover === "enabled") {
+        p.ui.editor.hover = "temporary-disabled";
+        p.render();
+      }
     }
     clearTimeout(local.timeout);
     local.timeout = setTimeout(() => {

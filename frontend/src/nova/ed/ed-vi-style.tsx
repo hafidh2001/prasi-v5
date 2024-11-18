@@ -14,7 +14,7 @@ export const mainStyle = (p: PG) => {
   return cx(
     "absolute flex main-editor-content overflow-auto",
     css`
-      contain: content;
+      contain: strict;
 
       .text-block {
         cursor: pointer;
@@ -45,6 +45,7 @@ export const mainStyle = (p: PG) => {
           transform-origin: 0% 0% 0px;
         `,
     active.hover.id &&
+      p.ui.editor.hover !== "disabled" &&
       css`
         .s-${active.hover.id} {
           &::after {
@@ -60,6 +61,7 @@ export const mainStyle = (p: PG) => {
         }
       `,
     active.item_id === item?.id &&
+      p.ui.editor.hover === "enabled"  &&
       css`
         .s-${active.item_id} {
           outline: none;
