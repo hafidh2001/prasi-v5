@@ -63,7 +63,8 @@ export const ViComp: FC<{
         { ...merged },
         db,
         api,
-        vscode_exports
+        vscode_exports,
+        standalone
       );
 
       instantiate(item);

@@ -9,7 +9,8 @@ export const compArgs = (
   existing: any,
   db: any,
   api: any,
-  vscode_exports: any
+  vscode_exports: any,
+  standalone?: string
 ) => {
   const inject = {} as any;
   const args: Record<string, any> = { ...existing };
@@ -44,10 +45,13 @@ export const compArgs = (
       }
     }
 
-    for (const [k, prop] of Object.entries(item.component.props)) {
+    for (const [k, master_prop] of Object.entries(
+      comp.component?.props || {}
+    )) {
+      const prop = item.component.props[k];
       let js = prop.valueBuilt || "";
 
-      if (prop.meta?.type === "content-element") {
+      if (master_prop.meta?.type === "content-element") {
         const content = prop.content;
         if (content) {
           args[k] = {
@@ -65,6 +69,7 @@ export const compArgs = (
                   is_layout={false}
                   instance_id={item.id}
                   item={content}
+                  standalone={standalone}
                 />
               );
             },
