@@ -2,12 +2,18 @@ import { FC } from "react";
 import { CompPickerNode } from "./render-picker-node";
 import { NodeModel } from "@minoru/react-dnd-treeview";
 import { Trash } from "lucide-react";
+import { useLocal } from "utils/react/use-local";
+import { loadCompTree } from "crdt/load-comp-tree";
+import { useGlobal } from "utils/react/use-global";
+import { EDGlobal } from "logic/ed-global";
 
 export const EdCompEditInfo: FC<{
   node: NodeModel<CompPickerNode>;
   close: () => void;
 }> = ({ node, close }) => {
+  const p = useGlobal(EDGlobal, "EDITOR");
   const item = node.data;
+  const local = useLocal({ name: item?.name });
   return (
     <div
       className={cx(
@@ -19,6 +25,7 @@ export const EdCompEditInfo: FC<{
             .input,
             .label {
               padding: 3px 6px;
+              display: flex;
             }
             .label {
               border-right: 1px solid #ccc;
@@ -34,6 +41,63 @@ export const EdCompEditInfo: FC<{
         `
       )}
     >
+      <div className="field">
+        <div className="label">Name</div>
+        <input
+          className="input"
+          value={local.name}
+          spellCheck={false}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.currentTarget.blur();
+            }
+          }}
+          autoFocus
+          onFocus={(e) => {
+            e.currentTarget.select();
+          }}
+          onBlur={async () => {
+            if (local.name && item && local.name !== item?.name) {
+              if (confirm(`Rename ${item.name} ~> ` + local.name) && p.sync) {
+                const tree = await loadCompTree({
+                  p,
+                  sync: p.sync,
+                  id: item.id,
+                  activate: false,
+                });
+                tree.update(
+                  "Rename Component",
+                  ({ tree }) => {
+                    if (local.name) {
+                      tree.name = local.name;
+                    }
+                  },
+                  () => {
+                    if (local.name) {
+                      node.text = local.name;
+                      item.name = local.name;
+                      const loaded = p.comp.loaded[item.id];
+                      if (loaded) {
+                        loaded.content_tree.name = item.name;
+                      }
+                      close();
+                      p.render();
+                    }
+                  }
+                );
+              } else {
+                local.name = item.name;
+                local.render();
+              }
+            }
+          }}
+          onChange={(e) => {
+            const name = e.currentTarget.value;
+            local.name = name;
+            local.render();
+          }}
+        />
+      </div>
       <div className="field">
         <div className="label">Image</div>
         <div className="input">

@@ -48,6 +48,7 @@ export const wsCompClose = (ws: ServerWebSocket<WSContext>) => {
 
 export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
   const comp_id = ws.data.pathname.substring(`/crdt/comp-`.length);
+
   if (!crdt_comps[comp_id]) {
     if (crdt_loading.has(comp_id)) {
       await waitUntil(() => crdt_comps[comp_id]);
@@ -127,7 +128,7 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
           },
           ts: Date.now(),
         });
-        
+
         await _db.component.update({
           where: { id: comp_id },
           data: {

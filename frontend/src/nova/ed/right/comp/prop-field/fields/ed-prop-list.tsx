@@ -257,7 +257,7 @@ export const EdPropList = (arg: {
             key={props.key}
             tabIndex={undefined}
             className={cx(
-              "relative text-sm flex items-stretch",
+              "relative text-sm flex items-stretch bg-white",
               css`
                 &:hover > .grip {
                   background: #3c82f6;

@@ -1,4 +1,5 @@
 import { DeepReadonly } from "popup/flow/runtime/types";
+import { isValidElement } from "react";
 import { IItem } from "utils/types/item";
 import { ViMergedProps } from "vi/lib/types";
 
@@ -21,11 +22,11 @@ export const createViPassProp = (
     if (isWritable(arg.children, "key")) {
       children.key = idx;
       children.props.merged = merged;
-    } else {
+    } else if (isValidElement(arg.children)) {
       children = {
         ...arg.children,
         key: idx,
-        props: { ...arg.children.props, merged: merged },
+        props: { ...(arg.children.props || {}), merged: merged },
       };
     }
 

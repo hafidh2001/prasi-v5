@@ -69,7 +69,6 @@ export const ViItem: FC<{
   }
 
   if (item.adv?.js) {
-
     return (
       <ViScript
         item={item}

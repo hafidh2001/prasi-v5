@@ -47,7 +47,11 @@ export const compRenderPickerNode = (
         <Popover
           open
           onOpenChange={(open) => {
-            if (!open) ctx_menu.closeEdit();
+            if (!open) {
+              setTimeout(() => {
+                ctx_menu.closeEdit();
+              }, 100);
+            }
           }}
           backdrop={false}
           content={

@@ -1,4 +1,5 @@
 import { DeepReadonly } from "popup/flow/runtime/types";
+import { isValidElement } from "react";
 import { IItem } from "utils/types/item";
 import { ViMergedProps } from "vi/lib/types";
 
@@ -31,17 +32,22 @@ export const createViLoop = (
         },
       };
 
-      if (isWritable(children, "key")) {
-        children.key = new_key;
-        children.props.merged = _merged;
-        return children;
-      }
+      if (isValidElement(children)) {
+        if (isWritable(children, "key")) {
+          children.key = new_key;
+          if (children.props) (children.props as any).merged = _merged;
+          else {
+            children.props = { merged: _merged };
+          }
+          return children;
+        }
 
-      return {
-        ...children,
-        key: new_key,
-        props: { ...children.props, merged: _merged },
-      };
+        return {
+          ...children,
+          key: new_key,
+          props: { ...(children.props || {}), merged: _merged },
+        };
+      }
     });
   };
 };

@@ -108,9 +108,10 @@ export const ViScript: FC<{
 
   const comp_args = parentCompArgs(parents, comp_props_parents, item.id);
 
+  const jsx = {} as Record<string, any>;
   for (const [k, v] of Object.entries(comp_args)) {
     if (typeof v === "object" && v && (v as any).__jsx) {
-      comp_args[k] = (v as any).__render(item, parents);
+      jsx[k] = (v as any).__render(item, parents);
     }
   }
 
@@ -146,6 +147,7 @@ export const ViScript: FC<{
     ...script_args,
     ..._merged,
     ...valtio_snapshot,
+    ...jsx,
     db,
     api,
     __js: removeRegion(item.adv!.js || ""),

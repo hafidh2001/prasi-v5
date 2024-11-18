@@ -61,8 +61,6 @@ export const loadScriptModels = async (
           if (master_prop.meta?.type !== "content-element") {
             if (name.endsWith("__")) continue;
             const file = `${item.id}~${name}`;
-            let prop_value = prop.value || "";
-            const source_hash = hash(prop_value).toString();
 
             if (!prop) {
               prop = {
@@ -70,6 +68,8 @@ export const loadScriptModels = async (
                 valueBuilt: master_prop.valueBuilt,
               };
             }
+            let prop_value = prop.value || "";
+            const source_hash = hash(prop_value).toString();
 
             if (result[file]?.source_hash !== source_hash) {
               result[file] = {
