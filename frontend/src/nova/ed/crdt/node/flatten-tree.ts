@@ -55,6 +55,7 @@ export const flattenTree = (
         ? { id: arg.parent.id, component: arg.parent_comp }
         : undefined,
     };
+
     models.push({
       id: item.id,
       parent: arg?.parent.id || "root",
@@ -62,6 +63,7 @@ export const flattenTree = (
       data: map[item.id],
     });
     array.push(map[item.id]);
+
     if (
       item.childs &&
       (!item.component?.id ||
@@ -86,12 +88,13 @@ export const parsePropForJsx = (item: IItem, comps: Record<string, EComp>) => {
   const result = {} as Record<string, IItem>;
   if (item.component) {
     const comp = comps?.[item.component.id];
-    for (const [name, master_prop] of Object.entries(
-      comp?.content_tree.component?.props || item.component.props
-    )) {
-      const prop = item.component.props[name];
-      if (prop && prop.meta?.type === "content-element" && prop.content) {
-        result[name] = prop.content;
+    const props = comp?.content_tree.component?.props;
+    if (props) {
+      for (const [name, master_prop] of Object.entries(props)) {
+        const prop = item.component.props[name];
+        if (prop && master_prop.meta?.type === "content-element" && prop.content) {
+          result[name] = prop.content;
+        }
       }
     }
   }
