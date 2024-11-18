@@ -2,10 +2,13 @@ import { activateComp } from "crdt/load-comp-tree";
 import { loadPageTree } from "crdt/load-page-tree";
 import { loadPendingComponent } from "crdt/node/load-child-comp";
 import { active } from "logic/active";
+import { Sticker } from "lucide-react";
 import { fg } from "popup/flow/utils/flow-global";
 import { updateActiveCodeFromServer } from "popup/script/code/js/update-active-code";
 import { EdPopItemScript } from "popup/script/ed-item-script";
+import { useRef } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { createId } from "utils/script/create-id";
 import { useGlobal } from "../../utils/react/use-global";
 import { w } from "../../utils/types/general";
 import { isLocalhost } from "../../utils/ui/is-localhost";
@@ -20,10 +23,6 @@ import { EDGlobal } from "./logic/ed-global";
 import { EdPopCompGroup } from "./popup/comp/comp-group";
 import { EdPopCompPicker } from "./popup/comp/comp-picker";
 import { iconVSCode } from "./ui/icons";
-import { Sticker } from "lucide-react";
-import { useRef } from "react";
-import { IItem } from "utils/types/item";
-import { createId } from "utils/script/create-id";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -229,7 +228,7 @@ export const EdBase = () => {
                 </div>
               ) : (
                 <>
-                  {script.paned && script.open ? (
+                  {script.paned && script.open && p.viref.comp_props ? (
                     <EdPopItemScript />
                   ) : (
                     <div

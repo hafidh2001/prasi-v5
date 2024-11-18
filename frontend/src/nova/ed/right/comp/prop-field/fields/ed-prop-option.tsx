@@ -11,6 +11,7 @@ import { FNCompDef } from "utils/types/meta-fn";
 import { Dropdown } from "utils/ui/dropdown";
 import { EdPropCheckbox } from "./ed-prop-checkbox";
 import { extractString } from "./extract-value";
+import { waitUntil } from "prasi-utils";
 
 export const EdPropOption = (arg: {
   name: string;
@@ -27,7 +28,7 @@ export const EdPropOption = (arg: {
   const ui = p.ui.comp.prop;
   let prop = instance.props[name];
 
-  const resetValue = (input_value?: string) => {
+  const resetValue = async (input_value?: string) => {
     const src = field.meta?.optionsBuilt || field.meta?.options;
     if (src) {
       let value = input_value || prop?.value || "";
@@ -41,21 +42,28 @@ export const EdPropOption = (arg: {
       }
       local.value = value;
 
-      const comp_props = p.viref.comp_props[active.item_id];
-      const fn = new Function(...Object.keys(comp_props), `return ${src}`);
-      try {
-        local.options = fn(...Object.values(comp_props));
-
-        local.options = (local.options || []).map((e) => {
-          if (typeof e === "string") {
-            return { label: e, value: e };
-          }
-          return e;
-        });
-      } catch (e) {
-        console.warn(e);
+      let comp_props = p.viref.comp_props?.[active.item_id];
+      if (!comp_props) {
+        await waitUntil(() => p.viref.comp_props?.[active.item_id]);
+        comp_props = p.viref.comp_props?.[active.item_id];
       }
-      local.render();
+
+      if (comp_props) {
+        const fn = new Function(...Object.keys(comp_props), `return ${src}`);
+        try {
+          local.options = fn(...Object.values(comp_props));
+
+          local.options = (local.options || []).map((e) => {
+            if (typeof e === "string") {
+              return { label: e, value: e };
+            }
+            return e;
+          });
+        } catch (e) {
+          console.warn(e);
+        }
+        local.render();
+      }
     }
   };
   useEffect(() => {

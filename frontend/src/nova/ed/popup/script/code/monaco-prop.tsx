@@ -31,6 +31,7 @@ export const EdMonacoProp: FC<{
     width: undefined as undefined | number,
     height: undefined as undefined | number,
     loading: true,
+    reset_monaco: false,
   });
   const Editor = jscript.MonacoEditor;
   const ui = p.ui.comp.prop;
@@ -64,6 +65,17 @@ export const EdMonacoProp: FC<{
   }, []);
 
   useEffect(() => {
+    if (!local.reset_monaco) {
+      local.reset_monaco = true;
+      local.render();
+      setTimeout(() => {
+        local.reset_monaco = false;
+        local.render();
+      }, 100);
+    }
+  }, [p.ui.comp.prop.active]);
+
+  useEffect(() => {
     const el = div?.current;
     if (el) {
       const observer = new ResizeObserver((entries) => {
@@ -79,9 +91,9 @@ export const EdMonacoProp: FC<{
         observer.unobserve(el);
       };
     }
-  }, [div?.current]);
+  }, [div?.current, p.ui.comp.prop.active]);
 
-  if (!Editor || (div && (!local.width || !local.height)))
+  if (!Editor || local.reset_monaco || (div && (!local.width || !local.height)))
     return (
       <div className="relative w-full h-full items-center justify-center flex flex-1">
         <Loading backdrop={false} note="loading-monaco" />

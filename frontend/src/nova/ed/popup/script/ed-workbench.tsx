@@ -222,8 +222,8 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
             strokeWidth={0.5}
             className="-mr-5"
           />
-          Please select
-          <br /> a property to edit
+          Please select a property
+          <br /> to edit its code.
         </div>
       </>
     );
