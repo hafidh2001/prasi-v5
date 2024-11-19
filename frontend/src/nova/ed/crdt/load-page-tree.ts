@@ -73,21 +73,21 @@ export const loadPageTree = (
 
     if (active.comp_id && !active.comp) {
       waitUntil(() => active.comp).then(async () => {
-        await loadScriptModels(
+        await loadScriptModels({
           p,
-          content_tree.childs,
-          tree.script_models,
-          tree.var_items
-        );
+          nodes: tree.nodes,
+          script_models: tree.script_models,
+          var_items: tree.var_items,
+        });
         p.render();
       });
     } else {
-      await loadScriptModels(
+      await loadScriptModels({
         p,
-        content_tree.childs,
-        tree.script_models,
-        tree.var_items
-      );
+        nodes: tree.nodes,
+        script_models: tree.script_models,
+        var_items: tree.var_items,
+      });
     }
     await arg?.loaded(content_tree);
     tree.nodes = flattenTree(content_tree.childs, p.comp.loaded);
@@ -124,13 +124,13 @@ export const loadPageTree = (
     async reloadScriptModels() {
       const content_tree = immer.get();
       tree.script_models = {};
-
-      await loadScriptModels(
+      tree.nodes = flattenTree(content_tree.childs, p.comp.loaded);
+      await loadScriptModels({
         p,
-        content_tree.childs,
-        tree.script_models,
-        tree.var_items
-      );
+        nodes: tree.nodes,
+        script_models: tree.script_models,
+        var_items: tree.var_items,
+      });
     },
     before_update: null as null | ((do_update: () => void) => void),
     update(

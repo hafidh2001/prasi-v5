@@ -65,7 +65,6 @@ export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
                 const id = p.ui.comp.last_edit_ids.pop();
                 if (id) {
                   active.comp = await loadCompTree({
-                    sync: p.sync,
                     id: id,
                     p,
                     async on_update(ctree) {
@@ -85,7 +84,7 @@ export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
                 }
               }
 
-              p.render()
+              p.render();
               p.ui.editor.render();
             }
           }}

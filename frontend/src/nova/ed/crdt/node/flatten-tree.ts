@@ -2,6 +2,8 @@ import { NodeModel } from "@minoru/react-dnd-treeview";
 import { IItem } from "../../../../utils/types/item";
 import { EComp, PNode } from "../../logic/types";
 
+export type FlattenedNodes = ReturnType<typeof flattenTree>;
+
 export const flattenTree = (
   items: IItem[],
   comps: Record<string, EComp>,
@@ -51,6 +53,8 @@ export const flattenTree = (
 
     map[item.id] = {
       item,
+      path_ids: [...array.map((e) => e.item.id), item.id],
+      path_names: [...array.map((e) => e.item.name), item.name],
       parent: arg
         ? { id: arg.parent.id, component: arg.parent_comp }
         : undefined,
@@ -92,7 +96,11 @@ export const parsePropForJsx = (item: IItem, comps: Record<string, EComp>) => {
     if (props) {
       for (const [name, master_prop] of Object.entries(props)) {
         const prop = item.component.props[name];
-        if (prop && master_prop.meta?.type === "content-element" && prop.content) {
+        if (
+          prop &&
+          master_prop.meta?.type === "content-element" &&
+          prop.content
+        ) {
           result[name] = prop.content;
         }
       }
@@ -107,6 +115,7 @@ export const findNodeById = (
   comps: Record<string, EComp>,
   arg?: {
     parent: IItem;
+    array: IItem[];
     parent_comp?: {
       prop_name: string;
       comp_id: string;
@@ -118,6 +127,8 @@ export const findNodeById = (
     if (item.id === id)
       return {
         item,
+        path_ids: [...(arg?.array || []).map((e) => e.id), id],
+        path_names: [...(arg?.array || []).map((e) => e.name), item.name],
         parent: arg?.parent
           ? { id: arg.parent.id || "", component: arg.parent_comp }
           : undefined,
@@ -128,6 +139,7 @@ export const findNodeById = (
       for (const [name, pitem] of Object.entries(props)) {
         const found = findNodeById(id, [pitem], comps, {
           parent: item,
+          array: [...(arg?.array || []), item],
           parent_comp: {
             prop_name: name,
             instance_id: item.id,
@@ -138,7 +150,10 @@ export const findNodeById = (
       }
     }
     if (item.childs) {
-      const found = findNodeById(id, item.childs, comps, { parent: item });
+      const found = findNodeById(id, item.childs, comps, {
+        array: [...(arg?.array || []), item],
+        parent: item,
+      });
       if (found) {
         return found;
       }

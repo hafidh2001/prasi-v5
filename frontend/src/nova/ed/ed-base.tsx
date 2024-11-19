@@ -41,8 +41,6 @@ export const EdBase = () => {
         }
 
         page.prepare(content_tree);
-        
-
 
         p.render();
         p.ui.editor.render();

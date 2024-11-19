@@ -1,19 +1,193 @@
-import { active } from "logic/active";
 import { EComp } from "logic/types";
-import { monacoCreateModel } from "popup/script/code/js/create-model";
-import { migrateCode } from "popup/script/code/js/migrate-code";
-import { parseItemCode } from "popup/script/code/js/parse-item-code";
-import { SingleExportVar } from "popup/script/code/js/parse-item-types";
-import { waitUntil } from "prasi-utils";
-import { deepClone } from "utils/react/use-global";
-import { jscript } from "utils/script/jscript";
-import { IItem } from "utils/types/item";
-import { loopItem } from "./loop-item";
-import { rapidhash_fast as hash } from "./rapidhash";
-import { TreeVarItems } from "./var-items";
+import { FlattenedNodes } from "./flatten-tree";
 import { ViRef } from "vi/lib/store";
+import { jscript } from "utils/script/jscript";
+import { waitUntil } from "prasi-utils";
+import { rapidhash_fast as hash } from "./rapidhash";
+import { monacoCreateModel } from "popup/script/code/js/create-model";
+import { SingleExportVar } from "popup/script/code/js/parse-item-types";
+import { deepClone } from "utils/react/use-global";
+import { TreeVarItems } from "./var-items";
+import { parseItemCode } from "popup/script/code/js/parse-item-code";
+import { migrateCode } from "popup/script/code/js/migrate-code";
 
 const source_sym = Symbol("source");
+
+export const loadScriptModels = async (arg: {
+  nodes: FlattenedNodes;
+  p: {
+    comp: { loaded: Record<string, EComp>; pending: Set<string> };
+    viref: ViRef;
+  };
+  var_items: TreeVarItems;
+  script_models: Record<string, ScriptModel>;
+  comp_id?: string;
+}) => {
+  const { nodes, p, script_models, var_items, comp_id } = arg;
+
+  if (!jscript.loaded) {
+    await waitUntil(() => jscript.loaded);
+  }
+
+  for (const node of nodes.array) {
+    const item = node.item;
+    const comp_id = item.component?.id;
+    if (item.component && comp_id) {
+      const comp_def = p.comp.loaded[comp_id];
+      const master_props = comp_def?.content_tree?.component?.props || {};
+      const props = item.component?.props || {};
+      if (!item.component?.props) {
+        item.component.props = props;
+      }
+
+      for (const [name, master_prop] of Object.entries(master_props)) {
+        let prop = props[name];
+        if (name.endsWith("__")) continue;
+        const model_id = `${item.id}~${name}`;
+
+        if (!prop && master_prop.meta?.type !== "content-element") {
+          prop = {
+            value: master_prop.value,
+            valueBuilt: master_prop.valueBuilt,
+          };
+        }
+
+        let prop_value = prop.value || "";
+        if (master_prop.meta?.type === "content-element") {
+          prop_value = "null as ReactElement";
+        }
+
+        const source_hash = hash(prop_value).toString();
+        if (script_models[model_id]?.source_hash !== source_hash) {
+          script_models[model_id] = newScriptModel({
+            comp_def,
+            model_id,
+            path_ids: node.path_ids,
+            path_names: node.path_names,
+            title: `${item.name}.${name}`,
+            source_hash,
+            value: prop_value,
+          });
+        }
+
+        script_models[model_id].title = `${item.name}.${name}`;
+        if (master_prop.meta?.type === "content-element") {
+          if (!prop && master_prop.content) {
+            prop = { content: deepClone(master_prop.content) };
+            props[name] = prop;
+          }
+        }
+      }
+    }
+
+    if (item.vars) {
+      const vars = Object.entries(item.vars);
+      if (vars.length > 0) {
+        for (const [k, v] of vars) {
+          var_items[k] = {
+            item_id: item.id,
+            get item() {
+              return item;
+            },
+            get var() {
+              return v;
+            },
+          };
+        }
+      }
+    }
+
+    const value = item.adv?.js || "";
+    const source_hash = hash(value).toString();
+    if (script_models[item.id]?.source_hash !== source_hash) {
+      script_models[item.id] = newScriptModel({
+        model_id: item.id,
+        path_ids: node.path_ids,
+        path_names: node.path_names,
+        title: `${item.name}.${name}`,
+        source_hash,
+        value,
+      });
+    }
+    script_models[item.id].title = item.name;
+  }
+
+  for (const [k, v] of Object.entries(script_models)) {
+    if (v.source && !v.ready) {
+      parseItemCode(v);
+      if (v.local) {
+        v.exports[v.local.name] = {
+          name: v.local.name,
+          value: v.local.value,
+          type: "local",
+        };
+      }
+    }
+  }
+
+  for (const [k, v] of Object.entries(script_models)) {
+    if (v.source && !v.ready) {
+      try {
+        v.source = await jscript.prettier.format?.(
+          migrateCode(v, script_models, comp_id)
+        );
+      } catch (e) {
+        console.error(
+          `[ERROR] When Formatting Code\n${v.title} ~> ${v.id}\n\n`,
+          e
+        );
+      }
+      v.ready = true;
+    }
+  }
+
+  return script_models;
+};
+
+const newScriptModel = ({
+  model_id,
+  comp_def,
+  value,
+  title,
+  path_names,
+  prop_name,
+  source_hash,
+  path_ids,
+}: {
+  model_id: string;
+  comp_def?: EComp;
+  value: string;
+  title: string;
+  path_names: string[];
+  source_hash: string;
+  prop_name?: string;
+  path_ids: string[];
+}): ScriptModel => {
+  return {
+    id: model_id,
+    comp_def,
+    get source() {
+      return this[source_sym];
+    },
+    set source(value: string) {
+      this[source_sym] = value;
+      this.source_hash = hash(value).toString();
+      this.ready = false;
+    },
+    [source_sym]: value,
+    title,
+    path_names: path_names,
+    prop_name,
+    path_ids,
+    name: `file:///${model_id}.tsx`,
+    local: { name: "", value: "", auto_render: false },
+    loop: { name: "", list: "" },
+    extracted_content: "",
+    source_hash,
+    ready: false,
+    exports: {},
+  };
+};
 
 export type ScriptModel = {
   source: string;
@@ -33,165 +207,4 @@ export type ScriptModel = {
   [source_sym]: string;
   ready: boolean;
   exports: Record<string, SingleExportVar>;
-};
-
-export const loadScriptModels = async (
-  p: {
-    comp: { loaded: Record<string, EComp>; pending: Set<string> };
-    viref: ViRef;
-    
-  },
-  items: IItem[],
-  result: Record<string, ScriptModel>,
-  var_items: TreeVarItems,
-  comp_id?: string
-) => {
-  if (!jscript.loaded) {
-    await waitUntil(() => jscript.loaded);
-  }
-
-  await loopItem(
-    items,
-    { active_comp_id: active.comp_id, comps: p.comp.loaded },
-    async ({ item, path_name, path_id }) => {
-      if (item.component?.id) {
-        const comp_id = item.component.id;
-        const comp_def = p.comp.loaded[comp_id];
-        const props = comp_def?.content_tree?.component?.props || {};
-
-        for (const [name, master_prop] of Object.entries(props)) {
-          let prop = item.component.props?.[name];
-
-          if (name.endsWith("__")) continue;
-          const file = `${item.id}~${name}`;
-
-          if (!prop && master_prop.meta?.type !== "content-element") {
-            prop = {
-              value: master_prop.value,
-              valueBuilt: master_prop.valueBuilt,
-            };
-          }
-          let prop_value = prop.value || "";
-          if (master_prop.meta?.type === "content-element") {
-            prop_value = "null as ReactElement";
-          }
-
-          const source_hash = hash(prop_value).toString();
-
-          if (result[file]?.source_hash !== source_hash) {
-            result[file] = {
-              id: item.id,
-              comp_def,
-              get source() {
-                return this[source_sym];
-              },
-              set source(value: string) {
-                this[source_sym] = value;
-                this.source_hash = hash(value).toString();
-                this.ready = false;
-              },
-              [source_sym]: prop_value,
-              title: `${item.name}.${name}`,
-              path_names: path_name,
-              prop_name: name,
-              path_ids: path_id,
-              name: `file:///${file}.tsx`,
-              local: { name: "", value: "", auto_render: false },
-              loop: { name: "", list: "" },
-              extracted_content: "",
-              source_hash,
-              ready: false,
-              exports: {},
-            };
-          }
-
-          result[file].title = `${item.name}.${name}`;
-          if (master_prop.meta?.type === "content-element") {
-            if (!prop && master_prop.content) {
-              prop = { content: deepClone(master_prop.content) };
-              item.component.props[name] = prop;
-            }
-          }
-        }
-      }
-      if (item.vars) {
-        const vars = Object.entries(item.vars);
-        if (vars.length > 0) {
-          for (const [k, v] of vars) {
-            var_items[k] = {
-              item_id: item.id,
-              get item() {
-                return item;
-              },
-              get var() {
-                return v;
-              },
-            };
-          }
-        }
-      }
-
-      const value = item.adv?.js || "";
-      const source_hash = hash(value).toString();
-      if (result[item.id]?.source_hash !== source_hash) {
-        result[item.id] = {
-          id: item.id,
-          [source_sym]: value,
-          get source() {
-            return this[source_sym];
-          },
-          set source(value: string) {
-            this[source_sym] = value;
-            this.source_hash = hash(value).toString();
-            this.ready = false;
-          },
-          name: `file:///${item.id}.tsx`,
-          path_names: path_name,
-          path_ids: path_id,
-          title: item.name,
-          loop: { name: "", list: "" },
-          local: { name: "", value: "", auto_render: false },
-          extracted_content: "",
-          source_hash,
-          ready: false,
-          exports: {},
-        };
-      }
-      result[item.id].title = item.name;
-    }
-  );
-
-  for (const [k, v] of Object.entries(result)) {
-    if (v.source && !v.ready) {
-      parseItemCode(v);
-      if (v.local) {
-        v.exports[v.local.name] = {
-          name: v.local.name,
-          value: v.local.value,
-          type: "local",
-        };
-      }
-    }
-  }
-
-  // if (p.viref) {
-  //   console.log(result, p.viref.item_parents);
-  // }
-  for (const [k, v] of Object.entries(result)) {
-    if (v.source && !v.ready) {
-      try {
-        v.source = await jscript.prettier.format?.(
-          migrateCode(v, result, comp_id)
-        );
-      } catch (e) {
-        console.error(
-          `[ERROR] When Formatting Code\n${v.title} ~> ${v.id}\n\n`,
-          e
-        );
-      }
-      v.ready = true;
-    }
-  }
-
-  return result;
 };

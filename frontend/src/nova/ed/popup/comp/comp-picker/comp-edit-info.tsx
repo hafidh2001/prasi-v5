@@ -61,7 +61,6 @@ export const EdCompEditInfo: FC<{
               if (confirm(`Rename ${item.name} ~> ` + local.name) && p.sync) {
                 const tree = await loadCompTree({
                   p,
-                  sync: p.sync,
                   id: item.id,
                   activate: false,
                 });

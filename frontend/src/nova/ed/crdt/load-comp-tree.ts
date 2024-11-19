@@ -14,6 +14,7 @@ import { bind } from "./lib/immer-yjs";
 import { findNodeById, flattenTree } from "./node/flatten-tree";
 import { loadScriptModels, ScriptModel } from "./node/load-script-models";
 import { TreeVarItems } from "./node/var-items";
+import { FNCompDef } from "utils/types/meta-fn";
 
 export type CompTree = ReturnType<typeof internalLoadCompTree>;
 
@@ -54,20 +55,20 @@ export const loadCompTree = (opt: {
   };
   id: string;
   on_update?: (comp: EBaseComp["content_tree"]) => void;
-  on_component?: (item: IItem) => void;
-  on_load?: (value: any) => void;
+  on_child_component?: (item: IItem) => void;
   activate?: boolean;
 }) => {
   if (opt.activate !== false) {
     active.comp_id = opt.id;
   }
   return new Promise<ReturnType<typeof internalLoadCompTree>>((done) => {
-    internalLoadCompTree({ ...opt, on_load: done });
+    internalLoadCompTree(opt, done);
   });
 };
 
 export const internalLoadCompTree = (
-  opt: Parameters<typeof loadCompTree>[0]
+  opt: Parameters<typeof loadCompTree>[0],
+  done: (res: any) => void
 ) => {
   const p = opt.p;
   const comp_id = opt.id;
@@ -76,7 +77,7 @@ export const internalLoadCompTree = (
   const data = doc.getMap("data");
   const immer = bind<EComp["content_tree"]>(data);
 
-  const state = {
+  const internal_tree = {
     loaded: false,
   };
   const wsurl = new URL(location.href);
@@ -86,42 +87,49 @@ export const internalLoadCompTree = (
 
   doc.on("update", async (update, origin) => {
     const content_tree = immer.get();
+    const props = content_tree.component?.props || {};
+    const jsx_props = {} as Record<string, FNCompDef>;
+    for (const [k, v] of Object.entries(props)) {
+      if (v.meta?.type === "content-element") jsx_props[k] = v;
+    }
+    const has_jsx_props = Object.keys(jsx_props).length > 0;
     component.nodes = flattenTree([content_tree], p.comp.loaded, {
       comp_id,
       visit(item) {
-        if (item.component?.id && opt?.on_component) {
-          opt.on_component(item);
+        if (has_jsx_props && item.adv?.js) {
+          console.log(has_jsx_props, item);
+        }
+        if (item.component?.id && opt?.on_child_component) {
+          opt.on_child_component(item);
         }
       },
     });
 
-    fg.prasi.updated_outside = true;
-
     if (active.comp_id === comp_id && !active.comp) {
       waitUntil(() => active.comp).then(async () => {
-        await loadScriptModels(
-          opt.p,
-          [content_tree],
-          component.script_models,
-          component.var_items,
-          opt.id
-        );
+        await loadScriptModels({
+          p: opt.p,
+          nodes: component.nodes,
+          script_models: component.script_models,
+          var_items: component.var_items,
+          comp_id: opt.id,
+        });
         opt.p.render();
       });
     } else {
-      await loadScriptModels(
-        opt.p,
-        [content_tree],
-        component.script_models,
-        component.var_items,
-        opt.id
-      );
+      await loadScriptModels({
+        p: opt.p,
+        nodes: component.nodes,
+        script_models: component.script_models,
+        var_items: component.var_items,
+        comp_id: opt.id,
+      });
     }
 
     if (opt.on_update) opt.on_update(content_tree);
-    if (!state.loaded) {
-      state.loaded = true;
-      opt.on_load?.(component);
+    if (!internal_tree.loaded) {
+      internal_tree.loaded = true;
+      done(component);
     }
   });
 
@@ -158,13 +166,14 @@ export const internalLoadCompTree = (
     var_items: {} as TreeVarItems,
     async reloadScriptModels() {
       const content_tree = immer.get();
-      await loadScriptModels(
-        opt.p,
-        [content_tree],
-        component.script_models,
-        component.var_items,
-        opt.id
-      );
+      component.nodes = flattenTree([content_tree], p.comp.loaded);
+      await loadScriptModels({
+        p: opt.p,
+        nodes: component.nodes,
+        script_models: component.script_models,
+        var_items: component.var_items,
+        comp_id: opt.id,
+      });
     },
     before_update: null as null | ((do_update: () => void) => void),
     update(

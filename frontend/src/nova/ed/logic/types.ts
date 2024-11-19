@@ -41,6 +41,8 @@ export type PropFieldKind =
 
 export type PNode = {
   item: IItem;
+  path_ids: string[];
+  path_names: string[];
   parent?: {
     id: string;
     component?: {

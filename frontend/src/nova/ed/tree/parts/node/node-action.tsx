@@ -196,7 +196,6 @@ export const EdTreeAction = ({
                     }
 
                     active.comp = await loadCompTree({
-                      sync: p.sync,
                       id: comp.id,
                       p,
                       async on_update(ctree) {

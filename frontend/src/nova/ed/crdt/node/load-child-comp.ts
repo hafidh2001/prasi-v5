@@ -33,7 +33,13 @@ const decorateJsxPass = async (p: PG, comp: EBaseComp) => {
     }
   }
   if (should_scan_for_jsx_pass) {
-    loadCompTree({ p, id: comp.id, activate: false });
+    const tree = await loadCompTree({
+      p,
+      id: comp.id,
+      activate: false,
+      on_update(comp) {},
+    });
+    tree.destroy();
   }
 };
 

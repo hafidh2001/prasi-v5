@@ -119,7 +119,6 @@ export const EdCompProp = () => {
               const tree = await loadCompTree({
                 id: local.comp_id,
                 p,
-                sync: p.sync,
                 activate: false,
               });
               tree.update("Prep Component", ({ tree }) => {

@@ -35,7 +35,7 @@ export const edActionNewComp = (
           }
         });
 
-        p.comp.loaded[comp.id] = decorateEComp({
+        p.comp.loaded[comp.id] = decorateEComp(p, {
           content_tree: item,
           id: comp.id,
           id_component_group: group_id,
@@ -45,7 +45,6 @@ export const edActionNewComp = (
         p.render();
 
         active.comp = await loadCompTree({
-          sync: p.sync,
           id: comp.id,
           p,
           on_update(ctree) {
