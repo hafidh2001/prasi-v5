@@ -61,6 +61,7 @@ export const initPage = (p: PG) => ({
       JSON.stringify([...comp_ids]) !==
       JSON.stringify(content_tree.component_ids);
 
+
     if (
       should_update_usage ||
       Object.keys(pending_update_prop).length > 0 ||

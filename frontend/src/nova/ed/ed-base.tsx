@@ -29,8 +29,6 @@ export const EdBase = () => {
   prasiKeybinding(p);
 
   if (!p.page.tree && p.page.cur && p.sync) {
-    const comp_ids = new Set<string>();
-    const uncleaned_comp_ids = new Set<string>();
     p.page.pending_instances = {};
     const page = initPage(p);
     p.page.tree = loadPageTree(p, p.sync, p.page.cur.id, {
@@ -54,9 +52,9 @@ export const EdBase = () => {
           const comp_id = item.component.id;
           p.page.pending_instances[item.id] = item;
           if (item.component?.instances) {
-            uncleaned_comp_ids.add(item.id);
+            page.uncleaned_comp_ids.add(item.id);
           }
-          comp_ids.add(comp_id);
+          page.comp_ids.add(comp_id);
           if (!p.comp.loaded[comp_id] && !p.comp.pending.has(comp_id)) {
             p.comp.pending.add(comp_id);
           }

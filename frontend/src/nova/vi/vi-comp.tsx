@@ -71,6 +71,7 @@ export const ViComp: FC<{
     }
   }
   const instance = instances[item.id];
+
   if (!instance) return loading_component;
 
   let instance_id: string | undefined = item.id;
@@ -79,9 +80,8 @@ export const ViComp: FC<{
   }
 
   return (
-    //@ts-ignore
     <ViItem
-      item={instance}
+      item={instance as any}
       is_layout={is_layout}
       div_props={div_props}
       instance_id={instance_id}
