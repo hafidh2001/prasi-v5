@@ -3,12 +3,9 @@ import { loadPageTree } from "crdt/load-page-tree";
 import { loadPendingComponent } from "crdt/node/load-child-comp";
 import { active } from "logic/active";
 import { Sticker } from "lucide-react";
-import { fg } from "popup/flow/utils/flow-global";
-import { updateActiveCodeFromServer } from "popup/script/code/js/update-active-code";
 import { EdPopItemScript } from "popup/script/ed-item-script";
 import { useRef } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import { createId } from "utils/script/create-id";
 import { useGlobal } from "../../utils/react/use-global";
 import { w } from "../../utils/types/general";
 import { isLocalhost } from "../../utils/ui/is-localhost";
@@ -23,6 +20,7 @@ import { EDGlobal } from "./logic/ed-global";
 import { EdPopCompGroup } from "./popup/comp/comp-group";
 import { EdPopCompPicker } from "./popup/comp/comp-picker";
 import { iconVSCode } from "./ui/icons";
+import { initPage } from "crdt/init-page";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -34,6 +32,7 @@ export const EdBase = () => {
     const comp_ids = new Set<string>();
     const uncleaned_comp_ids = new Set<string>();
     p.page.pending_instances = {};
+    const page = initPage(p);
     p.page.tree = loadPageTree(p, p.sync, p.page.cur.id, {
       async loaded(content_tree) {
         await loadPendingComponent(p);
@@ -41,100 +40,10 @@ export const EdBase = () => {
           activateComp(p, active.comp_id);
         }
 
-        const pending_update_prop = {} as Record<string, Record<string, any>>;
-        const push_update_prop = (id: string, key: string, value: any) => {
-          if (!pending_update_prop[id]) {
-            pending_update_prop[id] = {};
-          }
-          pending_update_prop[id][key] = value;
-        };
+        page.prepare(content_tree);
+        
 
-        for (const [id, item] of Object.entries(p.page.pending_instances)) {
-          if (item.component) {
-            const instance_props = item.component.props;
-            const comp = p.comp.loaded[item.component.id];
-            const master_props = comp?.content_tree.component?.props;
-            if (comp && master_props) {
-              for (const [k, master] of Object.entries(master_props)) {
-                const prop = instance_props[k];
-                const type = master.meta?.type || "text";
 
-                if (
-                  type !== "content-element" &&
-                  (!prop || Object.keys(prop || {}).length > 2)
-                ) {
-                  push_update_prop(id, k, {
-                    value: prop?.value || master?.value,
-                    valueBuilt: prop?.valueBuilt || master?.valueBuilt,
-                  });
-                }
-
-                if (
-                  type === "content-element" &&
-                  (!prop ||
-                    Object.keys(prop || {}).length > 1 ||
-                    !prop?.content)
-                ) {
-                  push_update_prop(id, k, {
-                    content: prop?.content ||
-                      master.content || {
-                        id: createId(),
-                        name: k,
-                        type: "item",
-                        childs: [],
-                      },
-                  });
-                }
-              }
-            }
-          }
-        }
-
-        const should_update_usage =
-          JSON.stringify([...comp_ids]) !==
-          JSON.stringify(content_tree.component_ids);
-
-        if (
-          should_update_usage ||
-          Object.keys(pending_update_prop).length > 0
-        ) {
-          p.page.tree.update("Page Component Usage", ({ tree, findNode }) => {
-            if (should_update_usage) tree.component_ids = [...comp_ids];
-            for (const [k, v] of Object.entries(pending_update_prop)) {
-              if (pending_update_prop[k]) {
-                const node = findNode(k);
-                const props = node?.item.component?.props;
-                if (node && props) {
-                  for (const [name, prop] of Object.entries(v)) {
-                    props[name] = prop;
-                  }
-                }
-              }
-            }
-          });
-        }
-
-        fg.prasi.updated_outside = true;
-        p.page.cur.content_tree = content_tree;
-        if (!p.mode) p.mode = "desktop";
-        if (["mobile", "desktop"].includes(content_tree.responsive)) {
-          p.mode = content_tree.responsive;
-        }
-
-        if (p.ui.popup.script.open) {
-          updateActiveCodeFromServer(p);
-        }
-
-        if (uncleaned_comp_ids.size > 0) {
-          p.page.tree.update("Upgrading Page", ({ findNode }) => {
-            for (const id of uncleaned_comp_ids) {
-              const node = findNode(id);
-              if (node && node.item.component) {
-                delete node.item.component.instances;
-              }
-            }
-          });
-        }
         p.render();
         p.ui.editor.render();
         setTimeout(() => {

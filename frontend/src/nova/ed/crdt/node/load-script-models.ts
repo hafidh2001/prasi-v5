@@ -5,13 +5,13 @@ import { migrateCode } from "popup/script/code/js/migrate-code";
 import { parseItemCode } from "popup/script/code/js/parse-item-code";
 import { SingleExportVar } from "popup/script/code/js/parse-item-types";
 import { waitUntil } from "prasi-utils";
+import { deepClone } from "utils/react/use-global";
 import { jscript } from "utils/script/jscript";
 import { IItem } from "utils/types/item";
 import { loopItem } from "./loop-item";
 import { rapidhash_fast as hash } from "./rapidhash";
 import { TreeVarItems } from "./var-items";
-import { PG } from "logic/ed-global";
-import { deepClone } from "utils/react/use-global";
+import { ViRef } from "vi/lib/store";
 
 const source_sym = Symbol("source");
 
@@ -36,7 +36,11 @@ export type ScriptModel = {
 };
 
 export const loadScriptModels = async (
-  p: { comp: { loaded: Record<string, EComp>; pending: Set<string> } },
+  p: {
+    comp: { loaded: Record<string, EComp>; pending: Set<string> };
+    viref: ViRef;
+    
+  },
   items: IItem[],
   result: Record<string, ScriptModel>,
   var_items: TreeVarItems,
@@ -100,6 +104,7 @@ export const loadScriptModels = async (
               exports: {},
             };
           }
+
           result[file].title = `${item.name}.${name}`;
           if (master_prop.meta?.type === "content-element") {
             if (!prop && master_prop.content) {
@@ -168,6 +173,10 @@ export const loadScriptModels = async (
       }
     }
   }
+
+  // if (p.viref) {
+  //   console.log(result, p.viref.item_parents);
+  // }
   for (const [k, v] of Object.entries(result)) {
     if (v.source && !v.ready) {
       try {

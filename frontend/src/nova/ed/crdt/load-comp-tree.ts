@@ -7,6 +7,7 @@ import { waitUntil } from "prasi-utils";
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "utils/sync/client";
 import { IItem } from "utils/types/item";
+import { ViRef } from "vi/lib/store";
 import { WebsocketProvider } from "y-websocket";
 import { Doc } from "yjs";
 import { bind } from "./lib/immer-yjs";
@@ -26,7 +27,6 @@ export const activateComp = async (p: PG, comp_id: string) => {
   if (p.sync) {
     active.comp = await loadCompTree({
       p,
-      sync: p.sync,
       id: id,
       async on_update(ctree) {
         if (!p.comp.loaded[id]) {
@@ -49,8 +49,9 @@ export const loadCompTree = (opt: {
   p: {
     comp: { loaded: Record<string, EComp>; pending: Set<string> };
     render: () => void;
+    viref: ViRef;
+    sync: undefined | null | ReturnType<typeof createClient>;
   };
-  sync: ReturnType<typeof createClient>;
   id: string;
   on_update?: (comp: EBaseComp["content_tree"]) => void;
   on_component?: (item: IItem) => void;
@@ -70,7 +71,7 @@ export const internalLoadCompTree = (
 ) => {
   const p = opt.p;
   const comp_id = opt.id;
-  const sync = opt.sync;
+  const sync = opt.p.sync;
   const doc = new Doc();
   const data = doc.getMap("data");
   const immer = bind<EComp["content_tree"]>(data);
@@ -145,10 +146,10 @@ export const internalLoadCompTree = (
       };
     },
     undo: (count = 1) => {
-      sync.comp.undo(comp_id, count);
+      sync?.comp.undo(comp_id, count);
     },
     redo: (count = 1) => {
-      sync.comp.redo(comp_id, count);
+      sync?.comp.redo(comp_id, count);
     },
     listen: (fn: () => void) => {
       return immer.subscribe(fn);
@@ -193,7 +194,7 @@ export const internalLoadCompTree = (
             });
           });
         }
-        sync.comp.pending_action(comp_id, action_name);
+        sync?.comp.pending_action(comp_id, action_name);
 
         fn({
           tree,

@@ -97,6 +97,10 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
     >
       <div
         tabIndex={0}
+        onDoubleClick={() => {
+          p.ui.popup.script.open = !p.ui.popup.script.open;
+          p.render();
+        }}
         onPointerEnter={() => {
           if (local.right_click) return;
           if (p.ui.tree.tooltip.open) {

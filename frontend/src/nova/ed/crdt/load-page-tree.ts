@@ -17,6 +17,7 @@ import { loadScriptModels, ScriptModel } from "./node/load-script-models";
 import { TreeVarItems } from "./node/var-items";
 import { active } from "logic/active";
 import { waitUntil } from "prasi-utils";
+import { ViRef } from "vi/lib/store";
 
 export type PageTree = ReturnType<typeof loadPageTree>;
 
@@ -30,6 +31,7 @@ export const loadPageTree = (
       page: { saved: boolean; saving: any };
       topbar: { render: () => void };
     };
+    viref: ViRef;
     render: () => void;
   },
   sync: ReturnType<typeof createClient>,

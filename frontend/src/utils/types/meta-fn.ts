@@ -37,6 +37,7 @@ export type FNCompDef = {
   onChange?: string;
   onChangeBuilt?: string;
   jsxCalledBy?: string[];
+  jsxPass?: Record<string, string>;
   content?: IItem;
   visible?: string;
   meta?: FNCompMeta;

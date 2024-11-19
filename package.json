@@ -22,7 +22,7 @@
     "prisma"
   ],
   "dependencies": {
-    "@types/bun": "^1.1.12",
+    "@types/bun": "^1.1.13",
     "@types/lodash.transform": "^4.6.9",
     "@types/lodash.uniq": "^4.5.9",
     "lodash.transform": "^4.6.0",

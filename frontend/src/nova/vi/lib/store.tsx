@@ -38,6 +38,8 @@ const viRef = {
   resetLocal: () => {},
 
   vscode_exports: {} as Record<string, any>,
+
+  jsx_pass: {} as Record<string, Record<string, string>>,
 };
 export type ViRef = typeof viRef;
 

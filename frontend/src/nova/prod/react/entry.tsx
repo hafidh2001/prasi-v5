@@ -44,6 +44,7 @@ export const PrasiEntry = () => {
                       overflow-x: hidden;
                       overflow-y: auto;
                       bottom: 0px;
+                      contain: strict;
                     }
                     @media (max-width: 1279px) {
                       left: 0px;
@@ -53,10 +54,7 @@ export const PrasiEntry = () => {
                       overflow-y: auto;
                     }
                   `
-                : "inset-0 overflow-auto",
-              css`
-                contain: strict;
-              `
+                : "inset-0 overflow-auto"
             )}
           >
             <ProdRouter />
