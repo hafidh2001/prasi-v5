@@ -10,6 +10,7 @@ import { deepClone } from "utils/react/use-global";
 import { TreeVarItems } from "./var-items";
 import { parseItemCode } from "popup/script/code/js/parse-item-code";
 import { migrateCode } from "popup/script/code/js/migrate-code";
+import { FNCompDef } from "utils/types/meta-fn";
 
 const source_sym = Symbol("source");
 
@@ -28,12 +29,19 @@ export const loadScriptModels = async (arg: {
   if (!jscript.loaded) {
     await waitUntil(() => jscript.loaded);
   }
+  const jsx_props = {} as Record<string, FNCompDef>;
+  if (comp_id && nodes.array[0].item.component?.id === comp_id) {
+    const props = nodes.array[0].item.component?.props;
+    for (const [k, v] of Object.entries(props)) {
+      if (v.meta?.type === "content-element") jsx_props[k] = v;
+    }
+  }
 
   for (const node of nodes.array) {
     const item = node.item;
-    const comp_id = item.component?.id;
-    if (item.component && comp_id) {
-      const comp_def = p.comp.loaded[comp_id];
+    if (item.component) {
+      const item_comp_id = item.component?.id;
+      const comp_def = p.comp.loaded[item_comp_id];
       const master_props = comp_def?.content_tree?.component?.props || {};
       const props = item.component?.props || {};
       if (!item.component?.props) {
@@ -63,6 +71,7 @@ export const loadScriptModels = async (arg: {
             comp_def,
             model_id,
             path_ids: node.path_ids,
+            prop_name: name,
             path_names: node.path_names,
             title: `${item.name}.${name}`,
             source_hash,
@@ -114,8 +123,8 @@ export const loadScriptModels = async (arg: {
 
   for (const [k, v] of Object.entries(script_models)) {
     if (v.source && !v.ready) {
-      parseItemCode(v);
-      if (v.local) {
+      parseItemCode(v, jsx_props);
+      if (v.local && v.local.name) {
         v.exports[v.local.name] = {
           name: v.local.name,
           value: v.local.value,
@@ -128,9 +137,8 @@ export const loadScriptModels = async (arg: {
   for (const [k, v] of Object.entries(script_models)) {
     if (v.source && !v.ready) {
       try {
-        v.source = await jscript.prettier.format?.(
-          migrateCode(v, script_models, comp_id)
-        );
+        const migrated = migrateCode(v, script_models, comp_id);
+        v.source = await jscript.prettier.format?.(migrated);
       } catch (e) {
         console.error(
           `[ERROR] When Formatting Code\n${v.title} ~> ${v.id}\n\n`,

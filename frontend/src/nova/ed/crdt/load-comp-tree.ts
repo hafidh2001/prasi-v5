@@ -87,18 +87,9 @@ export const internalLoadCompTree = (
 
   doc.on("update", async (update, origin) => {
     const content_tree = immer.get();
-    const props = content_tree.component?.props || {};
-    const jsx_props = {} as Record<string, FNCompDef>;
-    for (const [k, v] of Object.entries(props)) {
-      if (v.meta?.type === "content-element") jsx_props[k] = v;
-    }
-    const has_jsx_props = Object.keys(jsx_props).length > 0;
     component.nodes = flattenTree([content_tree], p.comp.loaded, {
       comp_id,
       visit(item) {
-        if (has_jsx_props && item.adv?.js) {
-          console.log(has_jsx_props, item);
-        }
         if (item.component?.id && opt?.on_child_component) {
           opt.on_child_component(item);
         }

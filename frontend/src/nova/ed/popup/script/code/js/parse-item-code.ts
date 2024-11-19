@@ -7,8 +7,12 @@ import { traverse } from "utils/script/parser/traverse";
 import { parseItemLocal } from "./parse-item-local";
 import { parseItemPassPropAndLoop } from "./parse-item-passprop";
 import { replaceString } from "./replace-string";
+import { FNCompDef } from "utils/types/meta-fn";
 
-export const parseItemCode = (model: ScriptModel) => {
+export const parseItemCode = (
+  model: ScriptModel,
+  jsx_props: Record<string, FNCompDef>
+) => {
   const replacements: Array<{
     start: number;
     end: number;
@@ -31,7 +35,15 @@ export const parseItemCode = (model: ScriptModel) => {
   if (ast) {
     const exports = model.exports;
 
+    const jsx_names = Object.keys(jsx_props);
+
     traverse(ast.program, {
+      // Identifier(node, parent) {
+      //   const name = (node as any).name;
+      //   if (jsx_names.includes(name)) {
+      //     console.log(exports);
+      //   }
+      // },
       ExportDefaultDeclaration: (node) => {
         if (
           node.declaration.type === "ArrowFunctionExpression" &&
