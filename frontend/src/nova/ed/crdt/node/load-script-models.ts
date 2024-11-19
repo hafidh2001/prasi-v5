@@ -9,8 +9,13 @@ import { SingleExportVar } from "popup/script/code/js/parse-item-types";
 import { deepClone } from "utils/react/use-global";
 import { TreeVarItems } from "./var-items";
 import { parseItemCode } from "popup/script/code/js/parse-item-code";
-import { migrateCode } from "popup/script/code/js/migrate-code";
+import {
+  generateRegion,
+  migrateCode,
+  removeRegion,
+} from "popup/script/code/js/migrate-code";
 import { FNCompDef } from "utils/types/meta-fn";
+import { active } from "logic/active";
 
 const source_sym = Symbol("source");
 
@@ -113,7 +118,7 @@ export const loadScriptModels = async (arg: {
         model_id: item.id,
         path_ids: node.path_ids,
         path_names: node.path_names,
-        title: `${item.name}.${name}`,
+        title: `${item.name}`,
         source_hash,
         value,
       });
@@ -121,9 +126,23 @@ export const loadScriptModels = async (arg: {
     script_models[item.id].title = item.name;
   }
 
+  const has_jsx_props = Object.keys(jsx_props).length > 0;
   for (const [k, v] of Object.entries(script_models)) {
     if (v.source && !v.ready) {
-      parseItemCode(v, jsx_props);
+      parseItemCode(
+        v,
+        !has_jsx_props
+          ? {}
+          : {
+              Identifier(node: any) {
+                const name = node.name;
+                const prop = jsx_props[name];
+                if (prop) {
+                  // console.log(k, v.source, name);
+                }
+              },
+            }
+      );
       if (v.local && v.local.name) {
         v.exports[v.local.name] = {
           name: v.local.name,
@@ -134,18 +153,33 @@ export const loadScriptModels = async (arg: {
     }
   }
 
-  for (const [k, v] of Object.entries(script_models)) {
-    if (v.source && !v.ready) {
+  for (const [k, model] of Object.entries(script_models)) {
+    if (model.source && !model.ready) {
       try {
-        const migrated = migrateCode(v, script_models, comp_id);
-        v.source = await jscript.prettier.format?.(migrated);
+        if (!model.already_migrated) {
+          const migrated = migrateCode(model, script_models, comp_id);
+          model.source = await jscript.prettier.format?.(migrated);
+        } else {
+          const code = model.source;
+          const lines = code.split("\n");
+          const region_end = lines.findIndex((line) =>
+            line.startsWith("// #endregion")
+          );
+          const main_code = lines.slice(region_end + 1).join("\n");
+          const region_code = generateRegion(model, script_models);
+
+          model.source = `\
+${region_code}
+
+${main_code}`;
+        }
       } catch (e) {
         console.error(
-          `[ERROR] When Formatting Code\n${v.title} ~> ${v.id}\n\n`,
+          `[ERROR] When Formatting Code\n${model.title} ~> ${model.id}\n\n`,
           e
         );
       }
-      v.ready = true;
+      model.ready = true;
     }
   }
 
@@ -171,6 +205,13 @@ const newScriptModel = ({
   prop_name?: string;
   path_ids: string[];
 }): ScriptModel => {
+  let _value = value;
+  let already_migrated = false;
+  if (value.startsWith("// #region")) {
+    _value = removeRegion(value);
+    already_migrated = true;
+  }
+
   return {
     id: model_id,
     comp_def,
@@ -182,7 +223,7 @@ const newScriptModel = ({
       this.source_hash = hash(value).toString();
       this.ready = false;
     },
-    [source_sym]: value,
+    [source_sym]: _value,
     title,
     path_names: path_names,
     prop_name,
@@ -194,6 +235,7 @@ const newScriptModel = ({
     source_hash,
     ready: false,
     exports: {},
+    already_migrated,
   };
 };
 
@@ -215,4 +257,5 @@ export type ScriptModel = {
   [source_sym]: string;
   ready: boolean;
   exports: Record<string, SingleExportVar>;
+  already_migrated: boolean;
 };

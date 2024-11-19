@@ -96,26 +96,13 @@ export const internalLoadCompTree = (
       },
     });
 
-    if (active.comp_id === comp_id && !active.comp) {
-      waitUntil(() => active.comp).then(async () => {
-        await loadScriptModels({
-          p: opt.p,
-          nodes: component.nodes,
-          script_models: component.script_models,
-          var_items: component.var_items,
-          comp_id: opt.id,
-        });
-        opt.p.render();
-      });
-    } else {
-      await loadScriptModels({
-        p: opt.p,
-        nodes: component.nodes,
-        script_models: component.script_models,
-        var_items: component.var_items,
-        comp_id: opt.id,
-      });
-    }
+    await loadScriptModels({
+      p: opt.p,
+      nodes: component.nodes,
+      script_models: component.script_models,
+      var_items: component.var_items,
+      comp_id: opt.id,
+    });
 
     if (opt.on_update) opt.on_update(content_tree);
     if (!internal_tree.loaded) {
@@ -157,7 +144,14 @@ export const internalLoadCompTree = (
     var_items: {} as TreeVarItems,
     async reloadScriptModels() {
       const content_tree = immer.get();
-      component.nodes = flattenTree([content_tree], p.comp.loaded);
+      component.nodes = flattenTree([content_tree], p.comp.loaded, {
+        comp_id,
+        visit(item) {
+          if (item.component?.id && opt?.on_child_component) {
+            opt.on_child_component(item);
+          }
+        },
+      });
       await loadScriptModels({
         p: opt.p,
         nodes: component.nodes,

@@ -2,8 +2,8 @@ import { ScriptModel } from "crdt/node/load-script-models";
 import get from "lodash.get";
 import trim from "lodash.trim";
 import { cutCode } from "utils/script/jscript";
-import { JSXElement, JSXElementName } from "utils/script/parser/oxc-types";
 import { SingleExportVar } from "./parse-item-types";
+import type { JSXElement, JSXElementName } from "@oxc-parser/wasm";
 
 export const parseItemLocal = ({
   name,
@@ -44,8 +44,7 @@ export const parseItemLocal = ({
               if (attr.value.expression.type === "ComputedMemberExpression") {
                 const name = get(
                   exports,
-                  cutCode(model.source, attr.value.expression.object, -2) +
-                    ".name"
+                  cutCode(model.source, attr.value.expression.object) + ".name"
                 ) as unknown as string;
 
                 if (name) {

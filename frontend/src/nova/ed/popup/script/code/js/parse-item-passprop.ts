@@ -1,11 +1,11 @@
 import { ScriptModel } from "crdt/node/load-script-models";
-import {
+import { SingleExportVar } from "./parse-item-types";
+import { cutCode } from "utils/script/jscript";
+import type {
   JSXAttribute,
   JSXElement,
   JSXElementName,
-} from "utils/script/parser/oxc-types";
-import { SingleExportVar } from "./parse-item-types";
-import { cutCode } from "utils/script/jscript";
+} from "@oxc-parser/wasm";
 
 export const parseItemPassPropAndLoop = ({
   name,
@@ -37,7 +37,7 @@ export const parseItemPassPropAndLoop = ({
             prop_name === "list" &&
             attr.value.type === "JSXExpressionContainer"
           ) {
-            val = cutCode(model.source, attr.value.expression, -2);
+            val = cutCode(model.source, attr.value.expression);
           }
         }
       }
@@ -88,7 +88,7 @@ const getTypings = (attr: JSXAttribute, model: ScriptModel) => {
   } else if (expr.type === "NumericLiteral") {
     value = "number";
   } else if (expr.type === "TSAsExpression") {
-    value = cutCode(model.source, expr.typeAnnotation, -2);
+    value = cutCode(model.source, expr.typeAnnotation);
   }
   return value;
 };
@@ -106,7 +106,7 @@ const getValue = (attr: JSXAttribute, model: ScriptModel) => {
   } else if (expr.type === "NumericLiteral") {
     value = expr.value;
   } else if (expr.type === "TSAsExpression") {
-    value = cutCode(model.source, expr.typeAnnotation, -2);
+    value = cutCode(model.source, expr.typeAnnotation);
   }
   return value;
 };

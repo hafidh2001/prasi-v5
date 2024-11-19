@@ -1,4 +1,4 @@
-import { Expression } from "@oxc-parser/wasm";
+import type { Expression } from "@oxc-parser/wasm";
 import get from "lodash.get";
 import { cutCode, jscript } from "utils/script/jscript";
 

@@ -40,22 +40,9 @@ export const migrateCode = (
   const code = model.source;
   const { local, loop } = model;
 
-  if (code.startsWith("// #region") && !model.prop_name) {
-    const lines = code.split("\n");
-    const region_end = lines.findIndex((line) =>
-      line.startsWith("// #endregion")
-    );
-    const main_code = lines.slice(region_end + 1).join("\n");
-    const region_code = generateRegion(model, models);
-
-    return `\
-${region_code}
-${main_code}`;
-  }
-
   let inject = "";
 
-  if (local.name) {
+  if (local.name && local.value) {
     inject = `
 
 export const ${local.name} = defineLocal({
@@ -65,7 +52,7 @@ export const ${local.name} = defineLocal({
 `;
   }
 
-  if (loop) {
+  if (loop && loop.name) {
     inject = `
 
 export const ${loop.name} = defineLoop({
@@ -122,7 +109,7 @@ const injectCompProps = (model: ScriptModel) => {
   return inject;
 };
 
-const generateRegion = (
+export const generateRegion = (
   model: ScriptModel,
   models: Record<string, ScriptModel>,
   opt?: {

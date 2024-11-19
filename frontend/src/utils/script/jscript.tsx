@@ -4,9 +4,7 @@ import type { formatMessages, transform } from "esbuild-wasm";
 import type estree from "prettier/plugins/estree";
 import type ts from "prettier/plugins/typescript";
 import type Prettier from "prettier/standalone";
-import { SimpleVisitors } from "./parser/acorn-types";
 // import { traverse } from "./parser/traverse";
-import { walk } from "estree-walker";
 
 import {
   configureMonacoTailwindcss,
@@ -35,7 +33,7 @@ export const jscript = {
   },
   getTailwindStyles: null as null | ((contents: string[]) => Promise<string>),
   loaded: false,
-  traverse: (code: string, visitors: SimpleVisitors<any>) => {
+  traverse: (code: string, visitors: Record<string, (arg: any) => void>) => {
     const ast = jscript.parse?.(code, {
       sourceFilename: "script.tsx",
       sourceType: "script",
@@ -78,7 +76,12 @@ export const jscript = {
           })(),
           (async () => {
             const oxc = await import("@oxc-parser/wasm");
-            (oxc.default as any)({});
+            await (oxc as any).default(
+              new URL(
+                "@oxc-parser/wasm/web/oxc_parser_wasm_bg.wasm",
+                import.meta.url
+              )
+            );
             jscript.parse = oxc.parseSync;
           })(),
           (async () => {
