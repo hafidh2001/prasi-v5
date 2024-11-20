@@ -17,6 +17,8 @@ import {
   useRole,
 } from "@floating-ui/react";
 import * as React from "react";
+import { createPortal } from "react-dom";
+import { useLocal } from "utils/react/use-local";
 
 interface PopoverOptions {
   initialOpen?: boolean;
@@ -219,6 +221,7 @@ export function Popover({
   popoverClassName,
   arrow,
   border = "1px solid black",
+  preload,
   // onChange,
   ...restOptions
 }: {
@@ -229,20 +232,12 @@ export function Popover({
   content?: React.ReactNode;
   arrow?: boolean;
   asChild?: boolean;
+  preload?: boolean;
 } & PopoverOptions) {
   const popover = usePopover({ modal, ...restOptions });
   const last = React.useRef({ open: popover.open });
   let _content = content;
   if (!content) _content = <div className={"w-[300px] h-[150px]"}></div>;
-
-  // if (onChange) {
-  //   React.useEffect(() => {
-  //     if (popover.open !== last.current.open) {
-  //       last.current.open = popover.open;
-  //       onChange(popover.open);
-  //     }
-  //   }, [popover.open]);
-  // }
 
   return (
     <PopoverContext.Provider value={popover}>
@@ -260,6 +255,7 @@ export function Popover({
         {children}
       </PopoverTrigger>
       <PopoverContent
+        preloadContent={preload}
         className={cx(
           popoverClassName
             ? popoverClassName
@@ -326,12 +322,15 @@ export const PopoverTrigger = React.forwardRef<
 
 export const PopoverContent = React.forwardRef<
   HTMLDivElement,
-  React.HTMLProps<HTMLDivElement>
+  React.HTMLProps<HTMLDivElement> & { preloadContent?: boolean }
 >(function PopoverContent(props, propRef) {
   const { context: floatingContext, ...context } = usePopoverContext();
   const ref = useMergeRefs([context.refs.setFloating, propRef]);
 
-  if (!floatingContext.open) return null;
+  if (!floatingContext.open && !props.preloadContent) return null;
+
+  const divProps = context.getFloatingProps(props as any);
+  delete divProps.preloadContent;
 
   const _content = (
     <div
@@ -342,11 +341,30 @@ export const PopoverContent = React.forwardRef<
       }}
       aria-labelledby={context.labelId}
       aria-describedby={context.descriptionId}
-      {...context.getFloatingProps(props as any)}
+      {...divProps}
     >
       {props.children}
     </div>
   );
+
+  if (props.preloadContent) {
+    if (!floatingContext.open) {
+      return createPortal(
+        <div
+          className={cx(
+            "popover-preload",
+            css`
+              display: none;
+              pointer-events: none;
+            `
+          )}
+        >
+          {_content}
+        </div>,
+        document.body
+      );
+    }
+  }
 
   const content = context.autoFocus ? (
     <FloatingFocusManager context={floatingContext} modal={context.modal}>

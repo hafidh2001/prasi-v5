@@ -7,7 +7,7 @@ export const compressed = (
   opt?: { headers?: any }
 ) => {
   let content = body;
-  if (typeof body !== "string") {
+  if (typeof body !== "string" && !(body instanceof Buffer)) {
     content = JSON.stringify(body);
   }
 

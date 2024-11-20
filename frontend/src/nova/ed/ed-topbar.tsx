@@ -3,18 +3,13 @@ import set from "lodash.set";
 import { active } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import {
-  BookOpenText,
-  Cloudy,
   ExternalLink,
   LayoutTemplate,
   Leaf,
-  Newspaper,
   PanelLeftOpen,
   PanelRightOpen,
   ScrollText,
-  Settings2,
-  TreeDeciduous,
-  Trees,
+  Trees
 } from "lucide-react";
 import { EdSave } from "popup/build/ed-save";
 import { closeEditor } from "popup/script/ed-workbench";
@@ -364,7 +359,7 @@ const Button: FC<{
   );
 
   if (popover) {
-    return <Popover content={popover.content}>{content}</Popover>;
+    return <Popover preload content={popover.content}>{content}</Popover>;
   }
 
   return content;

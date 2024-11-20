@@ -7,7 +7,9 @@ import { validate } from "uuid";
 import { ViComps } from "vi/lib/types";
 import { ViPage } from "vi/vi-page";
 import { prasi } from "./prasi";
-
+import { useGlobal } from "utils/react/use-global";
+import { EDGlobal } from "logic/ed-global";
+import { unpack } from "msgpackr";
 const page_cache = {} as Record<string, IRoot>;
 const component_cache = {} as ViComps;
 
@@ -16,6 +18,7 @@ export const CPrasi: FC<{ id: string; size?: string; name: string }> = ({
   size,
   name,
 }) => {
+  const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal(
     {
       root: page_cache[id],
@@ -25,32 +28,13 @@ export const CPrasi: FC<{ id: string; size?: string; name: string }> = ({
     async () => {
       local.load = async () => {
         if (validate(id)) {
-          const page = await _db.page.findFirst({
-            where: { id },
-            select: { content_tree: true },
+          const bin = await _api._cprasi(id, {
+            exclude: Object.keys(component_cache),
           });
-          if (page) {
-            local.root = page.content_tree as any;
-            page_cache[id] = local.root;
-            if (local.root.component_ids) {
-              const pending_ids = local.root.component_ids.filter(
-                (e) => !component_cache[e]
-              );
-              if (pending_ids.length > 0) {
-                const comps = await _db.component.findMany({
-                  where: {
-                    id: {
-                      in: pending_ids,
-                    },
-                    deleted_at: null,
-                  },
-                  select: { id: true, content_tree: true },
-                });
-                for (const comp of comps) {
-                  component_cache[comp.id] = comp.content_tree as any;
-                }
-              }
-            }
+          local.root = bin.page.content_tree;
+          page_cache[id] = local.root;
+          for (const comp of bin.comps) {
+            component_cache[comp.id] = comp.content_tree as any;
           }
         }
 

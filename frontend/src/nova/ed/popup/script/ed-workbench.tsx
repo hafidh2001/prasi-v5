@@ -405,7 +405,7 @@ const CompTitleInstance = () => {
   const ui = p.ui.comp.prop;
   if (item && item.component?.id) {
     return (
-      <div className="flex text-xs p-2 space-x-1 items-center">
+      <div className="flex text-xs p-2 space-x-1 items-center select-none">
         <div className="bg-blue-700 text-white text-[11px] px-1 mr-1">
           INSTANCE
         </div>
