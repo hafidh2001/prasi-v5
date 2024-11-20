@@ -59,11 +59,6 @@ export const parseItemCode = (model: ScriptModel, visitors: any) => {
                 if (model.extracted_content.startsWith("=")) {
                   model.extracted_content = cutCode(model.source, d.init);
                 }
-
-                exports[d.id.name] = {
-                  name: d.id.name,
-                  type: "propname",
-                };
               }
             } else {
               if (
@@ -87,14 +82,29 @@ export const parseItemCode = (model: ScriptModel, visitors: any) => {
                       if (local_value?.type === "ObjectProperty") {
                         model.local.value = cutCode(
                           model.source,
-                          local_value.value
+                          local_value.value,
+                          { default: "{}", should_start_with: "{" }
                         );
+                      }
+                      const render_mode = value.properties.find(
+                        (e: any) =>
+                          e.type === "ObjectProperty" &&
+                          e.key.type === "Identifier" &&
+                          e.key.name === "render_mode"
+                      );
+                      if (render_mode?.type === "ObjectProperty") {
+                        const res = cutCode(model.source, render_mode.value, {
+                          should_start_with: '"',
+                          default: "manual",
+                        });
+                        model.local.auto_render = res === '"auto"';
                       }
                     }
 
                     exports[d.id.name] = {
                       name: d.id.name,
                       type: "local",
+                      render_mode: model.local.auto_render ? "auto" : "manual",
                       value: model.local.value,
                     };
                   } else if (d.init.callee.name === "defineLoop") {

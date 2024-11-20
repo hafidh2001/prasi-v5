@@ -1,6 +1,9 @@
 import { ScriptModel } from "crdt/node/load-script-models";
+import { SingleExportVar } from "./parse-item-types";
 
-export const generatePassPropAndLoop = (model: ScriptModel) => {
+export const generatePassPropAndLoop = (model: {
+  exports: Record<string, SingleExportVar>;
+}) => {
   let result = "";
 
   const vars: Record<string, string> = {};
@@ -36,16 +39,15 @@ export const generatePassPropAndLoop = (model: ScriptModel) => {
     result = `
 ${
   pass_prop.map.value
-    ? `export const pass_prop_list = ${pass_prop.map.value}`
+    ? `export const pass_prop_list = ${pass_prop.map.value};`
     : ""
-};
+}
 export const pass_prop = {
 ${Object.entries(vars)
   .map((e) => `${e[0]}: null as unknown as ${e[1]}`)
   .join(",\n")}
 }
-const PassProp: React.FC<{ key?: any; children: any } & typeof pass_prop & Record<string, any>> = null as any
-;`;
+const PassProp: React.FC<{ key?: any; children: any } & typeof pass_prop & Record<string, any>> = null as any;`;
   }
 
   return result;

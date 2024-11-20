@@ -1,6 +1,10 @@
 export type SingleExportVar =
-  | { name: string; type: "local"; value: string }
-  | { name: string; type: "propname"; value?: string }
+  | {
+      name: string;
+      type: "local";
+      value: string;
+      render_mode: "auto" | "manual";
+    }
   | {
       type: "passprop";
       name: string;

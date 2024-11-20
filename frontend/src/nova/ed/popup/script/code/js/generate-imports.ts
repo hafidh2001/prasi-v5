@@ -1,23 +1,23 @@
 import { ScriptModel } from "crdt/node/load-script-models";
 import { active } from "logic/active";
+import { MergeProp } from "./migrate-code";
 
 export const generateImports = (
   model: ScriptModel,
-  models: Record<string, ScriptModel>,
-  debug?: boolean
+  models: Record<string, ScriptModel>
 ) => {
-  const merged = mergeParentVars(model, models, debug);
-  const imports = {} as Record<string, { name: string; type: string }[]>;
+  const merged = mergeParentVars(model, models);
+  const mapped = {} as Record<string, { name: string; type: string }[]>;
 
   for (const [k, v] of Object.entries(merged)) {
     if (v.id === model.name) continue;
-    if (!imports[v.id]) {
-      imports[v.id] = [];
+    if (!mapped[v.id]) {
+      mapped[v.id] = [];
     }
-    imports[v.id].push({ name: k, type: v.type });
+    mapped[v.id].push({ name: k, type: v.type });
   }
   const result: string[] = [];
-  for (const [id, v] of Object.entries(imports)) {
+  for (const [id, v] of Object.entries(mapped)) {
     if (models[id]) {
       if (v.find((e) => e.type === "passprop")) {
         result.push(
@@ -52,27 +52,17 @@ const importMap = (e: { name: string; type: string }) => {
 
 export const mergeParentVars = (
   model: ScriptModel,
-  models: Record<string, ScriptModel>,
+  script_models: Record<string, ScriptModel>,
   debug?: boolean
-) => {
+): MergeProp => {
   const variables = {} as Record<string, { id: string; type: string }>;
-  const models_map = {} as Record<string, string[]>;
-
-  for (const [k, v] of Object.entries(models)) {
-    const id = k.split("~")[0];
-    const prop_name = k.split("~")[1];
-    if (!models_map[id]) models_map[id] = [];
-    if (prop_name) {
-      models_map[id].push(prop_name);
-    }
-  }
 
   for (const id of model.path_ids) {
     if (
       model.id !== id ||
       (model.id === id && active.comp?.snapshot.id === id)
     ) {
-      const m = models[id];
+      const m = script_models[id];
 
       if (m) {
         for (const e of Object.values(m.exports)) {
@@ -81,9 +71,9 @@ export const mergeParentVars = (
         }
       }
 
-      if (models_map[id]?.length >= 1) {
-        for (const prop_name of models_map[id]) {
-          const m = models[`${id}~${prop_name}`];
+      if ((m.prop_names || []).length > 0) {
+        for (const prop_name of m.prop_names || []) {
+          const m = script_models[`${id}~${prop_name}`];
 
           if (m) {
             for (const e of Object.values(m.exports)) {

@@ -1,3 +1,4 @@
+import { SingleExportVar } from "popup/script/code/js/parse-item-types";
 import { IItem } from "./item";
 export type FNLayout = {
   dir: "row" | "col" | "row-reverse" | "col-reverse";
@@ -36,8 +37,7 @@ export type FNCompDef = {
   is_name?: boolean;
   onChange?: string;
   onChangeBuilt?: string;
-  jsxCalledBy?: string[];
-  jsxPass?: Record<string, string>;
+  jsxPass?: { hash: string; exports: Record<string, SingleExportVar> };
   content?: IItem;
   visible?: string;
   meta?: FNCompMeta;

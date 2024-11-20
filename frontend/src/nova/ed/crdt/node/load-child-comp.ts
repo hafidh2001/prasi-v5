@@ -37,7 +37,6 @@ const decorateJsxPass = async (p: PG, comp: EBaseComp) => {
       p,
       id: comp.id,
       activate: false,
-      on_update(comp) {},
     });
     tree.destroy();
   }

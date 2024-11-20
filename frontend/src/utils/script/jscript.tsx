@@ -202,7 +202,18 @@ export const jscript = {
   },
 };
 
-export const cutCode = (code: string, pos: any, offset?: number) => {
-  return code.substring(pos.start + (offset || 0), pos.end + (offset || 0));
-  return code.substring(pos.start, pos.end);
+export const cutCode = (
+  code: string,
+  pos: any,
+  arg?: { should_start_with: string; default: string }
+) => {
+  let res = code.substring(pos.start, pos.end);
+  if (!arg) {
+    return res;
+  }
+
+  if (res.startsWith(arg.should_start_with)) return res;
+  res = code.substring(pos.start - 2, pos.end - 2);
+  if (res.startsWith(arg.should_start_with)) return res;
+  return arg.default;
 };

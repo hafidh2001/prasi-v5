@@ -96,13 +96,30 @@ export const internalLoadCompTree = (
       },
     });
 
-    await loadScriptModels({
+    const { pending_items, jsx_exports_changed } = await loadScriptModels({
       p: opt.p,
       nodes: component.nodes,
       script_models: component.script_models,
       var_items: component.var_items,
       comp_id: opt.id,
     });
+
+    if (Object.keys(jsx_exports_changed).length > 0) {
+      component.update("Update JSX Exports", ({ tree }) => {
+        const props = tree.component?.props;
+        if (props) {
+          for (const [k, v] of Object.entries(jsx_exports_changed)) {
+            if (props[k]) {
+              props[k].jsxPass = v;
+            }
+          }
+        }
+      });
+    }
+
+    if (p.comp.loaded[opt.id]) {
+      p.comp.loaded[opt.id].content_tree = content_tree;
+    }
 
     if (opt.on_update) opt.on_update(content_tree);
     if (!internal_tree.loaded) {
