@@ -1,5 +1,11 @@
 import { DeepReadonly } from "popup/flow/runtime/types";
-import { isValidElement } from "react";
+import {
+  cloneElement,
+  isValidElement,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { IItem } from "utils/types/item";
 import { ViMergedProps } from "vi/lib/types";
 
@@ -17,42 +23,44 @@ export const createViLoop = (
       key: (arg: { item: any; index: number }) => any;
     };
   }) => {
+    const internal_item_ref = useRef({ map: new WeakMap(), count: 0 });
+    const item_ref = internal_item_ref.current;
+    const item_map = internal_item_ref.current.map;
+
+    const [, render] = useState({});
+    useEffect(() => {
+      if (item_ref.count > 0) {
+        internal_item_ref.current = { map: new WeakMap(), count: 0 };
+        render({});
+      }
+    }, [children]);
+
     if (!list || (list && !Array.isArray(list))) return null;
 
     return list.map((item, index) => {
-      const new_key = key ? key({ item, index }) : index;
-      const _merged = {
-        ...merged,
-        [name]: item,
-        [`${name}_idx`]: index,
-        __internal: {
-          ...merged.__internal,
-          [name]: { from_id: item.id, type: "loop" },
-          [`${name}_idx`]: { from_id: item.id, type: "loop" },
-        },
-      };
-
-      if (isValidElement(children)) {
-        if (isWritable(children, "key")) {
-          children.key = new_key;
-          if (children.props) (children.props as any).merged = _merged;
-          else {
-            children.props = { merged: _merged };
-          }
-          return children;
-        }
-
-        return {
-          ...children,
-          key: new_key,
-          props: { ...(children.props || {}), merged: _merged },
+      if (item_map.has(item)) return item_map.get(item);
+      else {
+        const new_key = key ? key({ item, index }) : index;
+        const _merged = {
+          ...merged,
+          [name]: item,
+          [`${name}_idx`]: index,
+          __internal: {
+            ...merged.__internal,
+            [name]: { from_id: item.id, type: "loop" },
+            [`${name}_idx`]: { from_id: item.id, type: "loop" },
+          },
         };
+
+        const result = cloneElement(children, {
+          key: new_key,
+          ...(children.props || {}),
+          merged: _merged,
+        });
+        item_ref.count++;
+        item_map.set(item, result);
+        return result;
       }
     });
   };
 };
-
-function isWritable<T extends Object>(obj: T, key: keyof T) {
-  const desc = Object.getOwnPropertyDescriptor(obj, key) || {};
-  return Boolean(desc.writable);
-}

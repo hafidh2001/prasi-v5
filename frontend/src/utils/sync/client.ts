@@ -26,6 +26,7 @@ export const clientStartSync = (arg: {
           conn_id: string;
         };
         if (msg.action === "connected") {
+          console.log("🚀 Prasi Connected");
           if (arg.p.sync) {
             arg.p.sync.ws = ws;
             arg.p.sync.ping = setInterval(() => {
@@ -33,22 +34,14 @@ export const clientStartSync = (arg: {
             }, 90 * 1000);
             arg.p.render();
           } else {
-            arg.connected(
-              createClient(
-                ws,
-                arg.p,
-                msg.conn_id,
-                setInterval(() => {
-                  ws.send(pack({ action: "ping" }));
-                }, 90 * 1000)
-              )
-            );
+            arg.connected(createClient(ws, arg.p, msg.conn_id));
           }
         }
       }
     };
     ws.onclose = () => {
       arg.p.render();
+      if (arg.p.sync?.ping) clearTimeout(arg.p.sync.ping);
       setTimeout(() => {
         reconnect();
       }, 3000);
@@ -63,15 +56,10 @@ const send = (ws: WebSocket, msg: any) => {
   }
 };
 
-export const createClient = (
-  ws: WebSocket,
-  p: any,
-  conn_id: string,
-  ping: any
-) => ({
+export const createClient = (ws: WebSocket, p: any, conn_id: string) => ({
   conn_id,
   ws,
-  ping,
+  ping: null as null | Timer,
   site: {
     load: async (id: string) => {
       return (await _api.site_load(id, { conn_id: p.user.conn_id })) as ESite;

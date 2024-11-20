@@ -59,7 +59,7 @@ export const EdTreeTopBar = () => {
                 if (!p.comp.loaded[comp_id]) {
                   const comps = await p.sync.comp.load([comp_id]);
                   for (const comp of Object.values(comps)) {
-                    p.comp.loaded[comp.id] = decorateEComp(comp);
+                    p.comp.loaded[comp.id] = decorateEComp(p, comp);
                   }
                 }
                 const comp = p.comp.loaded[comp_id];

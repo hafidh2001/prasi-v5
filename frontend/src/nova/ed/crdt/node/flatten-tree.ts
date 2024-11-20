@@ -33,25 +33,7 @@ export const flattenTree = (
   for (const item of items) {
     if (opt?.visit) opt.visit(item);
 
-    if (item.component && opt?.comp_id !== item.component.id) {
-      const props = parsePropForJsx(item, comps);
-      for (const [name, pitem] of Object.entries(props)) {
-        flattenTree([pitem], comps, opt, {
-          parent: item,
-          parent_comp: {
-            is_jsx_root: true,
-            prop_name: name,
-            instance_id: item.id,
-            comp_id: item.component.id,
-          },
-          models: models,
-          array,
-          map,
-        });
-      }
-    }
-
-    map[item.id] = {
+    const current = {
       item,
       path_ids: [...array.map((e) => e.item.id), item.id],
       path_names: [...array.map((e) => e.item.name), item.name],
@@ -59,7 +41,7 @@ export const flattenTree = (
         ? { id: arg.parent.id, component: arg.parent_comp }
         : undefined,
     };
-
+    map[item.id] = current;
     models.push({
       id: item.id,
       parent: arg?.parent.id || "root",
@@ -75,13 +57,31 @@ export const flattenTree = (
     ) {
       flattenTree(item.childs, comps, opt, {
         parent: item,
-        models: models,
         parent_comp: arg?.parent_comp
           ? { ...arg?.parent_comp, is_jsx_root: false }
           : undefined,
+        models: models,
         array,
         map,
       });
+    }
+
+    if (item.component && opt?.comp_id !== item.component.id) {
+      const props = parsePropForJsx(item, comps);
+      for (const [name, pitem] of Object.entries(props)) {
+        flattenTree([pitem], comps, opt, {
+          parent: item,
+          parent_comp: {
+            is_jsx_root: true,
+            prop_name: name,
+            instance_id: item.id,
+            comp_id: item.component.id,
+          },
+          models,
+          array,
+          map,
+        });
+      }
     }
   }
 

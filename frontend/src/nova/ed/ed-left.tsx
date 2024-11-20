@@ -8,17 +8,12 @@ import { useGlobal } from "../../utils/react/use-global";
 import { Tooltip } from "../../utils/ui/tooltip";
 import { active } from "./logic/active";
 import { EDGlobal } from "./logic/ed-global";
-import { EdSitePicker } from "./popup/site/site-picker";
 import { EdCompTree } from "./tree/ed-comp-tree";
 import { EdPageTree } from "./tree/ed-page-tree";
 import { EdTreeSearch } from "./tree/parts/search";
-import { EdTreeTopBar } from "./tree/parts/top-bar";
+import { EdTreeTopBar } from "./tree/parts/tree-top-bar";
 import {
-  iconHistory,
-  iconLogout,
-  iconRebuildLarge,
-  iconServer,
-  iconVSCode,
+  iconHistory
 } from "./ui/icons";
 import { TopBtn } from "./ui/top-btn";
 

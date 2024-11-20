@@ -5,7 +5,7 @@ import { monacoCreateModel } from "popup/script/code/js/create-model";
 import {
   generateRegion,
   JSX_PASS,
-  migrateCode
+  migrateCode,
 } from "popup/script/code/js/migrate-code";
 import { parseItemCode } from "popup/script/code/js/parse-item-code";
 import { SingleExportVar } from "popup/script/code/js/parse-item-types";
@@ -57,11 +57,10 @@ export const loadScriptModels = async (arg: {
       pending_items.add(node.item.id);
       continue;
     }
+    const item_comp_id = item.component?.id!;
+    let comp_def = p.comp.loaded[item_comp_id];
 
-    if (item.component) {
-      const item_comp_id = item.component?.id;
-      let comp_def = p.comp.loaded[item_comp_id];
-
+    if (item.component && item_comp_id) {
       if (!comp_def && item_comp_id === comp_id) {
         p.comp.loaded[item_comp_id] = decorateEComp(p as PG, {
           content_tree: item,
@@ -156,6 +155,7 @@ export const loadScriptModels = async (arg: {
         }
       }
       script_models[item.id] = newScriptModel({
+        comp_def,
         model_id: item.id,
         path_ids: node.path_ids,
         path_names: node.path_names,
@@ -200,7 +200,7 @@ export const loadScriptModels = async (arg: {
     }
   }
 
-  for (const [k, model] of Object.entries(script_models)) {
+  for (const [_, model] of Object.entries(script_models)) {
     if (model_prop_names[model.id]) {
       model.prop_names = model_prop_names[model.id];
     }
@@ -234,11 +234,17 @@ ${main_code}`);
 
   const jsx_exports = {} as Record<
     string,
-    { hash: string; exports: Record<string, SingleExportVar> }
+    {
+      hash: string;
+      exports: Record<string, SingleExportVar & { item_id: string }>;
+    }
   >;
   const jsx_exports_changed = {} as Record<
     string,
-    { hash: string; exports: Record<string, SingleExportVar> }
+    {
+      hash: string;
+      exports: Record<string, SingleExportVar & { item_id: string }>;
+    }
   >;
   for (const [name, prop] of Object.entries(jsx_pass)) {
     for (const [from_id, vars] of Object.entries(prop)) {
@@ -249,7 +255,7 @@ ${main_code}`);
           if (!jsx_exports[name]) {
             jsx_exports[name] = { hash: "", exports: {} };
           }
-          jsx_exports[name].exports[k] = v;
+          jsx_exports[name].exports[k] = { ...v, item_id: from_id };
         }
       }
     }
@@ -330,7 +336,10 @@ export type ScriptModel = {
   name: string;
   id: string;
   path_names: string[];
-  jsx_pass?: { hash: string; exports: Record<string, SingleExportVar> };
+  jsx_pass?: {
+    hash: string;
+    exports: Record<string, SingleExportVar & { item_id: string }>;
+  };
   prop_name?: string;
   prop_names?: string[];
   prop_value?: string;

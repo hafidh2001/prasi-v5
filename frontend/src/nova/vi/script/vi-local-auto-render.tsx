@@ -14,6 +14,7 @@ export const ViLocalAutoRender = (opt: {
   local_value: Record<string, any>;
   local_render: Record<string, () => void>;
   merged: ViMergedProps;
+  deps?: any[];
 }) => {
   const { local_render, local_value, item, value, effect, children } = opt;
 

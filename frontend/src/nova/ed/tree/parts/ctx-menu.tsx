@@ -20,6 +20,7 @@ import { edActionWrap, edActionWrapInComp } from "../action/wrap";
 import { edActionUnwrap } from "../action/unwrap";
 import { edActionAdd } from "../action/add";
 import { Plus } from "lucide-react";
+
 export const EdTreeCtxMenu = ({
   raw: raw,
   event,
@@ -53,9 +54,24 @@ export const EdTreeCtxMenu = ({
   const item = raw?.data?.item as IItem;
   const type = item?.type;
   const comp = (item as IItem).component as FNComponent | undefined;
-  const isComponent = comp?.id;
-  const isActiveComponent = active.comp && active.comp?.id === comp?.id;
+  let comp_id = comp?.id;
+
+  const nodes = getActiveTree(p).nodes;
+  if (!nodes.map[item.id]) {
+    let parent = p.viref.item_parents[item.id];
+    while (parent) {
+      if (nodes.map[parent] && nodes.map[parent].item.component?.id) {
+        comp_id = nodes.map[parent].item.component!.id;
+        break;
+      }
+
+      parent = p.viref.item_parents[parent];
+    }
+  }
+
+  const isActiveComponent = active.comp && active.comp?.id === comp_id;
   const isJSXProp = raw?.data?.parent?.component?.is_jsx_root;
+
   if (!item) {
     return (
       <Menu mouseEvent={event} onClose={onClose}>
@@ -69,7 +85,7 @@ export const EdTreeCtxMenu = ({
 
   return (
     <Menu mouseEvent={event} onClose={onClose}>
-      {!comp?.id && (
+      {!comp_id && (
         <MenuItem
           hotKey={<Plus size={12} strokeWidth={2.5} />}
           label="Add Item"
@@ -79,7 +95,7 @@ export const EdTreeCtxMenu = ({
           }}
         />
       )}
-      {type === "text" && (
+      {type === "text" && !comp_id && (
         <MenuItem
           label="Convert Text → Item"
           onClick={() => {
@@ -93,9 +109,10 @@ export const EdTreeCtxMenu = ({
       )}
 
       {type === "item" &&
+        !comp_id &&
         (!item.childs || (item.childs && item.childs.length === 0)) && (
           <MenuItem
-            label="Convert Item → Text"
+            label={"Convert Item → Text" + comp_id}
             onClick={() => {
               getActiveTree(p).update("Convert Item → Text", ({ findNode }) => {
                 const node = findNode(item.id);
@@ -105,13 +122,13 @@ export const EdTreeCtxMenu = ({
             }}
           />
         )}
-      {type === "item" && comp?.id && !isActiveComponent && (
+      {type === "item" && comp_id && !isActiveComponent && (
         <MenuItem
           label="Detach Component"
           onClick={() => edActionDetach(p, item)}
         />
       )}
-      {type === "item" && !comp?.id && !isJSXProp && (
+      {type === "item" && !comp_id && !isJSXProp && (
         <MenuItem
           label="Create Component"
           onClick={(e) => edActionNewComp(p, item, e)}
@@ -125,7 +142,13 @@ export const EdTreeCtxMenu = ({
         <MenuItem
           label="Rename"
           hotKey={"↵"}
-          onClick={() => edActionRename(p, item)}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onClick={(e) => {
+            edActionRename(p, item);
+          }}
         />
       )}
       {!isJSXProp && (
@@ -149,8 +172,7 @@ export const EdTreeCtxMenu = ({
       )}
       {local.allowCopy &&
         local.allowPaste &&
-        (!isComponent ||
-          (isComponent && (item as IItem).component?.props.child)) && (
+        (!comp_id || (comp_id && (item as IItem).component?.props.child)) && (
           <MenuItem label="Paste" onClick={() => edActionPaste(p, item)} />
         )}
       {["text", "item"].includes(item.type) && !isJSXProp && (
@@ -166,7 +188,7 @@ export const EdTreeCtxMenu = ({
         />
       )}
 
-      {["item"].includes(item.type) && !isJSXProp && !isComponent && (
+      {["item"].includes(item.type) && !isJSXProp && !comp_id && (
         <MenuItem
           label="Unwrap"
           onClick={() => edActionUnwrap(p, item as IItem)}

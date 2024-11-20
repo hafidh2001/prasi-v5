@@ -37,7 +37,10 @@ export type FNCompDef = {
   is_name?: boolean;
   onChange?: string;
   onChangeBuilt?: string;
-  jsxPass?: { hash: string; exports: Record<string, SingleExportVar> };
+  jsxPass?: {
+    hash: string;
+    exports: Record<string, SingleExportVar & { item_id: string }>;
+  };
   content?: IItem;
   visible?: string;
   meta?: FNCompMeta;

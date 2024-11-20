@@ -1,5 +1,6 @@
 import { NodeRender } from "@minoru/react-dnd-treeview";
 import { useEffect } from "react";
+import { Popover } from "utils/ui/popover";
 import { useGlobal } from "../../../../../utils/react/use-global";
 import { useLocal } from "../../../../../utils/react/use-local";
 import { activateItem, active } from "../../../logic/active";
@@ -11,8 +12,6 @@ import { EdTreeAction } from "./node-action";
 import { EdTreeNodeIndent } from "./node-indent";
 import { EdTreeNodeName } from "./node-name";
 import { parseNodeState } from "./node-tools";
-import { Popover } from "utils/ui/popover";
-import { CodeHighlight } from "./code-highlight";
 
 export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
   const p = useGlobal(EDGlobal, "EDITOR");

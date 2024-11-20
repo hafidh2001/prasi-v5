@@ -43,7 +43,6 @@ export const initSync = (p: PG) => {
           p.page.cur = page;
         }
 
-        console.log("🚀 Prasi Connected");
         p.render();
       },
     });

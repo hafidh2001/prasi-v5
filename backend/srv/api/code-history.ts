@@ -56,69 +56,73 @@ export default {
             }
 
             if (items.length > 0) {
-              loopItem(items, { active_comp_id: comp_id }, async ({ item }) => {
-                if (item.id === sel.item_id) {
-                  let text = "";
-                  if (sel.type !== "prop") {
-                    text = item.adv[sel.type] || "";
-                  } else {
-                    text = item.component.props[sel.prop_name].value;
-                  }
-                  if (text) {
-                    if (page_id) {
-                      const existing = codeHistory
-                        .site(body.site_id)
-                        .tables.page_code.find({
-                          where: {
+              loopItem(
+                items,
+                { active_comp_id: comp_id, comps: {} },
+                async ({ item }) => {
+                  if (item.id === sel.item_id) {
+                    let text = "";
+                    if (sel.type !== "prop") {
+                      text = item.adv[sel.type] || "";
+                    } else {
+                      text = item.component.props[sel.prop_name].value;
+                    }
+                    if (text) {
+                      if (page_id) {
+                        const existing = codeHistory
+                          .site(body.site_id)
+                          .tables.page_code.find({
+                            where: {
+                              item_id: sel.item_id,
+                              page_id: page_id,
+                              prop_name: sel.prop_name || "",
+                              type: sel.type,
+                            },
+                            limit: 1,
+                            sort: { ts: "desc" },
+                            select: ["id", "ts", "text"],
+                          });
+
+                        if (existing?.[0]?.text !== text) {
+                          codeHistory.site(body.site_id).tables.page_code.save({
                             item_id: sel.item_id,
                             page_id: page_id,
                             prop_name: sel.prop_name || "",
                             type: sel.type,
-                          },
-                          limit: 1,
-                          sort: { ts: "desc" },
-                          select: ["id", "ts", "text"],
-                        });
+                            ts: Date.now(),
+                            text,
+                          });
+                        }
+                      } else if (comp_id) {
+                        const existing = codeHistory
+                          .comp(comp_id)
+                          .tables.comp_code.find({
+                            where: {
+                              item_id: sel.item_id,
+                              comp_id: comp_id,
+                              prop_name: sel.prop_name || "",
+                              type: sel.type,
+                            },
+                            limit: 1,
+                            sort: { ts: "desc" },
+                            select: ["id", "ts", "text"],
+                          });
 
-                      if (existing?.[0]?.text !== text) {
-                        codeHistory.site(body.site_id).tables.page_code.save({
-                          item_id: sel.item_id,
-                          page_id: page_id,
-                          prop_name: sel.prop_name || "",
-                          type: sel.type,
-                          ts: Date.now(),
-                          text,
-                        });
-                      }
-                    } else if (comp_id) {
-                      const existing = codeHistory
-                        .comp(comp_id)
-                        .tables.comp_code.find({
-                          where: {
+                        if (existing?.[0]?.text !== text) {
+                          codeHistory.comp(comp_id).tables.comp_code.save({
                             item_id: sel.item_id,
                             comp_id: comp_id,
                             prop_name: sel.prop_name || "",
                             type: sel.type,
-                          },
-                          limit: 1,
-                          sort: { ts: "desc" },
-                          select: ["id", "ts", "text"],
-                        });
-
-                      if (existing?.[0]?.text !== text) {
-                        codeHistory.comp(comp_id).tables.comp_code.save({
-                          item_id: sel.item_id,
-                          comp_id: comp_id,
-                          prop_name: sel.prop_name || "",
-                          type: sel.type,
-                          ts: Date.now(),
-                          text,
-                        });
+                            ts: Date.now(),
+                            text,
+                          });
+                        }
                       }
                     }
                   }
                 }
-              });
+              );
             }
           }, 5 * 1000);
         }

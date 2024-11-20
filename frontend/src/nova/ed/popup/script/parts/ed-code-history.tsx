@@ -76,12 +76,11 @@ export const EdCodeHistory: FC<{
                   const index = local.list.findIndex(
                     (item) => item.id === history_id
                   );
+                  if (index >= 0 && index < local.list.length - 1) {
+                    const next = local.list[index + 1].id;
 
-                  if (index > 0) {
-                    const back = local.list[index - 1].id;
-
-                    if (back) {
-                      onHistoryPick(back, false);
+                    if (next) {
+                      onHistoryPick(next, false);
                     }
                   }
                 }}
@@ -96,11 +95,12 @@ export const EdCodeHistory: FC<{
                   const index = local.list.findIndex(
                     (item) => item.id === history_id
                   );
-                  if (index >= 0 && index < local.list.length - 1) {
-                    const next = local.list[index + 1].id;
 
-                    if (next) {
-                      onHistoryPick(next, false);
+                  if (index > 0) {
+                    const back = local.list[index - 1].id;
+
+                    if (back) {
+                      onHistoryPick(back, false);
                     }
                   }
                 }}

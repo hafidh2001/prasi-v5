@@ -1,5 +1,5 @@
 import { getNodeById } from "crdt/node/get-node-by-id";
-import { active } from "logic/active";
+import { active, getActiveTree } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import { Check, CornerUpRight, Sticker, X } from "lucide-react";
 import { FC, useEffect } from "react";
@@ -17,6 +17,7 @@ import { EdCodeHistory } from "./parts/ed-code-history";
 import { EdCodeFindAllBtn } from "./parts/ed-find-all-btn";
 import { EdWorkbenchPaneAction } from "./parts/pane-action";
 import { EdCodeSnippet } from "./parts/snippet";
+import { generateRegion, removeRegion } from "./code/js/migrate-code";
 
 export const EdScriptWorkbench: FC<{}> = ({}) => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -95,7 +96,7 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
             }
           );
           if (history.code) {
-            local.history.code = history.code;
+            local.history.code = removeRegion(history.code);
           }
           local.history.loaded = true;
           local.render();
@@ -134,7 +135,12 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
 
                 setTimeout(() => {
                   p.script.do_edit(async () => {
-                    return local.history.code.split("\n");
+                    const models = getActiveTree(p).script_models;
+                    const model = models[active.item_id];
+
+                    return `${generateRegion(model, models)}\n\n${local.history.code.trim()}`.split(
+                      "\n"
+                    );
                   });
                 }, 100);
               }}

@@ -9,7 +9,7 @@ import {
   PanelLeftOpen,
   PanelRightOpen,
   ScrollText,
-  Trees
+  Trees,
 } from "lucide-react";
 import { EdSave } from "popup/build/ed-save";
 import { closeEditor } from "popup/script/ed-workbench";
@@ -304,7 +304,13 @@ export const EdTopBar = () => {
         )}
 
         <ButtonBox>
-          <Button>
+          <Button
+            href={`/prod/${p.site.id}${
+              p.page.cur.url.startsWith("/")
+                ? p.page.cur.url
+                : `/${p.page.cur.url}`
+            }`}
+          >
             <ExternalLink size={12} /> <div>Preview</div>
           </Button>
         </ButtonBox>
@@ -343,23 +349,33 @@ const ButtonBox: FC<{ children: any }> = ({ children }) => {
 const Button: FC<{
   children: any;
   className?: string;
+  href?: string;
   popover?: { content: ReactElement };
-  onClick?: React.MouseEventHandler<HTMLDivElement>;
-}> = ({ children, onClick, className, popover }) => {
-  const content = (
-    <div
-      className={cx(
-        " btn px-2 py-[2px] flex items-center space-x-1",
-        className || "bg-white border rounded-sm hover:bg-blue-100"
-      )}
-      onClick={onClick}
-    >
+  onClick?: React.MouseEventHandler<HTMLDivElement | HTMLAnchorElement>;
+}> = ({ children, onClick, href, className, popover }) => {
+  const args = {
+    className: cx(
+      " btn px-2 py-[2px] flex items-center space-x-1",
+      className || "bg-white border rounded-sm hover:bg-blue-100"
+    ),
+
+    onClick,
+  };
+
+  const content = href ? (
+    <a {...args} href={href} target={"_blank"}>
       {children}
-    </div>
+    </a>
+  ) : (
+    <div {...args}>{children}</div>
   );
 
   if (popover) {
-    return <Popover preload content={popover.content}>{content}</Popover>;
+    return (
+      <Popover preload content={popover.content}>
+        {content}
+      </Popover>
+    );
   }
 
   return content;

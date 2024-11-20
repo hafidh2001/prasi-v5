@@ -92,7 +92,7 @@ export const ${model.prop_name} = ${compPropValue(model)}`;
     return `\
 ${generateRegion(model, models, { comp_id })}${inject}
 
-export default () => (${model.extracted_content || 'null'})`;
+export default () => (${model.extracted_content || "null"})`;
   }
 };
 
@@ -153,34 +153,34 @@ export const generateRegion = (
     }
   }
 
-  let jsx_pass_exports = "";
+  let jsx_pass_exports = [];
   if (model.jsx_pass?.exports) {
-    const model_id = `${model.jsx_pass.hash}_jsxpass`;
+    const model_source = [] as string[];
+    let exports = [] as SingleExportVar[];
+    for (const [k, v] of Object.entries(model.jsx_pass.exports)) {
+      let value = "null as any";
+      if (v.type === "local") {
+        exports.push(v);
+        continue;
+      }
+      model_source.push(`export const ${k} = ${value};`);
+    }
+    for (const v of exports) {
+      if (v.type === "local") {
+        model_source.push(
+          `export const ${v.name} = ${`\
+defineLocal({
+render_mode: "${v.render_mode}",
+name: "${v.name}",
+value: ${v.value}
+})`};`
+        );
+      }
+    }
+    model_source.push("export default () => { return null }");
 
-    if (!models[model_id]) {
-      const model_source = [] as string[];
-      let exports = [] as SingleExportVar[];
-      for (const [k, v] of Object.entries(model.jsx_pass.exports)) {
-        let value = "null as any";
-        if (v.type === "local") {
-          exports.push(v);
-          continue;
-        }
-        model_source.push(`export const ${k} = ${value};`);
-      }
-      for (const v of exports) {
-        if (v.type === "local") {
-          model_source.push(
-            `export const ${v.name} = ${`\
-      defineLocal({
-        render_mode: "${v.render_mode}",
-        name: "${v.name}",
-        value: ${v.value}
-      })`};`
-          );
-        }
-      }
-      model_source.push("export default () => { return null }");
+    for (const [var_name, v] of Object.entries(model.jsx_pass.exports)) {
+      const model_id = `${model.jsx_pass.hash}_${v.item_id}_jsxpass`;
       models[model_id] = newScriptModel({
         model_id,
         path_ids: model.path_ids,
@@ -189,9 +189,8 @@ export const generateRegion = (
         title: model_id,
         value: model_source.join("\n"),
       });
+      jsx_pass_exports.push(`import { ${var_name} } from "./${model_id}"`);
     }
-
-    jsx_pass_exports = `import {${Object.keys(model.jsx_pass.exports)}} from "./${model_id}"`;
   }
 
   const passprop = generatePassPropAndLoop(model);
@@ -201,7 +200,7 @@ export const generateRegion = (
 
 import React from "react";\
 ${opt?.inject_start || ""}\
-${jsx_pass_exports}\
+${jsx_pass_exports.join("\n")}\
 ${model.local.name ? `const local_name = "${model.local.name}"` : ""}\
 ${
   model.loop.name
