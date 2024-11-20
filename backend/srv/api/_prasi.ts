@@ -11,7 +11,11 @@ export default {
     switch (true) {
       case path === "editor-typings.d.ts":
         return new Response(
-          Bun.file(dir.root(`/frontend/src/nova/ed/cprasi/_prasi.d.ts`))
+          Bun.file(
+            dir.root(
+              `/frontend/src/nova/ed/cprasi/prasi-typings-generated.d.ts`
+            )
+          )
         );
       case path.startsWith("load.js"): {
         const res = await editor.load_cached({

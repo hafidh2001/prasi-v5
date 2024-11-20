@@ -12,7 +12,7 @@ import { ViComps, ViPageRoot, ViWrapperType } from "vi/lib/types";
 import { ViRoot } from "vi/vi-root";
 import { EdTreeCtxMenu } from "./tree/parts/ctx-menu";
 import { IItem } from "utils/types/item";
-import { prasi } from "./cprasi/prasi";
+import { prasi } from "./cprasi/lib/prasi";
 
 export const EdViRoot = memo(() => {
   const p = useGlobal(EDGlobal, "EDITOR");

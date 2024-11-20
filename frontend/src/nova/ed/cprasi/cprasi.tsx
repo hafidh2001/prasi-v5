@@ -6,7 +6,7 @@ import { LoadingSpinner } from "utils/ui/loading";
 import { validate } from "uuid";
 import { ViComps } from "vi/lib/types";
 import { ViPage } from "vi/vi-page";
-import { prasi } from "./prasi";
+import { prasi } from "./lib/prasi";
 import { useGlobal } from "utils/react/use-global";
 import { EDGlobal } from "logic/ed-global";
 import { unpack } from "msgpackr";

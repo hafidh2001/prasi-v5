@@ -34,7 +34,7 @@ export const buildPrasiTypings = async () => {
         platform() === "win32"
           ? "node_modules/.bin/tsc.exe"
           : "node_modules/.bin/tsc"
-      )} prasi.tsx --watch --moduleResolution node --emitDeclarationOnly --outFile _prasi.d.ts --declaration --noEmit false`.split(
+      )} --project tsconfig.prasi.json --watch --moduleResolution node --emitDeclarationOnly --outFile prasi-typings-generated.d.ts --declaration --noEmit false`.split(
         " "
       ),
     ];

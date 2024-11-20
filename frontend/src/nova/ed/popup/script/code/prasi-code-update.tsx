@@ -49,7 +49,7 @@ export {}
       {
         name: "file:///editor-typings.ts",
         source: `\
-import * as _editor from "prasi"; 
+import * as _editor from "lib/prasi"; 
 declare global { const prasi = _editor.prasi; }`,
       }
     );
