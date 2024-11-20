@@ -270,7 +270,7 @@ ${main_code}`);
   return { pending_items, jsx_exports_changed };
 };
 
-const newScriptModel = ({
+export const newScriptModel = ({
   model_id,
   comp_def,
   value,

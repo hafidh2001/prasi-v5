@@ -124,7 +124,11 @@ export const EdPopCompPicker = () => {
 
   let initial_open: string[] = [];
   const group_len = {} as Record<string, number>;
-  const trash_id = popup.data.groups.find((e) => e.name === "__TRASH__")?.id;
+
+  if (!popup.data.groups)
+    return <Loading note="loading-comp" backdrop={false} />;
+
+  const trash_id = popup.data.groups?.find((e) => e.name === "__TRASH__")?.id;
   let nodes =
     popup.tab === "Components"
       ? popup.data.nodes.filter((e) => {

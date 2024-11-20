@@ -1,4 +1,4 @@
-import { ScriptModel } from "crdt/node/load-script-models";
+import { newScriptModel, ScriptModel } from "crdt/node/load-script-models";
 import {
   createListItem,
   plStringifySingle,
@@ -153,30 +153,45 @@ export const generateRegion = (
     }
   }
 
-  let jsx_pass_exports: string[] = [];
+  let jsx_pass_exports = "";
   if (model.jsx_pass?.exports) {
-    let exports = [] as SingleExportVar[];
-    for (const [k, v] of Object.entries(model.jsx_pass.exports)) {
-      let value = "null as any";
-      if (v.type === "local") {
-        exports.push(v);
-        continue;
+    const model_id = `${model.jsx_pass.hash}_jsxpass`;
+
+    if (!models[model_id]) {
+      const model_source = [] as string[];
+      let exports = [] as SingleExportVar[];
+      for (const [k, v] of Object.entries(model.jsx_pass.exports)) {
+        let value = "null as any";
+        if (v.type === "local") {
+          exports.push(v);
+          continue;
+        }
+        model_source.push(`export const ${k} = ${value};`);
       }
-      jsx_pass_exports.push(`export const ${k} = ${value};`);
-    }
-    for (const v of exports) {
-      if (v.type === "local") {
-        jsx_pass_exports.push(
-          `export const ${v.name} = ${`\
-      defineLocal({ 
-        render_mode: "${v.render_mode}", 
-        name: "${v.name}", 
+      for (const v of exports) {
+        if (v.type === "local") {
+          model_source.push(
+            `export const ${v.name} = ${`\
+      defineLocal({
+        render_mode: "${v.render_mode}",
+        name: "${v.name}",
         value: ${v.value}
       })`};`
-        );
+          );
+        }
       }
+      model_source.push("export default () => { return null }");
+      models[model_id] = newScriptModel({
+        model_id,
+        path_ids: model.path_ids,
+        path_names: model.path_names,
+        source_hash: model.source_hash,
+        title: model_id,
+        value: model_source.join("\n"),
+      });
     }
-    jsx_pass_exports.push("");
+
+    jsx_pass_exports = `import {${Object.keys(model.jsx_pass.exports)}} from "./${model_id}"`;
   }
 
   const passprop = generatePassPropAndLoop(model);
@@ -186,7 +201,7 @@ export const generateRegion = (
 
 import React from "react";\
 ${opt?.inject_start || ""}\
-${jsx_pass_exports.join("\n")}\
+${jsx_pass_exports}\
 ${model.local.name ? `const local_name = "${model.local.name}"` : ""}\
 ${
   model.loop.name

@@ -18,10 +18,13 @@ export const registerEditorOpener = (
       if (result === null) {
         const model = monaco.editor.getModel(input.resource);
         const prasi_model = (model as any).prasi_model as ScriptModel;
+
         if (model && prasi_model.id) {
-          p.script.monaco_selection = input.options.selection;
-          activateItem(p, prasi_model.id);
-          if (prasi_model.prop_name) {
+          if (prasi_model.id.endsWith("_jsxpass")) {
+            console.log("mantap jiwa", prasi_model);
+          } else {
+            p.script.monaco_selection = input.options.selection;
+            activateItem(p, prasi_model.id);
           }
         }
       }

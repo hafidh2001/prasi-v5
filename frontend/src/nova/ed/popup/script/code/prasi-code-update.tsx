@@ -90,12 +90,12 @@ export const remountPrasiModels = (arg: {
 }) => {
   const { p, models, monaco, activeFileName, onChange, editor, onMount } = arg;
 
-  const defaultCode = () => {
+  const defaultCode = async () => {
     const item = getActiveNode(p)?.item;
     if (item?.component?.props[p.ui.comp.prop.active]) {
-      return dcode.prop(p, p.ui.comp.prop.active);
+      return await dcode.prop(p, p.ui.comp.prop.active);
     }
-    return dcode.js(p);
+    return await dcode.js(p);
   };
 
   const monacoModels = monaco.editor.getModels();
@@ -127,7 +127,7 @@ export const remountPrasiModels = (arg: {
             if (!value) {
               p.script.ignore_changes = true;
               p.script
-                .do_edit(async () => defaultCode().trim().split("\n"))
+                .do_edit(async () => (await defaultCode()).trim().split("\n"))
                 .then(() => {
                   setTimeout(() => {
                     if (m.model) {
@@ -199,9 +199,9 @@ export const remountPrasiModels = (arg: {
   }
 };
 
-const setActiveModel = (arg: {
+const setActiveModel = async (arg: {
   m: Partial<ScriptModel>;
-  defaultCode: () => string;
+  defaultCode: () => Promise<string>;
   monaco: Monaco;
   editor: MonacoEditor;
   p: PG;
@@ -210,7 +210,7 @@ const setActiveModel = (arg: {
   const { m, defaultCode, monaco, editor, p, onMount } = arg;
   if (!m.model) return;
   if (!m.model.getValue()) {
-    m.source = defaultCode().trim();
+    m.source = (await defaultCode()).trim();
     m.model.setValue(m.source);
   }
 
