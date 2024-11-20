@@ -112,7 +112,7 @@ export const EdTreeCtxMenu = ({
         !comp_id &&
         (!item.childs || (item.childs && item.childs.length === 0)) && (
           <MenuItem
-            label={"Convert Item → Text" + comp_id}
+            label={"Convert Item → Text"}
             onClick={() => {
               getActiveTree(p).update("Convert Item → Text", ({ findNode }) => {
                 const node = findNode(item.id);

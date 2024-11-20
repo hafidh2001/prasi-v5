@@ -5,6 +5,7 @@ import { useGlobal } from "utils/react/use-global";
 import { jscript } from "utils/script/jscript";
 import { IItem } from "utils/types/item";
 import { FNCompDef } from "utils/types/meta-fn";
+import { formatItemName } from "../parts/node/node-name";
 import {
   FieldButtons,
   FieldCode,
@@ -71,6 +72,7 @@ export const EdMasterPropBodyBasic: FC<{
                     new_name = group_name + "__" + value;
                   }
                 }
+                tree.component.props[name].label = formatItemName(new_name);
                 tree.component.props[new_name] = tree.component.props[name];
                 delete tree.component.props[name];
                 p.ui.tree.comp.active = new_name;

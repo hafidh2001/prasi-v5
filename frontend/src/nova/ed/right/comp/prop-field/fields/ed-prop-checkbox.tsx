@@ -62,13 +62,14 @@ export const EdPropCheckbox = ({
     const e = extractValue(p, name, prop);
     if (e) {
       local.original_value = e.original_value;
-      local.value = e.value;
+      local.value = [];
       local.has_code = e.has_code;
       try {
         local.value = JSON.parse(e.value);
       } catch (e) {}
     }
     local.render();
+    p.ui.comp.prop.render_prop_editor();
   }, [instance.props[name]?.value]);
 
   return (

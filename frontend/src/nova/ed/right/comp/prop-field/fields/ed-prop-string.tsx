@@ -12,6 +12,8 @@ import { AutoHeightTextarea } from "utils/ui/auto-textarea";
 import { EdPropCode } from "./ed-prop-code";
 import { getActiveNode } from "crdt/node/get-node-by-id";
 import { extractValue } from "./extract-value";
+import { Popover } from "utils/ui/popover";
+import { ChevronLeft, ChevronLeftCircle } from "lucide-react";
 
 export const EdPropString = (arg: {
   name: string;
@@ -21,9 +23,9 @@ export const EdPropString = (arg: {
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({ value: "", has_code: false, original_value: "" });
   const { name, instance, field } = arg;
+  const prop = instance.props[name];
 
   useEffect(() => {
-    let prop = instance.props[name];
     const e = extractValue(p, name, prop);
     if (e) {
       local.original_value = e.original_value;
@@ -31,6 +33,7 @@ export const EdPropString = (arg: {
       local.value = e.value;
     }
     local.render();
+    p.ui.comp.prop.render_prop_editor();
   }, [instance.props[name]?.value]);
 
   if (local.has_code) {
@@ -54,7 +57,7 @@ export const EdPropString = (arg: {
     );
   }
 
-  return (
+  const result = (
     <AutoHeightTextarea
       spellCheck={false}
       value={local.value}
@@ -76,7 +79,7 @@ export const ${name} = \`${text}\`;
         codeUpdate.push(p, active.item_id, value, { prop_name: name });
       }}
       className={cx(
-        "flex-1 py-1 px-1 border-l  flex w-full border-0 outline-none min-h-[29px]",
+        "flex-1 py-1 px-1 flex w-full border-0 outline-none min-h-[29px]",
         css`
           background: white;
           color: black;
@@ -84,4 +87,22 @@ export const ${name} = \`${text}\`;
       )}
     />
   );
+
+  if (typeof prop.value === "string" && prop.value.length > 60) {
+    return (
+      <div className="flex items-center flex-1 px-1">
+        <Popover
+          placement="left"
+          content={<div className="w-[700px] font-mono text-sm">{result}</div>}
+          asChild
+          className="flex items-center justify-center px-1 hover:bg-blue-500 hover:text-white border-blue-500 text-blue-500 border bg-slate-50 rounded-sm"
+        >
+          <ChevronLeftCircle size={12} className="mr-1" />
+          Long Text...
+        </Popover>
+      </div>
+    );
+  }
+
+  return result;
 };

@@ -21,12 +21,12 @@ export const EdPropField = (arg: {
   const is_jsx = field.meta?.type === "content-element";
 
   useEffect(() => {
-    p.ui.comp.prop.render_prop_editor();
+    p.ui.comp.prop.render_prop_editor(true);
   }, [instance.props[name]?.value]);
 
   return (
     <>
-      <div
+      <label
         className={cx(
           "border-b min-h-[30px] cursor-pointer relative flex items-stretch select-none",
           ui.active === name && p.ui.popup.script.open
@@ -67,22 +67,20 @@ export const EdPropField = (arg: {
           name={name}
           field={field}
           onClick={(e) => {
-            e.preventDefault();
             if (ui.active) {
               if (ui.active !== name) {
                 ui.active = name;
+                e.preventDefault();
                 p.render();
               } else {
                 ui.active = "";
+                e.preventDefault();
                 p.render();
               }
             } else {
               if (p.ui.popup.script.open) {
                 ui.active = name;
-                p.render();
-              } else {
-                ui.context_event = e;
-                ui.context_name = name;
+                e.preventDefault();
                 p.render();
               }
             }
@@ -101,7 +99,7 @@ export const EdPropField = (arg: {
             {field.meta?.type === "list" && <EdPropListHead {...arg} />}
           </>
         )}
-      </div>
+      </label>
       {field.meta?.type === "list" && <EdPropList {...arg} />}
     </>
   );

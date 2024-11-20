@@ -62,6 +62,10 @@ export const EdPropOption = (arg: {
         } catch (e) {
           console.warn(e);
         }
+
+        comp_props[name] = local.value;
+
+        p.ui.comp.prop.render_prop_editor(true);
         local.render();
       }
     }
@@ -88,7 +92,7 @@ export const ${name} = \`${text}\`;
   const mode = field.meta?.option_mode || "button";
 
   return (
-    <div className="flex items-stretch flex-1 border-l bg-white">
+    <div className="flex items-stretch flex-1 bg-white">
       {mode === "dropdown" && (
         <Dropdown
           items={local.options}

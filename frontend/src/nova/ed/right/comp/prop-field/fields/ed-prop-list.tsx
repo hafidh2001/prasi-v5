@@ -64,6 +64,7 @@ export const EdPropListHead = (arg: {
   useEffect(() => {
     delete prop_list[name];
     local.render();
+    p.ui.comp.prop.render_prop_editor();
   }, [arg.instance.props[name].value]);
 
   if (!prop_list[name]) {
@@ -105,7 +106,7 @@ export const EdPropListHead = (arg: {
         >
           {(prop.expand || typeof prop.expand === "undefined") && (
             <>
-              <ChevronDown size={13}  />
+              <ChevronDown size={13} />
             </>
           )}
 
