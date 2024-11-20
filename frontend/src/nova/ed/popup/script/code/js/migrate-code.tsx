@@ -92,7 +92,7 @@ export const ${model.prop_name} = ${compPropValue(model)}`;
     return `\
 ${generateRegion(model, models, { comp_id })}${inject}
 
-export default () => (${model.extracted_content})`;
+export default () => (${model.extracted_content || 'null'})`;
   }
 };
 

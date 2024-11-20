@@ -94,7 +94,7 @@ export const internalLoadCompTree = (
       },
     });
 
-    const { pending_items, jsx_exports_changed } = await loadScriptModels({
+    const { jsx_exports_changed } = await loadScriptModels({
       p: opt.p,
       nodes: component.nodes,
       script_models: component.script_models,

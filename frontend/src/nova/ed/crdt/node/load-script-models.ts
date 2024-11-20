@@ -5,8 +5,7 @@ import { monacoCreateModel } from "popup/script/code/js/create-model";
 import {
   generateRegion,
   JSX_PASS,
-  migrateCode,
-  removeRegion,
+  migrateCode
 } from "popup/script/code/js/migrate-code";
 import { parseItemCode } from "popup/script/code/js/parse-item-code";
 import { SingleExportVar } from "popup/script/code/js/parse-item-types";
