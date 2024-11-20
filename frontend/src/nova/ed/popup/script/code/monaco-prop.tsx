@@ -13,6 +13,9 @@ import { jsxColorScheme } from "./js/jsx-style";
 import { registerPrettier } from "./js/register-prettier";
 import { registerReact } from "./js/register-react";
 import { reloadPrasiModels, remountPrasiModels } from "./prasi-code-update";
+import { getActiveNode } from "crdt/node/get-node-by-id";
+import { waitUntil } from "prasi-utils";
+import { loadPendingComponent } from "crdt/node/load-child-comp";
 
 export const EdMonacoProp: FC<{
   className?: string;
@@ -65,6 +68,27 @@ export const EdMonacoProp: FC<{
   }, []);
 
   useEffect(() => {
+    if (p.ui.comp.prop.active) {
+      const node = getActiveNode(p);
+      const comp_id = node?.item.component?.id;
+      if (comp_id) {
+        (async () => {
+          if (!p.comp.loaded[comp_id]) {
+            if (!p.comp.pending.has(comp_id)) {
+              loadPendingComponent(p);
+            }
+            await waitUntil(() => p.comp.loaded[comp_id]);
+          }
+
+          const props = p.comp.loaded[comp_id].content_tree.component?.props;
+          if (props && !props[p.ui.comp.prop.active]) {
+            p.ui.comp.prop.active = "";
+            p.render();
+          }
+        })();
+      }
+    }
+
     if (!local.reset_monaco) {
       local.reset_monaco = true;
       local.render();

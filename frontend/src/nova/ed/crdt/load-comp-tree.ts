@@ -2,7 +2,6 @@ import { NodeModel } from "@minoru/react-dnd-treeview";
 import { active } from "logic/active";
 import { PG } from "logic/ed-global";
 import { EBaseComp, EComp, PNode, SyncUndoItem } from "logic/types";
-import { fg } from "popup/flow/utils/flow-global";
 import { waitUntil } from "prasi-utils";
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "utils/sync/client";
@@ -14,7 +13,6 @@ import { bind } from "./lib/immer-yjs";
 import { findNodeById, flattenTree } from "./node/flatten-tree";
 import { loadScriptModels, ScriptModel } from "./node/load-script-models";
 import { TreeVarItems } from "./node/var-items";
-import { FNCompDef } from "utils/types/meta-fn";
 
 export type CompTree = ReturnType<typeof internalLoadCompTree>;
 
