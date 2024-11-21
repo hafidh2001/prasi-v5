@@ -8,7 +8,8 @@
       "popup/*": ["./src/nova/ed/popup/*"],
       "prod/*": ["./src/nova/prod/*"],
       "expr*": ["./src/nova/ed/popup/script/expr"],
-      "vi/*": ["./src/nova/vi/*"]
+      "vi/*": ["./src/nova/vi/*"],
+      "prasi-prisma": ["../node_modules/.prisma/client/index.d.ts"]
     },
     "target": "ES2020",
     "lib": ["DOM", "ES2020"],

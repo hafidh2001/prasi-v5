@@ -76,12 +76,12 @@ export const jscript = {
           })(),
           (async () => {
             const oxc = await import("@oxc-parser/wasm");
-            await (oxc as any).default(
-              new URL(
+            await (oxc as any).default({
+              url: new URL(
                 "@oxc-parser/wasm/web/oxc_parser_wasm_bg.wasm",
                 import.meta.url
-              )
-            );
+              ),
+            });
             jscript.parse = oxc.parseSync;
           })(),
           (async () => {

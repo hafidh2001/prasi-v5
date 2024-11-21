@@ -1,4 +1,4 @@
-type DEPLOY_TARGET_NAME = string;
+export type DEPLOY_TARGET_NAME = string;
 
 export type DeployTarget = {
   name: DEPLOY_TARGET_NAME;
