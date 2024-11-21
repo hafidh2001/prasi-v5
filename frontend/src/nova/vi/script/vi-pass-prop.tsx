@@ -17,6 +17,10 @@ export const createViPassProp = (
       }
     }
     
+    if (!arg.children) {
+      return null;
+    }
+
     return cloneElement(arg.children, {
       key: idx,
       ...(arg.children.props || {}),

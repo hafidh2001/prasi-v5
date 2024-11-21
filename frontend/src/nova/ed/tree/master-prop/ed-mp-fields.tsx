@@ -1,8 +1,14 @@
 import { active } from "logic/active";
+import { EDGlobal } from "logic/ed-global";
 import { monacoRegisterSource } from "popup/script/code/js/create-model";
+import { monacoEnableJSX } from "popup/script/code/js/enable-jsx";
 import { registerPrettier } from "popup/script/code/js/register-prettier";
+import { registerReact } from "popup/script/code/js/register-react";
 import { MonacoRaw } from "popup/script/code/monaco-raw";
+import { remountPrasiModels } from "popup/script/code/prasi-code-update";
+import { Resizable } from "re-resizable";
 import { useEffect } from "react";
+import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
 
@@ -58,11 +64,16 @@ export const FieldCode = (arg: {
   onOpenChange?: (open: boolean) => void;
   open?: boolean;
 }) => {
+  const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal({
     open: false,
     timeout: null as any,
     value: arg.value || arg.default || "",
+    size: localStorage.getItem("prasi-size-code") || "600x400",
   });
+
+  const w = local.size?.split("x")[0];
+  const h = local.size?.split("x")[1];
 
   useEffect(() => {
     if (typeof arg.open === "boolean") {
@@ -72,7 +83,8 @@ export const FieldCode = (arg: {
   }, [arg.open]);
 
   useEffect(() => {
-    (local.value = arg.value || arg.default || ""), local.render();
+    local.value = arg.value || arg.default || "";
+    local.render();
   }, [arg.value]);
 
   const content = (
@@ -93,25 +105,34 @@ export const FieldCode = (arg: {
       open={local.open}
       backdrop={arg.label ? false : true}
       content={
-        <div className={cx("w-[600px] h-[400px]")}>
+        <Resizable
+          className="flex-1 flex"
+          defaultSize={{ width: w, height: h }}
+          onResizeStop={(_, __, div) => {
+            localStorage.setItem(
+              "prasi-size-" + name,
+              div.clientHeight.toString() + "x" + div.clientWidth.toString()
+            );
+          }}
+        >
           <MonacoRaw
             id="field-code"
             lang="typescript"
             value={local.value || ""}
-            onChange={(val) => {
-              local.value = val;
+            onChange={(value) => {
+              local.value = value || "";
               clearTimeout(local.timeout);
               local.timeout = setTimeout(() => {
-                arg.onChange?.(val);
+                arg.onChange?.(value || "");
               }, 500);
             }}
-            onMount={({ monaco }) => {
+            onMount={async ({ editor, monaco }) => {
               const props = Object.keys(
                 active.comp?.snapshot.component?.props || {}
               )
                 .filter((e) => !e.endsWith("__"))
                 .map((prop) => `const ${prop} = null as any;`);
-              registerPrettier(monaco);
+
               monacoRegisterSource(
                 monaco,
                 props.join("\n"),
@@ -124,9 +145,33 @@ export const FieldCode = (arg: {
                   "file:///arg-typings.d.ts"
                 );
               }
+
+              monacoRegisterSource(
+                monaco,
+                `import * as ImportReact from "react"; declare global { const React = ImportReact }`,
+                "file:///react-typings.ts"
+              );
+
+              remountPrasiModels({
+                activeFileName: "file:///active-prop.tsx",
+                editor,
+                monaco,
+                p,
+                models: [
+                  {
+                    name: "file:///active-prop.tsx",
+                    source: local.value,
+                    model: editor.getModel() as any,
+                  },
+                ],
+                async onMount(m) {
+                  await registerReact(monaco);
+                  registerPrettier(monaco);
+                },
+              });
             }}
           />
-        </div>
+        </Resizable>
       }
       className={cx(
         arg.label && "border-l px-1",

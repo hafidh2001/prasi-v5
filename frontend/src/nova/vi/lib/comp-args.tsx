@@ -2,6 +2,7 @@ import { DeepReadonly } from "popup/flow/runtime/types";
 import { IItem } from "utils/types/item";
 import { ViRender } from "vi/vi-render";
 import { ViComps } from "./types";
+import React from "react";
 
 export const compArgs = (
   item: DeepReadonly<IItem>,
@@ -28,12 +29,13 @@ export const compArgs = (
           }
 
           try {
-            let src = iprop.valueBuilt || iprop.value;
+            let src = iprop.valueBuilt;
             const args = {
               ...vscode_exports,
               db,
               api,
               ...existing,
+              React
             };
             if (!src.startsWith(`//prasi-prop`)) {
               src = `return ${src}`;
@@ -109,9 +111,8 @@ export const compArgs = (
 
       const src = replaceWithObject(js, replacement) || "";
 
-      const exports = (window as any).exports;
       const arg = {
-        ...exports,
+        ...vscode_exports,
         db,
         api,
         ...existing,

@@ -32,6 +32,7 @@ import {
   PLValue,
 } from "./prop-list/prop-list-util";
 import { Menu, MenuItem } from "utils/ui/context-menu";
+import { codeUpdate } from "popup/script/code/prasi-code-update";
 
 type PROP_NAME = string;
 
@@ -62,29 +63,29 @@ export const EdPropListHead = (arg: {
   }, [active.item_id]);
 
   useEffect(() => {
-    delete prop_list[name];
-    local.render();
-    p.ui.comp.prop.render_prop_editor();
-  }, [arg.instance.props[name].value]);
+    const exports = p.viref.vscode_exports || {};
 
-  if (!prop_list[name]) {
     const structure = new Function(
+      ...Object.keys(exports),
       `return ${arg.field.meta?.optionsBuilt || ""}`
     );
 
     let prop = arg.instance.props[name];
     const extracted = extractValue(p, name, prop);
+
     if (extracted) {
       prop_list[name] = {
         expand: true,
-        structure: structure(),
+        structure: structure(...Object.values(exports)),
         value: parsePLValue(extracted.value),
         update_timeout: null as any,
         ctx_menu: null,
         ctx_path: [],
       };
     }
-  }
+    local.render();
+    p.ui.comp.prop.render_prop_editor();
+  }, [arg.instance.props[name].value]);
 
   const prop = prop_list[name];
   if (!prop) return null;
@@ -164,19 +165,8 @@ export const EdPropList = (arg: {
     clearInterval(prop.update_timeout);
     prop.update_timeout = setTimeout(
       () => {
-        const source = `[\n${prop.value.map((e) => plStringifySingle(e)).join(",\n")}\n]`;
-        getActiveTree(p).update("Update Prop List", ({ findNode }) => {
-          const n = findNode(active.item_id);
-          if (n && n.item.component) {
-            n.item.component.props[name].value = source;
-            n.item.component.props[name].valueBuilt =
-              n.item.component.props[name].value;
-          }
-
-          if (reset) {
-            delete prop_list[name];
-          }
-        });
+        const source = `export const ${name} = [\n${prop.value.map((e) => plStringifySingle(e)).join(",\n")}\n]`;
+        codeUpdate.push(p, active.item_id, source, { prop_name: name });
       },
       reset ? 100 : 500
     );
@@ -568,7 +558,14 @@ const SCode: FC<{
   const local = useLocal({
     open: prop.ctx_path.join(".") === path.join("."),
     value: value?.value,
+    refresh: false,
   });
+
+  useEffect(() => {
+    local.value = value.value;
+    local.render();
+  }, [value.value]);
+
   return (
     <div
       className="flex-1 flex items-center p-1"

@@ -205,6 +205,10 @@ ${Object.keys(final_args)
   ${src}\
 }
 
+if (__result.children === undefined) {
+  console.error('children is undefined',__result, "${item.id}")
+}
+
 return __result.children;
 `;
 

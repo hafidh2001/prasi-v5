@@ -136,9 +136,6 @@ export const MonacoItemJS: FC<{
           local.editor = editor;
           p.script.do_edit = defineScriptEdit(editor, monaco);
 
-          registerPrettier(monaco);
-          await registerReact(monaco);
-
           remountPrasiModels({
             p,
             models,
@@ -146,7 +143,10 @@ export const MonacoItemJS: FC<{
             editor,
             monaco,
             onChange,
-            onMount: (m) => {
+            onMount: async (m) => {
+              await registerReact(monaco);
+              registerPrettier(monaco);
+
               if (!m) {
                 defaultCode.js(p);
               }

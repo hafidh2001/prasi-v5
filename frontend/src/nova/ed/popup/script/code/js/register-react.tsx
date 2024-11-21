@@ -6,13 +6,13 @@ export const registerReact = async (monaco: Monaco) => {
   m.prasiReactRegistered = true;
   monaco.languages.typescript.typescriptDefaults.setExtraLibs([
     {
-      filePath: "csstype.d.ts",
+      filePath: "file:///csstype.d.ts",
       content: `declare module "csstype" {
 ${await loadText("https://cdn.jsdelivr.net/npm/csstype@3.1.3/index.d.ts")}
 }`,
     },
     {
-      filePath: "prop-types.d.ts",
+      filePath: "file:///prop-types.d.ts",
       content: `declare module "prop-types" {
 ${await loadText(
   "https://cdn.jsdelivr.net/npm/@types/prop-types@15.7.12/index.d.ts"
@@ -20,7 +20,7 @@ ${await loadText(
 }`,
     },
     {
-      filePath: "react.d.ts",
+      filePath: "file:///react.d.ts",
       content: `
 declare module "react" {
 ${await loadText("https://cdn.jsdelivr.net/npm/@types/react@18.3.3/index.d.ts")}
@@ -28,7 +28,7 @@ ${await loadText("https://cdn.jsdelivr.net/npm/@types/react@18.3.3/index.d.ts")}
 `,
     },
     {
-      filePath: "jsx-runtime.d.ts",
+      filePath: "file:///jsx-runtime.d.ts",
       content: `declare module "react/jsx-runtime" {
 import * as React from "react";
 export { Fragment } from "react";

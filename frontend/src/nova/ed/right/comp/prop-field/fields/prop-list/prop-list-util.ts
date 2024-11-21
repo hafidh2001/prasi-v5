@@ -44,15 +44,20 @@ export const getPropStructureByPath = (
 };
 
 export const parsePLValue = (source: string): PLValue[] => {
-  const parsed = jscript.parse?.(source);
+  const parsed = jscript.parse?.(source, {
+    sourceFilename: "script.tsx",
+    sourceType: "script",
+  });
 
   const root = get(parsed, "program.body.0.expression");
 
   const items = [];
   if (root?.type === "ArrayExpression") {
     for (const item of root.elements) {
-      if (item && item?.type !== "SpreadElement")
-        items.push(parseSingle(source, item));
+      if (item && item?.type !== "SpreadElement") {
+        const single = parseSingle(source, item);
+        items.push(single);
+      }
     }
   }
 

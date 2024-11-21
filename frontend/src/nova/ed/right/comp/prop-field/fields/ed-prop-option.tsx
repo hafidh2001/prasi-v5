@@ -48,10 +48,18 @@ export const EdPropOption = (arg: {
         comp_props = p.viref.comp_props?.[active.item_id];
       }
 
+      const exports = p.viref.vscode_exports || {};
       if (comp_props) {
-        const fn = new Function(...Object.keys(comp_props), `return ${src}`);
+        const fn = new Function(
+          ...Object.keys(comp_props),
+          ...Object.keys(exports),
+          `return ${src}`
+        );
         try {
-          local.options = fn(...Object.values(comp_props));
+          local.options = fn(
+            ...Object.values(comp_props),
+            ...Object.values(exports)
+          );
 
           local.options = (local.options || []).map((e) => {
             if (typeof e === "string") {

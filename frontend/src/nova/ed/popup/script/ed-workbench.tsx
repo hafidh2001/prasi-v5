@@ -18,6 +18,7 @@ import { EdCodeFindAllBtn } from "./parts/ed-find-all-btn";
 import { EdWorkbenchPaneAction } from "./parts/pane-action";
 import { EdCodeSnippet } from "./parts/snippet";
 import { generateRegion, removeRegion } from "./code/js/migrate-code";
+import { registerReact } from "./code/js/register-react";
 
 export const EdScriptWorkbench: FC<{}> = ({}) => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -350,7 +351,7 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
                         } as any
                       )[p.ui.popup.script.mode]
                     }
-                    onMount={({ monaco, editor }) => {
+                    onMount={async ({ monaco, editor }) => {
                       if (p.ui.popup.script.mode === "js") {
                         monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions(
                           {
@@ -359,6 +360,7 @@ export const EdScriptWorkbench: FC<{}> = ({}) => {
                             onlyVisible: true,
                           }
                         );
+                        await registerReact(monaco);
 
                         const model = editor.getModel();
                         if (model) {

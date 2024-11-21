@@ -207,7 +207,7 @@ export const loadScriptModels = async (arg: {
 
     if (model.source && !model.ready) {
       try {
-        if (!model.already_migrated) {
+        if (!model.already_migrated && !model.prop_name) {
           const migrated = migrateCode(model, script_models, comp_id);
           model.source = await jscript.prettier.format?.(migrated);
         } else {
@@ -216,8 +216,12 @@ export const loadScriptModels = async (arg: {
           const region_end = lines.findIndex((line) =>
             line.startsWith("// #endregion")
           );
-          const main_code = lines.slice(region_end + 1).join("\n");
+          let main_code = lines.slice(region_end + 1).join("\n");
           const region_code = generateRegion(model, script_models, { comp_id });
+
+          if (model.prop_name && !main_code.includes('export const')) {
+            main_code = `\nexport const ${model.prop_name} = (${main_code});`;
+          }
 
           model.source = await jscript.prettier.format?.(`\
 ${region_code}

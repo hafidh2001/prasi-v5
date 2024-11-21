@@ -13,10 +13,10 @@ import { extractRegion, removeRegion } from "./js/migrate-code";
 import { replaceString } from "./js/replace-string";
 import { typingsItem } from "./js/typings-item";
 
-export const reloadPrasiModels = async (p: PG, from: string) => {
-  const tree = getActiveTree(p);
+export const prasiTypings = async (p: PG) => {
+  let editor_typings = [] as any[];
   if (!p.script.typings_vscode) {
-    const res = await fetch(`/prod/${p.site.id}/typings/index.d.ts`);
+    let res = await fetch(`/prod/${p.site.id}/typings/index.d.ts`);
     p.script.typings_vscode = await res.text();
     const def = await fetch(`/prod/${p.site.id}/_prasi/type_def`);
     const entry = await def.json();
@@ -33,10 +33,21 @@ ${type} ${name} = _.${name};`;
 export {}
 `;
   }
+  editor_typings = [
+    {
+      name: "file:///typings-item.ts",
+      source: typingsItem,
+    },
+    {
+      name: "file:///typings-vscode.d.ts",
+      source: p.script.typings_vscode,
+    },
+    {
+      name: "file:///typings-entry.d.ts",
+      source: p.script.typings_entry,
+    },
+  ];
 
-  await tree.reloadScriptModels();
-
-  const editor_typings = [] as any[];
   if (
     location.pathname.startsWith("/ed/a0170f25-a9d9-4646-a970-f1c2e5747971")
   ) {
@@ -50,24 +61,22 @@ export {}
         name: "file:///editor-typings.ts",
         source: `\
 import * as _editor from "lib/prasi"; 
-declare global { const prasi = _editor.prasi; }`,
+declare global { 
+const prasi = _editor.prasi; 
+}`,
       }
     );
   }
+  return editor_typings;
+};
+
+export const reloadPrasiModels = async (p: PG, from: string) => {
+  const editor_typings = await prasiTypings(p);
+  const tree = getActiveTree(p);
+
+  await tree.reloadScriptModels();
 
   return [
-    {
-      name: "file:///typings-item.ts",
-      source: typingsItem,
-    },
-    {
-      name: "file:///typings-vscode.d.ts",
-      source: p.script.typings_vscode,
-    },
-    {
-      name: "file:///typings-entry.d.ts",
-      source: p.script.typings_entry,
-    },
     ...editor_typings,
     ...Object.values(tree.script_models),
   ] as ScriptModel[];
@@ -108,13 +117,14 @@ export const remountPrasiModels = (arg: {
       (e) => e === m.model || e.uri.toString() === m.name
     );
 
-    if (model) {
-      if (m.model && !m.model.isDisposed) {
-        m.model.dispose();
-      }
+    if (model && model !== m.model) {
       m.model = model;
       m.model.setValue(m.source);
     } else {
+      if (m.model?.isDisposed() === false) {
+        m.model.dispose();
+      }
+
       m.model = monacoRegisterSource(monaco, m.source, m.name || "");
       m.model.onDidChangeContent(async (e) => {
         if (onChange && m.model) {
@@ -359,7 +369,9 @@ export const codeUpdate = {
               },
             });
 
-            final_source = replaceString(source, [replace]);
+            if (replace.start > 0 && replace.end > 0) {
+              final_source = replaceString(source, [replace]);
+            }
             final_source = `// ${q.item_name}: ${q.id} \n${final_source}`;
           }
 
@@ -398,19 +410,26 @@ export const codeUpdate = {
         "Update Code",
         ({ findNode }) => {
           for (const q of Object.values(this.queue)) {
-            const n = findNode(q.id);
+            let id = q.id;
+            if (q.id.includes("~")) {
+              id = q.id.split("~")[0];
+            }
+            const n = findNode(id);
             if (n && !n.item.adv) {
               n.item.adv = {};
             }
-            if (n && n.item.adv) {
-              if (q.tailwind !== n.item.adv.tailwind) {
+
+            if (n) {
+              if (n.item.adv && q.tailwind !== n.item.adv.tailwind) {
                 n.item.adv.tailwind = q.tailwind;
               }
 
               if (!q.prop_name) {
-                n.item.adv.js = q.source;
-                if (q.source_built !== null) {
-                  n.item.adv.jsBuilt = q.source_built;
+                if (n.item.adv) {
+                  n.item.adv.js = q.source;
+                  if (q.source_built !== null) {
+                    n.item.adv.jsBuilt = q.source_built;
+                  }
                 }
               } else {
                 const comp = n.item.component;

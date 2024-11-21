@@ -34,24 +34,23 @@ export const EdViRoot = memo(() => {
   const render = () => _set({});
   useEffect(() => {
     (async () => {
+      ref.exports.status = "loading";
+
       if (
         location.pathname.startsWith("/ed/a0170f25-a9d9-4646-a970-f1c2e5747971")
       ) {
         ref.exports.values = {
           prasi,
         };
-        ref.exports.status = "done";
-        render();
       } else {
-        ref.exports.status = "loading";
         const fn = new Function(
           `return import('/prod/${p.site.id}/index.js');`
         );
         ref.exports.values = await fn();
-        ref.exports.status = "done";
-        (window as any).exports = ref.exports.values;
-        render();
       }
+
+      ref.exports.status = "done";
+      render();
     })();
   }, []);
 
