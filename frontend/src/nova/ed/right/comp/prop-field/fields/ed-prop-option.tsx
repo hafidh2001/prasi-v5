@@ -25,7 +25,6 @@ export const EdPropOption = (arg: {
     has_code: false,
     value: "",
   });
-  const ui = p.ui.comp.prop;
   let prop = instance.props[name];
 
   const resetValue = async (input_value?: string) => {
@@ -93,7 +92,10 @@ export const EdPropOption = (arg: {
 
 export const ${name} = \`${text}\`;
   `;
-    codeUpdate.push(p, active.item_id, value, { prop_name: name });
+    codeUpdate.push(p, active.item_id, value, {
+      prop_name: name,
+      immediate: true,
+    });
     resetValue(text);
   };
 

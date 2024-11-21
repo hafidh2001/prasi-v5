@@ -109,6 +109,7 @@ export const ViScript: FC<{
 
   const comp_args = parentCompArgs(parents, comp_props_parents, item.id);
 
+
   const jsx = {} as Record<string, any>;
   for (const [k, v] of Object.entries(comp_args)) {
     if (typeof v === "object" && v && (v as any).__jsx) {
@@ -205,10 +206,6 @@ ${Object.keys(final_args)
   ${src}\
 }
 
-if (__result.children === undefined) {
-  console.error('children is undefined',__result, "${item.id}")
-}
-
 return __result.children;
 `;
 
@@ -219,6 +216,7 @@ return __result.children;
   if (!isEditor) {
     return <internal.ScriptComponent {...final_args} />;
   }
+
 
   return (
     <ErrorBox

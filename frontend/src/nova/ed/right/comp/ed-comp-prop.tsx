@@ -35,26 +35,8 @@ export const EdCompProp = () => {
       if (!p.viref.comp_props) {
         p.viref.comp_props = {};
       }
-      p.viref.comp_props[item.id] = {};
+      p.viref.resetCompInstance(item.id);
       p.ui.comp.re_eval_item_ids.delete(item.id);
-      const inject = p.viref.comp_props[item.id];
-      for (const [k, prop] of Object.entries(comp?.props || {})) {
-        inject[k] = "";
-        try {
-          const iprop = instance?.props[k];
-          if (!iprop) continue;
-          let src = iprop.valueBuilt || iprop.value;
-          const exports = p.viref.vscode_exports || {};
-          const args = {
-            ...exports,
-          };
-          if (!src.startsWith(`//prasi-prop`)) {
-            src = `return ${src}`;
-          }
-          const fn = new Function(...Object.keys(args), src);
-          inject[k] = fn(...Object.values(args));
-        } catch (e) {}
-      }
       p.ui.comp.prop.render_prop_editor();
     }
   }, [should_re_eval_props]);

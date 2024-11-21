@@ -19,34 +19,6 @@ export const compArgs = (
     const comp_id = item.component.id;
     const comp = comps[comp_id];
 
-    if (comp.component) {
-      for (const [k, prop] of Object.entries(comp.component.props)) {
-        if (!k.endsWith("__")) {
-          let iprop = item.component.props[k];
-          if (!iprop) {
-            //@ts-ignore
-            iprop = prop;
-          }
-
-          try {
-            let src = iprop.valueBuilt;
-            const args = {
-              ...vscode_exports,
-              db,
-              api,
-              ...existing,
-              React
-            };
-            if (!src.startsWith(`//prasi-prop`)) {
-              src = `return ${src}`;
-            }
-            const fn = new Function(...Object.keys(args), src);
-            inject[k] = fn(...Object.values(args));
-          } catch (e) {}
-        }
-      }
-    }
-
     for (const [k, master_prop] of Object.entries(
       comp.component?.props || {}
     )) {
@@ -100,50 +72,51 @@ export const compArgs = (
           args[k] = null;
         }
         continue;
-      }
+      } else {
+        if (js.startsWith(`const _jsxFileName = "";`)) {
+          js = `(() => { ${js.replace(
+            `const _jsxFileName = "";`,
+            `const _jsxFileName = ""; return `
+          )} })()`;
+        }
 
-      if (js.startsWith(`const _jsxFileName = "";`)) {
-        js = `(() => { ${js.replace(
-          `const _jsxFileName = "";`,
-          `const _jsxFileName = ""; return `
-        )} })()`;
-      }
+        const src = replaceWithObject(js, replacement) || "";
 
-      const src = replaceWithObject(js, replacement) || "";
+        const arg = {
+          ...vscode_exports,
+          db,
+          api,
+          ...existing,
+          ...inject,
+        };
 
-      const arg = {
-        ...vscode_exports,
-        db,
-        api,
-        ...existing,
-        ...inject,
-      };
-
-      let fn_src = `// [${item.name}] ${k}: ${item.id}
+        let fn_src = `// [${item.name}] ${k}: ${item.id}
 return ${src}
 `;
-      if (src.startsWith(`//prasi-prop`)) {
-        fn_src = `// [${item.name}] ${k}: ${item.id}
+        if (src.startsWith(`//prasi-prop`)) {
+          fn_src = `// [${item.name}] ${k}: ${item.id}
 ${src.substring(`//prasi-prop`.length + 1)}`;
-      }
-      try {
-        const fn = new Function(
-          ...Object.keys(arg),
-          `\
+        }
+        try {
+          const fn = new Function(
+            ...Object.keys(arg),
+            `\
   try { 
     ${fn_src.split("\n").join(`\n    `)}
   } catch(e) {
     console.error(e);
   }`
-        );
+          );
 
-        args[k] = fn(...Object.values(arg));
-      } catch (e) {
-        console.error(fn_src, e);
-        arg[k] = null;
+          args[k] = fn(...Object.values(arg));
+        } catch (e) {
+          console.error(fn_src, e);
+          arg[k] = null;
+        }
       }
     }
   }
+
   return { ...inject, ...args };
 };
 

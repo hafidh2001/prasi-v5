@@ -2,13 +2,9 @@ import { NodeModel, RenderParams } from "@minoru/react-dnd-treeview";
 import { loadCompTree } from "crdt/load-comp-tree";
 import { getNodeById, updateNodeById } from "crdt/node/get-node-by-id";
 import {
-  AudioWaveform,
-  MessageSquareWarning,
-  Scroll,
-  TriangleAlert,
+  AudioWaveform
 } from "lucide-react";
 import { iconExpr } from "popup/expr/parts/expr-icon";
-import { closeEditor } from "popup/script/ed-workbench";
 import { waitUntil } from "prasi-utils";
 import { useGlobal } from "../../../../../utils/react/use-global";
 import { Tooltip } from "../../../../../utils/ui/tooltip";

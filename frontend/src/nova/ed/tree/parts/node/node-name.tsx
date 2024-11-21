@@ -137,7 +137,7 @@ export const EdTreeNodeName: FC<{
                 {loop_name && (
                   <div
                     className={cx(
-                      " text-green-600 node-text px-1 border-r flex items-center text-[9px] font-mono",
+                      " text-green-600 node-text px-1 border border-l-4 border-green-600 rounded-l-[3px] flex items-center text-[9px] font-mono",
                       !is_active && "bg-white"
                     )}
                   >
@@ -148,7 +148,7 @@ export const EdTreeNodeName: FC<{
                 {local_name && (
                   <div
                     className={cx(
-                      " text-blue-600 node-text px-1 border-r flex items-center text-[9px] font-mono",
+                      " text-blue-600 node-text px-1 border border-l-4 border-blue-600 rounded-l-[3px] flex items-center text-[9px] font-mono",
                       !is_active && "bg-white"
                     )}
                   >

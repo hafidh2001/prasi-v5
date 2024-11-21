@@ -275,208 +275,214 @@ export const codeUpdate = {
       prop_name?: string;
       local_name?: string;
       loop_name?: string;
+      immediate?: boolean;
     }
   ) {
     this.p = p;
     const tree = getActiveTree(p);
     const item_name = tree.nodes.map[id]?.item?.name || "";
     this.queue[id] = { id, source, item_name, ...arg };
-    this.executeUpdate();
+    this.executeUpdate(arg?.immediate);
   },
-  executeUpdate() {
+  executeUpdate(immediate?: boolean) {
     clearTimeout(this.timeout);
-    this.timeout = setTimeout(async () => {
-      if (!jscript.loaded) {
-        await waitUntil(() => jscript.loaded);
-      }
-
-      for (const q of Object.values(this.queue)) {
-        q.source_built = null;
-        try {
-          if (!q.source.trim()) {
-            q.source_built = undefined;
-            continue;
-          }
-
-          if (q.source.length > 200000) {
-            alert("Code too long, please limit to 200KB or less.");
-            continue;
-          }
-
-          let final_source = "";
-          if (q.prop_name) {
-            final_source = removeRegion(q.source).replace(
-              `export const ${q.prop_name} =`,
-              "return"
-            );
-            this.p?.ui.comp.re_eval_item_ids.add(q.id);
-          } else {
-            const lines = q.source.split("\n").map((e) => {
-              if (e.startsWith("export const")) {
-                return e.replace("export const", "const");
-              }
-              return e;
-            });
-
-            let source = "";
-            for (let i = 0; i < lines.length; i++) {
-              if (lines[i].startsWith("// #endregion")) {
-                source = lines.slice(i + 1).join("\n");
-                break;
-              }
-            }
-
-            if (q.local_name) {
-              try {
-                const local_name = (q.source || "")
-                  .split(`= defineLocal`)
-                  .shift()
-                  ?.split("const ")
-                  .pop()
-                  ?.trim();
-                if (local_name) {
-                  q.local_name = local_name;
-                }
-              } catch (e) {}
-
-              source = `const local_name = "${q.local_name}";\n${source}`;
-            }
-
-            if (q.loop_name) {
-              try {
-                const loop_name = (q.source || "")
-                  .split(`= defineLoop`)
-                  .shift()
-                  ?.split("const ")
-                  .pop()
-                  ?.trim();
-                if (loop_name) {
-                  q.loop_name = loop_name;
-                }
-              } catch (e) {}
-
-              source = `const loop_name = "${q.loop_name}"\n${source}`;
-            }
-
-            let replace = { replacement: "", start: 0, end: 0 };
-            jscript.traverse(source, {
-              ExportDefaultDeclaration(node) {
-                replace.start = node.start;
-                replace.end = node.end;
-                if (node.declaration?.body) {
-                  replace.replacement = `render(${cutCode(source, node.declaration.body)})`;
-                }
-              },
-            });
-
-            if (replace.start > 0 && replace.end > 0) {
-              final_source = replaceString(source, [replace]);
-            }
-            final_source = `// ${q.item_name}: ${q.id} \n${final_source}`;
-          }
-
-          if (final_source.trim()) {
-            const tailwind = await jscript.getTailwindStyles?.([final_source]);
-            if (typeof tailwind === "string") {
-              q.tailwind = tailwind;
-            }
-
-            try {
-              q.source_built = (
-                await jscript.transform?.(final_source.trim(), {
-                  jsx: "transform",
-                  format: "cjs",
-                  logLevel: "silent",
-                  loader: "tsx",
-                  minify: false,
-                })
-              )?.code;
-              if (q.prop_name) {
-                q.source_built = `//prasi-prop\n${q.source_built}`;
-              }
-            } catch (e) {
-              console.warn("Code transpile failed on item:", q.id);
-              console.error(e);
-            }
-          } else {
-            q.source_built = undefined;
-          }
-        } catch (e: any) {
-          console.warn("Code transpile failed on item:", q.id, e.message);
+    this.timeout = setTimeout(
+      async () => {
+        if (!jscript.loaded) {
+          await waitUntil(() => jscript.loaded);
         }
-      }
 
-      getActiveTree(this.p!).update(
-        "Update Code",
-        ({ findNode }) => {
-          for (const q of Object.values(this.queue)) {
-            let id = q.id;
-            if (q.id.includes("~")) {
-              id = q.id.split("~")[0];
-            }
-            const n = findNode(id);
-            if (n && !n.item.adv) {
-              n.item.adv = {};
+        for (const q of Object.values(this.queue)) {
+          q.source_built = null;
+          try {
+            if (!q.source.trim()) {
+              q.source_built = undefined;
+              continue;
             }
 
-            if (n) {
-              if (n.item.adv && q.tailwind !== n.item.adv.tailwind) {
-                n.item.adv.tailwind = q.tailwind;
+            if (q.source.length > 200000) {
+              alert("Code too long, please limit to 200KB or less.");
+              continue;
+            }
+
+            let final_source = "";
+            if (q.prop_name) {
+              final_source = removeRegion(q.source).replace(
+                `export const ${q.prop_name} =`,
+                "return"
+              );
+              this.p?.ui.comp.re_eval_item_ids.add(q.id);
+            } else {
+              const lines = q.source.split("\n").map((e) => {
+                if (e.startsWith("export const")) {
+                  return e.replace("export const", "const");
+                }
+                return e;
+              });
+
+              let source = "";
+              for (let i = 0; i < lines.length; i++) {
+                if (lines[i].startsWith("// #endregion")) {
+                  source = lines.slice(i + 1).join("\n");
+                  break;
+                }
               }
 
-              if (!q.prop_name) {
-                if (n.item.adv) {
-                  n.item.adv.js = q.source;
-                  if (q.source_built !== null) {
-                    n.item.adv.jsBuilt = q.source_built;
+              if (q.local_name) {
+                try {
+                  const local_name = (q.source || "")
+                    .split(`= defineLocal`)
+                    .shift()
+                    ?.split("const ")
+                    .pop()
+                    ?.trim();
+                  if (local_name) {
+                    q.local_name = local_name;
                   }
-                }
-              } else {
-                const comp = n.item.component;
-                if (comp) {
-                  let [name, prop] =
-                    Object.entries(comp.props).find(
-                      ([name, prop]) => name === q.prop_name
-                    ) || [];
+                } catch (e) {}
 
-                  if (!prop) {
-                    const mcomp = this.p!.comp.loaded[comp.id];
-                    const cprop =
-                      mcomp?.content_tree.component?.props[q.prop_name];
-                    if (cprop) {
-                      comp.props[q.prop_name] = JSON.parse(
-                        JSON.stringify(cprop)
-                      );
-                      name = q.prop_name;
-                      prop = comp.props[q.prop_name];
+                source = `const local_name = "${q.local_name}";\n${source}`;
+              }
+
+              if (q.loop_name) {
+                try {
+                  const loop_name = (q.source || "")
+                    .split(`= defineLoop`)
+                    .shift()
+                    ?.split("const ")
+                    .pop()
+                    ?.trim();
+                  if (loop_name) {
+                    q.loop_name = loop_name;
+                  }
+                } catch (e) {}
+
+                source = `const loop_name = "${q.loop_name}"\n${source}`;
+              }
+
+              let replace = { replacement: "", start: 0, end: 0 };
+              jscript.traverse(source, {
+                ExportDefaultDeclaration(node) {
+                  replace.start = node.start;
+                  replace.end = node.end;
+                  if (node.declaration?.body) {
+                    replace.replacement = `render(${cutCode(source, node.declaration.body)})`;
+                  }
+                },
+              });
+
+              if (replace.start > 0 && replace.end > 0) {
+                final_source = replaceString(source, [replace]);
+              }
+              final_source = `// ${q.item_name}: ${q.id} \n${final_source}`;
+            }
+
+            if (final_source.trim()) {
+              const tailwind = await jscript.getTailwindStyles?.([
+                final_source,
+              ]);
+              if (typeof tailwind === "string") {
+                q.tailwind = tailwind;
+              }
+
+              try {
+                q.source_built = (
+                  await jscript.transform?.(final_source.trim(), {
+                    jsx: "transform",
+                    format: "cjs",
+                    logLevel: "silent",
+                    loader: "tsx",
+                    minify: false,
+                  })
+                )?.code;
+                if (q.prop_name) {
+                  q.source_built = `//prasi-prop\n${q.source_built}`;
+                }
+              } catch (e) {
+                console.warn("Code transpile failed on item:", q.id);
+                console.error(e);
+              }
+            } else {
+              q.source_built = undefined;
+            }
+          } catch (e: any) {
+            console.warn("Code transpile failed on item:", q.id, e.message);
+          }
+        }
+
+        getActiveTree(this.p!).update(
+          "Update Code",
+          ({ findNode }) => {
+            for (const q of Object.values(this.queue)) {
+              let id = q.id;
+              if (q.id.includes("~")) {
+                id = q.id.split("~")[0];
+              }
+              const n = findNode(id);
+              if (n && !n.item.adv) {
+                n.item.adv = {};
+              }
+
+              if (n) {
+                if (n.item.adv && q.tailwind !== n.item.adv.tailwind) {
+                  n.item.adv.tailwind = q.tailwind;
+                }
+
+                if (!q.prop_name) {
+                  if (n.item.adv) {
+                    n.item.adv.js = q.source;
+                    if (q.source_built !== null) {
+                      n.item.adv.jsBuilt = q.source_built;
                     }
                   }
+                } else {
+                  const comp = n.item.component;
+                  if (comp) {
+                    let [name, prop] =
+                      Object.entries(comp.props).find(
+                        ([name, prop]) => name === q.prop_name
+                      ) || [];
 
-                  if (name && prop) {
-                    prop.value = q.source;
-                    prop.valueBuilt = (q.source_built || "").trim();
+                    if (!prop) {
+                      const mcomp = this.p!.comp.loaded[comp.id];
+                      const cprop =
+                        mcomp?.content_tree.component?.props[q.prop_name];
+                      if (cprop) {
+                        comp.props[q.prop_name] = JSON.parse(
+                          JSON.stringify(cprop)
+                        );
+                        name = q.prop_name;
+                        prop = comp.props[q.prop_name];
+                      }
+                    }
+
+                    if (name && prop) {
+                      prop.value = q.source;
+                      prop.valueBuilt = (q.source_built || "").trim();
+                    }
                   }
                 }
               }
             }
+          },
+          () => {
+            _api._compressed.code_history({
+              mode: "update",
+              site_id: this.p?.site.id,
+              selector: Object.values(this.queue).map((e) => {
+                return {
+                  comp_id: active.comp_id ? active.comp_id : undefined,
+                  page_id: !active.comp_id ? this.p!.page.cur.id : undefined,
+                  item_id: e.id,
+                  type: e.prop_name ? "prop" : "js",
+                  prop_name: e.prop_name,
+                };
+              }),
+            });
           }
-        },
-        () => {
-          _api._compressed.code_history({
-            mode: "update",
-            site_id: this.p?.site.id,
-            selector: Object.values(this.queue).map((e) => {
-              return {
-                comp_id: active.comp_id ? active.comp_id : undefined,
-                page_id: !active.comp_id ? this.p!.page.cur.id : undefined,
-                item_id: e.id,
-                type: e.prop_name ? "prop" : "js",
-                prop_name: e.prop_name,
-              };
-            }),
-          });
-        }
-      );
-    }, 1000);
+        );
+      },
+      immediate ? 100 : 500
+    );
   },
 };
