@@ -36,7 +36,7 @@ export const EdMasterPropDetail: FC<{ children: any; onClose: () => void }> = ({
             }
           }}
           className={cx(
-            "w-[300px] text-sm outline-none",
+            "w-[300px] text-sm outline-none flex flex-col",
             css`
               height: ${document.body.clientHeight - 100}px;
             `

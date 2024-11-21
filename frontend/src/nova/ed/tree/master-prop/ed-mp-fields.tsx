@@ -197,7 +197,7 @@ export const FieldCode = (arg: {
   }
 
   return (
-    <label className="mp-field flex border-b flex-1">
+    <label className="mp-field flex border-b">
       <div className="mp-label p-1">{arg.label}</div>
       {content}
     </label>

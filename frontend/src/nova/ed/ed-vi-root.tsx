@@ -27,7 +27,9 @@ export const EdViRoot = memo(() => {
     }),
     exports: {
       status: "init" as "init" | "loading" | "done",
-      values: {},
+      values: {
+        prasi: null as any,
+      },
     },
   }).current;
   const [, _set] = useState({});
@@ -36,18 +38,8 @@ export const EdViRoot = memo(() => {
     (async () => {
       ref.exports.status = "loading";
 
-      if (
-        location.pathname.startsWith("/ed/a0170f25-a9d9-4646-a970-f1c2e5747971")
-      ) {
-        ref.exports.values = {
-          prasi,
-        };
-      } else {
-        const fn = new Function(
-          `return import('/prod/${p.site.id}/index.js');`
-        );
-        ref.exports.values = await fn();
-      }
+      const fn = new Function(`return import('/prod/${p.site.id}/index.js');`);
+      ref.exports.values = { ...(await fn()), prasi };
 
       ref.exports.status = "done";
       render();

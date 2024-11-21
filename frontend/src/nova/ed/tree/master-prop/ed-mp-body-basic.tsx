@@ -36,7 +36,7 @@ export const EdMasterPropBodyBasic: FC<{
   return (
     <div
       className={cx(
-        "flex items-stretch flex-col",
+        "flex flex-1 overflow-auto relative",
         css`
           .mp-field {
             &:hover {
@@ -52,309 +52,316 @@ export const EdMasterPropBodyBasic: FC<{
         `
       )}
     >
-      <FieldString
-        label="Name"
-        value={_name}
-        onBeforeChange={(value) => {
-          return value.replace(/[^a-zA-Z0-9_]/g, "_");
-        }}
-        onBlur={(value) => {
-          if (!value || value === _name) return;
-          getActiveTree(p).update(`Rename ${_name} to ${value}`, ({ tree }) => {
-            if (tree.type === "item") {
-              if (tree.component) {
-                let new_name = value;
-                if (is_group) {
-                  new_name = value + "__";
-                } else {
-                  if (name.includes("__")) {
-                    const group_name = name.split("__").shift();
-                    new_name = group_name + "__" + value;
-                  }
-                }
-                tree.component.props[name].label = formatItemName(new_name);
-                tree.component.props[new_name] = tree.component.props[name];
-                delete tree.component.props[name];
-                p.ui.tree.comp.active = new_name;
-              }
-            }
-          });
-        }}
-      />
-      <FieldString
-        label="Label"
-        value={prop.label || ""}
-        onChange={(value) => {
-          getActiveTree(p).update(`Set Label to ${value}`, ({ tree }) => {
-            if (tree.type === "item") {
-              if (tree.component) {
-                tree.component.props[name].label = value;
-              }
-            }
-          });
-        }}
-      />
-      {!is_group && (
-        <FieldDropdown
-          label="Group"
-          value={group}
-          list={[
-            { label: "- None -", value: "" },
-            ...groups.map((e) => ({
-              label: props?.[e].label || e.substring(0, -2),
-              value: e,
-            })),
-          ]}
-          onChange={(value) => {
+      <div className="flex flex-col absolute inset-0">
+        <FieldString
+          label="Name"
+          value={_name}
+          onBeforeChange={(value) => {
+            return value.replace(/[^a-zA-Z0-9_]/g, "_");
+          }}
+          onBlur={(value) => {
+            if (!value || value === _name) return;
             getActiveTree(p).update(
-              `Set Group to ${value.substring(0, -2)}`,
+              `Rename ${_name} to ${value}`,
               ({ tree }) => {
                 if (tree.type === "item") {
                   if (tree.component) {
-                    if (value) {
-                      const old_group = name.split("__").shift();
-                      const old_name = old_group ? name : _name;
-                      const new_name = value + _name;
-
-                      tree.component.props[new_name] =
-                        tree.component.props[old_name];
-                      delete tree.component.props[old_name];
-                      p.ui.tree.comp.active = new_name;
+                    let new_name = value;
+                    if (is_group) {
+                      new_name = value + "__";
                     } else {
-                      const new_name = name.split("__").pop() || name;
-
-                      if (new_name !== name) {
-                        tree.component.props[new_name] =
-                          tree.component.props[name];
-                        delete tree.component.props[name];
-                        p.ui.tree.comp.active = new_name;
+                      if (name.includes("__")) {
+                        const group_name = name.split("__").shift();
+                        new_name = group_name + "__" + value;
                       }
                     }
+                    tree.component.props[name].label = formatItemName(new_name);
+                    tree.component.props[new_name] = tree.component.props[name];
+                    delete tree.component.props[name];
+                    p.ui.tree.comp.active = new_name;
                   }
                 }
               }
             );
           }}
         />
-      )}
-      <FieldButtons
-        label="Type"
-        buttons={[
-          {
-            label: "Text",
-            checked() {
-              if (is_group) return false;
-              const meta = propMeta(prop);
-              if (meta.type !== "content-element") return meta.type === "text";
-
-              return false;
-            },
-            check() {
-              getActiveTree(p).update(`Set Type to TEXT`, ({ tree }) => {
-                if (tree.type === "item") {
-                  if (tree.component) {
-                    if (is_group) {
-                      _name = name.slice(0, -2);
-                      tree.component.props[_name] =
-                        tree.component.props[_name + "__"];
-                      delete tree.component.props[_name + "__"];
-                      p.ui.tree.comp.active = _name;
-                    } else if (name.includes("__")) {
-                      _name = name;
-                    }
-                    let meta = prepMeta(tree, name);
-                    if (meta) meta.type = "text";
-                  }
+        <FieldString
+          label="Label"
+          value={prop.label || ""}
+          onChange={(value) => {
+            getActiveTree(p).update(`Set Label to ${value}`, ({ tree }) => {
+              if (tree.type === "item") {
+                if (tree.component) {
+                  tree.component.props[name].label = value;
                 }
-              });
-            },
-          },
-          {
-            label: "Options",
-            checked() {
-              if (is_group) return false;
+              }
+            });
+          }}
+        />
+        {!is_group && (
+          <FieldDropdown
+            label="Group"
+            value={group}
+            list={[
+              { label: "- None -", value: "" },
+              ...groups.map((e) => ({
+                label: props?.[e].label || e.substring(0, -2),
+                value: e,
+              })),
+            ]}
+            onChange={(value) => {
+              getActiveTree(p).update(
+                `Set Group to ${value.substring(0, -2)}`,
+                ({ tree }) => {
+                  if (tree.type === "item") {
+                    if (tree.component) {
+                      if (value) {
+                        const old_group = name.split("__").shift();
+                        const old_name = old_group ? name : _name;
+                        const new_name = value + _name;
 
-              const meta = propMeta(prop);
-              if (meta.type !== "content-element")
-                return meta.type === "option";
-              return false;
-            },
-            check() {
-              getActiveTree(p).update(`Set Type to OPTIONS`, ({ tree }) => {
-                if (tree.type === "item") {
-                  if (tree.component) {
-                    if (is_group) {
-                      _name = name.slice(0, -2);
-                      tree.component.props[_name] =
-                        tree.component.props[_name + "__"];
-                      delete tree.component.props[_name + "__"];
-                      p.ui.tree.comp.active = _name;
-                    } else if (name.includes("__")) {
-                      _name = name;
-                    }
+                        tree.component.props[new_name] =
+                          tree.component.props[old_name];
+                        delete tree.component.props[old_name];
+                        p.ui.tree.comp.active = new_name;
+                      } else {
+                        const new_name = name.split("__").pop() || name;
 
-                    let meta = prepMeta(tree, name);
-                    if (meta) meta.type = "option";
-                  }
-                }
-              });
-            },
-          },
-          {
-            label: "List",
-            checked() {
-              if (is_group) return false;
-              const meta = propMeta(prop);
-              if (meta.type !== "content-element") return meta.type === "list";
-
-              return false;
-            },
-            check() {
-              getActiveTree(p).update(`Set Type to List`, ({ tree }) => {
-                if (tree.type === "item") {
-                  if (tree.component) {
-                    if (is_group) {
-                      _name = name.slice(0, -2);
-                      tree.component.props[_name] =
-                        tree.component.props[_name + "__"];
-                      delete tree.component.props[_name + "__"];
-                      p.ui.tree.comp.active = _name;
-                    } else if (name.includes("__")) {
-                      _name = name;
-                    }
-                    let meta = prepMeta(tree, name);
-                    if (meta) meta.type = "list";
-                  }
-                }
-              });
-            },
-          },
-          {
-            label: "JSX",
-            checked() {
-              if (is_group) return false;
-
-              const meta = propMeta(prop);
-              return meta.type === "content-element";
-            },
-            check() {
-              getActiveTree(p).update(`Set Type to JSX`, ({ tree }) => {
-                if (tree.type === "item") {
-                  if (tree.component) {
-                    if (is_group) {
-                      _name = name.slice(0, -2);
-                      tree.component.props[_name] =
-                        tree.component.props[_name + "__"];
-                      delete tree.component.props[_name + "__"];
-                      p.ui.tree.comp.active = _name;
-                    } else if (name.includes("__")) {
-                      _name = name;
-                    }
-
-                    const meta = prepMeta(tree, name);
-                    if (meta) meta.type = "content-element";
-                  }
-                }
-              });
-            },
-          },
-          !name.includes("__") || is_group
-            ? {
-                label: "Group",
-                checked() {
-                  if (is_group) return true;
-                  return false;
-                },
-                check() {
-                  getActiveTree(p).update(`Set Type to Group`, ({ tree }) => {
-                    if (tree.type === "item") {
-                      if (tree.component) {
-                        tree.component.props[_name + "__"] =
-                          tree.component.props[_name];
-
-                        delete tree.component.props[_name];
-                        p.ui.tree.comp.active = _name + "__";
+                        if (new_name !== name) {
+                          tree.component.props[new_name] =
+                            tree.component.props[name];
+                          delete tree.component.props[name];
+                          p.ui.tree.comp.active = new_name;
+                        }
                       }
                     }
-                  });
-                },
-              }
-            : undefined,
-        ]}
-      />
-      {meta.type === "option" && (
+                  }
+                }
+              );
+            }}
+          />
+        )}
         <FieldButtons
-          label="Mode"
+          label="Type"
           buttons={[
             {
-              label: "Button",
-              checked: () => {
-                return (
-                  prop.meta?.option_mode === "button" || !prop.meta?.option_mode
-                );
+              label: "Text",
+              checked() {
+                if (is_group) return false;
+                const meta = propMeta(prop);
+                if (meta.type !== "content-element")
+                  return meta.type === "text";
+
+                return false;
               },
-              check: () => {
-                getActiveTree(p).update(
-                  `Prop ${name} Set Button`,
-                  ({ tree }) => {
-                    if (tree.type === "item") {
-                      let meta = prepMeta(tree, name);
-                      if (meta) {
-                        meta.option_mode = "button";
+              check() {
+                getActiveTree(p).update(`Set Type to TEXT`, ({ tree }) => {
+                  if (tree.type === "item") {
+                    if (tree.component) {
+                      if (is_group) {
+                        _name = name.slice(0, -2);
+                        tree.component.props[_name] =
+                          tree.component.props[_name + "__"];
+                        delete tree.component.props[_name + "__"];
+                        p.ui.tree.comp.active = _name;
+                      } else if (name.includes("__")) {
+                        _name = name;
                       }
+                      let meta = prepMeta(tree, name);
+                      if (meta) meta.type = "text";
                     }
                   }
-                );
+                });
               },
             },
             {
-              label: "Dropdown",
-              checked: () => {
-                return prop.meta?.option_mode === "dropdown";
+              label: "Options",
+              checked() {
+                if (is_group) return false;
+
+                const meta = propMeta(prop);
+                if (meta.type !== "content-element")
+                  return meta.type === "option";
+                return false;
               },
-              check: () => {
-                getActiveTree(p).update(
-                  `Prop ${name} Set Dropdown`,
-                  ({ tree }) => {
-                    if (tree.type === "item") {
-                      let meta = prepMeta(tree, name);
-                      if (meta) {
-                        meta.option_mode = "dropdown";
+              check() {
+                getActiveTree(p).update(`Set Type to OPTIONS`, ({ tree }) => {
+                  if (tree.type === "item") {
+                    if (tree.component) {
+                      if (is_group) {
+                        _name = name.slice(0, -2);
+                        tree.component.props[_name] =
+                          tree.component.props[_name + "__"];
+                        delete tree.component.props[_name + "__"];
+                        p.ui.tree.comp.active = _name;
+                      } else if (name.includes("__")) {
+                        _name = name;
                       }
+
+                      let meta = prepMeta(tree, name);
+                      if (meta) meta.type = "option";
                     }
                   }
-                );
+                });
               },
             },
             {
-              label: "Checkbox",
-              checked: () => {
-                return prop.meta?.option_mode === "checkbox";
+              label: "List",
+              checked() {
+                if (is_group) return false;
+                const meta = propMeta(prop);
+                if (meta.type !== "content-element")
+                  return meta.type === "list";
+
+                return false;
               },
-              check: () => {
-                getActiveTree(p).update(
-                  `Prop ${name} Set Checkbox`,
-                  ({ tree }) => {
-                    if (tree.type === "item") {
-                      let meta = prepMeta(tree, name);
-                      if (meta) {
-                        meta.option_mode = "checkbox";
+              check() {
+                getActiveTree(p).update(`Set Type to List`, ({ tree }) => {
+                  if (tree.type === "item") {
+                    if (tree.component) {
+                      if (is_group) {
+                        _name = name.slice(0, -2);
+                        tree.component.props[_name] =
+                          tree.component.props[_name + "__"];
+                        delete tree.component.props[_name + "__"];
+                        p.ui.tree.comp.active = _name;
+                      } else if (name.includes("__")) {
+                        _name = name;
                       }
+                      let meta = prepMeta(tree, name);
+                      if (meta) meta.type = "list";
                     }
                   }
-                );
+                });
               },
             },
+            {
+              label: "JSX",
+              checked() {
+                if (is_group) return false;
+
+                const meta = propMeta(prop);
+                return meta.type === "content-element";
+              },
+              check() {
+                getActiveTree(p).update(`Set Type to JSX`, ({ tree }) => {
+                  if (tree.type === "item") {
+                    if (tree.component) {
+                      if (is_group) {
+                        _name = name.slice(0, -2);
+                        tree.component.props[_name] =
+                          tree.component.props[_name + "__"];
+                        delete tree.component.props[_name + "__"];
+                        p.ui.tree.comp.active = _name;
+                      } else if (name.includes("__")) {
+                        _name = name;
+                      }
+
+                      const meta = prepMeta(tree, name);
+                      if (meta) meta.type = "content-element";
+                    }
+                  }
+                });
+              },
+            },
+            !name.includes("__") || is_group
+              ? {
+                  label: "Group",
+                  checked() {
+                    if (is_group) return true;
+                    return false;
+                  },
+                  check() {
+                    getActiveTree(p).update(`Set Type to Group`, ({ tree }) => {
+                      if (tree.type === "item") {
+                        if (tree.component) {
+                          tree.component.props[_name + "__"] =
+                            tree.component.props[_name];
+
+                          delete tree.component.props[_name];
+                          p.ui.tree.comp.active = _name + "__";
+                        }
+                      }
+                    });
+                  },
+                }
+              : undefined,
           ]}
         />
-      )}
+        {meta.type === "option" && (
+          <FieldButtons
+            label="Mode"
+            buttons={[
+              {
+                label: "Button",
+                checked: () => {
+                  return (
+                    prop.meta?.option_mode === "button" ||
+                    !prop.meta?.option_mode
+                  );
+                },
+                check: () => {
+                  getActiveTree(p).update(
+                    `Prop ${name} Set Button`,
+                    ({ tree }) => {
+                      if (tree.type === "item") {
+                        let meta = prepMeta(tree, name);
+                        if (meta) {
+                          meta.option_mode = "button";
+                        }
+                      }
+                    }
+                  );
+                },
+              },
+              {
+                label: "Dropdown",
+                checked: () => {
+                  return prop.meta?.option_mode === "dropdown";
+                },
+                check: () => {
+                  getActiveTree(p).update(
+                    `Prop ${name} Set Dropdown`,
+                    ({ tree }) => {
+                      if (tree.type === "item") {
+                        let meta = prepMeta(tree, name);
+                        if (meta) {
+                          meta.option_mode = "dropdown";
+                        }
+                      }
+                    }
+                  );
+                },
+              },
+              {
+                label: "Checkbox",
+                checked: () => {
+                  return prop.meta?.option_mode === "checkbox";
+                },
+                check: () => {
+                  getActiveTree(p).update(
+                    `Prop ${name} Set Checkbox`,
+                    ({ tree }) => {
+                      if (tree.type === "item") {
+                        let meta = prepMeta(tree, name);
+                        if (meta) {
+                          meta.option_mode = "checkbox";
+                        }
+                      }
+                    }
+                  );
+                },
+              },
+            ]}
+          />
+        )}
 
-      {(meta.type === "option" || meta.type === "list") && (
-        <FieldCode
-          label={meta.type === "option" ? "Option" : "List"}
-          default={
-            meta.type === "option"
-              ? `\
+        {(meta.type === "option" || meta.type === "list") && (
+          <FieldCode
+            label={meta.type === "option" ? "Option" : "List"}
+            default={
+              meta.type === "option"
+                ? `\
 [
   {
     label: "yes",
@@ -365,88 +372,91 @@ export const EdMasterPropBodyBasic: FC<{
     value: "n",
   },
 ] as Options`
-              : `\
+                : `\
 ({
   type: "string"
 }) as ListStructure`
-          }
-          typings={
-            meta.type === "list"
-              ? `\
+            }
+            typings={
+              meta.type === "list"
+                ? `\
 type ListStructure = { 
   type: "string";
   placeholder?: string;
   options?: ({ label: string; value: string } | string)[];
  } | { type: "object", object: Record<string, ListStructure> }`
-              : `\
+                : `\
 type Options = ({ type: string, value: any} | string)[]
               `
-          }
-          value={prop.meta?.options}
-          onChange={async (val) => {
-            const source_built = (
-              await jscript.transform?.(val.trim(), {
-                jsx: "transform",
-                format: "cjs",
-                logLevel: "silent",
-                loader: "tsx",
-              })
-            )?.code;
-
-            getActiveTree(p).update(`Prop ${name} Set Options`, ({ tree }) => {
-              if (tree.type === "item") {
-                let meta = prepMeta(tree, name);
-                if (meta) {
-                  meta.options = val;
-                  meta.optionsBuilt = source_built;
-                }
-              }
-            });
-          }}
-        />
-      )}
-
-      {!is_group && (
-        <FieldCode
-          label="Default"
-          default="''"
-          value={prop.value}
-          onChange={async (val) => {
-            const source_built = (
-              await jscript.transform?.(val.trim(), {
-                jsx: "transform",
-                format: "cjs",
-                logLevel: "silent",
-                loader: "tsx",
-              })
-            )?.code;
-
-            getActiveTree(p).update(`Prop ${name} Set Options`, ({ tree }) => {
-              if (tree.type === "item" && tree.component) {
-                tree.component.props[name].value = val;
-                tree.component.props[name].valueBuilt = source_built;
-              }
-            });
-          }}
-        />
-      )}
-
-      <FieldCode
-        label="Visible"
-        default="true"
-        value={prop.visible}
-        onChange={async (val) => {
-          getActiveTree(p).update(`Prop ${name} Set Visible`, ({ tree }) => {
-            if (tree.type === "item" && tree.component) {
-              tree.component.props[name].visible = val;
             }
-          });
-        }}
-      />
-      <div className="p-1 flex justify-start"></div>
-      {/* <pre className="whitespace-pre text-xs ">
-        {JSON.stringify(prop, null, 2)}
-      </pre> */}
+            value={prop.meta?.options}
+            onChange={async (val) => {
+              const source_built = (
+                await jscript.transform?.(val.trim(), {
+                  jsx: "transform",
+                  format: "cjs",
+                  logLevel: "silent",
+                  loader: "tsx",
+                })
+              )?.code;
+
+              getActiveTree(p).update(
+                `Prop ${name} Set Options`,
+                ({ tree }) => {
+                  if (tree.type === "item") {
+                    let meta = prepMeta(tree, name);
+                    if (meta) {
+                      meta.options = val;
+                      meta.optionsBuilt = source_built;
+                    }
+                  }
+                }
+              );
+            }}
+          />
+        )}
+
+        {!is_group && (
+          <FieldCode
+            label="Default"
+            default="''"
+            value={prop.value}
+            onChange={async (val) => {
+              const source_built = (
+                await jscript.transform?.(val.trim(), {
+                  jsx: "transform",
+                  format: "cjs",
+                  logLevel: "silent",
+                  loader: "tsx",
+                })
+              )?.code;
+
+              getActiveTree(p).update(
+                `Prop ${name} Set Options`,
+                ({ tree }) => {
+                  if (tree.type === "item" && tree.component) {
+                    tree.component.props[name].value = val;
+                    tree.component.props[name].valueBuilt = source_built;
+                  }
+                }
+              );
+            }}
+          />
+        )}
+
+        <FieldCode
+          label="Visible"
+          default="true"
+          value={prop.visible}
+          onChange={async (val) => {
+            getActiveTree(p).update(`Prop ${name} Set Visible`, ({ tree }) => {
+              if (tree.type === "item" && tree.component) {
+                tree.component.props[name].visible = val;
+              }
+            });
+          }}
+        />
+      </div>
     </div>
   );
 };
