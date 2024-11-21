@@ -96,7 +96,7 @@ export const EdPopCompPicker = () => {
           id: true,
           name: true,
           id_component_group: true,
-          component_ext: { select: { id: true } },
+          color: true,
         },
       });
       compPickerToNodes(p);

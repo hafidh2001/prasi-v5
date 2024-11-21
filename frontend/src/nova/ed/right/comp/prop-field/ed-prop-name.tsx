@@ -14,7 +14,7 @@ export const EdPropName = ({
     <div
       onClick={onClick}
       className={cx(
-        "flex items-center pl-3 select-none  overflow-hidden",
+        "flex items-center pl-2 select-none  overflow-hidden",
         field.meta?.type !== "list" && "flex-1 max-w-[100px]"
       )}
     >

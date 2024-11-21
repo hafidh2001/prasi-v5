@@ -66,6 +66,7 @@ export const loadScriptModels = async (arg: {
           content_tree: item,
           id: item.id,
           id_component_group: "",
+          color: "",
         });
         comp_def = p.comp.loaded[item_comp_id];
       }
@@ -219,7 +220,7 @@ export const loadScriptModels = async (arg: {
           let main_code = lines.slice(region_end + 1).join("\n");
           const region_code = generateRegion(model, script_models, { comp_id });
 
-          if (model.prop_name && !main_code.includes('export const')) {
+          if (model.prop_name && !main_code.includes("export const")) {
             main_code = `\nexport const ${model.prop_name} = (${main_code});`;
           }
 

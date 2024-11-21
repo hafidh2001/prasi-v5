@@ -9,7 +9,6 @@ export type CompPickerNode = {
   name: string;
   id: string;
   idx: string;
-  ext: boolean;
   render?: () => void;
 };
 export const compRenderPickerNode = (

@@ -5,7 +5,7 @@ import { createClient } from "utils/sync/client";
 import { ViRef } from "vi/lib/store";
 import { PageTree } from "../crdt/load-page-tree";
 import { CompPickerNode } from "../popup/comp/comp-picker/render-picker-node";
-import { EComp, EPage, ESite } from "./types";
+import { EBaseComp, EComp, EPage, ESite } from "./types";
 import { MonacoEditor } from "utils/script/typings";
 import { IItem } from "utils/types/item";
 
@@ -240,12 +240,7 @@ export const EDGlobal = {
         reload: async () => {},
         should_import: false,
         data: {
-          comps: [] as {
-            id: string;
-            name: string;
-            id_component_group: string | null;
-            component_ext?: { id: number }[];
-          }[],
+          comps: [] as (Omit<EBaseComp, "content_tree"> & { name: string })[],
           groups: [] as { id: string; name: string }[],
           nodes: [] as NodeModel<CompPickerNode>[],
         },

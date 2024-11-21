@@ -116,14 +116,15 @@ export const ${name} = \`${text}\`;
           )}
         />
       )}
+
       {mode === "button" && (
-        <div className="flex space-x-1 p-1">
+        <div className={cx("flex p-1 flex-wrap pb-0")}>
           {local.options.map((e, idx) => {
             return (
               <div
                 key={idx}
                 className={cx(
-                  "border px-1 rounded-[3px] cursor-pointer flex items-center justify-center",
+                  "border px-1 rounded-[3px] flex-nowrap cursor-pointer flex items-center justify-center mr-1 mb-1",
                   local.value === e.value
                     ? "bg-blue-500 text-white border-blue-500"
                     : "border hover:bg-blue-100"

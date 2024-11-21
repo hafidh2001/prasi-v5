@@ -118,7 +118,7 @@ export const EdCompPickerCtxMenu: FC<{
                       id: true,
                       name: true,
                       id_component_group: true,
-                      component_ext: { select: { id: true } },
+                      color: true,
                     },
                   });
 

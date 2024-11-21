@@ -21,7 +21,8 @@ export type EPage = Omit<page, "content_tree"> & {
 export type EBaseComp = {
   id: string;
   content_tree: IItem;
-  id_component_group: string;
+  id_component_group: string | null;
+  color: string | null;
 };
 export type EComp = EBaseComp & {
   tree: {

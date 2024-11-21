@@ -13,7 +13,6 @@ export const compPickerToNodes = (p: PG) => {
         name: group.name,
         type: "folder",
         idx: "",
-        ext: false
       },
     });
   }
@@ -29,7 +28,6 @@ export const compPickerToNodes = (p: PG) => {
           name: comp.name,
           type: "comp",
           idx: "",
-          ext: !!comp.component_ext?.length 
         },
       });
   }

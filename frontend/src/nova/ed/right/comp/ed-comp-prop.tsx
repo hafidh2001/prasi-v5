@@ -182,7 +182,7 @@ export const EdCompProp = () => {
                 <div
                   key={name}
                   className={cx(css`
-                    > div > .pl-3 {
+                    > div > .pl-2 {
                       border-left: 10px solid #ececeb;
                       padding-left: 5px;
                     }
