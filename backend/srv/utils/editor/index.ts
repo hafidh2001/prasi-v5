@@ -8,19 +8,17 @@ import {
   unregisterCompConnection,
 } from "./editor-comp-util";
 import { editorPageLoad } from "./editor-page-load";
-import { editorSiteLoad } from "./editor-site-load";
+import type { WSReceiveMsg } from "prasi-frontend/src/utils/sync/type";
+import { pack } from "msgpackr";
 
 type USER_ID = string;
+type SITE_ID = string;
 type CONN_ID = string;
+
 export const editor = {
   cache: null as unknown as ReturnType<typeof initCacheDb>,
   init() {
     this.cache = initCacheDb();
-  },
-  site: {
-    async load(site_id: string, opt?: { conn_id?: string }) {
-      return await editorSiteLoad(editor, site_id, opt);
-    },
   },
   comp: {
     comp_ids: {} as Record<string, Set<CONN_ID>>,
@@ -47,12 +45,12 @@ export const editor = {
     {
       user_id: string;
       page_id?: string;
-      site_id?: string;
+      site_id: string;
       ws: ServerWebSocket<WSContext>;
     }
   >,
+  site: {} as Record<SITE_ID, Set<CONN_ID>>,
   user: {} as Record<USER_ID, Set<CONN_ID>>,
-
   load_cached: (arg: {
     type: "route" | "prasi-load-js";
     key: string;
@@ -60,6 +58,19 @@ export const editor = {
   }) => {
     const { type, key, loader } = arg;
     return editor.internal.cache_get_set(type, key, loader);
+  },
+  broadcast(receiver: Partial<{ site_id: string }>, msg: WSReceiveMsg) {
+    if (receiver.site_id) {
+      const conns = editor.site[receiver.site_id];
+      if (conns) {
+        for (const conn_id of conns) {
+          const conn = editor.conn[conn_id];
+          if (conn) {
+            conn.ws.send(new Uint8Array(pack(msg)));
+          }
+        }
+      }
+    }
   },
 
   // #region internal
@@ -130,22 +141,6 @@ const initCacheDb = () => {
             nullable: false,
           },
           root: {
-            type: "BLOB",
-            nullable: false,
-          },
-          ts: {
-            type: "INTEGER",
-            nullable: false,
-          },
-        },
-      },
-      site: {
-        columns: {
-          site_id: {
-            type: "TEXT",
-            nullable: false,
-          },
-          data: {
             type: "BLOB",
             nullable: false,
           },

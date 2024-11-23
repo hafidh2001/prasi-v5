@@ -7,7 +7,7 @@ import { parseTypeDef } from "../parser/parse-type-def";
 import { compressed } from "../server/compressed";
 import type { ServerCtx } from "../server/ctx";
 
-export const prasiLoader = async ({
+export const siteProdPrasi = async ({
   pathname,
   site_id,
   ctx,
@@ -17,7 +17,7 @@ export const prasiLoader = async ({
   ctx: ServerCtx;
 }) => {
   const action = pathname.split("/")[1];
-  const site = g.site[site_id];
+  const site = g.site.loaded[site_id];
 
   const body: any = ctx.req.method === "POST" ? await ctx.req.json() : {};
 

@@ -1,13 +1,15 @@
 import { pack, unpack } from "msgpackr";
 import { PG } from "../../nova/ed/logic/ed-global";
 import { EBaseComp, EPage, ESite } from "../../nova/ed/logic/types";
+import { WSReceiveMsg } from "./type";
 
 export const clientStartSync = (arg: {
   p: PG;
   user_id: string;
-  site_id?: string;
+  site_id: string;
   page_id?: string;
   connected: (sync: ReturnType<typeof createClient>) => void;
+  siteLoading: (arg: { status: string }) => void;
 }) => {
   arg.p.sync = undefined;
   const reconnect = () => {
@@ -16,19 +18,21 @@ export const clientStartSync = (arg: {
     url.pathname = "/sync";
     const ws = new WebSocket(url);
     ws.onopen = () => {
-      ws.send(pack({ action: "open", user_id: arg.user_id }));
+      ws.send(
+        pack({ action: "open", user_id: arg.user_id, site_id: arg.site_id })
+      );
     };
 
     ws.onmessage = async ({ data }) => {
       if (data instanceof Blob) {
-        const msg = unpack(new Uint8Array(await data.arrayBuffer())) as {
-          action: "connected";
-          conn_id: string;
-        };
+        const msg = unpack(
+          new Uint8Array(await data.arrayBuffer())
+        ) as WSReceiveMsg;
         if (msg.action === "connected") {
           console.log("🚀 Prasi Connected");
           if (arg.p.sync) {
             arg.p.sync.ws = ws;
+            arg.p.site = msg.site;
             arg.p.sync.ping = setInterval(() => {
               ws.send(pack({ action: "ping" }));
             }, 90 * 1000);
@@ -36,6 +40,8 @@ export const clientStartSync = (arg: {
           } else {
             arg.connected(createClient(ws, arg.p, msg.conn_id));
           }
+        } else if (msg.action === "site-loading") {
+          arg.siteLoading({ status: msg.status });
         }
       }
     };
@@ -60,22 +66,6 @@ export const createClient = (ws: WebSocket, p: any, conn_id: string) => ({
   conn_id,
   ws,
   ping: null as null | Timer,
-  site: {
-    load: async (id: string) => {
-      return (await _api.site_load(id, { conn_id: p.user.conn_id })) as ESite;
-    },
-    group: async () => {
-      return [] as {
-        id: string;
-        name: string;
-        site: ESite[];
-        org_user: { user: { id: string; username: string } }[];
-      }[];
-    },
-  },
-  code: {
-    action: async () => {},
-  },
   comp: {
     undo: (comp_id: string, count: number) => {
       send(ws, { action: "undo", comp_id, count });

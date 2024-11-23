@@ -1,14 +1,13 @@
+import { navigate } from "utils/react/navigate";
+import { jscript } from "utils/script/jscript";
 import { validate } from "uuid";
 import { EdBase } from "../../nova/ed/ed-base";
 import { EDGlobal, PG } from "../../nova/ed/logic/ed-global";
 import { initSync, loadSession } from "../../nova/ed/logic/ed-sync";
-import { EdFormSite } from "../../nova/ed/popup/site/site-form";
 import { page } from "../../utils/react/page";
 import { useGlobal } from "../../utils/react/use-global";
 import { useLocal } from "../../utils/react/use-local";
 import { Loading } from "../../utils/ui/loading";
-import { jscript } from "utils/script/jscript";
-import { navigate } from "utils/react/navigate";
 
 jscript.init();
 
@@ -27,23 +26,7 @@ export default page({
     if (p.status === "no-site") {
       return (
         <div className="flex-1 flex flex-col items-center justify-center">
-          {local.new_site ? (
-            <EdFormSite
-              group_id=""
-              site={{}}
-              onSave={(data) => {
-                if (data) {
-                  location.href = `/ed/${data.id}/_`;
-                }
-              }}
-              onClose={() => {}}
-              header={
-                <div className="border-b border-blue-500 text-xl">
-                  Create New Site
-                </div>
-              }
-            />
-          ) : (
+          {!local.new_site && (
             <div className="flex flex-col p-10 rounded-lg border shadow-2xl">
               <div className="text-3xl">Welcome to Prasi</div>
               <div className="">
@@ -105,6 +88,10 @@ export default page({
         navSitePage(p);
       }
       return <Loading note="finding-page" />;
+    }
+
+    if (!p.site) {
+      return <Loading note={p.ui.site.loading_status} />;
     }
 
     return <EdBase />;

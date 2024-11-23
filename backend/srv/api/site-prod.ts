@@ -1,9 +1,8 @@
 import { waitUntil } from "prasi-utils";
-import { prasiLoader } from "../utils/loader/prasi-prod";
-import { rebuildSite, siteLoaded, siteLoading } from "../utils/loader/site";
 import type { ServerCtx } from "../utils/server/ctx";
 import { prodIndex } from "../utils/server/prod-index";
-import { editor } from "../utils/editor";
+import { siteProdPrasi } from "../utils/site/site-prod-prasi";
+import { siteInit } from "../utils/site/site-init";
 
 export default {
   url: "/prod/:site_id/**",
@@ -11,38 +10,25 @@ export default {
     const { params } = ctx;
     const site_id = params.site_id as string;
     const pathname = params._ as string;
-    if (!siteLoaded(site_id)) {
-      if (!siteLoading(site_id)) {
-        editor.site.load(site_id);
-      }
-      if (pathname.endsWith(".js")) {
-        return new Response(
-          `\
-console.log("Building frontend...");
-setTimeout(() => { location.reload() }, 2000)
-`,
-          {
-            headers: { "content-type": "text/javascript" },
-          }
-        );
-      }
-      return new Response(
-        `\
-<div style="font-family:monospace;">
-Loading Site...
-</div>
-<script>setTimeout(() =>{ location.reload() }, 2000)</script>`,
-        {
-          headers: { "content-type": "text/html" },
-        }
-      );
-    }
 
-    const site = g.site[site_id];
+    const site = g.site.loaded[site_id];
+
+    if (!site) {
+      siteInit(site_id);
+      return new Response(`\
+Loading Site: ${site_id}
+Status: ${g.site.loading[site_id].status}
+<script>
+setTimeout(() => {
+  window.location.reload();
+}, 1000);
+</script>
+`);
+    }
 
     if (site && pathname) {
       if (pathname.startsWith("_prasi")) {
-        return await prasiLoader({ pathname, site_id, ctx });
+        return await siteProdPrasi({ pathname, site_id, ctx });
       }
 
       if (pathname !== "index.html") {

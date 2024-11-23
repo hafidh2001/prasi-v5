@@ -25,18 +25,18 @@ export const loadSession = (p: PG) => {
 export const initSync = (p: PG) => {
   loadSession(p);
 
-  if (p.sync === null) {
+  if (p.sync === null && params.site_id) {
     clientStartSync({
       p,
       user_id: p.user.id,
       site_id: params.site_id,
       page_id: params.page_id,
+      siteLoading({ status }) {
+        p.ui.site.loading_status = status;
+        p.render();
+      },
       async connected(sync) {
         p.sync = sync;
-        p.status = "ready";
-        p.site = await p.sync!.site.load(params.site_id);
-        prasi.site.name = p.site.name;
-        prasi.site.id = p.site.id;
 
         const page = (await p.sync!.page.load(params.page_id)) as EPage;
         if (!page) {

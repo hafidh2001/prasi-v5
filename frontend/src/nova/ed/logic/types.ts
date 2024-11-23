@@ -1,9 +1,13 @@
 import { page, site } from "prasi-db";
 import { IItem } from "../../../utils/types/item";
+import { SiteSettings } from "../cprasi/lib/typings";
 
 export type SyncUndoItem = { id: number; ts: number; size: string };
 
-export type ESite = Omit<site, "config"> & { config: { api_url: string } };
+export type ESite = Omit<site, "config" | "settings"> & {
+  config: { api_url: string };
+  settings: SiteSettings;
+};
 
 export type EPageContentTree = {
   childs: IItem[];

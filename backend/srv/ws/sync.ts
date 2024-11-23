@@ -6,6 +6,7 @@ import type { WSContext } from "../utils/server/ctx";
 import { unregisterCompConnection } from "../utils/editor/editor-comp-util";
 import { crdt_comps, crdt_pages } from "./crdt/shared";
 import type { UndoManager } from "yjs";
+import { siteInit } from "../utils/site/site-init";
 
 export const wsSyncClose = (ws: ServerWebSocket<WSContext>) => {
   const conn_id = editor.ws.get(ws);
@@ -14,6 +15,7 @@ export const wsSyncClose = (ws: ServerWebSocket<WSContext>) => {
     const conn = editor.conn[conn_id];
     if (conn) {
       editor.user[conn.user_id].delete(conn_id);
+      editor.site[conn.site_id].delete(conn_id);
     }
     delete editor.conn[conn_id];
 
@@ -25,7 +27,7 @@ export const wsSyncClose = (ws: ServerWebSocket<WSContext>) => {
 export const wsSync = (
   ws: ServerWebSocket<WSContext>,
   msg:
-    | { action: "open"; user_id: string }
+    | { action: "open"; user_id: string; site_id: string }
     | {
         action: "pending_action";
         comp_id?: string;
@@ -40,10 +42,21 @@ export const wsSync = (
       {
         const conn_id = createId();
         editor.ws.set(ws, conn_id);
-        editor.conn[conn_id] = { ws, user_id: msg.user_id };
+        editor.conn[conn_id] = {
+          ws,
+          user_id: msg.user_id,
+          site_id: msg.site_id,
+        };
         if (!editor.user[msg.user_id]) editor.user[msg.user_id] = new Set();
+        if (!editor.site[msg.site_id]) editor.site[msg.site_id] = new Set();
         editor.user[msg.user_id].add(conn_id);
-        ws.send(pack({ action: "connected", conn_id }));
+        editor.site[msg.site_id].add(conn_id);
+
+        ws.send(new Uint8Array(pack({ action: "connected", conn_id })));
+
+        if (!g.site.loaded[msg.site_id]) {
+          siteInit(msg.site_id);
+        }
       }
       break;
     case "pending_action":

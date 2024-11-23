@@ -20,7 +20,7 @@ export const EDGlobal = {
     | "page-not-found"
     | "ready"
     | "no-site",
-  site: { config: {} } as ESite,
+  site: null as null | ESite,
   page: {
     cur: null as unknown as EPage,
     tree: null as unknown as PageTree,
@@ -53,6 +53,9 @@ export const EDGlobal = {
     history: [] as { comp_id?: string; item_id: string; ui?: any }[],
   },
   ui: {
+    site: {
+      loading_status: "loading-site",
+    },
     topbar: {
       render: () => {},
       mode: "page" as "page" | "bundle" | "deploy",
