@@ -1,15 +1,14 @@
 import type { ServerWebSocket } from "bun";
-import { unlinkSync } from "node:fs";
 import { dir } from "../dir";
 import type { WSContext } from "../server/ctx";
 import BunORM from "../sqlite";
-import { editorPageLoad } from "./editor-page-load";
-import { editorSiteLoad } from "./editor-site-load";
+import { editorCompLoad } from "./editor-comp-load";
 import {
   registerCompConnections,
   unregisterCompConnection,
 } from "./editor-comp-util";
-import { editorCompLoad, type EditorCompSingleCache } from "./editor-comp-load";
+import { editorPageLoad } from "./editor-page-load";
+import { editorSiteLoad } from "./editor-site-load";
 
 type USER_ID = string;
 type CONN_ID = string;

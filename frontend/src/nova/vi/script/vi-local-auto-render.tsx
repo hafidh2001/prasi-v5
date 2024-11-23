@@ -16,10 +16,11 @@ export const ViLocalAutoRender = (opt: {
   merged: ViMergedProps;
   deps?: any[];
 }) => {
-  const { local_render, local_value, item, value, effect, children } = opt;
+  const { local_render, local_value, item, value, effect, children, deps } =
+    opt;
 
-  if (!local_value[opt.name]) {
-    local_value[opt.name] = {
+  const resetLocal = () => {
+    const local = {
       __autorender: true,
       [local_name]: value[local_name],
       __version: 0,
@@ -33,7 +34,12 @@ export const ViLocalAutoRender = (opt: {
         }),
       }),
     };
-    local_value[opt.name].proxy.set = ref(local_value[opt.name].proxy);
+    local.proxy.set = ref(local.proxy);
+    return local;
+  };
+
+  if (!local_value[opt.name]) {
+    local_value[opt.name] = resetLocal();
   }
 
   opt.merged[opt.name] = local_value[opt.name];
@@ -57,6 +63,13 @@ export const ViLocalAutoRender = (opt: {
       }
     }
   }, [valtio_version]);
+
+  useEffect(() => {
+    if ((deps || []).length > 0 && internal.__version > 0) {
+      local_value[opt.name] = resetLocal();
+      effect(internal.proxy);
+    }
+  }, [...(deps || [])]);
 
   return children;
 };

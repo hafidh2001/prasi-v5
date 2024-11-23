@@ -10,9 +10,6 @@ export default {
     const path = params._;
     switch (true) {
       case path === "editor-typings.d.ts": {
-        const prisma_runtime = await Bun.file(
-          dir.root("./node_modules/@prisma/client/runtime/library.d.ts")
-        ).text();
         const prasi_prisma = await Bun.file(
           dir.root(`./node_modules/.prisma/client/index.d.ts`)
         ).text();
@@ -26,7 +23,8 @@ declare module "prasi-prisma" {
 ${prasi_prisma}
 }
 ${prasi}
-`
+`,
+          { br: "editor-typings" }
         );
         break;
       }

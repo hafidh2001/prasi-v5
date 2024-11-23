@@ -1,5 +1,5 @@
 import { DeepReadonly } from "popup/flow/runtime/types";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { IItem } from "utils/types/item";
 import { ViMergedProps } from "vi/lib/types";
 import { ViLocalAutoRender } from "./vi-local-auto-render";
@@ -19,12 +19,15 @@ export const createViLocal = (
     proxy?: any;
     effect: (local: any) => void;
     children: any;
+    deps?: any[];
   }) => {
     let children = opt.children || {};
     children = {
       ...children,
       props: { ...(children.props || {}), merged },
     };
+
+    const deps = useRef({ init: false }).current;
 
     if (opt.value[render_mode] === "auto") {
       return (
@@ -39,21 +42,36 @@ export const createViLocal = (
       );
     }
 
-    if (Object.keys(local_value).length === 0) {
+    const resetLocal = () => {
       local_value[opt.name] = {
         ...opt.value,
         render() {
           local_render[item.id]();
         },
       };
+    };
+    if (Object.keys(local_value).length === 0) {
+      resetLocal();
     }
     for (const [k, v] of Object.entries(local_value)) {
       merged[k] = v;
     }
 
     useEffect(() => {
-      opt.effect(local_value[item.id]);
+      opt.effect(local_value[opt.name]);
     }, []);
+
+    useEffect(() => {
+      if ((opt.deps || []).length > 0) {
+        if (!deps.init) {
+          deps.init = false;
+          return;
+        } else {
+          resetLocal();
+          opt.effect(local_value[opt.name]);
+        }
+      }
+    }, opt.deps || []);
 
     return children;
   };
