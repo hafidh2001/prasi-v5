@@ -15,15 +15,21 @@ export default {
 
     if (!site) {
       siteInit(site_id);
-      return new Response(`\
-Loading Site: ${site_id}
-Status: ${g.site.loading[site_id].status}
+      return new Response(
+        `\
+<pre>
+${g.site.loading[site_id].status}
+------------------------------------
+${site_id}
+</pre>
 <script>
 setTimeout(() => {
   window.location.reload();
 }, 1000);
 </script>
-`);
+`,
+        { headers: { "content-type": "text/html" } }
+      );
     }
 
     if (site && pathname) {
