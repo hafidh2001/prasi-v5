@@ -18,7 +18,8 @@ export type PrasiSite = {
 };
 export type PrasiSiteLoading = {
   status: string;
-  data: null | ESite;
+  data?: ESite;
+  mode?: "new" | "upgrade" | "run";
 };
 export interface PrasiGlobal {
   reloadCount: number;

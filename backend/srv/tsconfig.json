@@ -1,5 +1,11 @@
 {
   "compilerOptions": {
+    "paths": {
+      "utils/*": ["./utils/*"],
+      "dev/*": ["./dev/*"],
+      "api/*": ["./api/*"]
+    },
+
     // Enable latest features
     "lib": ["ESNext", "DOM"],
     "target": "ESNext",

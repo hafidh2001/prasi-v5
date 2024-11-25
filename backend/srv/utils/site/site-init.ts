@@ -7,7 +7,6 @@ export const siteInit = async (site_id: string) => {
     if (!g.site.loading[site_id]) {
       g.site.loading[site_id] = {
         status: "",
-        data: null
       };
       siteLoadingMessage(site_id, "Site Initializing...");
     }
