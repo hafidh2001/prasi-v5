@@ -54,9 +54,7 @@ export const wsSync = (
 
         ws.send(new Uint8Array(pack({ action: "connected", conn_id })));
 
-        if (!g.site.loaded[msg.site_id]) {
-          siteInit(msg.site_id);
-        }
+        siteInit(msg.site_id, conn_id);
       }
       break;
     case "pending_action":

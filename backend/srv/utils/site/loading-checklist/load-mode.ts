@@ -3,14 +3,14 @@ import type { PrasiSiteLoading } from "../../global";
 import { siteLoadingMessage } from "./loading-msg";
 import { siteRun } from "./site-run";
 
-export const siteLoadingCheckDir = async (
+export const siteLoadingMode = async (
   site_id: string,
   loading: PrasiSiteLoading
 ) => {
   siteLoadingMessage(site_id, "Checking files...");
 
   const old_exists = await fs.exists(`code:${site_id}/site/src/index.tsx`);
-  if (!old_exists) {
+  if (old_exists) {
     loading.mode = "upgrade";
   } else {
     const new_exists = await fs.exists(`code:${site_id}/vsc/index.tsx`);
@@ -21,4 +21,5 @@ export const siteLoadingCheckDir = async (
       siteRun(site_id, loading);
     }
   }
-};
+  return loading.mode;
+}; 

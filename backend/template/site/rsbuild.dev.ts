@@ -21,7 +21,7 @@ export default defineConfig({
   server: {
     open: "",
     compress: false,
-    base: "/prod/site_id"
+    base: "/prod/[[site_id]]"
   },
 
   mode: "production",

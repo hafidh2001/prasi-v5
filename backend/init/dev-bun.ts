@@ -1,3 +1,6 @@
+/**
+ * this code is unused, still here because when someday bun compilation is correct we can replace dev.ts with this
+ */
 import { $, build } from "bun";
 import { watch } from "fs";
 process.chdir("./frontend");
@@ -12,8 +15,6 @@ const rebuildPrasi = async () => {
     entrypoints: ["./src/index.tsx"],
     outdir: "../build",
     splitting: true,
-    // sourcemap: "linked",
-    // minify: true,
     external: ["react", "react-dom"],
     target: "browser",
     define: {

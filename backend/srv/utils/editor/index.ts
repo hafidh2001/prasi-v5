@@ -59,6 +59,12 @@ export const editor = {
     const { type, key, loader } = arg;
     return editor.internal.cache_get_set(type, key, loader);
   },
+  send: (conn_id: CONN_ID, msg: WSReceiveMsg) => {
+    const conn = editor.conn[conn_id];
+    if (conn) {
+      conn.ws.send(new Uint8Array(pack(msg)));
+    }
+  },
   broadcast(receiver: Partial<{ site_id: string }>, msg: WSReceiveMsg) {
     if (receiver.site_id) {
       const conns = editor.site[receiver.site_id];
