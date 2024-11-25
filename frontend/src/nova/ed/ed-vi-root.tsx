@@ -17,8 +17,8 @@ import { prasi } from "./cprasi/lib/prasi";
 export const EdViRoot = memo(() => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const ref = useRef({
-    db: dbProxy(p.site.config.api_url),
-    api: apiProxy(p.site.config.api_url),
+    db: dbProxy(p.site!.config.api_url),
+    api: apiProxy(p.site!.config.api_url),
     page: null as ViPageRoot | null,
     comps: {} as ViComps,
     wrapper: ViWrapper({
@@ -38,7 +38,9 @@ export const EdViRoot = memo(() => {
     (async () => {
       ref.exports.status = "loading";
 
-      const fn = new Function(`return import('/prod/${p.site.id}/index.js');`);
+      const fn = new Function(
+        `return import('/prod/${p.site!.id}/js/index.js');`
+      );
       ref.exports.values = { ...(await fn()), prasi };
 
       ref.exports.status = "done";

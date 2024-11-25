@@ -30,7 +30,6 @@ export const clientStartSync = (arg: {
           new Uint8Array(await data.arrayBuffer())
         ) as WSReceiveMsg;
         if (msg.action === "connected") {
-          console.log("connected");
           console.log("🚀 Prasi Connected");
           if (p.sync) {
             p.sync.ws = ws;
@@ -41,7 +40,6 @@ export const clientStartSync = (arg: {
           } else {
             p.sync = createClient(ws, p, msg.conn_id);
           }
-          createClient(ws, p, msg.conn_id);
         } else if (msg.action === "site-loading") {
           p.ui.site.loading_status = msg.status;
           p.render();

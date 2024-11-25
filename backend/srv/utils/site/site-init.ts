@@ -13,7 +13,7 @@ export const siteInit = async (site_id: string, conn_id?: string) => {
       g.site.loading[site_id] = {
         status: "",
         build: {},
-      };
+      }; 
       loading = g.site.loading[site_id];
       siteLoadingMessage(site_id, "Site Initializing...");
 

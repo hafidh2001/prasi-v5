@@ -13,9 +13,11 @@ import { extractRegion, removeRegion } from "./js/migrate-code";
 import { replaceString } from "./js/replace-string";
 import { typingsItem } from "./js/typings-item";
 
+export const PRASI_CORE_SITE_ID = "a0170f25-a9d9-4646-a970-f1c2e5747971";
+
 export const prasiTypings = async (p: PG) => {
   let editor_typings = [] as any[];
-  if (!p.script.typings_vscode) {
+  if (!p.script.typings_vscode && p.site) {
     let res = await fetch(`/prod/${p.site.id}/typings/index.d.ts`);
     p.script.typings_vscode = await res.text();
     const def = await fetch(`/prod/${p.site.id}/_prasi/type_def`);
@@ -48,9 +50,7 @@ export {}
     },
   ];
 
-  if (
-    location.pathname.startsWith("/ed/a0170f25-a9d9-4646-a970-f1c2e5747971")
-  ) {
+  if (location.pathname.startsWith(`/ed/${PRASI_CORE_SITE_ID}`)) {
     const res = await fetch(`/_prasi/editor-typings.d.ts`);
     editor_typings.push(
       {
@@ -468,7 +468,7 @@ export const codeUpdate = {
           () => {
             _api._compressed.code_history({
               mode: "update",
-              site_id: this.p?.site.id,
+              site_id: this.p?.site?.id,
               selector: Object.values(this.queue).map((e) => {
                 return {
                   comp_id: active.comp_id ? active.comp_id : undefined,

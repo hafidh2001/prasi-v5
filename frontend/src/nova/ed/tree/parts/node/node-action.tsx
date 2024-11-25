@@ -1,9 +1,7 @@
 import { NodeModel, RenderParams } from "@minoru/react-dnd-treeview";
 import { loadCompTree } from "crdt/load-comp-tree";
 import { getNodeById, updateNodeById } from "crdt/node/get-node-by-id";
-import {
-  AudioWaveform
-} from "lucide-react";
+import { AudioWaveform } from "lucide-react";
 import { iconExpr } from "popup/expr/parts/expr-icon";
 import { waitUntil } from "prasi-utils";
 import { useGlobal } from "../../../../../utils/react/use-global";
@@ -13,7 +11,6 @@ import { EDGlobal } from "../../../logic/ed-global";
 import { PNode } from "../../../logic/types";
 export const EdTreeAction = ({
   raw,
-  render_params,
 }: {
   raw: NodeModel<PNode>;
   render_params: RenderParams;
@@ -175,7 +172,7 @@ export const EdTreeAction = ({
           {comp.id !== active.comp?.id && p.ui.comp.editable && (
             <Tooltip content="Edit Component">
               <div
-                className="node-action flex items-center border border-slate-500 bg-white rounded-sm text-[10px] px-[2px] cursor-pointer hover:bg-purple-100 hover:border-purple-600"
+                className="node-action flex items-center border ml-1 border-slate-500 bg-white rounded-sm text-[10px] px-[2px] cursor-pointer hover:bg-purple-100 hover:border-purple-600"
                 onClick={async (e) => {
                   e.stopPropagation();
                   e.preventDefault();

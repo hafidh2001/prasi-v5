@@ -1,6 +1,8 @@
-import { $, argv } from "bun";
-import { c } from "../srv/utils/color";
+import { argv } from "bun";
+import { fs } from "utils/fs";
 import { spawn } from "utils/spawn";
+import { c } from "../srv/utils/color";
+
 const is_debug = argv.includes("debug");
 
 declare global {
@@ -21,12 +23,20 @@ const dev = {
           site_port: dev.site_port,
         });
       }
-    }, 
-    mode: "passthrough",
+    },
+    onMessage(arg) {
+      dev.rsbuild_print = true;
+      process.stdout.write(arg.raw);
+    },
   }),
+  rsbuild_print: false,
   prasi_port: 0,
   site_port: 0,
 };
+
+if (!(await fs.exists("data:static-site"))) {
+  dev.rsbuild_print = true;
+}
 
 const getPort = (text: string) => {
   return parseInt(
@@ -59,6 +69,8 @@ const run = (cmd: string, cwd: string, prefix: string) => {
         is_ready = true;
       }
       if (is_ready || is_debug) {
+        if (!dev.rsbuild_print) return;
+
         process.stdout.write(prefix);
         process.stdout.write(raw);
       }
@@ -72,13 +84,17 @@ if (globalThis.reloadCount === 1) {
       `bun run --silent dev`,
       `frontend`,
       `${c.red}PRASI ▷  ${c.esc}`
-    ),
+    ).then(() => {
+      "rsbuild: frontend exited";
+    }),
     frontsite: run(
       `bunx rsbuild dev -m production`,
       `frontend/src/nova/prod`,
       `${c.magenta}SITES ▷  ${c.esc}`
-    ),
+    ).then(() => {
+      "rsbuild: site exited";
+    }),
   };
 
-  await Promise.all([dev.backend, rsbuild.frontend, rsbuild.frontsite]);
+  await Promise.all([dev.backend.exited, rsbuild.frontend, rsbuild.frontsite]);
 }

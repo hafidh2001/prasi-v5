@@ -134,7 +134,7 @@ export const EdTreeNodeName: FC<{
 
             {(local_name || loop_name || has_error) && (
               <div className="flex flex-1 items-center justify-end">
-                {loop_name && (
+                {loop_name && !item.component?.id && (
                   <div
                     className={cx(
                       " text-green-600 node-text px-1 border border-l-4 border-green-600 rounded-l-[3px] flex items-center text-[9px] font-mono",
@@ -145,7 +145,7 @@ export const EdTreeNodeName: FC<{
                     {loop_name}
                   </div>
                 )}
-                {local_name && (
+                {local_name && !item.component?.id && (
                   <div
                     className={cx(
                       " text-blue-600 node-text px-1 border border-l-4 border-blue-600 rounded-l-[3px] flex items-center text-[9px] font-mono",

@@ -142,7 +142,6 @@ const navSitePage = (p: PG) => {
 
     if (!p.page.cur?.id) {
       if (e && e.id && e.id_site) {
-        alert("2");
         location.href = `/ed/${e.id_site}/${e.id}`;
       } else {
         const e = await _db.page.findFirst({
@@ -169,8 +168,6 @@ const navSitePage = (p: PG) => {
         });
 
         if (e && e.id && e.id_site) {
-          alert("3");
-
           location.href = `/ed/${e.id_site}/${e.id}`;
         } else {
           const e = await _db.page.findFirst({
@@ -193,7 +190,6 @@ const navSitePage = (p: PG) => {
           });
           if (e) {
             if (e.id && e.id_site) {
-              alert("1");
               location.href = `/ed/${e.id_site}/${e.id}`;
             } else {
               p.status = "no-site";
@@ -213,7 +209,6 @@ const navSitePage = (p: PG) => {
                   id_site: params.site_id,
                 },
               });
-              alert("4");
 
               location.href = `/ed/${params.site_id}/${page.id}`;
               return;

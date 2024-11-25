@@ -40,6 +40,6 @@ export default defineConfig({
       js: "source-map",
     },
     distPath: { root: "./dist/prod" },
-    filename: { js: `[name].bundle.js` },
+    filename: { js: `[name].js` },
   },
 });

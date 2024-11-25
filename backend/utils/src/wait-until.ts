@@ -1,12 +1,12 @@
 export const waitUntil = (
   condition: number | (() => any),
-  timeout?: number
+  arg?: { timeout?: number; interval?: number }
 ) => {
   return new Promise<void>(async (resolve) => {
     if (typeof condition === "function") {
       let tout = null as any;
-      if (timeout) {
-        tout = setTimeout(resolve, timeout);
+      if (arg?.timeout) {
+        tout = setTimeout(resolve, arg?.timeout);
       }
       if (await condition()) {
         clearTimeout(tout);
@@ -23,7 +23,7 @@ export const waitUntil = (
         if (count > 100) {
           clearInterval(c);
         }
-      }, 10);
+      }, arg?.interval || 10);
     } else if (typeof condition === "number") {
       setTimeout(() => {
         resolve();

@@ -1,18 +1,26 @@
-import { Readable } from "node:stream";
 import { spawn as bunSpawn, type Subprocess } from "bun";
+import { Readable } from "node:stream";
 
-export const spawn = (arg: {
-  cmd: string;
-  cwd?: string;
-  log?: false | { max_lines: number };
-  ipc?(message: any, subprocess: Subprocess): void;
-  onMessage?: (arg: {
-    from: "stdout" | "stderr";
-    text: string;
-    raw: string;
-  }) => void;
-  mode?: "pipe" | "passthrough";
-}) => {
+export const spawn = (
+  arg: {
+    cmd: string;
+    cwd?: string;
+    log?: false | { max_lines: number };
+    ipc?(message: any, subprocess: Subprocess): void;
+  } & (
+    | {
+        onMessage: (arg: {
+          from: "stdout" | "stderr";
+          text: string;
+          raw: string;
+        }) => void;
+        mode?: "pipe";
+      }
+    | {
+        mode?: "passthrough";
+      }
+  )
+) => {
   const log = {
     lines: 0,
     text: [] as string[],
@@ -40,8 +48,9 @@ export const spawn = (arg: {
         }
       }
 
-      if (arg.onMessage) {
-        arg.onMessage({ from: from, text, raw });
+      const on_msg = (arg as any).onMessage;
+      if (arg.mode !== "passthrough" && on_msg) {
+        on_msg({ from: from, text, raw });
       }
     }
   }

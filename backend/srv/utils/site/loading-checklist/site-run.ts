@@ -1,12 +1,20 @@
 import { $ } from "bun";
+import { platform } from "os";
+import { waitUntil } from "prasi-utils";
 import { fs } from "utils/fs";
 import type { PrasiSiteLoading } from "utils/global";
-import { siteBroadcastBuildLog, siteLoadingMessage } from "./loading-msg";
 import { spawn } from "utils/spawn";
-import { platform } from "os";
+import { siteBroadcastBuildLog, siteLoadingMessage } from "./loading-msg";
 import { siteReady } from "./site-ready";
 
 export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
+  await waitUntil(
+    async () =>
+      (await fs.exists(`code:${site_id}/vsc/package.json`)) &&
+      (await fs.exists(`code:${site_id}/vsc/rsbuild.dev.ts`)),
+    { interval: 1000 }
+  );
+
   await fs.modify({
     path: `code:${site_id}/vsc/package.json`,
     save(content) {
@@ -24,9 +32,16 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   });
 
   siteLoadingMessage(site_id, "Installing dependencies...");
-  if (!loading.deps_install)
-    loading.deps_install = $`bun i`.quiet().cwd(fs.path(`code:${site_id}/vsc`));
-  await loading.deps_install;
+  if (!loading.deps_install) {
+    loading.deps_install = spawn({
+      cmd: `bun i`,
+      cwd: fs.path(`code:${site_id}/vsc`),
+      onMessage(arg) {
+        siteBroadcastBuildLog(site_id, arg.text);
+      },
+    });
+  }
+  await loading.deps_install.exited;
 
   siteLoadingMessage(site_id, "Starting RSBuild...");
 

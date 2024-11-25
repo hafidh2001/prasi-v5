@@ -54,8 +54,8 @@ export const useProdState = defineStore({
         const fn = new Function(
           location.hostname === "prasi.avolut.com" ||
           location.pathname.startsWith(`/prod/${site_id}`)
-            ? `return import('/prod/${site_id}/index.js');`
-            : `return import('/index.js');`
+            ? `return import('/prod/${site_id}/js/index.js');`
+            : `return import('/js/index.js');`
         );
 
         loadRouter().then(({ router, pages, site, layout }) => {

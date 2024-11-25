@@ -19,6 +19,7 @@ import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
 import { Tooltip } from "utils/ui/tooltip";
 import { CPrasi } from "./cprasi/cprasi";
+import { PRASI_CORE_SITE_ID } from "popup/script/code/prasi-code-update";
 
 export const navPrevItem = (p: PG) => {
   p.nav.navigating = true;
@@ -304,15 +305,17 @@ export const EdTopBar = () => {
         )}
 
         <ButtonBox>
-          <Button
-            href={`/prod/${p.site.id}${
-              p.page.cur.url.startsWith("/")
-                ? p.page.cur.url
-                : `/${p.page.cur.url}`
-            }`}
-          >
-            <ExternalLink size={12} /> <div>Preview</div>
-          </Button>
+          {p.site!.id !== PRASI_CORE_SITE_ID && (
+            <Button
+              href={`/prod/${p.site!.id}${
+                p.page.cur.url.startsWith("/")
+                  ? p.page.cur.url
+                  : `/${p.page.cur.url}`
+              }`}
+            >
+              <ExternalLink size={12} /> <div>Preview</div>
+            </Button>
+          )}
         </ButtonBox>
       </div>
     </div>

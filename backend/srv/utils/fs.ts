@@ -6,7 +6,10 @@ const internal = Symbol("internal");
 
 export const fs = {
   async exists(path: string) {
-    return await Bun.file(this.path(path)).exists();
+    try {
+      return await Bun.file(this.path(path)).exists();
+    } catch (e) {}
+    return false;
   },
   path(path: string) {
     const all_prefix = this[internal].prefix as Record<string, string>;

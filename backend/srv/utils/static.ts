@@ -9,17 +9,16 @@ import { addRoute, createRouter, findRoute } from "rou3";
 import { dir } from "./dir";
 import type { ServerCtx } from "./server/ctx";
 
-if (!g.static_cache) {
-  await removeAsync(dir.data(`static-cache.db`));
-  g.static_cache = new BunSqliteKeyValue(dir.data(`static-cache.db`));
-}
- 
-const store = g.static_cache;
-
 export const staticFile = async (
   path: string,
-  opt: { index: boolean; debug?: boolean }
+  opt?: { index?: string; debug?: boolean }
 ) => {
+  if (!g.static_cache) {
+    await removeAsync(dir.data(`static-cache.db`));
+    g.static_cache = new BunSqliteKeyValue(dir.data(`static-cache.db`));
+  }
+  const store = g.static_cache;
+
   const glob = new Glob("**");
 
   const internal = {
@@ -68,7 +67,7 @@ export const staticFile = async (
         }
       }
 
-      if (opt.index) {
+      if (opt?.index) {
         return new Response(internal.index);
       }
     },
@@ -86,7 +85,7 @@ export const staticFile = async (
       }
 
       for await (const file of glob.scan(path)) {
-        if (file === "index.html") internal.index = Bun.file(join(path, file));
+        if (file === opt?.index) internal.index = Bun.file(join(path, file));
 
         static_file.paths.add(join(path, file));
 
