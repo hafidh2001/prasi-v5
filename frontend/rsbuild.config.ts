@@ -32,4 +32,8 @@ export default defineConfig({
     distPath: { root: "../../data/prasi-static" },
     filename: { js: `[name].bundle.js` },
   },
+
+  server: {
+    port: 14315,
+  },
 });

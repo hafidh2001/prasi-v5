@@ -8,3 +8,7 @@ export const siteLoadingMessage = (site_id: string, status: string) => {
     { action: "site-loading", status: loading.status }
   );
 };
+
+export const siteBroadcastBuildLog = (site_id: string, log: string) => {
+  editor.broadcast({ site_id }, { action: "site-build-log", log });
+};

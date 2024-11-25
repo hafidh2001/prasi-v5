@@ -27,6 +27,17 @@ export const siteInit = async (site_id: string, conn_id?: string) => {
       }
     } else if (conn_id) {
       editor.send(conn_id, { action: "site-loading", status: loading.status });
+      if (loading.build.rsbuild) {
+        editor.send(conn_id, {
+          action: "site-build-log",
+          log: loading.build.rsbuild.log.text.slice(-2).join("\n"),
+        });
+      }
     }
+  } else if (conn_id) {
+    editor.send(conn_id, {
+      action: "site-ready",
+      site: g.site.loaded[site_id].data,
+    });
   }
 };

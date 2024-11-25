@@ -11,10 +11,12 @@ import { asset } from "./utils/server/asset";
 import { dir } from "./utils/dir";
 import { existsAsync } from "fs-jetpack";
 import { waitUntil } from "prasi-utils";
+import { setupDevPort } from "dev/port";
 
 editor.init();
 api.init();
 if (g.mode === "dev") {
+  setupDevPort();
   const path = dir.data(`/site-static`);
   if (!(await existsAsync(path))) {
     await waitUntil(() => existsAsync(path));

@@ -8,10 +8,10 @@ export const clientStartSync = (arg: {
   user_id: string;
   site_id: string;
   page_id?: string;
-  connected: (sync: ReturnType<typeof createClient>) => void;
-  siteLoading: (arg: { status: string }) => void;
+  siteLoaded: (sync: ReturnType<typeof createClient>) => void;
 }) => {
-  arg.p.sync = undefined;
+  const p = arg.p;
+  p.sync = undefined;
   const reconnect = () => {
     const url = new URL(location.href);
     url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
@@ -21,6 +21,7 @@ export const clientStartSync = (arg: {
       ws.send(
         pack({ action: "open", user_id: arg.user_id, site_id: arg.site_id })
       );
+      p.ui.site.build_log = [];
     };
 
     ws.onmessage = async ({ data }) => {
@@ -29,25 +30,38 @@ export const clientStartSync = (arg: {
           new Uint8Array(await data.arrayBuffer())
         ) as WSReceiveMsg;
         if (msg.action === "connected") {
+          console.log("connected");
           console.log("🚀 Prasi Connected");
-          if (arg.p.sync) {
-            arg.p.sync.ws = ws;
-            arg.p.site = msg.site;
-            arg.p.sync.ping = setInterval(() => {
+          if (p.sync) {
+            p.sync.ws = ws;
+            p.sync.ping = setInterval(() => {
               ws.send(pack({ action: "ping" }));
             }, 90 * 1000);
-            arg.p.render();
+            p.render();
           } else {
-            arg.connected(createClient(ws, arg.p, msg.conn_id));
+            p.sync = createClient(ws, p, msg.conn_id);
           }
+          createClient(ws, p, msg.conn_id);
         } else if (msg.action === "site-loading") {
-          arg.siteLoading({ status: msg.status });
+          p.ui.site.loading_status = msg.status;
+          p.render();
+        } else if (msg.action === "site-build-log") {
+          if (msg.action.length > 2) {
+            p.ui.site.build_log.shift();
+          }
+          p.ui.site.build_log.push(msg.log);
+          p.render();
+        } else if (msg.action === "site-ready") {
+          if (p.sync) {
+            p.site = msg.site;
+            arg.siteLoaded(p.sync);
+          }
         }
       }
     };
     ws.onclose = () => {
-      arg.p.render();
-      if (arg.p.sync?.ping) clearTimeout(arg.p.sync.ping);
+      p.render();
+      if (p.sync?.ping) clearTimeout(p.sync.ping);
       setTimeout(() => {
         reconnect();
       }, 3000);

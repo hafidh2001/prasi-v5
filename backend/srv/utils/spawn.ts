@@ -1,15 +1,17 @@
 import { Readable } from "node:stream";
-import { spawn as bunSpawn } from "bun";
+import { spawn as bunSpawn, type Subprocess } from "bun";
 
 export const spawn = (arg: {
   cmd: string;
-  cwd: string;
+  cwd?: string;
   log?: false | { max_lines: number };
+  ipc?(message: any, subprocess: Subprocess): void;
   onMessage?: (arg: {
     from: "stdout" | "stderr";
     text: string;
     raw: string;
   }) => void;
+  mode?: "pipe" | "passthrough";
 }) => {
   const log = {
     lines: 0,
@@ -44,21 +46,28 @@ export const spawn = (arg: {
     }
   }
 
+  const is_piped = arg.mode === "pipe" || !arg.mode;
+
   const proc = bunSpawn({
     cmd: arg.cmd.split(" "),
     cwd: arg.cwd,
-    stderr: "pipe",
-    stdout: "pipe",
     env: { ...process.env, FORCE_COLOR: "1" },
+    ...(is_piped
+      ? { stderr: "pipe", stdout: "pipe" }
+      : { stderr: "inherit", stdout: "inherit" }),
+    ...(arg.ipc ? { ipc: arg.ipc } : undefined),
   });
-  const stdout = Readable.fromWeb(proc.stdout as any);
-  const stderr = Readable.fromWeb(proc.stderr as any);
+
+  if (is_piped) {
+    const stdout = Readable.fromWeb(proc.stdout as any);
+    const stderr = Readable.fromWeb(proc.stderr as any);
+    processStream(stdout, "stdout");
+    processStream(stderr, "stderr");
+  }
 
   return {
-    subprocess: proc,
-    exited: Promise.all([
-      processStream(stdout, "stdout"),
-      processStream(stderr, "stderr"),
-    ]),
+    process: proc,
+    exited: proc.exited,
+    log,
   };
 };

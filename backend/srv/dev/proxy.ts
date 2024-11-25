@@ -17,7 +17,9 @@ export const devProxy = async ({ url, req, ws }: ServerCtx) => {
         break;
       }
       try {
-        const res = await fetch(`http://localhost:3000${url.pathname}`);
+        const res = await fetch(
+          `http://localhost:${g.rsbuild.prasi_port}${url.pathname}`
+        );
         done(res);
         break;
       } catch (e) {

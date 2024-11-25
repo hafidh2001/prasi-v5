@@ -55,6 +55,7 @@ export const EDGlobal = {
   ui: {
     site: {
       loading_status: "loading-site",
+      build_log: [] as string[]
     },
     topbar: {
       render: () => {},

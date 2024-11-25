@@ -1,9 +1,10 @@
 import { $ } from "bun";
 import { fs } from "utils/fs";
 import type { PrasiSiteLoading } from "utils/global";
-import { siteLoadingMessage } from "./loading-msg";
+import { siteBroadcastBuildLog, siteLoadingMessage } from "./loading-msg";
 import { spawn } from "utils/spawn";
 import { platform } from "os";
+import { siteReady } from "./site-ready";
 
 export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   await fs.modify({
@@ -36,6 +37,12 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
       log: {
         max_lines: 300,
       },
+      onMessage(arg) {
+        siteBroadcastBuildLog(site_id, arg.text);
+        if (arg.text.includes("ready")) {
+          siteReady(site_id);
+        }
+      },
     });
   }
 
@@ -45,8 +52,11 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
       platform() === "win32"
         ? "node_modules/.bin/tsc.exe"
         : "node_modules/.bin/tsc";
+
+    const tsc_arg = `--watch --moduleResolution node --emitDeclarationOnly --outFile ./dist/typings-generated.d.ts --declaration --noEmit false`;
+
     loading.build.typings = spawn({
-      cmd: `${fs.path(`root:${tsc}`)} --watch --moduleResolution node --emitDeclarationOnly --outFile ./dist/typings-generated.d.ts --declaration --noEmit false`,
+      cmd: `${fs.path(`root:${tsc}`)} ${tsc_arg}`,
       cwd: fs.path(`code:${site_id}/vsc`),
     });
   }

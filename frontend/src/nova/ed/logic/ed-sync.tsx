@@ -1,6 +1,5 @@
 import { clientStartSync } from "../../../utils/sync/client";
 import { Loading } from "../../../utils/ui/loading";
-import { prasi } from "../cprasi/lib/prasi";
 import { PG } from "./ed-global";
 import { EPage } from "./types";
 
@@ -31,11 +30,7 @@ export const initSync = (p: PG) => {
       user_id: p.user.id,
       site_id: params.site_id,
       page_id: params.page_id,
-      siteLoading({ status }) {
-        p.ui.site.loading_status = status;
-        p.render();
-      },
-      async connected(sync) {
+      async siteLoaded(sync) {
         p.sync = sync;
 
         const page = (await p.sync!.page.load(params.page_id)) as EPage;

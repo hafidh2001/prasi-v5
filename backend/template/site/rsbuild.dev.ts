@@ -6,8 +6,8 @@ export default defineConfig({
 
   source: {
     entry: {
-      index: "./app/index.tsx",
-      server: "./server/server.ts",
+      index: "./frontend/index.tsx",
+      server: "./backend/server.ts",
     },
   },
 

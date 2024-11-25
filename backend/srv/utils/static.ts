@@ -9,8 +9,12 @@ import { addRoute, createRouter, findRoute } from "rou3";
 import { dir } from "./dir";
 import type { ServerCtx } from "./server/ctx";
 
-await removeAsync(dir.data(`static-cache.db`));
-const store = new BunSqliteKeyValue(dir.data(`static-cache.db`));
+if (!g.static_cache) {
+  await removeAsync(dir.data(`static-cache.db`));
+  g.static_cache = new BunSqliteKeyValue(dir.data(`static-cache.db`));
+}
+ 
+const store = g.static_cache;
 
 export const staticFile = async (
   path: string,

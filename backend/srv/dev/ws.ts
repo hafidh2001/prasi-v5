@@ -1,14 +1,20 @@
 import { type ServerWebSocket, type WebSocketHandler } from "bun";
 import type { WSContext } from "../utils/server/ctx";
 import { initWS } from "../ws/init";
+import { waitUntil } from "prasi-utils";
 
 const clients = {
   conns: new WeakMap<ServerWebSocket<WSContext>, WebSocket>(),
 };
-const connect = (ws: ServerWebSocket<WSContext>) => {
-  const cws = new WebSocket(`ws://localhost:3000${ws.data.pathname}`);
+const connect = async (ws: ServerWebSocket<WSContext>) => {
+  if (!g.rsbuild?.prasi_port) {
+    await waitUntil(() => g.rsbuild?.prasi_port);
+  }
+  const cws = new WebSocket(
+    `ws://localhost:${g.rsbuild.prasi_port}${ws.data.pathname}`
+  );
   cws.onmessage = ({ data }) => {
-    ws.send(data);
+    ws.send(data); 
   };
   cws.onclose = () => {
     ws.close();
@@ -17,11 +23,11 @@ const connect = (ws: ServerWebSocket<WSContext>) => {
 };
 
 export const devWS: WebSocketHandler<WSContext> = {
-  message(ws, message) {
+  async message(ws, message) {
     if (ws.data.pathname.startsWith("/rsbuild-hmr")) {
       let cws = clients.conns.get(ws);
       if (!cws) {
-        cws = connect(ws);
+        cws = await connect(ws);
         clients.conns.set(ws, cws);
       }
       cws.send(message);
@@ -29,9 +35,9 @@ export const devWS: WebSocketHandler<WSContext> = {
       initWS.message(ws, message);
     }
   },
-  open(ws) {
+  async open(ws) {
     if (ws.data.pathname.startsWith("/rsbuild-hmr")) {
-      clients.conns.set(ws, connect(ws));
+      clients.conns.set(ws, await connect(ws));
     } else {
       initWS.open?.(ws);
     }

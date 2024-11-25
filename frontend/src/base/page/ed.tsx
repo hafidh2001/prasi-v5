@@ -91,7 +91,18 @@ export default page({
     }
 
     if (!p.site) {
-      return <Loading note={p.ui.site.loading_status} />;
+      return (
+        <Loading
+          note={p.ui.site.loading_status}
+          alt={
+            <div className="mt-3 text-[7px] whitespace-pre-wrap font-mono w-[230px] relative">
+              <div className=" absolute top-0 left-0 right-0">
+                ${p.ui.site.build_log.join("\n")}
+              </div>
+            </div>
+          }
+        />
+      );
     }
 
     return <EdBase />;
