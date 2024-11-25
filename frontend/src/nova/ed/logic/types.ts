@@ -6,7 +6,7 @@ export type SyncUndoItem = { id: number; ts: number; size: string };
 
 export type ESite = Omit<site, "config" | "settings"> & {
   config: { api_url: string };
-  settings: SiteSettings;
+  settings: null | SiteSettings;
 };
 
 export type EPageContentTree = {

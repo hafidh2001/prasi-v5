@@ -1,5 +1,6 @@
 import { clientStartSync } from "../../../utils/sync/client";
 import { Loading } from "../../../utils/ui/loading";
+import { prasi } from "../cprasi/lib/prasi";
 import { PG } from "./ed-global";
 import { EPage } from "./types";
 
@@ -33,6 +34,7 @@ export const initSync = (p: PG) => {
       async siteLoaded(sync) {
         p.sync = sync;
 
+        if (p.site) prasi.site = p.site;
         const page = (await p.sync!.page.load(params.page_id)) as EPage;
         if (!page) {
           p.status = "page-not-found";
