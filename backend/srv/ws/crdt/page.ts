@@ -4,11 +4,12 @@ import * as decoding from "lib0/decoding";
 import * as encoding from "lib0/encoding";
 import { bind } from "prasi-frontend/src/nova/ed/crdt/lib/immer-yjs";
 import { waitUntil } from "prasi-utils";
+import { validate } from "uuid";
 import { applyAwarenessUpdate, Awareness } from "y-protocols/awareness.js";
 import * as syncProtocol from "y-protocols/sync.js";
 import { readSyncMessage } from "y-protocols/sync.js";
 import { applyUpdate, Doc, encodeStateAsUpdate, UndoManager } from "yjs";
-import { dir } from "../../utils/dir";
+import { dir, isLocalPC } from "../../utils/dir";
 import { editor } from "../../utils/editor";
 import type { WSContext } from "../../utils/server/ctx";
 import {
@@ -17,7 +18,6 @@ import {
   createSiteCrdt,
   MAX_HISTORY_SIZE,
 } from "./shared";
-import { validate } from "uuid";
 
 const crdt_loading = new Set<string>();
 
@@ -41,7 +41,22 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
     console.warn("Invalid page_id:" + page_id);
     return;
   }
-  
+
+  if (isLocalPC() && crdt_pages[page_id]) {
+    const updated_at = crdt_pages[page_id].updated_at;
+    const res = await _db.page.findFirst({
+      where: { id: page_id },
+      select: { updated_at: true },
+    });
+    if (res) {
+      if (res && res.updated_at && updated_at !== res.updated_at.getTime()) {
+        crdt_pages[page_id].ws.forEach((w) => w.close());
+        delete crdt_pages[page_id];
+        crdt_loading.delete(page_id);
+      }
+    }
+  }
+
   if (!crdt_pages[page_id]) {
     if (crdt_loading.has(page_id)) {
       await waitUntil(() => crdt_pages[page_id]);
@@ -51,7 +66,12 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
 
       const db_page = await _db.page.findFirst({
         where: { id: page_id },
-        select: { content_tree: true, id_site: true, url: true },
+        select: {
+          updated_at: true,
+          content_tree: true,
+          id_site: true,
+          url: true,
+        },
       });
       if (!db_page) return;
 
@@ -162,6 +182,7 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
           actionHistory,
           timeout: null,
           ws: new Set(),
+          updated_at: db_page.updated_at?.getTime() || Date.now(),
         };
       }
 
@@ -241,12 +262,15 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
             }
           }
 
+          const updated_at = new Date();
+          crdt_pages[page_id].updated_at = updated_at.getTime();
+
           _db.page
             .update({
               where: { id: page_id },
               data: {
                 content_tree: doc.getMap("data").toJSON(),
-                updated_at: new Date(),
+                updated_at,
               },
               select: { id: true },
             })

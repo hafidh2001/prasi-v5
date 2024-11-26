@@ -8,12 +8,13 @@ import { applyAwarenessUpdate, Awareness } from "y-protocols/awareness.js";
 import * as syncProtocol from "y-protocols/sync.js";
 import { readSyncMessage } from "y-protocols/sync.js";
 import { applyUpdate, Doc, encodeStateAsUpdate, UndoManager } from "yjs";
-import { dir } from "../../utils/dir";
+import { dir, isLocalPC } from "../../utils/dir";
 import { editor } from "../../utils/editor";
 import type { WSContext } from "../../utils/server/ctx";
 import BunORM from "../../utils/sqlite";
 import { crdt_comps, MAX_HISTORY_SIZE } from "./shared";
 import type { IItem } from "prasi-frontend/src/utils/types/item";
+import { validate } from "uuid";
 
 const crdt_loading = new Set<string>();
 await dirAsync(dir.data(`/crdt`));
@@ -48,6 +49,26 @@ export const wsCompClose = (ws: ServerWebSocket<WSContext>) => {
 
 export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
   const comp_id = ws.data.pathname.substring(`/crdt/comp-`.length);
+
+  if (!validate(comp_id)) {
+    console.warn("Invalid comp_id:" + comp_id);
+    return;
+  }
+
+  if (isLocalPC() && crdt_comps[comp_id]) {
+    const updated_at = crdt_comps[comp_id].updated_at;
+    const res = await _db.page.findFirst({
+      where: { id: comp_id },
+      select: { updated_at: true },
+    });
+    if (res) {
+      if (res && res.updated_at && updated_at !== res.updated_at.getTime()) {
+        crdt_comps[comp_id].ws.forEach((w) => w.close());
+        delete crdt_comps[comp_id];
+        crdt_loading.delete(comp_id);
+      }
+    }
+  }
 
   if (!crdt_comps[comp_id]) {
     if (crdt_loading.has(comp_id)) {
@@ -129,12 +150,15 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
           ts: Date.now(),
         });
 
+        const updated_at = new Date();
+        crdt_comps[comp_id].updated_at = updated_at.getTime();
+        
         await _db.component.update({
           where: { id: comp_id },
           data: {
             name: db_comp.name,
             content_tree: comp,
-            updated_at: new Date(),
+            updated_at,
           },
           select: { id: true },
         });
@@ -186,6 +210,7 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
           actionHistory,
           timeout: null,
           ws: new Set(),
+          updated_at: Date.now(),
         };
       }
 

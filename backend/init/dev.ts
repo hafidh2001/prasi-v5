@@ -16,22 +16,17 @@ process.env.FORCE_COLOR = "1";
 const dev = {
   backend: spawn({
     cmd: `bun run --silent --watch --no-clear-screen backend/srv/server.ts dev`,
-    ipc: (msg) => {
-      if (msg.resend_port && dev.prasi_port > 0) {
-        dev.backend.process.send({
-          prasi_port: dev.prasi_port,
-          site_port: dev.site_port,
-        });
-      }
-    },
-    onMessage(arg) {
-      dev.rsbuild_print = true;
-      process.stdout.write(arg.raw);
-    },
   }),
   rsbuild_print: false,
   prasi_port: 0,
   site_port: 0,
+};
+
+const updatePort = () => {
+  return fs.write("port.json", {
+    prasi_port: dev.prasi_port,
+    site_port: dev.site_port,
+  });
 };
 
 if (!(await fs.exists("data:static-site"))) {
@@ -54,14 +49,14 @@ const run = (cmd: string, cwd: string, prefix: string) => {
       if (cwd === "frontend") {
         if (dev.prasi_port === 0 && text.includes("http://localhost:")) {
           dev.prasi_port = getPort(text);
-          dev.backend.process.send({ prasi_port: dev.prasi_port });
+          updatePort();
         }
       }
 
       if (cwd === "frontend/src/nova/prod") {
         if (dev.site_port === 0 && text.includes("http://localhost:")) {
           dev.site_port = getPort(text);
-          dev.backend.process.send({ site_port: dev.site_port });
+          updatePort();
         }
       }
 

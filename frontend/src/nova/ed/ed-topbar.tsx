@@ -125,15 +125,6 @@ export const EdTopBar = () => {
               "border border-r-0 btn px-2 py-[2px] flex items-center space-x-1",
               "hover:bg-blue-100 bg-white"
             )}
-            popover={{
-              content: (
-                <CPrasi
-                  id="b480c554-577d-4d66-8949-2a3e982973ac"
-                  name="site"
-                  size="500x500"
-                />
-              ),
-            }}
           >
             <Trees size={12} />
             <div>Site</div>
@@ -143,6 +134,15 @@ export const EdTopBar = () => {
               "border rounded-sm rounded-l-none btn px-2 py-[2px] flex items-center space-x-1",
               "hover:bg-blue-100 bg-white"
             )}
+            popover={{
+              content: (
+                <CPrasi
+                  id="b480c554-577d-4d66-8949-2a3e982973ac"
+                  name="site"
+                  size="500x500"
+                />
+              ),
+            }}
           >
             <Leaf size={12} />
             <div className="capitalize">{p.page.cur.name}</div>

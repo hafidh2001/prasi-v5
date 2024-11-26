@@ -7,3 +7,7 @@ export const dir = {
     return join(process.cwd(), "..", "data", path.replace(/\.\./gi, ""));
   },
 };
+
+export const isLocalPC = () => {
+  return dir.root("") !== "/app/prasi/repo";
+};

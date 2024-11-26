@@ -93,6 +93,7 @@ export const crdt_pages = {} as Record<
     actionHistory: Record<number, string>;
     timeout: any;
     ws: Set<ServerWebSocket<WSContext>>;
+    updated_at: number;
   }
 >;
 
@@ -105,6 +106,7 @@ export const crdt_comps = {} as Record<
     actionHistory: Record<number, string>;
     timeout: any;
     ws: Set<ServerWebSocket<WSContext>>;
+    updated_at: number
   }
 >;
 
