@@ -1,3 +1,4 @@
+import { PRASI_CORE_SITE_ID } from "prasi-utils";
 import { editor } from "utils/editor";
 import { fs } from "utils/fs";
 import { staticFile } from "utils/static";
@@ -12,6 +13,7 @@ export const siteReady = async (site_id: string) => {
     asset: await staticFile(fs.path(`code:${site_id}/vsc/dist/dev/static`)),
   };
   delete g.site.loading[site_id];
+
 
   editor.broadcast(
     { site_id },

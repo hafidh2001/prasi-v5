@@ -19,7 +19,7 @@ import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
 import { Tooltip } from "utils/ui/tooltip";
 import { CPrasi } from "./cprasi/cprasi";
-import { PRASI_CORE_SITE_ID } from "popup/script/code/prasi-code-update";
+import { PRASI_CORE_SITE_ID } from "prasi-utils";
 
 export const navPrevItem = (p: PG) => {
   p.nav.navigating = true;

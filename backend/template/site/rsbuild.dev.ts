@@ -42,5 +42,9 @@ export default defineConfig({
     },
     distPath: { root: "./dist/dev" },
     filename: { js: `[name].js` },
+    externals: {
+      react: "window.React",
+      "react-dom": "window.ReactDOM",
+    },
   },
 });

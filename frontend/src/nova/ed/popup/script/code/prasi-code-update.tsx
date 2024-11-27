@@ -2,7 +2,7 @@ import { getActiveNode } from "crdt/node/get-node-by-id";
 import { ScriptModel } from "crdt/node/load-script-models";
 import { active, getActiveTree } from "logic/active";
 import { PG } from "logic/ed-global";
-import { waitUntil } from "prasi-utils";
+import { PRASI_CORE_SITE_ID, waitUntil } from "prasi-utils";
 import { cutCode, jscript } from "utils/script/jscript";
 import { MonacoEditor, monacoRegisterSource } from "./js/create-model";
 import { defaultCode as dcode } from "./js/default-code";
@@ -13,7 +13,6 @@ import { extractRegion, removeRegion } from "./js/migrate-code";
 import { replaceString } from "./js/replace-string";
 import { typingsItem } from "./js/typings-item";
 
-export const PRASI_CORE_SITE_ID = "a0170f25-a9d9-4646-a970-f1c2e5747971";
 
 export const prasiTypings = async (p: PG) => {
   let editor_typings = [] as any[];

@@ -8,6 +8,7 @@ import { page } from "../../utils/react/page";
 import { useGlobal } from "../../utils/react/use-global";
 import { useLocal } from "../../utils/react/use-local";
 import { Loading } from "../../utils/ui/loading";
+import { PRASI_CORE_SITE_ID } from "prasi-utils";
 
 jscript.init();
 
@@ -110,6 +111,11 @@ export default page({
 });
 
 const navSitePage = (p: PG) => {
+  if (params.site_id === "prasi") {
+    location.href = `/ed/${PRASI_CORE_SITE_ID}`;
+    return;
+  }
+
   setTimeout(async () => {
     loadSession(p);
     const e = await _db.page.findFirst({

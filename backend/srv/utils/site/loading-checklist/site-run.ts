@@ -1,13 +1,25 @@
-import { $ } from "bun";
 import { platform } from "os";
-import { waitUntil } from "prasi-utils";
+import { PRASI_CORE_SITE_ID, waitUntil } from "prasi-utils";
 import { fs } from "utils/fs";
 import type { PrasiSiteLoading } from "utils/global";
 import { spawn } from "utils/spawn";
 import { siteBroadcastBuildLog, siteLoadingMessage } from "./loading-msg";
 import { siteReady } from "./site-ready";
+import { $ } from "bun";
+import { sync } from "sync-directory";
 
 export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
+  if (site_id === PRASI_CORE_SITE_ID) {
+    sync(
+      fs.path(`root:backend/srv/vsc`),
+      fs.path(`code:${site_id}/vsc/dist/dev`),
+      {
+        watch: true,
+        type: 'copy'
+      }
+    );
+  }
+
   await waitUntil(
     async () =>
       (await fs.exists(`code:${site_id}/vsc/package.json`)) &&
