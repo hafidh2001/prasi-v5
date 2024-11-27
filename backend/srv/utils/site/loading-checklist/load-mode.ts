@@ -14,7 +14,7 @@ export const siteLoadingMode = async (
     loading.mode = "upgrade";
   } else {
     const new_exists = await fs.exists(
-      `code:${site_id}/vsc/frontend/index.tsx`
+      `code:${site_id}/psc/frontend/index.tsx`
     ); 
     if (new_exists) {
       loading.mode = "run";

@@ -7,15 +7,17 @@ import { siteBroadcastBuildLog, siteLoadingMessage } from "./loading-msg";
 import { siteReady } from "./site-ready";
 import { $ } from "bun";
 import { sync } from "sync-directory";
+import { removeAsync } from "fs-jetpack";
 
 export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   if (site_id === PRASI_CORE_SITE_ID) {
+    await removeAsync(fs.path(`code:${site_id}/vsc/dist/dev`));
     sync(
-      fs.path(`root:backend/srv/vsc`),
+      fs.path(`root:backend/srv/psc`),
       fs.path(`code:${site_id}/vsc/dist/dev`),
       {
         watch: true,
-        type: 'copy'
+        type: "copy",
       }
     );
   }

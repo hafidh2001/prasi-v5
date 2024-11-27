@@ -1,8 +1,9 @@
 import { waitUntil } from "prasi-utils";
 import type { ServerCtx } from "../utils/server/ctx";
 import { prodIndex } from "../utils/server/prod-index";
-import { siteProdPrasi } from "../utils/site/site-prod-prasi";
 import { siteInit } from "../utils/site/site-init";
+import { siteProdPrasi } from "../utils/site/site-prod-prasi";
+import { asset } from "utils/server/asset";
 
 export default {
   url: "/prod/:site_id/**",
@@ -10,6 +11,16 @@ export default {
     const { params } = ctx;
     const site_id = params.site_id as string;
     const pathname = params._ as string;
+
+    if (site_id === "prasi") {
+      if (pathname.startsWith("psc")) {
+        return asset.psc.serve(ctx, {
+          prefix: `/prod/prasi/psc/`,
+          debug: true,
+        });
+      }
+      return new Response("");
+    }
 
     const site = g.site.loaded[site_id];
 

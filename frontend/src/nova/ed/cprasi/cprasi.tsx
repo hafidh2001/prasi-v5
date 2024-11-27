@@ -1,5 +1,7 @@
+import { EDGlobal } from "logic/ed-global";
 import { Resizable } from "re-resizable";
 import { FC } from "react";
+import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { IRoot } from "utils/types/root";
 import { LoadingSpinner } from "utils/ui/loading";
@@ -7,11 +9,13 @@ import { validate } from "uuid";
 import { ViComps } from "vi/lib/types";
 import { ViPage } from "vi/vi-page";
 import { prasi } from "./lib/prasi";
-import { useGlobal } from "utils/react/use-global";
-import { EDGlobal } from "logic/ed-global";
-import { unpack } from "msgpackr";
-const page_cache = {} as Record<string, IRoot>;
-const component_cache = {} as ViComps;
+import { waitUntil } from "prasi-utils";
+
+const cache = {
+  page: {} as Record<string, IRoot>,
+  component: {} as ViComps,
+  vsc: { loaded: false, loading: false },
+};
 
 export const CPrasi: FC<{ id: string; size?: string; name: string }> = ({
   id,
@@ -21,26 +25,37 @@ export const CPrasi: FC<{ id: string; size?: string; name: string }> = ({
   const p = useGlobal(EDGlobal, "EDITOR");
   const local = useLocal(
     {
-      root: page_cache[id],
+      root: cache.page[id],
       load: async () => {},
       size: localStorage.getItem("prasi-size-" + name) || size,
     },
     async () => {
+      if (!cache.vsc.loaded) {
+        if (!cache.vsc.loading) {
+          cache.vsc.loading = true;
+          const fn = new Function(
+            `return import('/prod/prasi/psc/js/index.js');`
+          );
+          await fn()
+        }
+        await waitUntil(() => cache.vsc.loaded);
+      }
+
       local.load = async () => {
         if (validate(id)) {
           const bin = await _api._cprasi(id, {
-            exclude: Object.keys(component_cache),
+            exclude: Object.keys(cache.component),
           });
           local.root = bin.page.content_tree;
-          page_cache[id] = local.root;
+          cache.page[id] = local.root;
           for (const comp of bin.comps) {
-            component_cache[comp.id] = comp.content_tree as any;
+            cache.component[comp.id] = comp.content_tree as any;
           }
         }
 
         local.render();
       };
-      if (!page_cache[id] || location.hostname === "localhost") {
+      if (!cache.page[id] || location.hostname === "localhost") {
         local.load();
       }
     }
@@ -52,7 +67,7 @@ export const CPrasi: FC<{ id: string; size?: string; name: string }> = ({
         init={{
           name,
           page: { root: local.root, id, url: "" },
-          comps: component_cache,
+          comps: cache.component,
           exports: { prasi },
         }}
       />

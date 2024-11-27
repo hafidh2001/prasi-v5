@@ -6,4 +6,5 @@ export const asset = {
   nova: await staticFile(dir.data("/site-static"), {
     index: "index.html",
   }),
+  psc: await staticFile(dir.root("/backend/srv/psc/static")),
 };

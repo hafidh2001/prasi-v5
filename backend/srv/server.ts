@@ -1,18 +1,21 @@
+import { setupDevPort } from "dev/port";
+import { watch } from "fs";
+import { existsAsync } from "fs-jetpack";
+import { waitUntil } from "prasi-utils";
+import { fs } from "utils/fs";
 import { devProxy } from "./dev/proxy";
 import { devWS } from "./dev/ws";
 import { c } from "./utils/color";
 import { editor } from "./utils/editor";
+import "./utils/init";
 import { api } from "./utils/server/api";
+import { asset } from "./utils/server/asset";
 import { serverContext } from "./utils/server/ctx";
 import { initWS } from "./ws/init";
-import { watch } from "fs";
-import "./utils/init";
-import { asset } from "./utils/server/asset";
-import { dir } from "./utils/dir";
-import { existsAsync } from "fs-jetpack";
-import { waitUntil } from "prasi-utils";
-import { setupDevPort } from "dev/port";
-import { fs } from "utils/fs";
+
+if (!(global as any).g) {
+  (global as any).g = global;
+}
 
 editor.init();
 api.init();
