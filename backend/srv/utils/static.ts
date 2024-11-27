@@ -1,3 +1,4 @@
+import * as zstd from "@bokuweb/zstd-wasm";
 import { Glob, gzipSync, type BunFile } from "bun";
 import { BunSqliteKeyValue } from "bun-sqlite-key-value";
 import { exists, existsAsync, removeAsync } from "fs-jetpack";
@@ -9,6 +10,7 @@ import { addRoute, createRouter, findRoute } from "rou3";
 import { dir } from "./dir";
 import type { ServerCtx } from "./server/ctx";
 
+await zstd.init();
 export const staticFile = async (
   path: string,
   opt?: { index?: string; debug?: boolean }
@@ -18,9 +20,17 @@ export const staticFile = async (
   }
 
   if (!g.static_cache) {
-    await removeAsync(dir.data(`static-cache.db`));
-    g.static_cache = new BunSqliteKeyValue(dir.data(`static-cache.db`));
+    g.static_cache = {} as any;
+
+    if (!g.static_cache.gz) {
+      g.static_cache.gz = new BunSqliteKeyValue(":memory:");
+    }
+
+    if (!g.static_cache.zstd) {
+      g.static_cache.zstd = new BunSqliteKeyValue(":memory:");
+    }
   }
+
   const store = g.static_cache;
 
   const glob = new Glob("**");
@@ -37,7 +47,8 @@ export const staticFile = async (
   const static_file = {
     scanning: false,
     paths: new Set<string>(),
-    async rescan(arg?: { immediatly?: boolean }) {}, // rescan will be overwritten below.
+    // rescan will be overwritten below.
+    async rescan(arg?: { immediatly?: boolean }) {},
     serve: (ctx: ServerCtx, arg?: { prefix?: string; debug?: boolean }) => {
       let pathname = ctx.url.pathname || "";
       if (arg?.prefix && pathname) {
@@ -48,26 +59,42 @@ export const staticFile = async (
       if (found) {
         const { fullpath, mime } = found.data;
         if (exists(fullpath)) {
-          if (ctx.req.headers.get("accept-encoding")?.includes("gz")) {
-            let gz = store.get(fullpath);
-            if (!gz) {
-              gz = gzipSync(new Uint8Array(readFileSync(fullpath)));
-              store.set(fullpath, gz);
-            }
+          const accept = ctx.req.headers.get("accept-encoding") || "";
+          const headers: any = {
+            "content-type": mime || "",
+          };
+          let content = null as any;
 
-            const headers: any = {
-              "content-encoding": "gzip",
-              "content-type": mime || "",
-            };
-            if (g.mode === "prod") {
-              headers["cache-control"] = "public, max-age=604800, immutable";
+          if (accept.includes("zstd")) {
+            content = store.zstd.get(fullpath);
+            if (!content) {
+              content = zstd.compress(
+                new Uint8Array(readFileSync(fullpath)) as any,
+                10
+              );
+              store.zstd.set(fullpath, content);
             }
-            return new Response(gz, {
-              headers,
-            });
+            headers["content-encoding"] = "zstd";
           }
+
+          if (!content && accept.includes("gz")) {
+            content = store.gz.get(fullpath);
+            if (!content) {
+              content = gzipSync(new Uint8Array(readFileSync(fullpath)));
+              store.gz.set(fullpath, content);
+            }
+            headers["content-encoding"] = "gzip";
+          }
+
+          if (g.mode === "prod") {
+            headers["cache-control"] = "public, max-age=604800, immutable";
+          }
+          return new Response(content, {
+            headers,
+          });
         } else {
-          store.delete(fullpath);
+          store.gz.delete(fullpath);
+          store.zstd.delete(fullpath);
         }
       }
 
@@ -85,7 +112,8 @@ export const staticFile = async (
     static_file.scanning = true;
     if (await existsAsync(path)) {
       if (static_file.paths.size > 0) {
-        store.delete([...static_file.paths]);
+        store.gz.delete([...static_file.paths]);
+        store.zstd.delete([...static_file.paths]);
       }
 
       for await (const file of glob.scan(path)) {

@@ -17,6 +17,6 @@ export default {
     const body = unpack(gunzipSync(await ctx.req.arrayBuffer()));
     const result = await execQuery(body, db);
 
-    return compressed(ctx, result);
+    return await compressed(ctx, result);
   },
 };

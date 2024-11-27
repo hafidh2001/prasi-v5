@@ -14,7 +14,7 @@ import { waitUntil } from "prasi-utils";
 const cache = {
   page: {} as Record<string, IRoot>,
   component: {} as ViComps,
-  vsc: { loaded: false, loading: false },
+  psc: { loaded: false, loading: false, exports: {} as any },
 };
 
 export const CPrasi: FC<{ id: string; size?: string; name: string }> = ({
@@ -30,15 +30,16 @@ export const CPrasi: FC<{ id: string; size?: string; name: string }> = ({
       size: localStorage.getItem("prasi-size-" + name) || size,
     },
     async () => {
-      if (!cache.vsc.loaded) {
-        if (!cache.vsc.loading) {
-          cache.vsc.loading = true;
+      if (!cache.psc.loaded) {
+        if (!cache.psc.loading) {
+          cache.psc.loading = true;
           const fn = new Function(
-            `return import('/prod/prasi/psc/js/index.js');`
+            `return import('/prod/prasi/psc/static/js/index.js');`
           );
-          console.log(await fn());
+          cache.psc.exports = await fn();
+          cache.psc.loaded = true;
         }
-        await waitUntil(() => cache.vsc.loaded);
+        await waitUntil(() => cache.psc.loaded);
       }
 
       local.load = async () => {
@@ -68,7 +69,7 @@ export const CPrasi: FC<{ id: string; size?: string; name: string }> = ({
           name,
           page: { root: local.root, id, url: "" },
           comps: cache.component,
-          exports: { prasi },
+          exports: { ...cache.psc.exports, prasi },
         }}
       />
     </div>

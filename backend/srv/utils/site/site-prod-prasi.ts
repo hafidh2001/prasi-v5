@@ -157,7 +157,7 @@ export const siteProdPrasi = async ({
         },
       });
 
-      return compressed(ctx, res);
+      return await compressed(ctx, res);
     }
     case "page": {
       const page_id = pathname.split("/").pop() as string;
@@ -168,7 +168,7 @@ export const siteProdPrasi = async ({
         });
 
         if (page) {
-          return compressed(ctx, page);
+          return await compressed(ctx, page);
         }
       }
       return new Response("null", {
@@ -198,13 +198,13 @@ export const siteProdPrasi = async ({
 
         const uncached_ids = ids.filter((id) => !cached[id]);
         if (uncached_ids.length === 0) {
-          return compressed(ctx, Object.values(cached));
+          return await compressed(ctx, Object.values(cached));
         }
         const pages = await _db.page.findMany({
           where: { id: { in: uncached_ids } },
           select: { id: true, content_tree: true, url: true },
         });
-        return compressed(ctx, [
+        return await compressed(ctx, [
           ...Object.values(cached),
           ...pages.map((e: any) => ({
             id: e.id,
@@ -237,7 +237,7 @@ export const siteProdPrasi = async ({
           }
         }
       }
-      return compressed(ctx, result);
+      return await compressed(ctx, result);
     }
   }
   return new Response("action " + action + ": not found");

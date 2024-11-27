@@ -1,7 +1,6 @@
 import { validate } from "uuid";
-import type { ServerCtx } from "../utils/server/ctx";
-import { pack } from "msgpackr";
 import { compressed } from "../utils/server/compressed";
+import type { ServerCtx } from "../utils/server/ctx";
 
 export default {
   url: "/_cprasi",
@@ -37,7 +36,7 @@ export default {
           });
         }
       }
-      return compressed(ctx, { page, comps });
+      return await compressed(ctx, { page, comps });
     }
 
     return new Response("");

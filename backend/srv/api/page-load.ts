@@ -6,6 +6,6 @@ export default {
   url: "/page_load",
   api: async (ctx: ServerCtx) => {
     const [id, opt] = await ctx.req.json();
-    return compressed(ctx, await editor.page.load(id, opt));
+    return await compressed(ctx, await editor.page.load(id, opt));
   },
 };

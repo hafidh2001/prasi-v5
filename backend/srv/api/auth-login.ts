@@ -33,10 +33,10 @@ export default {
       //@ts-ignore
       delete user.password;
 
-      return compressed(ctx, { status: "ok", user });
+      return await compressed(ctx, { status: "ok", user });
     }
 
-    return compressed(ctx, {
+    return await compressed(ctx, {
       status: "failed",
       reason: "invalid username/password",
     });

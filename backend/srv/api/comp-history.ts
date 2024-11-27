@@ -9,7 +9,7 @@ export default {
 
     const comp = crdt_comps[comp_id];
     if (comp) {
-      return compressed(ctx, {
+      return await compressed(ctx, {
         undo: comp.undoManager.undoStack.map((e) => {
           return {
             ts: (e as any).ts,
@@ -28,7 +28,7 @@ export default {
         ts: Date.now(),
       });
     }
-    return compressed(ctx, ["-"]);
+    return await compressed(ctx, ["-"]);
   },
 };
 

@@ -16,7 +16,7 @@ export default {
         const prasi = await Bun.file(
           dir.root(`/frontend/src/nova/ed/cprasi/prasi-typings-generated.d.ts`)
         ).text();
-        return compressed(
+        return await compressed(
           ctx,
           `\
 declare module "prasi-prisma" {
@@ -82,7 +82,7 @@ w.prasiApi[url] = {
           },
         });
 
-        return compressed(ctx, res, {
+        return await compressed(ctx, res, {
           headers: { "content-type": "text/javascript" },
         });
       }

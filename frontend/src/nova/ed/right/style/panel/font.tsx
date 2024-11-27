@@ -90,6 +90,7 @@ export const PanelFont: FC<{
           >
             <FieldNumUnit
               positiveOnly
+              className="flex-1"
               hideUnit
               icon={
                 <div className="w-[22px] h-[14px] flex items-center justify-center pr-2 border-r border-gray-300 mr-1">

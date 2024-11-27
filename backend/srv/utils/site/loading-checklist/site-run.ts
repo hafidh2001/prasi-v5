@@ -46,6 +46,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   siteLoadingMessage(site_id, "Starting RSBuild...");
 
   if (!loading.build.rsbuild) {
+    siteReady(site_id);
     loading.build.rsbuild = spawn({
       cmd: `bun dev`,
       cwd: fs.path(`code:${site_id}/vsc`),

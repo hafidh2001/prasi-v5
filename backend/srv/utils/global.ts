@@ -37,7 +37,7 @@ export interface PrasiGlobal {
     prasi_port: 0;
     site_port: 0;
   };
-  static_cache: BunSqliteKeyValue;
+  static_cache: { gz: BunSqliteKeyValue; zstd: BunSqliteKeyValue };
 }
 
 declare global {

@@ -1,10 +1,13 @@
 import { gzipSync } from "bun";
 import { brotliCompress } from "node:zlib";
+import * as zstd from "@bokuweb/zstd-wasm";
 import type { ServerCtx } from "./ctx";
 
+await zstd.init();
 const br_cache = new Map<string, Buffer>();
 
-export const compressed = (
+const encoder = new TextEncoder();
+export const compressed = async (
   ctx: ServerCtx,
   body: any,
   opt?: { headers?: any; br?: string }
@@ -14,7 +17,21 @@ export const compressed = (
     content = JSON.stringify(body);
   }
 
-  if (opt?.br && ctx.req.headers.get("accept-encoding")?.includes("br")) {
+  const accept = ctx.req.headers.get("accept-encoding") || "";
+  if (accept.includes("zstd")) {
+    if (typeof content === "string") {
+      content = encoder.encode(content);
+    }
+    return new Response(zstd.compress(content), {
+      headers: {
+        "content-type": "application/json",
+        "content-encoding": "zstd",
+        ...opt?.headers,
+      },
+    });
+  }
+
+  if (opt?.br && accept.includes("br")) {
     if (!br_cache.has(opt.br)) {
       setTimeout(() => {
         brotliCompress(content, (err, res) => {
@@ -32,7 +49,7 @@ export const compressed = (
     }
   }
 
-  if (ctx.req.headers.get("accept-encoding")?.includes("gz")) {
+  if (accept.includes("gz")) {
     return new Response(gzipSync(content), {
       headers: {
         "content-type": "application/json",

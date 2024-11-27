@@ -20,14 +20,10 @@
     "esbuild",
     "leveldown",
     "msgpackr-extract",
-    "prisma"
+    "prisma",
+    "zstd-napi"
   ],
   "dependencies": {
-    "@types/bun": "^1.1.13",
-    "@types/lodash.transform": "^4.6.9",
-    "@types/lodash.uniq": "^4.5.9",
-    "dnd-tree-sortable": "^1.0.3",
-    "lodash.transform": "^4.6.0",
-    "lodash.uniq": "^4.5.0"
+    "@types/bun": "^1.1.13"
   }
 }

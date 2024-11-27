@@ -42,7 +42,6 @@ export const EdViRoot = memo(() => {
         `return import('/prod/${p.site!.id}/js/index.js');`
       );
       ref.exports.values = { ...(await fn()), prasi };
-
       ref.exports.status = "done";
       render();
     })();

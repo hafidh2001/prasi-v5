@@ -9,6 +9,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@bokuweb/zstd-wasm": "^0.0.21-alpha.5",
     "@fal-works/esbuild-plugin-global-externals": "^2.1.2",
     "@hyrious/esbuild-plugin-style": "^0.3.5",
     "@mrleebo/prisma-ast": "^0.12.0",
@@ -34,6 +35,7 @@
     "prasi-frontend": "workspace:*",
     "prasi-utils": "workspace:*",
     "rou3": "^0.5.1",
+    "simple-zstd": "^1.4.2",
     "sync-directory": "^6.0.5",
     "uuid": "^10.0.0",
     "y-protocols": "^1.0.6",
