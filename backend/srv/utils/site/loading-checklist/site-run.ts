@@ -61,6 +61,11 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
             if (site_id === PRASI_CORE_SITE_ID) {
               asset.psc.rescan();
             }
+
+            const site = g.site.loaded[site_id];
+            if (site) {
+              site.asset?.rescan();
+            }
           }
         }
       },
