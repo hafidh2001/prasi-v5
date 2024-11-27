@@ -36,7 +36,7 @@ export const CPrasi: FC<{ id: string; size?: string; name: string }> = ({
           const fn = new Function(
             `return import('/prod/prasi/psc/js/index.js');`
           );
-          await fn()
+          console.log(await fn());
         }
         await waitUntil(() => cache.vsc.loaded);
       }

@@ -1,0 +1,1 @@
+{"version":3,"file":"static/js/index.js","sources":["/Users/riz/Developer/data/code/a0170f25-a9d9-4646-a970-f1c2e5747971/vsc/frontend/index.tsx"],"sourcesContent":["// export * from \"lib/exports\";\nexport const rakuda = \"fwni\";\n// export const Maka = <>asfio</>;\n "],"names":["rakuda"],"mappings":"4ZACO,IAAMA,EAAS,O"}

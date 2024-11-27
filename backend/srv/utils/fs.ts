@@ -1,13 +1,14 @@
 import { $ } from "bun";
-import { dir } from "./dir";
 import { mkdirSync, statSync } from "fs";
+import { dir } from "./dir";
 
 const internal = Symbol("internal");
 
 export const fs = {
   async exists(path: string) {
     try {
-      return await Bun.file(this.path(path)).exists();
+      const s = statSync(this.path(path))
+      return s.isDirectory() || s.isFile();
     } catch (e) {}
     return false;
   },

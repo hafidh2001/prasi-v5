@@ -1,1 +1,2 @@
-(()=>{var r={},t={};function e(n){var o=t[n];if(void 0!==o)return o.exports;var u=t[n]={exports:{}};return r[n](u,u.exports,e),u.exports}e.rv=function(){return"1.1.3"},e.ruid="bundler=rspack@1.1.3"})();
+var e={};e.d=function(r,t){for(var o in t)e.o(t,o)&&!e.o(r,o)&&Object.defineProperty(r,o,{enumerable:!0,get:t[o]})},e.o=function(e,r){return Object.prototype.hasOwnProperty.call(e,r)},e.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})};var r={};e.r(r),e.d(r,{rakuda:function(){return t}});let t="fwni";var o=r.rakuda;export{o as rakuda};
+//# sourceMappingURL=index.js.map

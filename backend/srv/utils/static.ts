@@ -13,6 +13,10 @@ export const staticFile = async (
   path: string,
   opt?: { index?: string; debug?: boolean }
 ) => {
+  if (typeof g === "undefined") {
+    (global as any).g = global;
+  }
+
   if (!g.static_cache) {
     await removeAsync(dir.data(`static-cache.db`));
     g.static_cache = new BunSqliteKeyValue(dir.data(`static-cache.db`));
@@ -33,7 +37,7 @@ export const staticFile = async (
   const static_file = {
     scanning: false,
     paths: new Set<string>(),
-    async rescan() {}, // rescan will be overwritten below.
+    async rescan(arg?: { immediatly?: boolean }) {}, // rescan will be overwritten below.
     serve: (ctx: ServerCtx, arg?: { prefix?: string; debug?: boolean }) => {
       let pathname = ctx.url.pathname || "";
       if (arg?.prefix && pathname) {
@@ -105,13 +109,16 @@ export const staticFile = async (
   };
   await scan();
 
-  static_file.rescan = () => {
+  static_file.rescan = (arg?: { immediatly?: boolean }) => {
     return new Promise<void>((resolve) => {
       clearTimeout(internal.rescan_timeout);
-      internal.rescan_timeout = setTimeout(async () => {
-        await scan();
-        resolve();
-      }, 300);
+      internal.rescan_timeout = setTimeout(
+        async () => {
+          await scan();
+          resolve();
+        },
+        arg?.immediatly ? 0 : 300
+      );
     });
   };
 

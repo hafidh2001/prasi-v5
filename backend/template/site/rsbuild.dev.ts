@@ -19,15 +19,26 @@ export default defineConfig({
   },
 
   server: {
-    open: "",
+    open: false,
     compress: false,
-    base: "/prod/[[site_id]]"
+    base: "/prod/[[site_id]]",
   },
-
   mode: "production",
 
   tools: {
     rspack: {
+      experiments: {
+        outputModule: true,
+      },
+      output: {
+        module: true,
+        library: {
+          type: "module",
+        },
+      },
+      optimization: {
+        usedExports: false,
+      },
       ignoreWarnings: [
         /require function is used in a way/,
         /the request of a dependency is an expression/,
@@ -40,6 +51,7 @@ export default defineConfig({
     sourceMap: {
       js: "source-map",
     },
+
     distPath: { root: "./dist/dev" },
     filename: { js: `[name].js` },
     externals: {

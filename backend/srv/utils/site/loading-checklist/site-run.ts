@@ -5,23 +5,9 @@ import type { PrasiSiteLoading } from "utils/global";
 import { spawn } from "utils/spawn";
 import { siteBroadcastBuildLog, siteLoadingMessage } from "./loading-msg";
 import { siteReady } from "./site-ready";
-import { $ } from "bun";
-import { sync } from "sync-directory";
-import { removeAsync } from "fs-jetpack";
+import { asset } from "utils/server/asset";
 
 export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
-  if (site_id === PRASI_CORE_SITE_ID) {
-    await removeAsync(fs.path(`code:${site_id}/vsc/dist/dev`));
-    sync(
-      fs.path(`root:backend/srv/psc`),
-      fs.path(`code:${site_id}/vsc/dist/dev`),
-      {
-        watch: true,
-        type: "copy",
-      }
-    );
-  }
-
   await waitUntil(
     async () =>
       (await fs.exists(`code:${site_id}/vsc/package.json`)) &&
@@ -69,7 +55,13 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
       onMessage(arg) {
         siteBroadcastBuildLog(site_id, arg.text);
         if (arg.text.includes("ready")) {
-          siteReady(site_id);
+          if (g.site.loading[site_id]) {
+            siteReady(site_id);
+          } else {
+            if (site_id === PRASI_CORE_SITE_ID) {
+              asset.psc.rescan({ immediatly: true });
+            }
+          }
         }
       },
     });
