@@ -1,2 +1,2 @@
-var e={};e.d=function(r,t){for(var o in t)e.o(t,o)&&!e.o(r,o)&&Object.defineProperty(r,o,{enumerable:!0,get:t[o]})},e.o=function(e,r){return Object.prototype.hasOwnProperty.call(e,r)},e.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})};var r={};e.r(r),e.d(r,{rakuda:function(){return t}});let t="fwni";var o=r.rakuda;export{o as rakuda};
+const e=window.React,o=window.ReactDOM;console.log("rwo,  okdqw , moko"),console.log({createPortal:o.createPortal,createElement:e.createElement});
 //# sourceMappingURL=index.js.map

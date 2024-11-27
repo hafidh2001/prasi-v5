@@ -39,6 +39,11 @@ export default defineConfig({
       optimization: {
         usedExports: false,
       },
+      externalsType: "window",
+      externals: {
+        react: "React",
+        "react-dom": "ReactDOM",
+      },
       ignoreWarnings: [
         /require function is used in a way/,
         /the request of a dependency is an expression/,
@@ -54,9 +59,5 @@ export default defineConfig({
 
     distPath: { root: "./dist/dev" },
     filename: { js: `[name].js` },
-    externals: {
-      react: "window.React",
-      "react-dom": "window.ReactDOM",
-    },
   },
 });

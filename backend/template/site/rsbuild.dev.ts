@@ -36,6 +36,11 @@ export default defineConfig({
           type: "module",
         },
       },
+      externalsType: "window",
+      externals: {
+        react: "React",
+        "react-dom": "ReactDOM",
+      },
       optimization: {
         usedExports: false,
       },
@@ -54,9 +59,5 @@ export default defineConfig({
 
     distPath: { root: "./dist/dev" },
     filename: { js: `[name].js` },
-    externals: {
-      react: "window.React",
-      "react-dom": "window.ReactDOM",
-    },
   },
 });
