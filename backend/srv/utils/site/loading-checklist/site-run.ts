@@ -7,18 +7,14 @@ import { asset } from "utils/server/asset";
 import { spawn } from "utils/spawn";
 import { broadcastVscUpdate } from "../utils/broadcast-vsc";
 import { extractVscIndex } from "../utils/extract-vsc";
-import {
-  siteBroadcastBuildLog,
-  siteBroadcastTscLog,
-  siteLoadingMessage,
-} from "./loading-msg";
+import { siteBroadcastBuildLog, siteLoadingMessage } from "./loading-msg";
 import { siteReady } from "./site-ready";
 
 export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   await waitUntil(
-    async () =>
-      (await fs.exists(`code:${site_id}/vsc/package.json`)) &&
-      (await fs.exists(`code:${site_id}/vsc/rsbuild.dev.ts`)),
+    () =>
+      fs.exists(`code:${site_id}/vsc/package.json`) &&
+      fs.exists(`code:${site_id}/vsc/rsbuild.dev.ts`),
     { interval: 1000 }
   );
 

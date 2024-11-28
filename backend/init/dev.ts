@@ -30,7 +30,7 @@ const updatePort = () => {
   });
 };
 
-if (!(await fs.exists("data:static-site"))) {
+if (!fs.exists("data:static-site")) {
   dev.rsbuild_print = true;
 }
 
@@ -50,6 +50,7 @@ const run = (cmd: string, cwd: string, prefix: string) => {
       if (cwd === "frontend") {
         if (dev.prasi_port === 0 && text.includes("http://localhost:")) {
           dev.prasi_port = getPort(text);
+
           updatePort();
         }
       }

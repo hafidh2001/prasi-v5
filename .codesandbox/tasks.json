@@ -1,0 +1,25 @@
+{
+  // These tasks will run in order when initializing your CodeSandbox project.
+  "setupTasks": [
+    {
+      "name": "Install Dependencies",
+      "command": "bun install"
+    },
+    {
+      "name": "generating db",
+      "command": "cd backend/db && bun prisma generate"
+    }
+  ],
+
+  // These tasks can be run from CodeSandbox. Running one will open a log in the app.
+  "tasks": {
+    "Prasi Dev": {
+      "name": "Prasi Dev",
+      "command": "bun dev",
+      "runAtStart": true,
+      "preview": {
+        "port":4550
+      }
+    }
+  }
+}

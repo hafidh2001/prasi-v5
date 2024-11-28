@@ -8,20 +8,22 @@ export const siteLoadingMode = async (
   loading: PrasiSiteLoading
 ) => {
   siteLoadingMessage(site_id, "Checking files...");
-  const old_exists = await fs.exists(`code:${site_id}/site/frontend/index.tsx`);
+  const old_exists = fs.exists(`code:${site_id}/site/frontend/index.tsx`);
   if (old_exists) {
     loading.mode = "upgrade";
   } else {
-    const new_exists = await fs.exists(
-      `code:${site_id}/vsc/frontend/index.tsx`
+    const new_exists = fs.exists(`code:${site_id}/vsc/frontend/index.tsx`);
+    console.log(
+      "wew",
+      fs.path(`code:${site_id}/vsc/frontend/index.tsx`),
+      new_exists
     );
     if (new_exists) {
       loading.mode = "run";
     } else {
       loading.mode = "new";
-      siteRun(site_id, loading);
     }
   }
-  // console.log(`Site ${site_id}: ${loading.mode}`);
+  console.log(`Site ${site_id}: ${loading.mode}`);
   return loading.mode;
 };

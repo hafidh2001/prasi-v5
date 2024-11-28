@@ -10,10 +10,10 @@ const dev = {
 
 export const devProxy = async ({ url, req, ws }: ServerCtx) => {
   if (ws) return undefined;
- 
-  if (!g.rsbuild) { 
+
+  if (!g.rsbuild?.prasi_port) {
     await setupDevPort();
-    await waitUntil(() => g.rsbuild);
+    await waitUntil(() => g.rsbuild && g.rsbuild.prasi_port);
   }
 
   const target_url = `http://localhost:${g.rsbuild.prasi_port}${url.pathname}`;

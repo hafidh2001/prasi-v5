@@ -13,7 +13,7 @@ export const siteInit = async (site_id: string, conn_id?: string) => {
       g.site.loading[site_id] = {
         status: "",
         build: {},
-      }; 
+      };
       loading = g.site.loading[site_id];
       siteLoadingMessage(site_id, "Site Initializing...");
 
@@ -21,6 +21,7 @@ export const siteInit = async (site_id: string, conn_id?: string) => {
       if (!loading.mode) {
         await siteLoadingMode(site_id, loading);
 
+        console.log(loading.mode);
         if (loading.mode === "new") await siteNew(site_id, loading);
         if (loading.mode === "upgrade") await siteUpgrade(site_id, loading);
         if (loading.mode === "run") await siteRun(site_id, loading);

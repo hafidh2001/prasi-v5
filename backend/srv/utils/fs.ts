@@ -26,10 +26,10 @@ export const fs = {
     const from_dir = this.path(from);
     const to_dir = this.path(to);
     const is_dir = statSync(from_dir).isDirectory();
-    if (is_dir && !(await this.exists(to_dir))) {
+    if (is_dir && !this.exists(to_dir)) {
       mkdirSync(to_dir, { recursive: true });
     }
-    return await $`cp -r ${from_dir} ${to_dir}`;
+    return await $`cp -r * ${to_dir}`.cwd(from_dir);
   },
 
   async modify(arg: {
