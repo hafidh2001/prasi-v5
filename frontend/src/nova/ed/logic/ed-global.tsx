@@ -8,6 +8,7 @@ import { CompPickerNode } from "../popup/comp/comp-picker/render-picker-node";
 import { EBaseComp, EComp, EPage, ESite } from "./types";
 import { MonacoEditor } from "utils/script/typings";
 import { IItem } from "utils/types/item";
+import { Monaco } from "popup/script/code/js/enable-jsx";
 
 export const EDGlobal = {
   mode: "" as "desktop" | "mobile",
@@ -34,6 +35,7 @@ export const EDGlobal = {
   script: {
     ignore_changes: false,
     editor: null as null | MonacoEditor,
+    monaco: null as null | Monaco,
     snippet_pasted: false,
     do_edit: (() => {}) as unknown as ReturnType<typeof defineScriptEdit>,
     flow: {
@@ -55,7 +57,7 @@ export const EDGlobal = {
   ui: {
     site: {
       loading_status: "loading-site",
-      build_log: [] as string[]
+      build_log: [] as string[],
     },
     topbar: {
       render: () => {},

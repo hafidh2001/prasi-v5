@@ -44,7 +44,9 @@
     "lodash.find": "^4.6.0",
     "lodash.get": "^4.4.2",
     "lodash.set": "^4.3.2",
+    "lodash.transform": "^4.6.0",
     "lodash.trim": "^4.5.1",
+    "lodash.uniq": "^4.5.0",
     "lucide-react": "^0.441.0",
     "monaco-editor": "^0.52.0",
     "monaco-tailwindcss": "^0.6.1",
@@ -73,9 +75,7 @@
     "valtio": "^2.0.0",
     "y-indexeddb": "^9.0.12",
     "y-websocket": "^2.0.4",
-    "yjs": "^13.6.19",
-    "lodash.transform": "^4.6.0",
-    "lodash.uniq": "^4.5.0"
+    "yjs": "^13.6.19"
   },
   "devDependencies": {
     "@rsbuild/core": "^1.1.3",

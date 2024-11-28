@@ -60,7 +60,6 @@ setTimeout(() => {
       }
     }
 
-
     const accept = ctx.req.headers.get("accept-encoding") || "";
     const content = (await prodIndex(site_id, {})).render();
     if (accept.includes("zstd")) {
@@ -68,8 +67,7 @@ setTimeout(() => {
       return new Response(compressed, {
         headers: { "content-type": "text/html", "content-encoding": "zstd" },
       });
-    } else
-     if (accept.includes("gz")) {
+    } else if (accept.includes("gz")) {
       const compressed = gzipSync(content);
       return new Response(compressed, {
         headers: { "content-type": "text/html", "content-encoding": "gzip" },

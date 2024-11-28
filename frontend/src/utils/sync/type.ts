@@ -11,7 +11,6 @@ export type WSReceiveMsg =
   | {
       action: "vsc-update";
       vars: Record<string, any>;
-      source: Uint8Array;
       tsc: Uint8Array;
     }
   | { action: "site-tsc-log"; log: string };

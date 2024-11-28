@@ -1,7 +1,6 @@
+import { gzipSync } from "bun";
 import { editor } from "utils/editor";
 import { fs } from "utils/fs";
-import { compress, init } from "@bokuweb/zstd-wasm";
-init();
 
 export const broadcastVscUpdate = async (
   site_id: string,
@@ -10,20 +9,22 @@ export const broadcastVscUpdate = async (
   const site = g.site.loaded[site_id];
   if (site) {
     const pending = site.broadcasted;
-    if (from === "rsbuild") pending.rsbuild = true;
+    if (from === "rsbuild") {
+      pending.rsbuild = true;
+      await site.asset!.rescan();
+    }
     if (from === "tsc") pending.tsc = true;
 
     if (pending.rsbuild && pending.tsc) {
-      const source = await fs.read(
-        `code:${site_id}/vsc/dist/static/js/index.js`
+      const tsc = await fs.read(
+        `code:${site_id}/vsc/dist/typings-generated.d.ts`
       );
-      const tsc = await fs.read(`code:${site_id}/vsc/typings-generated.d.ts`);
+
       editor.broadcast(
         { site_id },
         {
           action: "vsc-update",
-          source: compress(source, 10),
-          tsc: compress(tsc, 10),
+          tsc: gzipSync(tsc),
           vars: site.build_result.vsc_vars,
         }
       );

@@ -54,23 +54,11 @@ export const EdViRoot = memo(() => {
           if (site) {
             const res = await fetch(`/prod/${site.id}/_prasi/type_vsc`);
             const json = (await res.json()) as {
-              vars: Record<string, "const" | "type">;
+              vars: Record<string, string>;
               source: string;
             };
             if (json.vars && json.source) {
-              p.script.typings_vscode = json.source;
-              p.script.typings_entry = `
-import * as _ from "frontend/index";
-
-declare global {
-${Object.entries(json.vars)
-  .map(([name, type]) => {
-    return `  ${type} ${name} = _.${name};`;
-  })
-  .join("\n")}
-}
-export {};
-`;
+              applyVscTypings(p, json);
             }
           }
           done();
@@ -187,6 +175,7 @@ const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
                 ? (e) => {
                     const content = e.currentTarget.innerHTML || "";
                     getActiveTree(p).update("Update Text", ({ findNode }) => {
+                      //@ts-ignore
                       const n = findNode(item.id);
                       if (n) {
                         n.item.html = content;
@@ -233,7 +222,6 @@ const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
               if (item) {
                 local.ctx_menu = e;
                 local.item = JSON.parse(JSON.stringify(item));
-                //@ts-ignore
                 local.render();
               }
             },
@@ -252,3 +240,40 @@ const ViWrapper = ({ p, render }: { p: PG; render: () => void }) =>
       </>
     );
   }) as ViWrapperType;
+
+export const applyVscTypings = (
+  p: PG,
+  arg: { vars: Record<string, string>; source: string }
+) => {
+  p.script.typings_vscode = arg.source;
+  p.script.typings_entry = `
+import * as _ from "frontend/index";
+
+declare global {
+${Object.entries(arg.vars)
+  .map(([name, type]) => {
+    return `  ${type} ${name} = _.${name};`;
+  })
+  .join("\n")}
+}
+export {};
+`;
+
+  if (
+    p.ui.popup.script.open &&
+    ["js", "prop"].includes(p.ui.popup.script.mode) &&
+    p.script.monaco
+  ) {
+    const models = p.script.monaco.editor.getModels();
+    for (const model of models) {
+      if (model.uri.toString() === `file:///typings-vscode.d.ts`) {
+        model.setValue(p.script.typings_vscode);
+        console.log(model.getValue(), p.script.typings_vscode);
+      }
+
+      if (model.uri.toString() === `file:///typings-entry.d.ts`) {
+        model.setValue(p.script.typings_entry);
+      }
+    }
+  }
+};

@@ -1,8 +1,11 @@
 import { pack, unpack } from "msgpackr";
 import { PG } from "../../nova/ed/logic/ed-global";
-import { EBaseComp, EPage, ESite } from "../../nova/ed/logic/types";
+import { EBaseComp, EPage } from "../../nova/ed/logic/types";
 import { WSReceiveMsg } from "./type";
+import { gunzipSync } from "fflate";
+import { applyVscTypings } from "../../nova/ed/ed-vi-root";
 
+const decoder = new TextDecoder();
 export const clientStartSync = (arg: {
   p: PG;
   user_id: string;
@@ -54,6 +57,21 @@ export const clientStartSync = (arg: {
             p.site = msg.site;
             arg.siteLoaded(p.sync);
           }
+        } else if (msg.action === "vsc-update") {
+          applyVscTypings(p, {
+            source: decoder.decode(gunzipSync(msg.tsc)),
+            vars: msg.vars,
+          });
+
+          const fn = new Function(
+            `return import('/prod/${p.site!.id}/js/index.js?${Date.now()}');`
+          );
+          const exports = await fn();
+          for (const [k, v] of Object.entries(exports)) {
+            p.viref.vscode_exports[k] = v;
+          }
+
+          p.ui.editor.render();
         }
       }
     };

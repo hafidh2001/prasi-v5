@@ -96,8 +96,11 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
       cmd: `${fs.path(`root:${tsc}`)} ${tsc_arg}`,
       cwd: fs.path(`code:${site_id}/vsc`),
       async onMessage(arg) {
-        siteBroadcastTscLog(site_id, arg.text);
-        if (arg.text.includes("Watching for file")) {
+        const site = g.site.loaded[site_id];
+        if (
+          arg.text.includes("Watching for file") &&
+          site?.broadcasted.rsbuild
+        ) {
           await extractVscIndex(site_id);
           broadcastVscUpdate(site_id, "tsc");
         }
