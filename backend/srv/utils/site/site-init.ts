@@ -5,8 +5,14 @@ import { siteLoadingMessage } from "./loading-checklist/loading-msg";
 import { siteNew } from "./loading-checklist/site-new";
 import { siteRun } from "./loading-checklist/site-run";
 import { siteUpgrade } from "./loading-checklist/site-upgrade";
+import { validate } from "uuid";
 
 export const siteInit = async (site_id: string, conn_id?: string) => {
+  if (!validate(site_id)) {
+    console.log(site_id);
+    return;
+  }
+
   if (!g.site.loaded[site_id]) {
     let loading = g.site.loading[site_id];
     if (!loading) {

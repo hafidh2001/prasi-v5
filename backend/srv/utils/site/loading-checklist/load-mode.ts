@@ -13,17 +13,12 @@ export const siteLoadingMode = async (
     loading.mode = "upgrade";
   } else {
     const new_exists = fs.exists(`code:${site_id}/vsc/frontend/index.tsx`);
-    console.log(
-      "wew",
-      fs.path(`code:${site_id}/vsc/frontend/index.tsx`),
-      new_exists
-    );
+
     if (new_exists) {
       loading.mode = "run";
     } else {
       loading.mode = "new";
     }
   }
-  console.log(`Site ${site_id}: ${loading.mode}`);
   return loading.mode;
 };

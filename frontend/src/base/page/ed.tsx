@@ -9,6 +9,7 @@ import { useGlobal } from "../../utils/react/use-global";
 import { useLocal } from "../../utils/react/use-local";
 import { Loading } from "../../utils/ui/loading";
 import { PRASI_CORE_SITE_ID } from "prasi-utils";
+import { useEffect } from "react";
 
 jscript.init();
 
@@ -23,6 +24,37 @@ export default page({
     const w = window as any;
 
     w.isEditor = true;
+
+    useEffect(() => {
+      if (validate(params.page_id) && validate(params.site_id)) {
+        localStorage.setItem(
+          "prasi-last-open",
+          JSON.stringify({ page_id: params.page_id, site_id: params.site_id })
+        );
+
+        if (!p.sync) {
+          initSync(p);
+        }
+      } else {
+        if (!validate(params.site_id)) {
+          const last_open_str = localStorage.getItem("prasi-last-open");
+
+          try {
+            const last_open = JSON.parse(last_open_str || "");
+
+            if (last_open.site_id && last_open.page_id) {
+              navigate(`/ed/${last_open.site_id}/${last_open.page_id}`);
+            } else {
+              navSitePage(p);
+            }
+          } catch (e) {
+            navSitePage(p);
+          }
+        } else {
+          navSitePage(p);
+        }
+      }
+    }, [location.pathname]);
 
     if (p.status === "no-site") {
       return (
@@ -59,36 +91,6 @@ export default page({
           )}
         </div>
       );
-    }
-
-    if (validate(params.page_id) && validate(params.site_id)) {
-      localStorage.setItem(
-        "prasi-last-open",
-        JSON.stringify({ page_id: params.page_id, site_id: params.site_id })
-      );
-
-      if (!initSync(p) && !p.sync) {
-        return <Loading note="loading-page" />;
-      }
-    } else {
-      if (!validate(params.site_id)) {
-        const last_open_str = localStorage.getItem("prasi-last-open");
-
-        try {
-          const last_open = JSON.parse(last_open_str || "");
-
-          if (last_open.site_id && last_open.page_id) {
-            navigate(`/ed/${last_open.site_id}/${last_open.page_id}`);
-          } else {
-            navSitePage(p);
-          }
-        } catch (e) {
-          navSitePage(p);
-        }
-      } else {
-        navSitePage(p);
-      }
-      return <Loading note="finding-page" />;
     }
 
     if (!p.site || !p.page.cur) {

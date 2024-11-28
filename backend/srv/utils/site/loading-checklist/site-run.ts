@@ -9,6 +9,7 @@ import { broadcastVscUpdate } from "../utils/broadcast-vsc";
 import { extractVscIndex } from "../utils/extract-vsc";
 import { siteBroadcastBuildLog, siteLoadingMessage } from "./loading-msg";
 import { siteReady } from "./site-ready";
+import { $ } from "bun";
 
 export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   await waitUntil(
@@ -99,6 +100,10 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
         ) {
           await extractVscIndex(site_id);
           broadcastVscUpdate(site_id, "tsc");
+
+          if (site_id === PRASI_CORE_SITE_ID) {
+            $`cp -f ${fs.path(`code:${site_id}/vsc/dist/typings-generated.d.ts`)} ${fs.path(`root:frontend/src/nova/ed/cprasi/prasi-typings-generated.d.ts`)}`;
+          }
         }
       },
     });
