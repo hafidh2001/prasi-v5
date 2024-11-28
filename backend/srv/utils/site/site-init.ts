@@ -9,7 +9,7 @@ import { validate } from "uuid";
 
 export const siteInit = async (site_id: string, conn_id?: string) => {
   if (!validate(site_id)) {
-    console.log(site_id);
+    console.log(`Warning, opening invalid site_id: ${site_id}`);
     return;
   }
 
