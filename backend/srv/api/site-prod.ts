@@ -4,7 +4,11 @@ import { prodIndex } from "../utils/server/prod-index";
 import { siteInit } from "../utils/site/site-init";
 import { siteProdPrasi } from "../utils/site/site-prod-prasi";
 import { asset } from "utils/server/asset";
+import * as zstd from "@bokuweb/zstd-wasm";
+import { gzipSync } from "bun";
 
+await zstd.init();
+const encoder = new TextEncoder();
 export default {
   url: "/prod/:site_id/**",
   async api(ctx: ServerCtx) {
@@ -56,7 +60,22 @@ setTimeout(() => {
       }
     }
 
-    return new Response((await prodIndex(site_id, {})).render(), {
+
+    const accept = ctx.req.headers.get("accept-encoding") || "";
+    const content = (await prodIndex(site_id, {})).render();
+    if (accept.includes("zstd")) {
+      const compressed = zstd.compress(encoder.encode(content) as any, 10);
+      return new Response(compressed, {
+        headers: { "content-type": "text/html", "content-encoding": "zstd" },
+      });
+    } else
+     if (accept.includes("gz")) {
+      const compressed = gzipSync(content);
+      return new Response(compressed, {
+        headers: { "content-type": "text/html", "content-encoding": "gzip" },
+      });
+    }
+    return new Response(content, {
       headers: { "content-type": "text/html" },
     });
   },

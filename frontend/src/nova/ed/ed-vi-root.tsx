@@ -2,7 +2,7 @@ import { apiProxy } from "base/load/api/api-proxy";
 import { dbProxy } from "base/load/db/db-proxy";
 import { activateItem, active, getActiveTree } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
-import { waitUntil } from "prasi-utils";
+import { PRASI_CORE_SITE_ID, waitUntil } from "prasi-utils";
 import { memo, useEffect, useRef, useState } from "react";
 import { StoreProvider } from "utils/react/define-store";
 import { useGlobal } from "utils/react/use-global";
@@ -30,6 +30,8 @@ export const EdViRoot = memo(() => {
       values: {
         prasi: null as any,
       },
+      vars: [] as string[],
+      typings: "",
     },
   }).current;
   const [, _set] = useState({});
@@ -38,11 +40,46 @@ export const EdViRoot = memo(() => {
     (async () => {
       ref.exports.status = "loading";
 
-      const fn = new Function(
-        `return import('/prod/${p.site!.id}/js/index.js');`
-      );
-      ref.exports.values = { ...(await fn()), prasi };
+      await Promise.all([
+        new Promise<void>(async (done) => {
+          const fn = new Function(
+            `return import('/prod/${p.site!.id}/js/index.js');`
+          );
+          ref.exports.values = { ...(await fn()), prasi };
+          done();
+        }),
+        new Promise<void>(async (done) => {
+          const site = p.site;
+
+          if (site) {
+            const res = await fetch(`/prod/${site.id}/_prasi/type_vsc`);
+            const json = (await res.json()) as {
+              vars: Record<string, "const" | "type">;
+              source: string;
+            };
+            if (json.vars && json.source) {
+              p.script.typings_vscode = json.source;
+              p.script.typings_entry = `
+import * as _ from "frontend/index";
+
+declare global {
+${Object.entries(json.vars)
+    .map(([name, type]) => {
+      return `  ${type} ${name} = _.${name};`;
+    })
+    .join("\n")}
+}
+export {}
+`;
+            }
+            console.log(p.script.typings_entry);
+
+            done();
+          }
+        }),
+      ]);
       ref.exports.status = "done";
+
       render();
     })();
   }, []);

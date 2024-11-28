@@ -21,11 +21,11 @@ export const siteReady = async (site_id: string) => {
         {
           watch: true,
           type: "copy",
-          supportSymlink: false
+          supportSymlink: false,
         }
       );
     });
-  } 
+  }
 
   const loading = g.site.loading[site_id];
 
@@ -35,6 +35,13 @@ export const siteReady = async (site_id: string) => {
     config: {},
     id: site_id,
     asset: await staticFile(fs.path(`code:${site_id}/vsc/dist/dev/static`)),
+    build_result: {
+      vsc_vars: {},
+    },
+    broadcasted: {
+      rsbuild: false,
+      tsc: false,
+    },
   };
   delete g.site.loading[site_id];
 

@@ -3,6 +3,7 @@ import type { PrismaClient } from "prasi-db";
 import type { ESite } from "prasi-frontend/src/nova/ed/logic/types";
 import type { spawn } from "./spawn";
 import type { staticFile } from "./static";
+import type { parseTypeDef } from "./parser/parse-type-def";
 
 type SITE_ID = string;
 export type PrasiSite = {
@@ -14,6 +15,13 @@ export type PrasiSite = {
   data: ESite;
   build: PrasiSiteLoading["build"];
   asset?: Awaited<ReturnType<typeof staticFile>>;
+  build_result: {
+    vsc_vars: Awaited<ReturnType<typeof parseTypeDef>>;
+  };
+  broadcasted: {
+    rsbuild: boolean;
+    tsc: boolean;
+  };
 };
 export type PrasiSiteLoading = {
   status: string;

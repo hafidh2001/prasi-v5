@@ -7,4 +7,5 @@ export type WSReceiveMsg =
     }
   | { action: "site-loading"; status: string }
   | { action: "site-ready"; site: ESite }
-  | { action: "site-build-log"; log: string };
+  | { action: "site-build-log"; log: string }
+  | { action: "site-tsc-log"; log: string };

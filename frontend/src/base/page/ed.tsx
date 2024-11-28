@@ -91,7 +91,7 @@ export default page({
       return <Loading note="finding-page" />;
     }
 
-    if (!p.site) {
+    if (!p.site || !p.page.cur) {
       return (
         <Loading
           note={p.ui.site.loading_status}

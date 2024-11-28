@@ -13,27 +13,9 @@ import { extractRegion, removeRegion } from "./js/migrate-code";
 import { replaceString } from "./js/replace-string";
 import { typingsItem } from "./js/typings-item";
 
-
 export const prasiTypings = async (p: PG) => {
   let editor_typings = [] as any[];
-  if (!p.script.typings_vscode && p.site) {
-    let res = await fetch(`/prod/${p.site.id}/typings/index.d.ts`);
-    p.script.typings_vscode = await res.text();
-    const def = await fetch(`/prod/${p.site.id}/_prasi/type_def`);
-    const entry = await def.json();
-    p.script.typings_entry = `
-declare global {
-  import * as _ from "index"
-  ${Object.entries(entry)
-    .map(([name, type]) => {
-      return `
-${type} ${name} = _.${name};`;
-    })
-    .join("\n")}
-}
-export {}
-`;
-  }
+
   editor_typings = [
     {
       name: "file:///typings-item.ts",
@@ -66,6 +48,7 @@ const prasi = _editor.prasi;
       }
     );
   }
+  
   return editor_typings;
 };
 

@@ -1,13 +1,12 @@
 import * as zstd from "@bokuweb/zstd-wasm";
-import { Glob, gzipSync, type BunFile } from "bun";
+import { Glob, gzipSync } from "bun";
 import { BunSqliteKeyValue } from "bun-sqlite-key-value";
-import { exists, existsAsync, removeAsync } from "fs-jetpack";
+import { exists, existsAsync } from "fs-jetpack";
 import mime from "mime";
 import { readFileSync } from "node:fs";
 import { join } from "path";
 import { waitUntil } from "prasi-utils";
 import { addRoute, createRouter, findRoute } from "rou3";
-import { dir } from "./dir";
 import type { ServerCtx } from "./server/ctx";
 
 await zstd.init();
@@ -36,7 +35,7 @@ export const staticFile = async (
   const glob = new Glob("**");
 
   const internal = {
-    index: null as null | BunFile,
+    indexPath: "",
     rescan_timeout: null as any,
     router: createRouter<{
       mime: string | null;
@@ -49,6 +48,14 @@ export const staticFile = async (
     paths: new Set<string>(),
     // rescan will be overwritten below.
     async rescan(arg?: { immediatly?: boolean }) {},
+    exists(rpath: string, arg?: { prefix?: string; debug?: boolean }) {
+      let pathname = rpath;
+      if (arg?.prefix && pathname) {
+        pathname = pathname.substring(arg.prefix.length);
+      }
+      const found = findRoute(internal.router, undefined, path + pathname);
+      return !!found;
+    },
     serve: (ctx: ServerCtx, arg?: { prefix?: string; debug?: boolean }) => {
       let pathname = ctx.url.pathname || "";
       if (arg?.prefix && pathname) {
@@ -59,33 +66,12 @@ export const staticFile = async (
       if (found) {
         const { fullpath, mime } = found.data;
         if (exists(fullpath)) {
-          const accept = ctx.req.headers.get("accept-encoding") || "";
-          const headers: any = {
-            "content-type": mime || "",
-          };
-          let content = null as any;
-
-          if (accept.includes("zstd")) {
-            content = store.zstd.get(fullpath);
-            if (!content) {
-              content = zstd.compress(
-                new Uint8Array(readFileSync(fullpath)) as any,
-                10
-              );
-              store.zstd.set(fullpath, content);
-            }
-            headers["content-encoding"] = "zstd";
-          }
-
-          if (!content && accept.includes("gz")) {
-            content = store.gz.get(fullpath);
-            if (!content) {
-              content = gzipSync(new Uint8Array(readFileSync(fullpath)));
-              store.gz.set(fullpath, content);
-            }
-            headers["content-encoding"] = "gzip";
-          }
-
+          const { headers, content } = cachedResponse(
+            ctx,
+            fullpath,
+            mime,
+            store
+          );
           if (g.mode === "prod") {
             headers["cache-control"] = "public, max-age=604800, immutable";
           }
@@ -99,7 +85,13 @@ export const staticFile = async (
       }
 
       if (opt?.index) {
-        return new Response(internal.index);
+        const { headers, content } = cachedResponse(
+          ctx,
+          internal.indexPath,
+          "text/html",
+          store
+        );
+        return new Response(content, { headers });
       }
     },
   };
@@ -117,7 +109,7 @@ export const staticFile = async (
       }
 
       for await (const file of glob.scan(path)) {
-        if (file === opt?.index) internal.index = Bun.file(join(path, file));
+        if (file === opt?.index) internal.indexPath = join(path, file);
 
         static_file.paths.add(join(path, file));
 
@@ -151,4 +143,40 @@ export const staticFile = async (
   };
 
   return static_file;
+};
+
+const cachedResponse = (
+  ctx: ServerCtx,
+  file_path: string,
+  mime: string | null,
+  store: any
+) => {
+  const accept = ctx.req.headers.get("accept-encoding") || "";
+  const headers: any = {
+    "content-type": mime || "",
+  };
+  let content = null as any;
+
+  if (accept.includes("zstd")) {
+    content = store.zstd.get(file_path);
+    if (!content) {
+      content = zstd.compress(
+        new Uint8Array(readFileSync(file_path)) as any,
+        10
+      );
+      store.zstd.set(file_path, content);
+    }
+    headers["content-encoding"] = "zstd";
+  }
+
+  if (!content && accept.includes("gz")) {
+    content = store.gz.get(file_path);
+    if (!content) {
+      content = gzipSync(new Uint8Array(readFileSync(file_path)));
+      store.gz.set(file_path, content);
+    }
+    headers["content-encoding"] = "gzip";
+  }
+
+  return { content, headers };
 };

@@ -206,7 +206,7 @@ export const parseTypeDef = async (path: string) => {
       }
     }
   };
-  traverse(exports.index);
+  traverse(exports['frontend/index']);
 
   return result;
 };

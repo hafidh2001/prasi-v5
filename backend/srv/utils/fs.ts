@@ -5,9 +5,9 @@ import { dir } from "./dir";
 const internal = Symbol("internal");
 
 export const fs = {
-  async exists(path: string) {
+  exists(path: string) {
     try {
-      const s = statSync(this.path(path))
+      const s = statSync(this.path(path));
       return s.isDirectory() || s.isFile();
     } catch (e) {}
     return false;

@@ -1,11 +1,18 @@
+import { removeAsync } from "fs-jetpack";
 import { platform } from "os";
 import { PRASI_CORE_SITE_ID, waitUntil } from "prasi-utils";
 import { fs } from "utils/fs";
 import type { PrasiSiteLoading } from "utils/global";
-import { spawn } from "utils/spawn";
-import { siteBroadcastBuildLog, siteLoadingMessage } from "./loading-msg";
-import { siteReady } from "./site-ready";
 import { asset } from "utils/server/asset";
+import { spawn } from "utils/spawn";
+import { broadcastVscUpdate } from "../utils/broadcast-vsc";
+import { extractVscIndex } from "../utils/extract-vsc";
+import {
+  siteBroadcastBuildLog,
+  siteBroadcastTscLog,
+  siteLoadingMessage,
+} from "./loading-msg";
+import { siteReady } from "./site-ready";
 
 export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   await waitUntil(
@@ -45,15 +52,16 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
 
   siteLoadingMessage(site_id, "Starting RSBuild...");
 
+  await removeAsync(fs.path(`code:${site_id}/dist/log`));
+
   if (!loading.build.rsbuild) {
-    siteReady(site_id);
     loading.build.rsbuild = spawn({
       cmd: `bun dev`,
       cwd: fs.path(`code:${site_id}/vsc`),
       log: {
         max_lines: 300,
       },
-      onMessage(arg) {
+      async onMessage(arg) {
         siteBroadcastBuildLog(site_id, arg.text);
         if (arg.text.includes("ready")) {
           if (g.site.loading[site_id]) {
@@ -67,6 +75,8 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
             if (site) {
               site.asset?.rescan();
             }
+
+            broadcastVscUpdate(site_id, "rsbuild");
           }
         }
       },
@@ -80,11 +90,18 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
         ? "node_modules/.bin/tsc.exe"
         : "node_modules/.bin/tsc";
 
-    const tsc_arg = `--watch --moduleResolution node --emitDeclarationOnly --outFile ./dist/typings-generated.d.ts --declaration --noEmit false`;
+    const tsc_arg = `--watch --moduleResolution node --emitDeclarationOnly --isolatedModules false --outFile ./dist/typings-generated.d.ts --declaration --allowSyntheticDefaultImports true --noEmit false`;
 
     loading.build.typings = spawn({
       cmd: `${fs.path(`root:${tsc}`)} ${tsc_arg}`,
       cwd: fs.path(`code:${site_id}/vsc`),
+      async onMessage(arg) {
+        siteBroadcastTscLog(site_id, arg.text);
+        if (arg.text.includes("Watching for file")) {
+          await extractVscIndex(site_id);
+          broadcastVscUpdate(site_id, "tsc");
+        }
+      },
     });
   }
 };

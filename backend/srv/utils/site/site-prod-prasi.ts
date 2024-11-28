@@ -6,6 +6,8 @@ import { editor } from "../editor";
 import { parseTypeDef } from "../parser/parse-type-def";
 import { compressed } from "../server/compressed";
 import type { ServerCtx } from "../server/ctx";
+import { fs } from "utils/fs";
+import { extractVscIndex } from "./utils/extract-vsc";
 
 export const siteProdPrasi = async ({
   pathname,
@@ -28,6 +30,31 @@ export const siteProdPrasi = async ({
       );
       const file = Bun.file(path);
       return new Response(file);
+    }
+    case "type_vsc": {
+      const site = g.site.loaded[site_id];
+      let vars = {};
+      let source = "";
+      if (site) {
+        source = await fs.read(
+          `code:${site_id}/vsc/dist/typings-generated.d.ts`,
+          "string"
+        );
+        vars = site.build_result.vsc_vars;
+
+        if (source && Object.keys(vars).length === 0) {
+          await extractVscIndex(site_id);
+          vars = site.build_result.vsc_vars;
+        }
+      }
+      return compressed(
+        ctx,
+        JSON.stringify({
+          vars,
+          source,
+        })
+      );
+      break;
     }
     case "type_def": {
       const path = dir.data(`/code/${site_id}/site/typings.d.ts`);
@@ -80,16 +107,14 @@ export const siteProdPrasi = async ({
       });
 
       if (!res) {
-        if (ctx.url.pathname.endsWith(".js")) {
-          return new Response(
-            `\
-  console.log("Building frontend...");
-  setTimeout(() => { location.reload() }, 2000)
-  `,
-            {
-              headers: { "content-type": "text/javascript" },
-            }
-          );
+        if (
+          !site.asset!.exists(ctx.url.pathname, {
+            prefix: `/prod/${site_id}/_prasi/code`,
+          })
+        ) {
+          return new Response(`NOT FOUND`, {
+            status: 404,
+          });
         }
       }
 

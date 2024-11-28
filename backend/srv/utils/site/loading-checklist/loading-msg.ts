@@ -10,5 +10,15 @@ export const siteLoadingMessage = (site_id: string, status: string) => {
 };
 
 export const siteBroadcastBuildLog = (site_id: string, log: string) => {
-  editor.broadcast({ site_id }, { action: "site-build-log", log });
+  const loading = g.site.loading[site_id];
+  if (loading) {
+    editor.broadcast({ site_id }, { action: "site-build-log", log });
+  }
+};
+
+export const siteBroadcastTscLog = (site_id: string, log: string) => {
+  const loading = g.site.loading[site_id];
+  if (loading) {
+    editor.broadcast({ site_id }, { action: "site-tsc-log", log });
+  }
 };

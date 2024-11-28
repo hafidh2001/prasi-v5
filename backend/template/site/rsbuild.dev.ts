@@ -7,6 +7,7 @@ export default defineConfig({
   source: {
     entry: {
       index: "./frontend/index.tsx",
+      internal: "./frontend/internal.tsx",
       server: "./backend/server.ts",
     },
   },
@@ -27,14 +28,12 @@ export default defineConfig({
 
   tools: {
     rspack: {
-      experiments: {
-        outputModule: true,
-      },
       output: {
         module: true,
         library: {
           type: "module",
         },
+        clean: true,
       },
       externalsType: "window",
       externals: {
