@@ -24,7 +24,7 @@ export const EdSave = () => {
             <div className={cx("flex items-center relative", "text-green-700")}>
               <div className="absolute flex items-center ml-1">
                 <div className="rounded-md px-[2px] bg-white">
-                  <Zap size={15} strokeWidth={3} className="text-green-700" />
+                  <Zap size={15} className="text-green-700" />
                 </div>
                 <div className={cx("text-[12px]")}>Reconnected!</div>
               </div>
