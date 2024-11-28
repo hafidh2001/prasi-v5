@@ -72,6 +72,7 @@ export const TopBtn = ({
     return (
       <Popover
         autoFocus={false}
+        zIndex={40}
         content={typeof popover === "function" ? popover(local) : popover}
         open={local.open}
         onOpenChange={(open) => {

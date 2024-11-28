@@ -75,7 +75,7 @@ export const clientStartSync = (arg: {
           for (const [k, v] of Object.entries(exports)) {
             p.viref.vscode_exports[k] = v;
           }
-
+          
           p.ui.editor.render();
         }
       }

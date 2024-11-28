@@ -10,6 +10,10 @@ import { useLocal } from "../../utils/react/use-local";
 import { Loading } from "../../utils/ui/loading";
 import { PRASI_CORE_SITE_ID } from "prasi-utils";
 import { useEffect } from "react";
+import { TopBtn } from "../../nova/ed/ui/top-btn";
+import { Bug, Hammer, ScrollText } from "lucide-react";
+import { iconVSCode } from "../../nova/ed/ui/icons";
+import { DebugPopup } from "popup/debug/debug-popup";
 
 jscript.init();
 
@@ -19,6 +23,7 @@ export default page({
     const p = useGlobal(EDGlobal, "EDITOR");
     const local = useLocal({
       new_site: false,
+      debug_popup: false,
     });
 
     const w = window as any;
@@ -95,16 +100,55 @@ export default page({
 
     if (!p.site || !p.page.cur) {
       return (
-        <Loading
-          note={p.ui.site.loading_status}
-          alt={
-            <div className="mt-3 text-[7px] whitespace-pre-wrap font-mono w-[230px] relative">
-              <div className=" absolute top-0 left-0 right-0">
-                ${p.ui.site.build_log.join("\n")}
+        <>
+          <Loading
+            backdrop={false}
+            pointer
+            note={p.ui.site.loading_status}
+            alt={
+              <div className="flex flex-col mt-3 items-center">
+                <div className="mb-3 flex space-x-1">
+                  <TopBtn
+                    className={cx(
+                      "hover:bg-blue-500 cursor-pointer text-[11px]"
+                    )}
+                    onClick={() => {
+                      local.debug_popup = true;
+                      local.render();
+                    }}
+                  >
+                    <Bug size={12} />
+                    <div>Debug</div>
+                  </TopBtn>
+
+                  <TopBtn
+                    className={cx(
+                      "hover:bg-blue-500 cursor-pointer text-[11px]"
+                    )}
+                  >
+                    <div
+                      dangerouslySetInnerHTML={{ __html: iconVSCode }}
+                      className={css`
+                        svg {
+                          width: 10px;
+                        }
+                      `}
+                    ></div>
+                    <div>VSCode</div>
+                  </TopBtn>
+                </div>
+
+                <div className="text-[7px] whitespace-pre-wrap font-mono w-[230px] relative h-[40px] overflow-hidden">
+                  <div className="absolute top-0 left-0 right-0 ">
+                    {p.ui.site.build_log.join("\n")}
+                  </div>
+                  <div className="absolute bg-gradient-to-t from-white  to-transparent pointer-events-none inset-0 w-full h-full"></div>
+                </div>
               </div>
-            </div>
-          }
-        />
+            }
+          />
+          {local.debug_popup && <DebugPopup />}
+        </>
       );
     }
 

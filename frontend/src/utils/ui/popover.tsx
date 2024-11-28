@@ -18,7 +18,6 @@ import {
 } from "@floating-ui/react";
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { useLocal } from "utils/react/use-local";
 
 interface PopoverOptions {
   initialOpen?: boolean;
@@ -222,6 +221,7 @@ export function Popover({
   arrow,
   border = "1px solid black",
   preload,
+  zIndex,
   // onChange,
   ...restOptions
 }: {
@@ -233,6 +233,7 @@ export function Popover({
   arrow?: boolean;
   asChild?: boolean;
   preload?: boolean;
+  zIndex?: number;
 } & PopoverOptions) {
   const popover = usePopover({ modal, ...restOptions });
   const last = React.useRef({ open: popover.open });
@@ -256,6 +257,7 @@ export function Popover({
       </PopoverTrigger>
       <PopoverContent
         preloadContent={preload}
+        zIndex={zIndex}
         className={cx(
           popoverClassName
             ? popoverClassName
@@ -322,7 +324,10 @@ export const PopoverTrigger = React.forwardRef<
 
 export const PopoverContent = React.forwardRef<
   HTMLDivElement,
-  React.HTMLProps<HTMLDivElement> & { preloadContent?: boolean }
+  React.HTMLProps<HTMLDivElement> & {
+    preloadContent?: boolean;
+    zIndex?: number;
+  }
 >(function PopoverContent(props, propRef) {
   const { context: floatingContext, ...context } = usePopoverContext();
   const ref = useMergeRefs([context.refs.setFloating, propRef]);
@@ -330,7 +335,9 @@ export const PopoverContent = React.forwardRef<
   if (!floatingContext.open && !props.preloadContent) return null;
 
   const divProps = context.getFloatingProps(props as any);
+  const zIndex = divProps.zIndex as number;
   delete divProps.preloadContent;
+  delete divProps.zIndex;
 
   const _content = (
     <div
@@ -377,7 +384,12 @@ export const PopoverContent = React.forwardRef<
   return (
     <FloatingPortal root={context.root}>
       {context.backdrop ? (
-        <FloatingOverlay lockScroll>{content}</FloatingOverlay>
+        <FloatingOverlay
+          style={zIndex ? { zIndex: zIndex } : undefined}
+          lockScroll
+        >
+          {content}
+        </FloatingOverlay>
       ) : (
         content
       )}

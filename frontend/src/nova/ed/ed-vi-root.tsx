@@ -268,7 +268,6 @@ export {};
     for (const model of models) {
       if (model.uri.toString() === `file:///typings-vscode.d.ts`) {
         model.setValue(p.script.typings_vscode);
-        console.log(model.getValue(), p.script.typings_vscode);
       }
 
       if (model.uri.toString() === `file:///typings-entry.d.ts`) {
