@@ -144,7 +144,7 @@ export const parseTypeDef = async (path: string) => {
                     }
                   }
                   if (!exported) {
-                    console.log("export-named-declaration", body);
+                    // console.log("export-named-declaration", body);
                   }
                 } else {
                   let exported = false;

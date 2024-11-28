@@ -8,4 +8,10 @@ export type WSReceiveMsg =
   | { action: "site-loading"; status: string }
   | { action: "site-ready"; site: ESite }
   | { action: "site-build-log"; log: string }
+  | {
+      action: "vsc-update";
+      vars: Record<string, any>;
+      source: Uint8Array;
+      tsc: Uint8Array;
+    }
   | { action: "site-tsc-log"; log: string };

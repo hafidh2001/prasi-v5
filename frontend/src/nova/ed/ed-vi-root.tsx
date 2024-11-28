@@ -64,18 +64,16 @@ import * as _ from "frontend/index";
 
 declare global {
 ${Object.entries(json.vars)
-    .map(([name, type]) => {
-      return `  ${type} ${name} = _.${name};`;
-    })
-    .join("\n")}
+  .map(([name, type]) => {
+    return `  ${type} ${name} = _.${name};`;
+  })
+  .join("\n")}
 }
-export {}
+export {};
 `;
             }
-            console.log(p.script.typings_entry);
-
-            done();
           }
+          done();
         }),
       ]);
       ref.exports.status = "done";
