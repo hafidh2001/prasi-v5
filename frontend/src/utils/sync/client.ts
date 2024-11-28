@@ -35,6 +35,11 @@ export const clientStartSync = (arg: {
         if (msg.action === "connected") {
           console.log("🚀 Prasi Connected");
           if (p.sync) {
+            p.ui.topbar.reconnected = true;
+            setTimeout(() => {
+              p.ui.topbar.reconnected = false;
+              p.render();
+            }, 3000);
             p.sync.ws = ws;
             p.sync.ping = setInterval(() => {
               ws.send(pack({ action: "ping" }));

@@ -62,6 +62,7 @@ export const EDGlobal = {
     topbar: {
       render: () => {},
       mode: "page" as "page" | "bundle" | "deploy",
+      reconnected: false,
     },
     page: {
       ids: new Set<string>(),
