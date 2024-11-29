@@ -41,7 +41,7 @@ export const prasiTypings = async (p: PG) => {
       {
         name: "file:///editor-typings.ts",
         source: `\
-import * as _editor from "lib/prasi"; 
+import * as _editor from "nova/ed/cprasi/lib/prasi"; 
 declare global { 
 const prasi = _editor.prasi; 
 }`,

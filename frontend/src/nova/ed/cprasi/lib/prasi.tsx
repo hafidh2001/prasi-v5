@@ -1,11 +1,8 @@
-import { prasi_db } from "./prasi-db";
+import { PrasiDBEditor } from "./prasi-db/db-typings";
 import { prasi_site } from "./prasi-site";
-import type { PrismaClient } from "prasi-prisma";
 
 export type { DeployTarget, SiteSettings } from "./typings";
 export const prasi = {
   site: prasi_site,
-  db: prasi_db,
+  db: _db as PrasiDBEditor,
 };
-
-const editor_db = null as unknown as PrismaClient;
