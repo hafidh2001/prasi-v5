@@ -9,24 +9,43 @@ export default {
     const { params, req, query_params } = ctx;
     const path = params._;
     switch (true) {
-      case path === "editor-typings.d.ts": {
+      case path === "editor-prisma-typings.d.ts": {
         const prasi_prisma = await Bun.file(
           dir.root(`./node_modules/.prisma/client/index.d.ts`)
         ).text();
+
+        return await compressed(
+          ctx,
+          `
+declare global { 
+ ${prasi_prisma}
+}
+export {}`,
+          {
+            br: "editor-prisma-typings",
+          }
+        );
+      }
+      case path === "editor-prisma-runtime.d.ts": {
+        const prasi_prisma = await Bun.file(
+          dir.root(`./node_modules/@prisma/client/runtime/library.d.ts`)
+        ).text();
+
+        return await compressed(
+          ctx,
+          `declare module '@prisma/client/runtime/library.js' { 
+ ${prasi_prisma}
+}`,
+          {
+            br: "editor-prisma-runtime",
+          }
+        );
+      }
+      case path === "editor-typings.d.ts": {
         const prasi = await Bun.file(
           dir.root(`/frontend/src/nova/ed/cprasi/prasi-typings-generated.d.ts`)
         ).text();
-        return await compressed(
-          ctx,
-          `\
-declare module "prasi-prisma" {
-${prasi_prisma}
-}
-${prasi}
-`,
-          { br: "editor-typings" }
-        );
-        break;
+        return await compressed(ctx, prasi, { br: "editor-typings" });
       }
       case path.startsWith("load.js"): {
         const res = await editor.load_cached({

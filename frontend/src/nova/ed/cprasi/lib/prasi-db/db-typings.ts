@@ -1,7 +1,8 @@
 import type {
-  PrismaClient as PrasiDBClient,
   Prisma as PrasiDB,
+  PrismaClient as PrasiDBClient,
 } from "prasi-prisma";
+
 export type PrasiDBEditor = PrasiDBClient & {
   _batch: {
     update: <T extends PrasiDB.ModelName>(

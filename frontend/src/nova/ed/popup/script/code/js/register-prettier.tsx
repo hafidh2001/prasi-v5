@@ -48,7 +48,7 @@ export const registerPrettier = (monaco: Monaco) => {
             },
           },
           {
-            label: "sfy",
+            label: "stringify",
             kind: monaco.languages.CompletionItemKind.Snippet,
             documentation: "Add JSON.stringify",
             insertText: `JSON.stringify($1)`,

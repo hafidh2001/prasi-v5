@@ -100,12 +100,26 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
         ) {
           await extractVscIndex(site_id);
           broadcastVscUpdate(site_id, "tsc");
-
-          if (site_id === PRASI_CORE_SITE_ID) {
-            $`cp -f ${fs.path(`code:${site_id}/vsc/dist/typings-generated.d.ts`)} ${fs.path(`root:frontend/src/nova/ed/cprasi/prasi-typings-generated.d.ts`)}`;
-          }
         }
       },
     });
+
+    if (site_id === PRASI_CORE_SITE_ID) {
+      const cmd = [
+        ...`${fs.path(
+          platform() === "win32"
+            ? "root:node_modules/.bin/tsc.exe"
+            : "root:node_modules/.bin/tsc"
+        )} --project tsconfig.prasi.json --watch --moduleResolution node --emitDeclarationOnly --outFile prasi-typings-generated.d.ts --declaration --noEmit false`.split(
+          " "
+        ),
+      ];
+
+      Bun.spawn({
+        cmd,
+        cwd: fs.path(`root:frontend/src/nova/ed/cprasi`),
+        stdio: ["ignore", "ignore", "ignore"],
+      });
+    }
   }
 };

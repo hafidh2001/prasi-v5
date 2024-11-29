@@ -32,18 +32,28 @@ export const prasiTypings = async (p: PG) => {
   ];
 
   if (location.pathname.startsWith(`/ed/${PRASI_CORE_SITE_ID}`)) {
-    const res = await fetch(`/_prasi/editor-typings.d.ts`);
+    const prasi = await fetch(`/_prasi/editor-typings.d.ts`);
+    const prisma = await fetch(`/_prasi/editor-prisma-typings.d.ts`);
+    const runtime = await fetch(`/_prasi/editor-prisma-runtime.d.ts`);
     editor_typings.push(
       {
         name: "file:///editor-typings.d.ts",
-        source: await res.text(),
+        source: await prasi.text(),
+      },
+      {
+        name: "file:///editor-prisma-runtime.d.ts",
+        source: await runtime.text(),
+      },
+      {
+        name: "file:///editor-prisma-typings.d.ts",
+        source: await prisma.text(),
       },
       {
         name: "file:///editor-typings.ts",
         source: `\
-import * as _editor from "nova/ed/cprasi/lib/prasi"; 
+import * as _editor from "lib/prasi"; 
 declare global { 
-const prasi = _editor.prasi; 
+  const prasi = _editor.prasi as Omit<typeof _editor.prasi, "db"> & { db: PrismaClient }; 
 }`,
       }
     );
