@@ -50,6 +50,7 @@ type FNCompMeta = {
   options?: string;
   optionsBuilt?: string;
   option_mode?: "dropdown" | "button" | "checkbox";
+  text_mode?: "string" | "code";
 };
 
 export type FNAlign =

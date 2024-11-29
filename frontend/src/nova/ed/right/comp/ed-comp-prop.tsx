@@ -237,6 +237,17 @@ export const EdCompProp = () => {
                       prop.value = comp_prop.value;
                       prop.valueBuilt = comp_prop.valueBuilt;
                     }
+
+                    if (
+                      p.ui.popup.script.open &&
+                      ui.active === ui.context_name
+                    ) {
+                      p.ui.popup.script.open = false;
+                      setTimeout(() => {
+                        p.ui.popup.script.open = true;
+                        p.render();
+                      }, 100);
+                    }
                   }
                 }
               );

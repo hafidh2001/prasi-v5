@@ -288,6 +288,53 @@ export const EdMasterPropBodyBasic: FC<{
               : undefined,
           ]}
         />
+        {meta.type === "text" && (
+          <FieldButtons
+            label="Mode"
+            buttons={[
+              {
+                label: "String",
+                checked: () => {
+                  return (
+                    prop.meta?.text_mode === "string" || !prop.meta?.text_mode
+                  );
+                },
+                check: () => {
+                  getActiveTree(p).update(
+                    `Prop ${name} Set String`,
+                    ({ tree }) => {
+                      if (tree.type === "item") {
+                        let meta = prepMeta(tree, name);
+                        if (meta) {
+                          meta.text_mode = "string";
+                        }
+                      }
+                    }
+                  );
+                },
+              },
+              {
+                label: "Code",
+                checked: () => {
+                  return prop.meta?.text_mode === "code";
+                },
+                check: () => {
+                  getActiveTree(p).update(
+                    `Prop ${name} Set Code`,
+                    ({ tree }) => {
+                      if (tree.type === "item") {
+                        let meta = prepMeta(tree, name);
+                        if (meta) {
+                          meta.text_mode = "code";
+                        }
+                      }
+                    }
+                  );
+                },
+              },
+            ]}
+          />
+        )}
         {meta.type === "option" && (
           <FieldButtons
             label="Mode"

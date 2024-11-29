@@ -36,7 +36,7 @@ export const EdPropString = (arg: {
     p.ui.comp.prop.render_prop_editor();
   }, [instance.props[name]?.value]);
 
-  if (local.has_code) {
+  if (local.has_code || arg.field.meta?.text_mode === "code") {
     return <EdPropCode {...arg} />;
   }
 

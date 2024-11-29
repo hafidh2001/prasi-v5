@@ -72,9 +72,7 @@ export const EdCodeFindAllPane: FC<{}> = ({}) => {
           }
         }
         if (found.length > 0) {
-          local.found[
-            model.id + `${model.prop_name ? `~${model.prop_name}` : ""}`
-          ] = found;
+          local.found[model.id] = found;
         }
       }
     }
@@ -119,8 +117,13 @@ export const EdCodeFindAllPane: FC<{}> = ({}) => {
       <div className="flex-1 relative overflow-auto">
         <div className="absolute inset-0 text-sm">
           {Object.entries(local.found).map(([id, found], idx) => {
-            const model = local.models[id];
-            const node = local.nodes[model.id];
+            let model = local.models[id];
+
+            let item_id = model.id;
+            if (item_id.includes("~")) {
+              item_id = item_id.split("~")[0];
+            }
+            const node = local.nodes[item_id];
             if (!node) return null;
             return (
               <div key={id} className="flex flex-col">
@@ -144,8 +147,8 @@ export const EdCodeFindAllPane: FC<{}> = ({}) => {
                           if (model.prop_name) {
                             p.ui.comp.prop.active = model.prop_name;
                           }
-                          if (active.item_id !== model.id) {
-                            activateItem(p, model.id);
+                          if (active.item_id !== item_id) {
+                            activateItem(p, item_id);
                           }
                           setTimeout(() => {
                             const ed = p.script.editor;
