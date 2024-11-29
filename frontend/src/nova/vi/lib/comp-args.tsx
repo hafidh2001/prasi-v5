@@ -23,6 +23,7 @@ export const compArgs = (
       comp.component?.props || {}
     )) {
       const prop = item.component.props[k];
+      if (!prop) continue;
       let js = prop.valueBuilt || "";
 
       if (master_prop.meta?.type === "content-element") {

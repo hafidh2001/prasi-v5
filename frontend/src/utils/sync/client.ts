@@ -68,14 +68,17 @@ export const clientStartSync = (arg: {
             vars: msg.vars,
           });
 
-          const fn = new Function(
-            `return import('/prod/${p.site!.id}/js/index.js?${Date.now()}');`
-          );
-          const exports = await fn();
-          for (const [k, v] of Object.entries(exports)) {
-            p.viref.vscode_exports[k] = v;
+          if (p.viref?.vscode_exports) {
+            const fn = new Function(
+              `return import('/prod/${p.site!.id}/js/index.js?${Date.now()}');`
+            );
+            const exports = await fn();
+            console.log(Object.keys(exports));
+            for (const [k, v] of Object.entries(exports)) {
+              p.viref.vscode_exports[k] = v;
+            }
           }
-          
+
           p.ui.editor.render();
         }
       }

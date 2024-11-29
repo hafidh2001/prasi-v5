@@ -65,7 +65,7 @@ export const EdPropListHead = (arg: {
   useEffect(() => {
     const exports = p.viref.vscode_exports || {};
 
-    const structure = new Function(
+    const options = new Function(
       ...Object.keys(exports),
       `return ${arg.field.meta?.optionsBuilt || ""}`
     );
@@ -74,9 +74,12 @@ export const EdPropListHead = (arg: {
     const extracted = extractValue(p, name, prop);
 
     if (extracted) {
+      const options_result = options(...Object.values(exports));
+
+      const expanded = localStorage.getItem(`prasi-prop-list-${name}`);
       prop_list[name] = {
-        expand: true,
-        structure: structure(...Object.values(exports)),
+        expand: expanded !== "collapsed",
+        structure: options_result.structure,
         value: parsePLValue(extracted.value),
         update_timeout: null as any,
         ctx_menu: null,
@@ -85,7 +88,7 @@ export const EdPropListHead = (arg: {
     }
     local.render();
     p.ui.comp.prop.render_prop_editor();
-  }, [arg.instance.props[name].value]);
+  }, [arg.instance.props[name]?.value]);
 
   const prop = prop_list[name];
   if (!prop) return null;
@@ -96,15 +99,23 @@ export const EdPropListHead = (arg: {
         className={cx("flex items-center justify-between px-1 flex-1")}
         onClick={() => {
           prop.expand = prop.expand === undefined ? false : !prop.expand;
+          localStorage.setItem(
+            `prasi-prop-list-${name}`,
+            prop.expand ? "expanded" : "collapsed"
+          );
           p.render();
         }}
       >
         <div
           className={cx(
-            "text-[10px] bg-white ml-1 px-1 rounded-sm flex items-center transition-all ",
-            !prop.expand && "border"
+            "text-[10px] bg-white ml-1 px-1 flex items-center transition-all "
           )}
         >
+          <div className="pr-2 py-1 flex items-center">
+            <div className="rounded-[2px] bg-blue-500 h-[14px] flex items-center px-1 text-white">
+              {prop.value.length}
+            </div>
+          </div>
           {(prop.expand || typeof prop.expand === "undefined") && (
             <>
               <ChevronDown size={13} />

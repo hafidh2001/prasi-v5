@@ -42,10 +42,14 @@ export const EdViRoot = memo(() => {
 
       await Promise.all([
         new Promise<void>(async (done) => {
-          const fn = new Function(
-            `return import('/prod/${p.site!.id}/js/index.js');`
-          );
-          ref.exports.values = { ...(await fn()), prasi };
+          try {
+            const fn = new Function(
+              `return import('/prod/${p.site!.id}/js/index.js');`
+            );
+            ref.exports.values = { ...(await fn()), prasi };
+          } catch (e) {
+            console.error(e);
+          }
           done();
         }),
         new Promise<void>(async (done) => {

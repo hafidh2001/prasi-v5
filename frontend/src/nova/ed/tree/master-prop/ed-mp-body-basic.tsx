@@ -374,12 +374,15 @@ export const EdMasterPropBodyBasic: FC<{
 ] as Options`
                 : `\
 ({
-  type: "string"
-}) as ListStructure`
+  structure: {
+    type: "string"
+  }
+}) as List`
             }
             typings={
               meta.type === "list"
                 ? `\
+type List = { structure: ListStructure }
 type ListStructure = { 
   type: "string";
   placeholder?: string;
