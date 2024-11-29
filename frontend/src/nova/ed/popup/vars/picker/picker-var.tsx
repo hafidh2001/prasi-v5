@@ -13,6 +13,7 @@ import { Tooltip } from "utils/ui/tooltip";
 import { EBaseType, EType } from "../lib/type";
 import { EdTypeLabel } from "../lib/type-label";
 import { getBaseType } from "../lib/validate";
+import { loadScriptModels } from "crdt/node/load-script-models";
 
 export const EdVarPicker: FC<{
   children: any;
@@ -56,7 +57,10 @@ export const EdVarPicker: FC<{
       local.render();
 
       let cur = tree.nodes.map[item_id];
+
       while (cur) {
+        console.log(tree.script_models[cur.item.id]);
+
         if (cur && cur.item.vars) {
           for (const [k, v] of Object.entries(cur.item.vars)) {
             if (tree.var_items[k]) {

@@ -152,7 +152,7 @@ const parseSingle = (source: string, item: Expression) => {
 };
 
 export const createListItem = (structures: ListStructure): PLValue => {
-  if (structures.type === "object") {
+  if (structures && structures.type === "object") {
     const item = { type: "object", value: {} } as PLObject;
     for (const [k, v] of Object.entries(structures.object)) {
       if (v.type === "string" && v.deletable === true) continue;

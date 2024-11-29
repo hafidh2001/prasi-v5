@@ -77,9 +77,10 @@ export const EdPropOption = (arg: {
       }
     }
   };
+
   useEffect(() => {
     resetValue();
-  }, [prop?.value]);
+  }, [prop?.value, p.viref.comp_props[active.item_id]]);
 
   const setValue = (text: string) => {
     const region = extractRegion(prop?.value || "");

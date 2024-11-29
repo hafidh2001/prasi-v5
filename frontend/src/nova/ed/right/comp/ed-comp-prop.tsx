@@ -255,6 +255,7 @@ export const EdCompProp = () => {
           />
         </Menu>
       )}
+      <div className="p-1 text-[9px] text-slate-500">{comp_id}</div>
     </div>
   );
 };

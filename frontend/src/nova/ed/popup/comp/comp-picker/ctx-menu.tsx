@@ -3,6 +3,7 @@ import { FC } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { Menu, MenuItem } from "utils/ui/context-menu";
 import { compPickerToNodes } from "./to-nodes";
+import { IItem } from "utils/types/item";
 
 export const EdCompPickerCtxMenu: FC<{
   event?: React.MouseEvent<HTMLElement, MouseEvent>;
@@ -112,8 +113,9 @@ export const EdCompPickerCtxMenu: FC<{
                   delete (comp as any).id;
                   (comp as any).id_component_group = group_id;
                   (comp as any).name = name;
+
                   const res = await _db.component.create({
-                    data: comp as any,
+                    data: { ...comp, content_tree: {} } as any,
                     select: {
                       id: true,
                       name: true,
@@ -121,6 +123,16 @@ export const EdCompPickerCtxMenu: FC<{
                       color: true,
                     },
                   });
+
+                  const ctree = comp.content_tree as IItem;
+                  if (ctree.component) {
+                    ctree.name = name;
+                    ctree.component.id = res.id;
+                    await _db.component.update({
+                      where: { id: res.id },
+                      data: { content_tree: ctree },
+                    });
+                  }
 
                   popup.data.comps.push(res);
                   compPickerToNodes(p);

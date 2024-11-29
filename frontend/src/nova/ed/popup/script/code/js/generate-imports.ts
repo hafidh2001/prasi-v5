@@ -69,15 +69,15 @@ export const mergeParentVars = (
           if (e.name === m.local.name && model.id === id) continue;
           variables[e.name] = { id: m.id, type: e.type };
         }
-      }
 
-      if ((m.prop_names || []).length > 0) {
-        for (const prop_name of m.prop_names || []) {
-          const m = script_models[`${id}~${prop_name}`];
+        if ((m.prop_names || []).length > 0) {
+          for (const prop_name of m.prop_names || []) {
+            const m = script_models[`${id}~${prop_name}`];
 
-          if (m) {
-            for (const e of Object.values(m.exports)) {
-              variables[e.name] = { id: `${id}~${prop_name}`, type: e.type };
+            if (m) {
+              for (const e of Object.values(m.exports)) {
+                variables[e.name] = { id: `${id}~${prop_name}`, type: e.type };
+              }
             }
           }
         }

@@ -99,7 +99,7 @@ export const EdPropListHead = (arg: {
     }
     local.render();
     p.ui.comp.prop.render_prop_editor();
-  }, [arg.instance.props[name]?.value]);
+  }, [arg.instance.props[name]?.value, p.viref.comp_props[active.item_id]]);
 
   const prop = prop_list[name];
   if (!prop) return null;
@@ -182,7 +182,7 @@ export const EdPropList = (arg: {
 
   const name = arg.name;
   const prop = prop_list[name];
-  if (!prop || (prop && !prop.expand)) return null;
+  if (!prop || (prop && (!prop.expand || !prop.structure))) return null;
 
   prop.render_list = local.render;
 
@@ -192,6 +192,7 @@ export const EdPropList = (arg: {
     const source = `export const ${name} = [\n${prop.value
       .map((e) => plStringifySingle(e))
       .join(",\n")}\n]`;
+
     const comp_name =
       p.comp.loaded[getActiveNode(p)?.item.component?.id || ""].content_tree
         .name || "";
@@ -199,6 +200,8 @@ export const EdPropList = (arg: {
       action_name: `Updated: [${comp_name}] ~> ${name}`,
       prop_name: name,
     });
+
+    p.ui.comp.prop.render_prop_editor(true);
   };
 
   let ctx_menu = null as null | PLValue;

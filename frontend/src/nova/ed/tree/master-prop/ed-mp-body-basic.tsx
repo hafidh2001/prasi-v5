@@ -288,7 +288,7 @@ export const EdMasterPropBodyBasic: FC<{
               : undefined,
           ]}
         />
-        {meta.type === "text" && (
+        {meta.type === "text" && !is_group && (
           <FieldButtons
             label="Mode"
             buttons={[
@@ -332,10 +332,29 @@ export const EdMasterPropBodyBasic: FC<{
                   );
                 },
               },
+              {
+                label: "Var Picker",
+                checked: () => {
+                  return prop.meta?.text_mode === "var-picker";
+                },
+                check: () => {
+                  getActiveTree(p).update(
+                    `Prop ${name} Set Var Picker`,
+                    ({ tree }) => {
+                      if (tree.type === "item") {
+                        let meta = prepMeta(tree, name);
+                        if (meta) {
+                          meta.text_mode = "var-picker";
+                        }
+                      }
+                    }
+                  );
+                },
+              },
             ]}
           />
         )}
-        {meta.type === "option" && (
+        {meta.type === "option" && !is_group && (
           <FieldButtons
             label="Mode"
             buttons={[
@@ -516,8 +535,8 @@ type Options = ({ label: string, value: any} | string)[]
 
 const prepMeta = (tree: IItem, name: string) => {
   if (tree.component) {
-    let meta = tree.component.props[name].meta;
-    if (!tree.component.props[name].meta) {
+    let meta = tree.component.props[name]?.meta;
+    if (!tree.component.props[name]?.meta && tree.component.props[name]) {
       tree.component.props[name].meta = {
         type: "text",
       };

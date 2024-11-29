@@ -1,7 +1,6 @@
 import { active } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import { monacoRegisterSource } from "popup/script/code/js/create-model";
-import { monacoEnableJSX } from "popup/script/code/js/enable-jsx";
 import { registerPrettier } from "popup/script/code/js/register-prettier";
 import { registerReact } from "popup/script/code/js/register-react";
 import { MonacoRaw } from "popup/script/code/monaco-raw";
@@ -188,7 +187,7 @@ export const FieldCode = (arg: {
         )}
       >
         Edit Code
-      </div>{" "}
+      </div>
     </Popover>
   );
 

@@ -83,13 +83,13 @@ export const loadScriptModels = async (arg: {
           if (name.endsWith("__")) continue;
           const model_id = `${item.id}~${name}`;
 
-          if (!prop && master_prop.meta?.type !== "content-element") {
+          if (!prop && master_prop?.meta?.type !== "content-element") {
             prop = {
               value: master_prop.value,
               valueBuilt: master_prop.valueBuilt,
             };
           }
-
+          
           let prop_value = prop.value || "";
           if (master_prop.meta?.type === "content-element") {
             prop_value = "null as ReactElement";
@@ -108,6 +108,7 @@ export const loadScriptModels = async (arg: {
               value: prop_value,
             });
           }
+          
           model_prop_names[item.id] ??= [
             ...(model_prop_names[item.id] || []),
             name,

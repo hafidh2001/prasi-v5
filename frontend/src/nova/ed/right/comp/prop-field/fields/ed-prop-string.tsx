@@ -14,6 +14,7 @@ import { getActiveNode } from "crdt/node/get-node-by-id";
 import { extractValue } from "./extract-value";
 import { Popover } from "utils/ui/popover";
 import { ChevronLeft, ChevronLeftCircle } from "lucide-react";
+import { EdPropVarPicker } from "./ed-prop-varpicker";
 
 export const EdPropString = (arg: {
   name: string;
@@ -35,6 +36,10 @@ export const EdPropString = (arg: {
     local.render();
     p.ui.comp.prop.render_prop_editor();
   }, [instance.props[name]?.value]);
+
+  if (arg.field.meta?.text_mode === "var-picker") {
+    return <EdPropVarPicker {...arg} />;
+  }
 
   if (local.has_code || arg.field.meta?.text_mode === "code") {
     return <EdPropCode {...arg} />;

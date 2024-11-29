@@ -263,7 +263,7 @@ export default () => (
       >
         <div className="top-btn">
           <ScrollText size={12} className="mr-1" />
-          Template
+          Preset
         </div>
       </Popover>
     </div>

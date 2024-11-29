@@ -58,7 +58,9 @@ export const createViLoop = (
           merged: _merged,
         });
         item_ref.count++;
-        item_map.set(item, result);
+        if (typeof item === "object" && item) {
+          item_map.set(item, result);
+        }
         return result;
       }
     });

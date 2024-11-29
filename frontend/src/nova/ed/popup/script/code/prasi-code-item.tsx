@@ -64,7 +64,7 @@ export const EdPrasiCodeItem: FC<{ div: RefObject<HTMLDivElement> }> = ({
                   codeUpdate.push(p, model.id, value, {
                     local_name: model.local?.name,
                     prop_name: model.prop_name,
-                    loop_name: model.loop?.name
+                    loop_name: model.loop?.name,
                   });
                 }
               }}
@@ -78,7 +78,7 @@ export const EdPrasiCodeItem: FC<{ div: RefObject<HTMLDivElement> }> = ({
               value={_css}
               defaultValue={itemCssDefault}
               onChange={(val) => {
-                if (val.length > 200000) {
+                if ((val || "").length > 200000) {
                   alert("CSS code is too long. Please limit to 200KB.");
                   return;
                 }
@@ -106,7 +106,7 @@ export const EdPrasiCodeItem: FC<{ div: RefObject<HTMLDivElement> }> = ({
               div={div}
               value={_html}
               onChange={(val) => {
-                if (val.length > 200000) {
+                if ((val || "").length > 200000) {
                   alert("HTML code is too long. Please limit to 200KB.");
                   return;
                 }
@@ -138,7 +138,7 @@ const postCodeUpdateHistory = (p: PG, type: "html" | "css") => {
   return ({ findNode }: any) => {
     const n = findNode(active.item_id);
 
-    if (n) {
+    if (n && p.site) {
       _api._compressed.code_history({
         mode: "update",
         site_id: p.site.id,
