@@ -1,5 +1,6 @@
 import type { Expression } from "@oxc-parser/wasm";
 import get from "lodash.get";
+import { ReactElement } from "react";
 import { cutCode, jscript } from "utils/script/jscript";
 
 export type PLObject = { type: "object"; value: Record<string, PLValue> };
@@ -10,6 +11,9 @@ export type PLValue = PLString | PLCode | PLObject;
 export type LSString = {
   type: "string";
   placeholder?: string;
+  deletable?: boolean;
+  disabled?: boolean;
+  label?: string;
   options?: ({ label: string; value: string } | string)[];
 };
 export type LSObject = {
@@ -17,7 +21,14 @@ export type LSObject = {
   object: Record<string, ListStructure>;
 };
 export type ListStructure = LSString | LSObject;
-
+export type ListLayout = Record<
+  string,
+  (arg: {
+    structure: ListStructure;
+    value: any;
+    update: (key: string, value: any) => void;
+  }) => ReactElement
+>;
 export const getPropStructureByPath = (
   structure: ListStructure,
   path: (string | number)[]
@@ -144,6 +155,7 @@ export const createListItem = (structures: ListStructure): PLValue => {
   if (structures.type === "object") {
     const item = { type: "object", value: {} } as PLObject;
     for (const [k, v] of Object.entries(structures.object)) {
+      if (v.type === "string" && v.deletable === true) continue;
       item.value[k] = createListItem(v);
     }
     return item;

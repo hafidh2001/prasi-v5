@@ -7,13 +7,16 @@ import {
   GripVertical,
   PlusCircle,
   Trash,
+  X,
 } from "lucide-react";
+import { codeUpdate } from "popup/script/code/prasi-code-update";
 import { FC, Fragment, useEffect, useRef } from "react";
 import { arrayMove, List } from "react-movable";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { IItem } from "utils/types/item";
 import { FNCompDef } from "utils/types/meta-fn";
+import { Menu, MenuItem } from "utils/ui/context-menu";
 import { Dropdown } from "utils/ui/dropdown";
 import { FieldCode } from "../../../../tree/master-prop/ed-mp-fields";
 import { extractValue } from "./extract-value";
@@ -21,6 +24,7 @@ import {
   createListItem,
   getPropStructureByPath,
   getPropValueByPath,
+  ListLayout,
   ListStructure,
   LSObject,
   LSString,
@@ -31,19 +35,21 @@ import {
   plStringifySingle,
   PLValue,
 } from "./prop-list/prop-list-util";
-import { Menu, MenuItem } from "utils/ui/context-menu";
-import { codeUpdate } from "popup/script/code/prasi-code-update";
+import { Popover } from "utils/ui/popover";
+import { getActiveNode } from "crdt/node/get-node-by-id";
 
 type PROP_NAME = string;
 
 const prop_list = {} as Record<PROP_NAME, PropListSingle>;
 type PropListSingle = {
+  layout?: ListLayout;
   structure: ListStructure;
   value: PLValue[];
   expand: boolean;
-  update_timeout: any;
   ctx_path: (string | number)[];
   ctx_menu: any;
+  render_head: () => void;
+  render_list: () => void;
 };
 
 export const EdPropListHead = (arg: {
@@ -52,7 +58,7 @@ export const EdPropListHead = (arg: {
   instance: Exclude<IItem["component"], undefined>;
 }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
-  const local = useLocal({});
+  const local = useLocal({ add_new_timeout: null as any });
   const { name } = arg;
 
   useEffect(() => {
@@ -74,16 +80,21 @@ export const EdPropListHead = (arg: {
     const extracted = extractValue(p, name, prop);
 
     if (extracted) {
-      const options_result = options(...Object.values(exports));
+      const options_result = options(...Object.values(exports)) as {
+        structure: ListStructure;
+        layout?: ListLayout;
+      };
 
       const expanded = localStorage.getItem(`prasi-prop-list-${name}`);
       prop_list[name] = {
+        layout: options_result.layout,
         expand: expanded !== "collapsed",
         structure: options_result.structure,
         value: parsePLValue(extracted.value),
-        update_timeout: null as any,
         ctx_menu: null,
         ctx_path: [],
+        render_head: local.render,
+        render_list: () => {},
       };
     }
     local.render();
@@ -124,8 +135,7 @@ export const EdPropListHead = (arg: {
 
           {prop.expand === false && (
             <>
-              Show
-              <ChevronRight size={10} className="ml-1" />
+              <ChevronRight size={13} />
             </>
           )}
         </div>
@@ -135,6 +145,9 @@ export const EdPropListHead = (arg: {
             e.stopPropagation();
             const item = createListItem(prop.structure);
             prop.value.push(item as any);
+            local.render();
+            prop.render_list();
+
             const source = `[\n${prop.value.map((e) => plStringifySingle(e)).join(",\n")}\n]`;
 
             getActiveTree(p).update(
@@ -171,16 +184,21 @@ export const EdPropList = (arg: {
   const prop = prop_list[name];
   if (!prop || (prop && !prop.expand)) return null;
 
-  const update = (reset?: boolean) => {
+  prop.render_list = local.render;
+
+  const update = () => {
+    prop.render_head();
     local.render();
-    clearInterval(prop.update_timeout);
-    prop.update_timeout = setTimeout(
-      () => {
-        const source = `export const ${name} = [\n${prop.value.map((e) => plStringifySingle(e)).join(",\n")}\n]`;
-        codeUpdate.push(p, active.item_id, source, { prop_name: name });
-      },
-      reset ? 100 : 500
-    );
+    const source = `export const ${name} = [\n${prop.value
+      .map((e) => plStringifySingle(e))
+      .join(",\n")}\n]`;
+    const comp_name =
+      p.comp.loaded[getActiveNode(p)?.item.component?.id || ""].content_tree
+        .name || "";
+    codeUpdate.push(p, active.item_id, source, {
+      action_name: `Updated: [${comp_name}] ~> ${name}`,
+      prop_name: name,
+    });
   };
 
   let ctx_menu = null as null | PLValue;
@@ -188,6 +206,7 @@ export const EdPropList = (arg: {
     ctx_menu = getPropValueByPath(prop.value, prop.ctx_path);
   }
 
+  const root_layout = prop.layout?.[""];
   return (
     <div
       className={cx("flex items-stretch flex-col flex-1 bg-white")}
@@ -238,7 +257,7 @@ export const EdPropList = (arg: {
                 for (const [k, v] of Object.entries(blank_value)) {
                   (ctx_menu as any)[k] = v;
                 }
-                update(true);
+                update();
               }
             }}
           />
@@ -262,7 +281,7 @@ export const EdPropList = (arg: {
               "relative text-sm flex items-stretch bg-white",
               css`
                 &:hover > .grip {
-                  background: #3c82f6;
+                  background: #acccff;
                   color: white;
                 }
               `
@@ -278,10 +297,16 @@ export const EdPropList = (arg: {
             }}
           >
             <Fragment key={1}>
-              {local.activeIdx === index && (
-                <div className="absolute inset-0 border-blue-500 border-2 z-10 pointer-events-none"></div>
-              )}
-              <div className="grip w-[15px] cursor-ns-resize flex items-center justify-center border-r">
+              <div
+                className={cx(
+                  "grip w-[15px] cursor-ns-resize flex items-center justify-center border-r",
+                  local.activeIdx === index &&
+                    css`
+                      background: #3c82f6 !important;
+                      color: white;
+                    `
+                )}
+              >
                 <GripVertical size={10} />
               </div>
               <div
@@ -290,40 +315,52 @@ export const EdPropList = (arg: {
                   e.stopPropagation();
                 }}
               >
-                {prop.structure.type === "string" && (
-                  <SString
-                    structure={prop.structure}
-                    value={item as PLString}
-                    prop={prop}
-                    path={[index!]}
-                    onChange={(e) => {
-                      if (typeof index === "number") {
-                        prop.value[index] = { type: "string", value: e };
-                        prop.value = [...prop.value];
-                        update();
-                      }
-                    }}
-                  />
-                )}
+                {root_layout ? (
+                  root_layout({
+                    structure: prop.structure,
+                    value: item,
+                    update: (key, value) => {
+                      console.log(key, value);
+                    },
+                  })
+                ) : (
+                  <>
+                    {prop.structure.type === "string" && (
+                      <SString
+                        structure={prop.structure}
+                        value={item as PLString}
+                        prop={prop}
+                        path={[index!]}
+                        onChange={(e) => {
+                          if (typeof index === "number") {
+                            prop.value[index] = { type: "string", value: e };
+                            prop.value = [...prop.value];
+                            update();
+                          }
+                        }}
+                      />
+                    )}
 
-                {prop.structure.type === "object" && (
-                  <SObject
-                    structure={prop.structure}
-                    value={item as PLObject}
-                    prop={prop}
-                    path={[index!]}
-                    onChange={(e) => {
-                      if (typeof index === "number") {
-                        prop.value[index] = { type: "object", value: e };
-                        prop.value = [...prop.value];
-                        update();
-                      }
-                    }}
-                  />
+                    {prop.structure.type === "object" && (
+                      <SObject
+                        structure={prop.structure}
+                        value={item as PLObject}
+                        prop={prop}
+                        path={[index!]}
+                        onChange={(e) => {
+                          if (typeof index === "number") {
+                            prop.value[index] = { type: "object", value: e };
+                            prop.value = [...prop.value];
+                            update();
+                          }
+                        }}
+                      />
+                    )}
+                  </>
                 )}
               </div>
               <div
-                className="cursor-pointer flex items-center justify-center border-l w-[18px] hover:text-red-600"
+                className="cursor-pointer flex items-center justify-center border-l w-[20px] text-red-600 hover:bg-red-50"
                 onPointerDown={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
@@ -396,7 +433,11 @@ const SString: FC<{
           ) : (
             <input
               type="text"
-              className="flex-1 outline-none rounded-none px-1 py-[2px]"
+              disabled={s.disabled === true}
+              className={cx(
+                "flex-1 outline-none rounded-none px-1 py-[2px]",
+                s.disabled && "text-black"
+              )}
               value={local.value || ""}
               placeholder={s.placeholder}
               onClick={(e) => {
@@ -440,6 +481,7 @@ const SObject: FC<{
 }> = (arg) => {
   const p = useGlobal(EDGlobal, "EDITOR");
   const { structure: s, value, onChange } = arg;
+  const local = useLocal({ deleted: new Set<string>() });
   let cur = value as any;
   if (typeof value !== "object") {
     cur = {};
@@ -447,6 +489,11 @@ const SObject: FC<{
     cur = cur.value;
   }
 
+  useEffect(() => {
+    local.render();
+  }, [local.deleted.size]);
+
+  let deleted_popup_rendered = false;
   return (
     <div
       className="flex-1 flex flex-col"
@@ -458,6 +505,21 @@ const SObject: FC<{
         <>
           {Object.entries(s.object).map(([name, st], idx) => {
             const curval = get(cur, name);
+
+            let label = name;
+            let deletable = false;
+            if (st.type === "string") {
+              if (typeof st.label === "string") label = st.label;
+              if (typeof st.deletable === "boolean") deletable = st.deletable;
+            }
+
+            if (deletable && !curval) {
+              local.deleted.add(name);
+              return null;
+            } else {
+              local.deleted.delete(name);
+            }
+
             return (
               <div
                 key={idx}
@@ -474,9 +536,11 @@ const SObject: FC<{
                   contextMenu(e, arg.prop, [...arg.path, name], p);
                 }}
               >
-                <div className="border-r flex items-center ml-1 pr-1 text-slate-400 label">
-                  {name}
-                </div>
+                {label && (
+                  <div className="border-r flex items-center ml-1 pr-1 text-slate-400 label">
+                    {label}
+                  </div>
+                )}
                 <div className="flex flex-1">
                   {st.type === "string" && (
                     <SString
@@ -526,6 +590,66 @@ const SObject: FC<{
                     />
                   )}
                 </div>
+                {deletable && (
+                  <div
+                    className="text-red-600 w-[20px] justify-center flex items-center border-l cursor-pointer hover:outline-red-600 hover:bg-red-50"
+                    onClick={() => {
+                      delete cur[name];
+                      local.deleted.add(name);
+                      local.render();
+                      onChange(cur);
+                    }}
+                    onPointerDown={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                    }}
+                  >
+                    <X size={12} />
+                  </div>
+                )}
+                {!deleted_popup_rendered && local.deleted.size > 0 && (
+                  <Popover
+                    asChild
+                    placement="bottom"
+                    content={({ close }) => (
+                      <div className="flex text-sm min-w-[200px] min-h-[100px] flex-col">
+                        <div className="p-1 text-xs border-b bg-slate-100">
+                          Add Properties:
+                        </div>
+                        {[...local.deleted].map((name) => {
+                          return (
+                            <div
+                              key={name}
+                              className="flex border-b p-1 cursor-pointer hover:bg-blue-500 hover:text-white"
+                              onClick={() => {
+                                const st = s.object[name];
+                                if (st) {
+                                  cur[name] = createListItem(st);
+                                  local.deleted.delete(name);
+                                  local.render();
+                                  onChange(cur);
+                                }
+                                close();
+                              }}
+                            >
+                              {name}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  >
+                    <div
+                      className="w-[20px] justify-center border-l flex items-center cursor-pointer hover:bg-blue-50 hover:text-blue-600"
+                      onPointerDown={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                      }}
+                    >
+                      <ChevronDown size={14} />
+                    </div>
+                  </Popover>
+                )}
               </div>
             );
           })}

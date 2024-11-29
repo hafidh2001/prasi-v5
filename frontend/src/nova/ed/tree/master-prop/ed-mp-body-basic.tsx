@@ -382,14 +382,17 @@ export const EdMasterPropBodyBasic: FC<{
             typings={
               meta.type === "list"
                 ? `\
-type List = { structure: ListStructure }
+type List = { structure: ListStructure, layout?: ListLayout }
+type ListLayout = Record<string, (arg: {structure: ListStructure, value: any }) => ReactElement>
 type ListStructure = { 
   type: "string";
   placeholder?: string;
+  disabled?: boolean;
+  deletable?: boolean;
   options?: ({ label: string; value: string } | string)[];
  } | { type: "object", object: Record<string, ListStructure> }`
                 : `\
-type Options = ({ type: string, value: any} | string)[]
+type Options = ({ label: string, value: any} | string)[]
               `
             }
             value={prop.meta?.options}

@@ -48,7 +48,7 @@ const prasi = _editor.prasi;
       }
     );
   }
-  
+
   return editor_typings;
 };
 
@@ -247,6 +247,7 @@ export const codeUpdate = {
       source_built?: string | null;
       local_name?: string;
       loop_name?: string;
+      action_name?: string;
     }
   >,
   push(
@@ -254,6 +255,7 @@ export const codeUpdate = {
     id: string,
     source: string,
     arg?: {
+      action_name?: string;
       prop_name?: string;
       local_name?: string;
       loop_name?: string;
@@ -273,8 +275,12 @@ export const codeUpdate = {
         if (!jscript.loaded) {
           await waitUntil(() => jscript.loaded);
         }
+        let action_name = "Update Code";
 
         for (const q of Object.values(this.queue)) {
+          if (q.action_name) {
+            action_name = q.action_name;
+          }
           q.source_built = null;
           try {
             if (!q.source.trim()) {
@@ -393,7 +399,7 @@ export const codeUpdate = {
         }
 
         getActiveTree(this.p!).update(
-          "Update Code",
+          action_name,
           ({ findNode }) => {
             for (const q of Object.values(this.queue)) {
               let id = q.id;

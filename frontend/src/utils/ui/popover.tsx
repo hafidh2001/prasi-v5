@@ -229,7 +229,7 @@ export function Popover({
   root?: HTMLElement;
   popoverClassName?: string;
   children: React.ReactNode;
-  content?: React.ReactNode;
+  content?: React.ReactNode | ((arg: { close: () => void }) => React.ReactNode);
   arrow?: boolean;
   asChild?: boolean;
   preload?: boolean;
@@ -278,7 +278,13 @@ export function Popover({
             `
         )}
       >
-        {_content}
+        {typeof _content === "function"
+          ? _content({
+              close: () => {
+                popover.setOpen(false);
+              },
+            })
+          : _content}
         {(typeof arrow === "undefined" || arrow) && <PopoverArrow />}
       </PopoverContent>
     </PopoverContext.Provider>
