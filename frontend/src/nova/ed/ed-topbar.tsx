@@ -5,15 +5,12 @@ import { EDGlobal, PG } from "logic/ed-global";
 import {
   BookImage,
   ExternalLink,
-  Hammer,
   House,
   LayoutTemplate,
-  Leaf,
-  NotepadText,
   PanelLeftOpen,
   PanelRightOpen,
   ScrollText,
-  Server,
+  Server
 } from "lucide-react";
 import { EdSave } from "popup/build/ed-save";
 import { closeEditor } from "popup/script/ed-workbench";
