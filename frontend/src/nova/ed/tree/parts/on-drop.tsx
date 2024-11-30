@@ -1,5 +1,6 @@
 import { DropOptions, NodeModel } from "@minoru/react-dnd-treeview";
 import { getNodeById } from "crdt/node/get-node-by-id";
+import { current } from "immer";
 import get from "lodash.get";
 import { activateItem, active, getActiveTree } from "logic/active";
 import { PG } from "logic/ed-global";
@@ -14,6 +15,7 @@ export const treeOnDrop: (
   const { dragSource, dropTarget, relativeIndex, dragSourceId, dropTargetId } =
     options;
 
+  console.log(dropTarget);
   if (
     dragSource?.data &&
     dropTarget &&
@@ -22,8 +24,10 @@ export const treeOnDrop: (
   ) {
     getActiveTree(p).update("Move item", ({ findNode, findParent, tree }) => {
       const from = findNode(dragSourceId);
-      const from_parent = findParent(dragSourceId);
-      const to = findNode(dropTargetId);
+      const from_parent = findParent(dragSourceId) || { item: tree };
+
+      const to =
+        dropTargetId === "root" ? { item: tree } : findNode(dropTargetId);
 
       if (from && typeof relativeIndex === "number") {
         let to_childs = null as null | IItem[];
@@ -62,19 +66,15 @@ export const treeCanDrop = (p: PG, arg: DropOptions<PNode>) => {
       dragSource,
       "data.item.parent.parent"
     ) as any;
-    if (parentSource && parentSource.id === "root") {
-      return false;
+
+    if ((dropTarget?.data as any)?.id === "root") {
+      return true;
     }
-    if (dropTargetId === "root") {
-      const ds = get(dragSource, "data.item") as IItem;
-      if (ds && ds.type === "section") {
-        return true;
-      }
-      return false;
-    } else if (dragSource?.data && dropTarget?.data) {
+
+    if (dragSource?.data?.item && dropTarget?.data?.item) {
       const from = (dragSource.data.item as IItem).type;
       const to = (dropTarget.data.item as IItem).type;
-      if (from === "section" || from === "item") {
+      if (from === "item") {
         let parentMeta: PNode | undefined = dropTarget.data;
         while (parentMeta) {
           if (parentMeta.item.id === dragSource.data.item.id) {
@@ -96,9 +96,7 @@ export const treeCanDrop = (p: PG, arg: DropOptions<PNode>) => {
         return false;
       }
 
-      if (from === "section" || to === "text") {
-        return false;
-      } else if (from === "item") {
+      if (from === "item") {
         if (to === "section" || to === "item") {
           return true;
         } else {

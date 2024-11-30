@@ -19,8 +19,8 @@ export const EdTreeAction = ({
   const item = raw.data?.item;
   if (!item) return null;
   const comp = {
-    editable: item.type === "item" && !!item.component?.id,
-    id: item.type === "item" && item.component ? item.component.id : "",
+    editable: item.type !== "text" && !!item.component?.id,
+    id: item.type !== "text" && item.component ? item.component.id : "",
   };
 
   let mode = "";
@@ -69,7 +69,6 @@ export const EdTreeAction = ({
           />
         </Tooltip>
       )}
-
       {!!item.hidden && (
         <Tooltip content="Hidden: All">
           <div
@@ -166,7 +165,6 @@ export const EdTreeAction = ({
           </div> */}
         </>
       )}
-
       {comp.editable && (
         <>
           {comp.id !== active.comp?.id && p.ui.comp.editable && (

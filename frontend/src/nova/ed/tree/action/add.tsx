@@ -38,7 +38,7 @@ export const edActionAdd = async (p: PG, item?: IItem) => {
         }
       }
     } else {
-      tree.childs.push({ ...new_item, type: "section", name: "Section" });
+      tree.childs.push({ ...new_item, type: "item", name: "Section" });
     }
   });
 

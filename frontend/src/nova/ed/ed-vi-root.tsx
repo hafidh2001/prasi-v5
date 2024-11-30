@@ -69,7 +69,6 @@ export const EdViRoot = memo(() => {
         }),
       ]);
       ref.exports.status = "done";
-
       render();
     })();
   }, []);
@@ -97,7 +96,7 @@ export const EdViRoot = memo(() => {
   return (
     <>
       {!ref.page.root || ref.exports.status !== "done" ? (
-        <Loading />
+        <Loading note="root-page" />
       ) : (
         <StoreProvider>
           <ViRoot

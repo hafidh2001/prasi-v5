@@ -4,22 +4,22 @@ import { active } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import {
   ExternalLink,
+  House,
   LayoutTemplate,
   Leaf,
   PanelLeftOpen,
   PanelRightOpen,
   ScrollText,
-  Trees,
 } from "lucide-react";
 import { EdSave } from "popup/build/ed-save";
 import { closeEditor } from "popup/script/ed-workbench";
+import { PRASI_CORE_SITE_ID } from "prasi-utils";
 import { FC, ReactElement, useEffect } from "react";
+import { navigate } from "utils/react/navigate";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
 import { Tooltip } from "utils/ui/tooltip";
-import { CPrasi } from "./cprasi/cprasi";
-import { PRASI_CORE_SITE_ID } from "prasi-utils";
 
 export const navPrevItem = (p: PG) => {
   p.nav.navigating = true;
@@ -126,22 +126,21 @@ export const EdTopBar = () => {
               "hover:bg-blue-100 bg-white"
             )}
           >
-            <Trees size={12} />
-            <div>Site</div>
+            <House size={12} />
           </Button>
           <Button
             className={cx(
               "border rounded-sm rounded-l-none btn px-2 py-[2px] flex items-center space-x-1",
               "hover:bg-blue-100 bg-white"
             )}
-            popover={{
-              content: (
-                <CPrasi
-                  id="b480c554-577d-4d66-8949-2a3e982973ac"
-                  name="site"
-                  size="500x500"
-                />
-              ),
+            onClick={() => {
+              p.ui.popup.page.open = ({ url }) => {
+                p.ui.popup.page.open = null;
+                active.comp_id = "";
+                active.item_id = "";
+                navigate(url);
+              };
+              p.render();
             }}
           >
             <Leaf size={12} />

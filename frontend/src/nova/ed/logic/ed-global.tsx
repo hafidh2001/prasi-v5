@@ -9,6 +9,7 @@ import { EBaseComp, EComp, EPage, ESite } from "./types";
 import { MonacoEditor } from "utils/script/typings";
 import { IItem } from "utils/types/item";
 import { Monaco } from "popup/script/code/js/enable-jsx";
+import { page } from "prasi-db";
 
 export const EDGlobal = {
   mode: "" as "desktop" | "mobile",
@@ -26,6 +27,12 @@ export const EDGlobal = {
     cur: null as unknown as EPage,
     tree: null as unknown as PageTree,
     pending_instances: {} as Record<string, IItem>,
+    list: {} as Record<
+      string,
+      {
+        page: EPage;
+      }
+    >,
   },
   viref: {} as ViRef,
   comp: {
@@ -200,6 +207,10 @@ export const EDGlobal = {
         set id(value) {
           localStorage.setItem("prasi-panel-var-name", value);
         },
+      },
+      page: {
+        open: null as null | ((arg: { url: string; page_id: string }) => void),
+        form: null as null | Partial<page>,
       },
       site: null as null | ((id_site: string) => any),
       site_form: null as null | {

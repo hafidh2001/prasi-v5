@@ -21,6 +21,7 @@ import { EdPopCompGroup } from "./popup/comp/comp-group";
 import { EdPopCompPicker } from "./popup/comp/comp-picker";
 import { iconVSCode } from "./ui/icons";
 import { initPage } from "crdt/init-page";
+import { EdPopPagePicker } from "popup/page/page-popup";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -186,6 +187,8 @@ export const EdBase = () => {
       <>
         <EdPopCompGroup />
         <EdPopCompPicker />
+        <EdPopPagePicker />
+
         {!script.paned && script.open && <EdPopItemScript />}
       </>
     </div>

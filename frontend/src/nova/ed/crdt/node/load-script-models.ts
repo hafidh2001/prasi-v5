@@ -89,10 +89,12 @@ export const loadScriptModels = async (arg: {
               valueBuilt: master_prop.valueBuilt,
             };
           }
-          
-          let prop_value = prop.value || "";
+
+          let prop_value = "";
           if (master_prop.meta?.type === "content-element") {
             prop_value = "null as ReactElement";
+          } else {
+            prop_value = prop.value || "";
           }
 
           const source_hash = hash(prop_value).toString();
@@ -108,7 +110,7 @@ export const loadScriptModels = async (arg: {
               value: prop_value,
             });
           }
-          
+
           model_prop_names[item.id] ??= [
             ...(model_prop_names[item.id] || []),
             name,
@@ -230,7 +232,7 @@ ${region_code}
 ${main_code}`);
         }
       } catch (e) {
-        console.error(
+        console.warn(
           `[ERROR] When Formatting Code\n${model.title} ~> ${model.id}\n\n`,
           e
         );

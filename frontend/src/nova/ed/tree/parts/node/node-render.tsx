@@ -171,7 +171,7 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
               )
             : [is_component && `bg-purple-50`],
           is_hover && [
-            (item as any).type === "section" ? "bg-blue-100" : "bg-blue-50",
+            (item as any).type === "section" ? "bg-orange-50" : "bg-blue-50",
           ],
           render_params.isDropTarget &&
             cx(
@@ -205,7 +205,6 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
             className={cx("absolute left-0 bottom-0 top-0 w-[4px] bg-blue-500")}
           ></div>
         )}
-
         {local.right_click && (
           <EdTreeCtxMenu
             raw={raw}
@@ -222,8 +221,8 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
           is_active={is_active}
           render_params={render_params}
         />
-        {p.ui.comp.creating_id !== item.id &&
-          p.ui.comp.loading_id !== item.id && (
+        {p.ui.comp.creating_id !== item.component?.id &&
+          p.ui.comp.loading_id !== item.component?.id && (
             <EdTreeAction raw={raw} render_params={render_params} />
           )}
       </div>

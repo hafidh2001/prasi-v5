@@ -1,4 +1,4 @@
-import { active, getActiveTree } from "logic/active";
+import { getActiveTree } from "logic/active";
 import { IItem } from "../../../../utils/types/item";
 import { PG } from "../../logic/ed-global";
 
@@ -13,7 +13,7 @@ export const edActionDelete = async (p: PG, item: IItem) => {
             ...parent.item.childs.filter((e) => e.id !== item.id),
           ];
         }
-      } else if (node.item.type === "section") {
+      } else {
         const idx = tree.childs.findIndex((e) => e.id === item.id);
         if (idx >= 0) {
           tree.childs.splice(idx, 1);

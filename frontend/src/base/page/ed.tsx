@@ -14,6 +14,8 @@ import { TopBtn } from "../../nova/ed/ui/top-btn";
 import { Bug, Hammer, ScrollText } from "lucide-react";
 import { iconVSCode } from "../../nova/ed/ui/icons";
 import { DebugPopup } from "popup/debug/debug-popup";
+import { active, getActiveTree } from "logic/active";
+import { EPage } from "logic/types";
 
 jscript.init();
 
@@ -39,6 +41,24 @@ export default page({
 
         if (!p.sync) {
           initSync(p);
+        } else if (p.page.cur.id !== params.page_id) {
+          (async () => {
+            if (active.comp) {
+              await getActiveTree(p).destroy();
+              active.comp = null;
+              active.comp_id = "";
+            }
+            await getActiveTree(p).destroy();
+            p.page.tree = null as any;
+            p.page.cur = null as any;
+            p.render();
+
+            const page = (await p.sync!.page.load(params.page_id)) as EPage;
+            if (page) {
+              p.page.cur = page;
+              p.render();
+            }
+          })();
         }
       } else {
         if (!validate(params.site_id)) {
