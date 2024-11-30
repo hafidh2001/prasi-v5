@@ -15,6 +15,7 @@ type DropdownExtProp = {
     renderItem?: (val: DropdownItem, idx: number) => ReactNode;
   };
   onChange?: (value: string, idx: number, item: DropdownItem) => void;
+  placeholder?: string;
 };
 
 export const Dropdown: FC<
@@ -243,6 +244,7 @@ export const Dropdown: FC<
 
             local.render();
           }}
+          autoFocus={elProp.autoFocus}
           onKeyDown={(e) => {
             if (!local.open) {
               local.open = true;

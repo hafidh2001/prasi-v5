@@ -3,13 +3,17 @@ import set from "lodash.set";
 import { active } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import {
+  BookImage,
   ExternalLink,
+  Hammer,
   House,
   LayoutTemplate,
   Leaf,
+  NotepadText,
   PanelLeftOpen,
   PanelRightOpen,
   ScrollText,
+  Server,
 } from "lucide-react";
 import { EdSave } from "popup/build/ed-save";
 import { closeEditor } from "popup/script/ed-workbench";
@@ -125,8 +129,24 @@ export const EdTopBar = () => {
               "border border-r-0 btn px-2 py-[2px] flex items-center space-x-1",
               "hover:bg-blue-100 bg-white"
             )}
+            onClick={() => {
+              p.ui.popup.site = (id) => {
+                active.comp_id = "";
+                navigate(`/ed/${id}`);
+              };
+              p.render();
+            }}
           >
             <House size={12} />
+          </Button>
+
+          <Button
+            className={cx(
+              "border border-r-0 btn px-2 py-[2px] flex items-center space-x-1",
+              "hover:bg-blue-100 bg-white"
+            )}
+          >
+            <Server size={12} />
           </Button>
           <Button
             className={cx(
@@ -143,7 +163,7 @@ export const EdTopBar = () => {
               p.render();
             }}
           >
-            <Leaf size={12} />
+            <BookImage size={12} />
             <div className="capitalize">{p.page.cur.name}</div>
           </Button>
         </ButtonBox>
