@@ -1,6 +1,6 @@
 import { getActiveTree } from "logic/active";
-import { IItem } from "../../../../utils/types/item";
-import { PG } from "../../logic/ed-global";
+import { IItem } from "../../../../../../utils/types/item";
+import { PG } from "../../../../logic/ed-global";
 
 export const edActionDelete = async (p: PG, item: IItem) => {
   getActiveTree(p).update("Delete item", ({ findNode, tree }) => {

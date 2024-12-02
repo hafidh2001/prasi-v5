@@ -6,7 +6,7 @@ import { FC } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { AutoHeightTextarea } from "utils/ui/auto-textarea";
-import { formatItemName } from "../../../tree/parts/node/node-name";
+import { formatItemName } from "../../../mode/page/tree/parts/node/node-name";
 import { ChevronRight } from "lucide-react";
 import { extractRegion } from "../code/js/migrate-code";
 

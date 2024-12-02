@@ -2,7 +2,7 @@ import { EDGlobal } from "logic/ed-global";
 import { Lock, Pencil, Plus } from "lucide-react";
 import { useGlobal } from "utils/react/use-global";
 import { IItem } from "utils/types/item";
-import { TopBtn } from "../../ui/top-btn";
+import { TopBtn } from "../../../../ui/top-btn";
 import { edActionAdd } from "../action/add";
 import { ComponentIcon, ItemIcon } from "./node/node-indent";
 import { createId } from "@paralleldrive/cuid2";

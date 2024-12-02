@@ -1,9 +1,9 @@
 import { RenderParams } from "@minoru/react-dnd-treeview";
 import { getNodeById } from "crdt/node/get-node-by-id";
 import { KeyboardEvent } from "react";
-import { IItem } from "../../../../utils/types/item";
-import { active } from "../../logic/active";
-import { PG } from "../../logic/ed-global";
+import { IItem } from "../../../../../../utils/types/item";
+import { active } from "../../../../logic/active";
+import { PG } from "../../../../logic/ed-global";
 import { edActionAdd } from "../action/add";
 import { edActionDelete } from "../action/delete";
 import { scrollTreeActiveItem } from "./scroll-tree";

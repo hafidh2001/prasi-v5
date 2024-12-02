@@ -6,7 +6,7 @@ import { FC, useEffect } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { Loading } from "utils/ui/loading";
-import { formatItemName } from "../../tree/parts/node/node-name";
+import { formatItemName } from "../../mode/page/tree/parts/node/node-name";
 import { foldRegionVState } from "./code/js/fold-region-vstate";
 import { EdMonacoProp } from "./code/monaco-prop";
 import { MonacoRaw } from "./code/monaco-raw";

@@ -1,8 +1,8 @@
 import { NodeModel, RenderParams } from "@minoru/react-dnd-treeview";
-import { PNode } from "../../../logic/types";
-import { useGlobal } from "../../../../../utils/react/use-global";
-import { EDGlobal } from "../../../logic/ed-global";
-import { IItem } from "../../../../../utils/types/item";
+import { PNode } from "../../../../../logic/types";
+import { useGlobal } from "../../../../../../../utils/react/use-global";
+import { EDGlobal } from "../../../../../logic/ed-global";
+import { IItem } from "../../../../../../../utils/types/item";
 import { active } from "logic/active";
 export const DEPTH_WIDTH = 5;
 

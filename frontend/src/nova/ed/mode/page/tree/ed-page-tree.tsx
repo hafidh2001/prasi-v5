@@ -1,10 +1,10 @@
 import { Tree as DNDTree } from "@minoru/react-dnd-treeview";
 import { PageTree } from "crdt/load-page-tree";
 import { FC } from "react";
-import { useGlobal } from "../../../utils/react/use-global";
-import { ErrorBox } from "../../vi/lib/error-box";
-import { EDGlobal } from "../logic/ed-global";
-import { PNode } from "../logic/types";
+import { useGlobal } from "../../../../../utils/react/use-global";
+import { ErrorBox } from "../../../../vi/lib/error-box";
+import { EDGlobal } from "../../../logic/ed-global";
+import { PNode } from "../../../logic/types";
 import { DragPreview, Placeholder } from "./parts/drag-preview";
 import { nodeRender } from "./parts/node/node-render";
 import { treeCanDrop, treeOnDrop } from "./parts/on-drop";

@@ -1,5 +1,5 @@
 import { PFlow } from "popup/flow/runtime/types";
-import { EventType } from "../../nova/ed/right/events/ed-event-types";
+import { EventType } from "../../nova/ed/mode/page/right/events/ed-event-types";
 import { EBaseType, EType } from "../../nova/ed/popup/vars/lib/type";
 import { BasicItem, MetaItem } from "./meta";
 import { FNAdv, FNComponent, FNLayout, FNLinkTag } from "./meta-fn";

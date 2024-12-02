@@ -13,7 +13,7 @@ import { useLocal } from "utils/react/use-local";
 import { Button } from "utils/ui/form/Button";
 import { Popover } from "utils/ui/popover";
 import { mergeParentVars } from "../code/js/generate-imports";
-import { animalNames } from "../../../tree/action/add";
+import { animalNames } from "../../../mode/page/tree/action/add";
 
 export const EdCodeSnippet: FC<{}> = ({}) => {
   const p = useGlobal(EDGlobal, "EDITOR");

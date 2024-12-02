@@ -16,6 +16,7 @@ import { iconVSCode } from "../../nova/ed/ui/icons";
 import { DebugPopup } from "popup/debug/debug-popup";
 import { active, getActiveTree } from "logic/active";
 import { EPage } from "logic/types";
+import { getActiveNode } from "crdt/node/get-node-by-id";
 
 jscript.init();
 

@@ -3,7 +3,7 @@ import { PG } from "../../nova/ed/logic/ed-global";
 import { EBaseComp, EPage } from "../../nova/ed/logic/types";
 import { WSReceiveMsg } from "./type";
 import { gunzipSync } from "fflate";
-import { applyVscTypings } from "../../nova/ed/ed-vi-root";
+import { applyVscTypings } from "../../nova/ed/mode/page/ed-vi-root";
 
 const decoder = new TextDecoder();
 export const clientStartSync = (arg: {

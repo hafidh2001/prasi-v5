@@ -4,18 +4,16 @@ import { TreeDeciduous } from "lucide-react";
 import { useRef } from "react";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Loading } from "utils/ui/loading";
-import { useGlobal } from "../../utils/react/use-global";
-import { Tooltip } from "../../utils/ui/tooltip";
-import { active } from "./logic/active";
-import { EDGlobal } from "./logic/ed-global";
+import { useGlobal } from "../../../../utils/react/use-global";
+import { Tooltip } from "../../../../utils/ui/tooltip";
+import { active } from "../../logic/active";
+import { EDGlobal } from "../../logic/ed-global";
+import { iconHistory } from "../../ui/icons";
+import { TopBtn } from "../../ui/top-btn";
 import { EdCompTree } from "./tree/ed-comp-tree";
 import { EdPageTree } from "./tree/ed-page-tree";
 import { EdTreeSearch } from "./tree/parts/search";
 import { EdTreeTopBar } from "./tree/parts/tree-top-bar";
-import {
-  iconHistory
-} from "./ui/icons";
-import { TopBtn } from "./ui/top-btn";
 
 export const EdLeft = () => {
   const p = useGlobal(EDGlobal, "EDITOR");

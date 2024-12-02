@@ -2,7 +2,7 @@ import { newScriptModel, ScriptModel } from "crdt/node/load-script-models";
 import {
   createListItem,
   plStringifySingle,
-} from "../../../../right/comp/prop-field/fields/prop-list/prop-list-util";
+} from "../../../../mode/page/right/comp/prop-field/fields/prop-list/prop-list-util";
 import { generateImports } from "./generate-imports";
 import { generatePassPropAndLoop } from "./generate-passprop";
 import { SingleExportVar } from "./parse-item-types";
