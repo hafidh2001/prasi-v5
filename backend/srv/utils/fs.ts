@@ -1,7 +1,7 @@
 import { $ } from "bun";
 import { mkdirSync, statSync } from "fs";
 import { dir } from "./dir";
-
+import { copyAsync } from "fs-jetpack";
 const internal = Symbol("internal");
 
 export const fs = {
@@ -29,7 +29,7 @@ export const fs = {
     if (is_dir && !this.exists(to_dir)) {
       mkdirSync(to_dir, { recursive: true });
     }
-    return await $`cp -r * ${to_dir}`.cwd(from_dir);
+    return await copyAsync(from_dir, to_dir, { overwrite: true });
   },
 
   async modify(arg: {
