@@ -3,20 +3,18 @@ import { CompTree, loadCompTree } from "crdt/load-comp-tree";
 import { active } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
 import { PNode } from "logic/types";
-import { ArrowLeft, Box, Copy, LayoutList, ListTree, X } from "lucide-react";
+import { Box, LayoutList, ListTree, X } from "lucide-react";
 import { waitUntil } from "prasi-utils";
 import { FC } from "react";
 import { useGlobal } from "utils/react/use-global";
+import { Loading } from "utils/ui/loading";
 import { ErrorBox } from "../../../../vi/lib/error-box";
-import { TopBtn } from "../../../ui/top-btn";
 import { EdMasterProp } from "./master-prop/ed-master-prop";
 import { DragPreview, Placeholder } from "./parts/drag-preview";
 import { nodeRender } from "./parts/node/node-render";
 import { treeCanDrop, treeOnDrop } from "./parts/on-drop";
 import { doTreeSearch } from "./parts/search";
 import { indentTree, useTreeIndent } from "./parts/use-indent";
-import { Loading } from "utils/ui/loading";
-import { loadPendingComponent } from "crdt/node/load-child-comp";
 
 export const EdCompTree: FC<{ tree: CompTree }> = ({ tree }) => {
   const p = useGlobal(EDGlobal, "EDITOR");
