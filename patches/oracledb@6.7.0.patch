@@ -1,0 +1,13 @@
+diff --git a/lib/util.js b/lib/util.js
+index 82f70766145fc510277ad45fd0e97209f0296966..157c7cc419efd555ad3ead4c3593d499895bd95b 100644
+--- a/lib/util.js
++++ b/lib/util.js
+@@ -172,7 +172,7 @@ function traceExitFn(traceContext, result, err) {
+ 
+   // Fill the traceContext.
+   if (err) {
+-    traceContext.error = Object.assign(({}, err));
++    traceContext.error = Object.assign({}, err);
+   }
+   traceContext.additionalConfig.result = result;
+   if (this._impl) {
