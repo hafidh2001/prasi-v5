@@ -88,7 +88,7 @@ export const EdDeployPopup = () => {
                         <span
                             className={`px-3 py-1 text-sm text-white rounded ${local.target.status === 'online' ? 'bg-green-500' : 'bg-gray-400'}`}
                         >
-                            {local.target.status === 'online' ? 'Online' : 'Offline'}
+                            {local.target.status.toLocaleUpperCase()}
                         </span>
                         <span className="text-xs text-gray-600 mt-1">{formatDate(local.target.ts)}</span>
                     </div>
