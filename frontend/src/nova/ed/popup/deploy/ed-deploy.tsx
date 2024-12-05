@@ -64,13 +64,13 @@ export const EdDeployPopup = () => {
 
     return (
         <div className="max-w-3xl mx-auto">
-            <div className="flex mb-5">
+            <div className="flex mb-5 bg-gray-200">
                 {site.settings.deploy_targets.map((target) => (
                     <button
                         key={target.name}
                         className={`px-4 mr-1 py-2 transition ${local.target.name === target.name
                             ? "bg-white text-black border-t border-l border-r rounded-t"
-                            : "bg-gray-200 text-black hover:bg-gray-300 border rounded"
+                            : "bg-gray-100 text-black hover:bg-gray-300 border border-gray-300 rounded-t"
                             }`}
                         onClick={() => {
                             local.target = target;
@@ -81,7 +81,7 @@ export const EdDeployPopup = () => {
                     </button>
                 ))}
             </div>
-            <div className="bg-gray-100 p-5 rounded shadow">
+            <div className="px-5 rounded shadow">
                 <div className="flex items-center justify-between mb-2">
                     <h3 className="text-lg font-semibold">Server URL:</h3>
                     <div className="flex flex-col items-end">
