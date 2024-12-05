@@ -129,12 +129,13 @@ export const EdTopBar = () => {
             onClick={() => {
               p.ui.popup.site = (id) => {
                 active.comp_id = "";
-                navigate(`/ed/${id}`);
+                location.href = `/ed/${id}`;
               };
               p.render();
             }}
           >
             <House size={12} />
+            <div className="capitalize">{p.site?.name}</div>
           </Button>
 
           <Button
