@@ -20,7 +20,6 @@ import { Loading } from "../../utils/ui/loading";
 import { prasiKeybinding } from "./ed-keybinds";
 import { EdTopBar } from "./ed-topbar";
 import { EDGlobal } from "./logic/ed-global";
-import { WizardQuerySelect } from "./mode/query/wizard-query-select";
 import { EdPopCompGroup } from "./popup/comp/comp-group";
 import { EdPopCompPicker } from "./popup/comp/comp-picker";
 import { iconVSCode } from "./ui/icons";
@@ -202,7 +201,7 @@ export const EdBase = () => {
             hidden={!p.ui.panel.left}
             className={cx(p.ui.panel.left && "flex min-w-[240px]")}
           >
-            <WizardQuerySelect />
+            {/* <WizardQuerySelect /> */}
           </Panel>
         </PanelGroup>
       )}
