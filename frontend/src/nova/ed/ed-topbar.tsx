@@ -10,7 +10,7 @@ import {
   PanelLeftOpen,
   PanelRightOpen,
   ScrollText,
-  Server
+  Server,
 } from "lucide-react";
 import { EdSave } from "popup/build/ed-save";
 import { EdDeployPopup } from "popup/deploy/ed-deploy";
@@ -139,7 +139,6 @@ export const EdTopBar = () => {
             <div className="capitalize">{p.site?.name}</div>
           </Button>
 
-          
           <Button
             className={cx(
               "border rounded-sm rounded-l-none btn px-2 py-[2px] flex items-center space-x-1",
@@ -170,15 +169,13 @@ export const EdTopBar = () => {
           >
             <img src="/img/vscode.svg" width={12} />
           </Button>
-          
         </ButtonBox>
 
         <ButtonBox>
-        <Button
+          <Button
             popover={{
-              content: (
-               <EdDeployPopup/>
-              ),
+              // open: true,
+              content: <EdDeployPopup />,
             }}
           >
             <Server size={12} />
@@ -383,7 +380,7 @@ const Button: FC<{
   children: any;
   className?: string;
   href?: string;
-  popover?: { content: ReactElement };
+  popover?: { content: ReactElement; open?: boolean };
   onClick?: React.MouseEventHandler<HTMLDivElement | HTMLAnchorElement>;
 }> = ({ children, onClick, href, className, popover }) => {
   const args = {
@@ -405,7 +402,7 @@ const Button: FC<{
 
   if (popover) {
     return (
-      <Popover preload content={popover.content}>
+      <Popover open={popover.open} preload content={popover.content}>
         {content}
       </Popover>
     );
