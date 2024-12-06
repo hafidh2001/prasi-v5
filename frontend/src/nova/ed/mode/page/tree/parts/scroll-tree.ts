@@ -1,4 +1,4 @@
-import { active } from "../../logic/active";
+import { active } from "../../../../logic/active";
 
 export const scrollTreeActiveItem = () => {
   setTimeout(() => {

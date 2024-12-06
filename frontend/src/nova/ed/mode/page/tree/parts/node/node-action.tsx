@@ -4,11 +4,11 @@ import { getNodeById, updateNodeById } from "crdt/node/get-node-by-id";
 import { AudioWaveform } from "lucide-react";
 import { iconExpr } from "popup/expr/parts/expr-icon";
 import { waitUntil } from "prasi-utils";
-import { useGlobal } from "../../../../../utils/react/use-global";
-import { Tooltip } from "../../../../../utils/ui/tooltip";
-import { active } from "../../../logic/active";
-import { EDGlobal } from "../../../logic/ed-global";
-import { PNode } from "../../../logic/types";
+import { useGlobal } from "../../../../../../../utils/react/use-global";
+import { Tooltip } from "../../../../../../../utils/ui/tooltip";
+import { active } from "../../../../../logic/active";
+import { EDGlobal } from "../../../../../logic/ed-global";
+import { PNode } from "../../../../../logic/types";
 export const EdTreeAction = ({
   raw,
 }: {

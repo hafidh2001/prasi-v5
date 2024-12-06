@@ -21,16 +21,21 @@ import { propGroupInfo } from "../parts/prop-group-info";
 import { sortProp } from "../parts/sort-prop";
 import { EdMasterPropName } from "./ed-mp-name";
 
+type PROP_NAME = string;
+
 export const EdMasterProp = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
-  const local = useLocal({ checked: new Set<string>(), all: false });
+  const local = useLocal({
+    checked: new Set<PROP_NAME>(),
+    all: false,
+  });
   const item = active.comp?.snapshot;
   const comp = item?.component;
   const dragbox = useRef<HTMLDivElement>(null);
   if (!comp) return null;
 
   const props = item.component?.props || {};
-  const entries = sortProp(props);
+  const sorted_props = sortProp(props);
 
   return (
     <div className="flex flex-col items-stretch flex-1 w-full h-full text-sm">
@@ -193,7 +198,7 @@ export const EdMasterProp = () => {
 
       <div className="flex-1 relative overflow-auto" ref={dragbox}>
         <List
-          values={entries}
+          values={sorted_props}
           lockVertically
           container={dragbox.current}
           renderItem={({ value, props, isDragged }) => {
@@ -326,8 +331,8 @@ export const EdMasterProp = () => {
           onChange={({ oldIndex, newIndex }) => {
             getActiveTree(p).update("Reorder Master Prop", ({ tree }) => {
               if (tree.type === "item") {
-                const from = entries[oldIndex][0];
-                const to = entries[newIndex][0];
+                const from = sorted_props[oldIndex][0];
+                const to = sorted_props[newIndex][0];
                 const props = tree.component?.props;
                 if (props) {
                   props[to].idx = oldIndex;

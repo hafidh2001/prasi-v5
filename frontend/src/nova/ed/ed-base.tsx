@@ -1,9 +1,13 @@
 import { initPage } from "crdt/init-page";
 import { activateComp } from "crdt/load-comp-tree";
 import { loadPageTree } from "crdt/load-page-tree";
+import { getActiveNode } from "crdt/node/get-node-by-id";
 import { loadPendingComponent } from "crdt/node/load-child-comp";
-import { active } from "logic/active";
+import { active, getActiveTree } from "logic/active";
 import { Sticker } from "lucide-react";
+import { EdRight } from "mode-page/ed-right";
+import { EdViRoot } from "mode-page/ed-vi-root";
+import { mainStyle } from "mode-page/ed-vi-style";
 import { EdPopPagePicker } from "popup/page/page-popup";
 import { EdPopItemScript } from "popup/script/ed-item-script";
 import { EdPopSitePicker } from "popup/site/site-popup";
@@ -14,17 +18,13 @@ import { w } from "../../utils/types/general";
 import { isLocalhost } from "../../utils/ui/is-localhost";
 import { Loading } from "../../utils/ui/loading";
 import { prasiKeybinding } from "./ed-keybinds";
-import { EdLeft } from "./ed-left";
-import { EdRight } from "./ed-right";
 import { EdTopBar } from "./ed-topbar";
-import { EdViRoot } from "./ed-vi-root";
-import { mainStyle } from "./ed-vi-style";
 import { EDGlobal } from "./logic/ed-global";
 import { WizardQuerySelect } from "./mode/query/wizard-query-select";
 import { EdPopCompGroup } from "./popup/comp/comp-group";
 import { EdPopCompPicker } from "./popup/comp/comp-picker";
 import { iconVSCode } from "./ui/icons";
-
+import { EdLeft } from "mode-page/ed-left";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -35,6 +35,7 @@ export const EdBase = () => {
   if (!p.page.tree && p.page.cur && p.sync) {
     p.page.pending_instances = {};
     const page = initPage(p);
+
     p.page.tree = loadPageTree(p, p.sync, p.page.cur.id, {
       async loaded(content_tree) {
         await loadPendingComponent(p);
@@ -48,6 +49,13 @@ export const EdBase = () => {
         p.ui.editor.render();
         setTimeout(() => {
           p.ui.page.loaded = true;
+
+          if (!getActiveNode(p)) {
+            const tree = getActiveTree(p);
+            if (tree) {
+              active.item_id = tree.nodes.array[0]?.item.id;
+            }
+          }
           p.render();
         }, 100);
       },

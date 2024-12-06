@@ -6,6 +6,8 @@
       "base/*": ["./src/base/*"],
       "logic/*": ["./src/nova/ed/logic/*"],
       "popup/*": ["./src/nova/ed/popup/*"],
+      "mode-page/*": ["./src/nova/ed/mode/page/*"],
+      "mode-query/*": ["./src/nova/ed/mode/query/*"],
       "prod/*": ["./src/nova/prod/*"],
       "expr*": ["./src/nova/ed/popup/script/expr"],
       "vi/*": ["./src/nova/vi/*"],

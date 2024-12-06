@@ -1,7 +1,7 @@
 import { TreeMethods } from "@minoru/react-dnd-treeview";
 import { useEffect } from "react";
-import { PG } from "../../logic/ed-global";
-import { active, getActiveTree } from "../../logic/active";
+import { PG } from "../../../../logic/ed-global";
+import { active, getActiveTree } from "../../../../logic/active";
 import { scrollTreeActiveItem } from "./scroll-tree";
 
 export const useTreeIndent = (p: PG) => {

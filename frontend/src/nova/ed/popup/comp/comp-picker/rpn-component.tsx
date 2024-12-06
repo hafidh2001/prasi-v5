@@ -5,7 +5,7 @@ import { FC } from "react";
 import tc from "tinycolor2";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
-import { formatItemName } from "../../../tree/parts/node/node-name";
+import { formatItemName } from "../../../mode/page/tree/parts/node/node-name";
 import { CompPickerNode } from "./render-picker-node";
 
 export const RPNComponent: FC<{

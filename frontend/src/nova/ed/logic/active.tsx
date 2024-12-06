@@ -1,6 +1,6 @@
 import { CompTree } from "crdt/load-comp-tree";
 import { PG } from "./ed-global";
-import { indentTree, useTreeIndent } from "../tree/parts/use-indent";
+import { indentTree, useTreeIndent } from "../mode/page/tree/parts/use-indent";
 
 export const getActiveTree = (p: PG) => {
   return active.comp ? active.comp : p.page.tree;

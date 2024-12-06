@@ -16,7 +16,7 @@ import { FC, ReactNode, useEffect, useState } from "react";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
 import { LoadingSpinner } from "utils/ui/loading";
-import { PNode } from "../../../logic/types";
+import { PNode } from "../../../../../logic/types";
 import { scrollTreeActiveItem } from "../scroll-tree";
 import { ComponentIcon } from "./node-indent";
 

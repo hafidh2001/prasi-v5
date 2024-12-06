@@ -1,11 +1,11 @@
 import { NodeRender } from "@minoru/react-dnd-treeview";
 import { useEffect } from "react";
 import { Popover } from "utils/ui/popover";
-import { useGlobal } from "../../../../../utils/react/use-global";
-import { useLocal } from "../../../../../utils/react/use-local";
-import { activateItem, active } from "../../../logic/active";
-import { EDGlobal } from "../../../logic/ed-global";
-import { PNode } from "../../../logic/types";
+import { useGlobal } from "../../../../../../../utils/react/use-global";
+import { useLocal } from "../../../../../../../utils/react/use-local";
+import { activateItem, active } from "../../../../../logic/active";
+import { EDGlobal } from "../../../../../logic/ed-global";
+import { PNode } from "../../../../../logic/types";
 import { EdTreeCtxMenu } from "../ctx-menu";
 import { treeItemKeyMap } from "../key-map";
 import { EdTreeAction } from "./node-action";
@@ -170,9 +170,7 @@ export const nodeRender: NodeRender<PNode> = (raw, render_params) => {
                 `
               )
             : [is_component && `bg-purple-50`],
-          is_hover && [
-            (item as any).type === "section" ? "bg-orange-50" : "bg-blue-50",
-          ],
+          is_hover && ["bg-blue-50"],
           render_params.isDropTarget &&
             cx(
               "bg-blue-400 text-white",

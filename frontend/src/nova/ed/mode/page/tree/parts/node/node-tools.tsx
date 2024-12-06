@@ -1,5 +1,5 @@
-import { IItem } from "../../../../../utils/types/item";
-import { active } from "../../../logic/active";
+import { IItem } from "../../../../../../../utils/types/item";
+import { active } from "../../../../../logic/active";
 
 export const parseNodeState = ({ item }: { item: IItem }) => {
   let is_active = false;
