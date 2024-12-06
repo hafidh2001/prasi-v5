@@ -4,6 +4,7 @@ import { active } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import {
   BookImage,
+  Database,
   ExternalLink,
   House,
   LayoutTemplate,
@@ -119,7 +120,7 @@ export const EdTopBar = () => {
         `
       )}
     >
-      <div className="flex items-stretch">
+      <div className="top-left flex items-stretch">
         <ButtonBox>
           <Button
             className={cx(
@@ -194,7 +195,7 @@ export const EdTopBar = () => {
           </div>
         )}
       </div>
-      <div className="flex items-stretch absolute inset-0 justify-center pointer-events-none">
+      <div className="top-center flex items-stretch absolute inset-0 justify-center pointer-events-none">
         {!disconnected && (
           <>
             <div className="flex items-center pointer-events-auto">
@@ -265,7 +266,7 @@ export const EdTopBar = () => {
 
               <Button
                 className={cx(
-                  "border rounded-sm rounded-l-none border-l-0",
+                  "border rounded-sm rounded-l-none rounded-r-none border-l-0",
                   topbar_mode === "page" && !p.ui.popup.script.open
                     ? "bg-green-600 text-white border-green-600"
                     : "hover:bg-green-100 text-slate-600 bg-white"
@@ -278,12 +279,28 @@ export const EdTopBar = () => {
               >
                 <LayoutTemplate size={12} /> <div>Design</div>
               </Button>
+
+              <Button
+                className={cx(
+                  "border rounded-sm rounded-l-none border-l-0",
+                  topbar_mode === "query"
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "hover:bg-blue-100 text-slate-600 bg-white"
+                )}
+                onClick={() => {
+                  p.ui.topbar.mode = "query";
+                  closeEditor(p);
+                  p.render();
+                }}
+              >
+                <Database size={12} /> <div>Query</div>
+              </Button>
             </ButtonBox>
           </>
         )}
         <EdSave />
       </div>
-      <div className="flex justify-end pr-1 items-stretch">
+      <div className="top-right flex justify-end pr-1 items-stretch">
         {!p.ui.panel.right && (
           <div
             className="flex items-center m-1 cursor-pointer hover:text-blue-600"
