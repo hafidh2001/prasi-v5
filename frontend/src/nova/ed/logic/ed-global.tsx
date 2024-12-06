@@ -68,7 +68,7 @@ export const EDGlobal = {
     },
     topbar: {
       render: () => {},
-      mode: "page" as "page" | "bundle" | "deploy",
+      mode: "page" as "page" | "query",
       reconnected: false,
     },
     page: {
@@ -189,7 +189,7 @@ export const EDGlobal = {
         ref: null as null | HTMLInputElement,
       },
     },
-    left: { mode: "tree" as "tree" | "history" },
+    left: { mode: "tree" as "tree" | "history" | "query" },
     right: {
       tab: (localStorage.getItem("prasi-panel-right-tab") || "style") as
         | "style"

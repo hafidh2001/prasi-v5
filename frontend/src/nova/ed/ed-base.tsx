@@ -5,6 +5,9 @@ import { getActiveNode } from "crdt/node/get-node-by-id";
 import { loadPendingComponent } from "crdt/node/load-child-comp";
 import { active, getActiveTree } from "logic/active";
 import { Sticker } from "lucide-react";
+import { EdRight } from "mode-page/ed-right";
+import { EdViRoot } from "mode-page/ed-vi-root";
+import { mainStyle } from "mode-page/ed-vi-style";
 import { EdPopPagePicker } from "popup/page/page-popup";
 import { EdPopItemScript } from "popup/script/ed-item-script";
 import { EdPopSitePicker } from "popup/site/site-popup";
@@ -17,13 +20,11 @@ import { Loading } from "../../utils/ui/loading";
 import { prasiKeybinding } from "./ed-keybinds";
 import { EdTopBar } from "./ed-topbar";
 import { EDGlobal } from "./logic/ed-global";
-import { EdLeft } from "./mode/page/ed-left";
-import { EdRight } from "./mode/page/ed-right";
-import { EdViRoot } from "./mode/page/ed-vi-root";
-import { mainStyle } from "./mode/page/ed-vi-style";
+import { WizardQuerySelect } from "./mode/query/wizard-query-select";
 import { EdPopCompGroup } from "./popup/comp/comp-group";
 import { EdPopCompPicker } from "./popup/comp/comp-picker";
 import { iconVSCode } from "./ui/icons";
+import { EdLeft } from "mode-page/ed-left";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -126,74 +127,86 @@ export const EdBase = () => {
     >
       <EdTopBar />
 
-      <PanelGroup autoSaveId="prasi-editor-left" direction="horizontal">
-        <Panel
-          hidden={!p.ui.panel.left}
-          className={cx(p.ui.panel.left && "flex min-w-[240px]")}
-        >
-          <EdLeft />
-        </Panel>
-        <PanelResizeHandle />
-        <Panel defaultSize={78} className="flex flex-col">
-          <PanelGroup autoSaveId="prasi-editor-right" direction="horizontal">
-            <Panel className="flex">
-              {p.status === "page-not-found" ? (
-                <div className="flex items-center justify-center flex-1 text-sm">
-                  <Sticker size={40} strokeWidth={1} className="mr-1" />
-                  <div>Page Not Found</div>
-                </div>
-              ) : (
-                <>
-                  {script.paned && script.open && p.viref.comp_props ? (
-                    <EdPopItemScript />
-                  ) : (
-                    <div
-                      className={cx(
-                        "w-full h-full flex flex-1 relative overflow-auto",
-                        p.mode === "mobile" ? "flex-col items-center" : "",
-                        css``
-                      )}
-                      onContextMenu={(e) => {
-                        e.preventDefault();
-                      }}
-                    >
-                      <div className={cx(mainStyle(p))} ref={div}>
-                        <EdViRoot />
-                        {p.ui.page.ruler && (
-                          <div
-                            className={cx(
-                              "absolute inset-0 pointer-events-none contain-strict",
-                              div.current &&
-                                css`
-                                  top: ${div.current.scrollTop}px;
-                                  width: ${div.current.clientWidth}px;
-                                  height: ${div.current.clientHeight}px;
-                                `,
-                              p.ui.page.ruler && rulerCSS
-                            )}
-                          >
-                            <Ruler />
-                          </div>
+      {p.ui.topbar.mode === "page" ? (
+        <PanelGroup autoSaveId="prasi-mode-page" direction="horizontal">
+          <Panel
+            hidden={!p.ui.panel.left}
+            className={cx(p.ui.panel.left && "flex min-w-[240px]")}
+          >
+            <EdLeft />
+          </Panel>
+          <PanelResizeHandle />
+          <Panel defaultSize={78} className="flex flex-col">
+            <PanelGroup autoSaveId="prasi-editor-right" direction="horizontal">
+              <Panel className="flex">
+                {p.status === "page-not-found" ? (
+                  <div className="flex items-center justify-center flex-1 text-sm">
+                    <Sticker size={40} strokeWidth={1} className="mr-1" />
+                    <div>Page Not Found</div>
+                  </div>
+                ) : (
+                  <>
+                    {script.paned && script.open && p.viref.comp_props ? (
+                      <EdPopItemScript />
+                    ) : (
+                      <div
+                        className={cx(
+                          "w-full h-full flex flex-1 relative overflow-auto",
+                          p.mode === "mobile" ? "flex-col items-center" : "",
+                          css``
                         )}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                        }}
+                      >
+                        <div className={cx(mainStyle(p))} ref={div}>
+                          <EdViRoot />
+                          {p.ui.page.ruler && (
+                            <div
+                              className={cx(
+                                "absolute inset-0 pointer-events-none contain-strict",
+                                div.current &&
+                                  css`
+                                    top: ${div.current.scrollTop}px;
+                                    width: ${div.current.clientWidth}px;
+                                    height: ${div.current.clientHeight}px;
+                                  `,
+                                p.ui.page.ruler && rulerCSS
+                              )}
+                            >
+                              <Ruler />
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </Panel>
-            <PanelResizeHandle />
-            <Panel
-              defaultSize={25}
-              hidden={!p.ui.panel.right}
-              className={cx(
-                p.ui.panel.right && "flex flex-col min-w-[265px] border-l"
-              )}
-            >
-              <EdRight />
-            </Panel>
-          </PanelGroup>
-        </Panel>
-      </PanelGroup>
+                    )}
+                  </>
+                )}
+              </Panel>
+              <PanelResizeHandle />
+              <Panel
+                defaultSize={25}
+                hidden={!p.ui.panel.right}
+                className={cx(
+                  p.ui.panel.right && "flex flex-col min-w-[265px] border-l"
+                )}
+              >
+                <EdRight />
+              </Panel>
+            </PanelGroup>
+          </Panel>
+        </PanelGroup>
+      ) : (
+        <PanelGroup autoSaveId="prasi-mode-query" direction="horizontal">
+          <Panel
+            hidden={!p.ui.panel.left}
+            className={cx(p.ui.panel.left && "flex min-w-[240px]")}
+          >
+            <WizardQuerySelect />
+          </Panel>
+        </PanelGroup>
+      )}
+
       <>
         <EdPopCompGroup />
         <EdPopCompPicker />
