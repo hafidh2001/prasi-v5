@@ -242,7 +242,7 @@ export const EdDeployPopup = () => {
                           .map((target) => (
                             <button
                               key={target.name}
-                              className="block w-full text-left p-2 hover:bg-blue-200 border-b"
+                              className="block w-full text-left p-2 hover:bg-blue-500 border-b hover:text-white"
                               onClick={() => {
                                 local.target = target;
                                 local.render();
@@ -280,6 +280,32 @@ export const EdDeployPopup = () => {
                   className="flex justify-between items-center border-b py-1 px-2"
                 >
                   <span className="text-gray-700">{formatDate(entry.ts)}</span>
+                  <Popover
+                    preload
+                    content={
+                      <div className="bg-white border rounded shadow">
+                        
+                            <button
+                              className="block w-full text-left p-2 hover:bg-blue-500 border-b hover:text-white"
+                              
+                            >
+                              Re-Deploy
+                            </button>
+                            <button
+                              className="block w-full text-left p-2 hover:bg-blue-500 border-b hover:text-white"
+                              
+                            >
+                              Delete Build
+                            </button>
+                          
+                      </div>
+                    }
+                  >
+                    <button className="px-2 py-1 border border-slate-300 hover:bg-blue-100 flex items-center">
+                      Action
+                      <ChevronDown size={14} className="align-middle" />
+                    </button>
+                  </Popover>
                 </li>
               ))}
             </ul>
