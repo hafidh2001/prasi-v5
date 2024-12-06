@@ -1,5 +1,5 @@
-type NAME = string;
-type DB_NAME = string;
+export type NAME = string;
+export type DB_NAME = string;
 
 export type QConnectorParams = {
   type: "postgresql" | "oracle";
@@ -8,6 +8,7 @@ export type QConnectorParams = {
 
 export interface QConnector {
   inspect(): Promise<QInspectResult>;
+  destroy(): Promise<void>;
 }
 
 export type QInspectColumn = {
