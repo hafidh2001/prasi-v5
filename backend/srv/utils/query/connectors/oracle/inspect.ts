@@ -64,6 +64,8 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
     WHERE c.constraint_type = 'R' AND a.owner = '${SCHEMA}'`
   );
 
+  console.log({ fk_columns });
+
   // Create a Map for quick lookup of PKs
   const pkMap = new Map<string, Set<string>>();
   for (const pk of pk_columns) {
@@ -90,6 +92,8 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
 
   // Populate tables with columns, PKs, FKs, and Relations
   for (const table of tables) {
+    const table_name = table.NAME.toLowerCase();
+
     const columns = {} as Record<NAME, QInspectColumn>;
     const pk = [] as QInspectTable["pk"];
     const fk = {} as Record<NAME, QInspectFK>;
@@ -189,7 +193,7 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
     }
 
     // Populate table details
-    result.tables[table.NAME] = {
+    result.tables[table_name] = {
       name: table.NAME.toLowerCase(),
       pk,
       db_name: table.NAME,

@@ -13,6 +13,7 @@ import {
   Server
 } from "lucide-react";
 import { EdSave } from "popup/build/ed-save";
+import { EdDeployPopup } from "popup/deploy/ed-deploy";
 import { closeEditor } from "popup/script/ed-workbench";
 import { PRASI_CORE_SITE_ID } from "prasi-utils";
 import { FC, ReactElement, useEffect } from "react";
@@ -129,22 +130,16 @@ export const EdTopBar = () => {
             onClick={() => {
               p.ui.popup.site = (id) => {
                 active.comp_id = "";
-                navigate(`/ed/${id}`);
+                location.href = `/ed/${id}`;
               };
               p.render();
             }}
           >
             <House size={12} />
+            <div className="capitalize">{p.site?.name}</div>
           </Button>
 
-          <Button
-            className={cx(
-              "border border-r-0 btn px-2 py-[2px] flex items-center space-x-1",
-              "hover:bg-blue-100 bg-white"
-            )}
-          >
-            <Server size={12} />
-          </Button>
+          
           <Button
             className={cx(
               "border rounded-sm rounded-l-none btn px-2 py-[2px] flex items-center space-x-1",
@@ -174,6 +169,19 @@ export const EdTopBar = () => {
             }
           >
             <img src="/img/vscode.svg" width={12} />
+          </Button>
+          
+        </ButtonBox>
+
+        <ButtonBox>
+        <Button
+            popover={{
+              content: (
+               <EdDeployPopup/>
+              ),
+            }}
+          >
+            <Server size={12} />
           </Button>
         </ButtonBox>
         {!p.ui.panel.left && (

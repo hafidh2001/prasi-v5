@@ -3,7 +3,15 @@ export type DEPLOY_TARGET_NAME = string;
 export type DeployTarget = {
   name: DEPLOY_TARGET_NAME;
   domain: string;
-  dburl: string;
+  ts: number;
+  status: "online" | "offline";
+  db: {
+    url: string;
+    orm: "prasi" | "prisma";
+  },
+  history: {
+    ts: number;
+  }[]
 };
 export const internal = Symbol(`[internal]`);
 
