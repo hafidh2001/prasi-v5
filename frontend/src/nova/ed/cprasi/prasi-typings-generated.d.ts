@@ -11,7 +11,15 @@ declare module "lib/typings" {
     export type DeployTarget = {
         name: DEPLOY_TARGET_NAME;
         domain: string;
-        dburl: string;
+        ts: number;
+        status: "online" | "offline";
+        db: {
+            url: string;
+            orm: "prasi" | "prisma";
+        };
+        history: {
+            ts: number;
+        }[];
     };
     export const internal: unique symbol;
     export type SiteSettings = {
