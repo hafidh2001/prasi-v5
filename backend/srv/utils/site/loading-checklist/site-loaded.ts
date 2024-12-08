@@ -15,12 +15,12 @@ export const siteLoaded = async (
   }
 
   if (site_id === PRASI_CORE_SITE_ID) {
-    waitUntil(() => fs.exists(`code:${site_id}/vsc/dist/dev`), {
+    waitUntil(() => fs.exists(`code:${site_id}/site/build/frontend`), {
       interval: 300,
     }).then(async () => {
       await removeAsync(fs.path(`root:backend/srv/psc`));
       sync(
-        fs.path(`code:${site_id}/vsc/dist/dev`),
+        fs.path(`code:${site_id}/site/build/frontend`),
         fs.path(`root:backend/srv/psc`),
         {
           watch: true,
@@ -37,13 +37,10 @@ export const siteLoaded = async (
     data: loading.data!,
     config: {},
     id: site_id,
-    asset: await staticFile(fs.path(`code:${site_id}/vsc/dist/dev/static`)),
+    asset: await staticFile(fs.path(`code:${site_id}/site/build/frontend`)),
     build_result: {
       vsc_vars: {},
-    },
-    broadcasted: {
-      frontend: false,
-      tsc: false,
+      log: { frontend: "", typings: "" },
     },
     prasi,
   };

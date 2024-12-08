@@ -54,8 +54,8 @@ export const useProdState = defineStore({
         const fn = new Function(
           location.hostname === "prasi.avolut.com" ||
           location.pathname.startsWith(`/prod/${site_id}`)
-            ? `return import('/prod/${site_id}/js/index.js');`
-            : `return import('/js/index.js');`
+            ? `return import('/prod/${site_id}/index.js');`
+            : `return import('/index.js');`
         );
 
         loadRouter().then(({ router, pages, site, layout }) => {
@@ -64,7 +64,8 @@ export const useProdState = defineStore({
             r.layout = layout;
             r.router = router;
             r.pages = pages;
-            r.vscode_exports = await fn();
+            r.vscode_exports = { ...(await fn()) };
+            delete r.vscode_exports.default;
 
             if (site.api_url) {
               r.api = apiProxy(site.api_url);

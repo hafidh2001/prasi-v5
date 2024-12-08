@@ -44,9 +44,11 @@ export const EdViRoot = memo(() => {
         new Promise<void>(async (done) => {
           try {
             const fn = new Function(
-              `return import('/prod/${p.site!.id}/js/index.js');`
+              `return import('/prod/${p.site!.id}/index.js');`
             );
-            ref.exports.values = { ...(await fn()), prasi };
+            const exports = { ...(await fn()) };
+            delete exports.default;
+            ref.exports.values = { ...exports, prasi };
           } catch (e) {
             console.error(e);
           }

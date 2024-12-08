@@ -1,12 +1,13 @@
 import { fs } from "utils/files/fs";
-import type { PrasiSite, PrasiSiteLoading } from "utils/global";
+import type { PrasiSite } from "utils/global";
 
-export const initPrasiJson = async (
-  site_id: string,
-  loading: PrasiSiteLoading
-) => {
-  const json = {
-    frontend: { index: "", internal: "internal.tsx" },
+export const initPrasiJson = async (site_id: string) => {
+  const json: PrasiSite["prasi"] = {
+    frontend: {
+      index: "",
+      internal: "internal.tsx",
+      typings: "types/typings-generated.d.ts",
+    },
     backend: { index: "" },
 
     log: {
@@ -15,7 +16,7 @@ export const initPrasiJson = async (
       typings: "log/typings.log",
       tailwind: "log/tailwind.log",
     },
-  } as PrasiSite["prasi"];
+  };
 
   if (fs.exists(`code:${site_id}/site/src/index.tsx`)) {
     json.frontend.index = `index.tsx`;

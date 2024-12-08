@@ -31,7 +31,7 @@ export const siteInit = async (site_id: string, conn_id?: string) => {
       }
 
       if (!fs.exists(`code:${site_id}/site/src/prasi.json`)) {
-        await initPrasiJson(site_id, loading);
+        await initPrasiJson(site_id);
       }
       await siteRun(site_id, loading);
     } else if (conn_id) {

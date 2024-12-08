@@ -70,7 +70,7 @@ export const clientStartSync = (arg: {
 
           if (p.viref?.vscode_exports) {
             const fn = new Function(
-              `return import('/prod/${p.site!.id}/js/index.js?${Date.now()}');`
+              `return import('/prod/${p.site!.id}/index.js?${Date.now()}');`
             );
             const exports = await fn();
             console.log(Object.keys(exports));

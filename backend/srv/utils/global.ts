@@ -18,15 +18,14 @@ export type PrasiSite = {
   asset?: Awaited<ReturnType<typeof staticFile>>;
   build_result: {
     vsc_vars: Awaited<ReturnType<typeof parseTypeDef>>;
-  };
-  broadcasted: {
-    frontend: boolean;
-    tsc: boolean;
+    log: {
+      frontend: string;
+      typings: string;
+    };
   };
   prasi: {
-    frontend: { index: string; internal: string };
+    frontend: { index: string; internal: string; typings: string };
     backend: { index: string };
-
     log: {
       frontend: string;
       backend: string;

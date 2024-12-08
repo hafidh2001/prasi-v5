@@ -111,7 +111,7 @@ ${src.substring(`//prasi-prop`.length + 1)}`;
 
           args[k] = fn(...Object.values(arg));
         } catch (e) {
-          console.error(fn_src, e);
+          console.error(e);
           arg[k] = null;
         }
       }

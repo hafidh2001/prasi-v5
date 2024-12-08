@@ -5,41 +5,23 @@ import { fs } from "utils/files/fs";
 import type { PrasiSite, PrasiSiteLoading } from "utils/global";
 import { asset } from "utils/server/asset";
 import { spawn } from "utils/spawn";
-import { broadcastVscUpdate } from "../utils/broadcast-vsc";
 import { extractVscIndex } from "../utils/extract-vsc";
+import { bunWatchBuild } from "./bun-build";
 import { siteBroadcastBuildLog, siteLoadingMessage } from "./loading-msg";
 import { siteLoaded } from "./site-loaded";
-import { bunWatchBuild } from "./bun-build";
+import { editor } from "utils/editor";
+import { gzipSync } from "bun";
 
 export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
-  await waitUntil(
-    () =>
-      fs.exists(`code:${site_id}/vsc/package.json`) &&
-      fs.exists(`code:${site_id}/vsc/rsbuild.dev.ts`),
-    { interval: 1000 }
-  );
-
-  await fs.modify({
-    path: `code:${site_id}/vsc/package.json`,
-    save(content) {
-      content.name = site_id;
-      return content;
-    },
-  });
-
-  await fs.modify({
-    path: `code:${site_id}/vsc/rsbuild.dev.ts`,
-    save(content) {
-      const res = content.replace("[[site_id]]", site_id);
-      return res;
-    },
+  await waitUntil(() => fs.exists(`code:${site_id}/site/src`), {
+    interval: 1000,
   });
 
   siteLoadingMessage(site_id, "Installing dependencies...");
   if (!loading.deps_install) {
     loading.deps_install = spawn({
       cmd: `bun i`,
-      cwd: fs.path(`code:${site_id}/vsc`),
+      cwd: fs.path(`code:${site_id}/site/src`),
       onMessage(arg) {
         siteBroadcastBuildLog(site_id, arg.text);
       },
@@ -47,7 +29,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   }
   await loading.deps_install.exited;
 
-  siteLoadingMessage(site_id, "Starting RSBuild...");
+  siteLoadingMessage(site_id, "Starting Frontend Build...");
 
   const prasi: PrasiSite["prasi"] = await fs.read(
     `code:${site_id}/site/src/prasi.json`,
@@ -62,15 +44,20 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
     loading.build.frontend = await bunWatchBuild({
       outdir: fs.path(`code:${site_id}/site/build/frontend`),
       entrypoint: fs.path(`code:${site_id}/site/src/${prasi.frontend.index}`),
-      onBuild({ status, log }) {
+      async onBuild({ status, log }) {
+        const site = g.site.loaded[site_id];
+        if (site) {
+          site.build_result.log.frontend += log;
+        }
         if (status === "building") {
           siteBroadcastBuildLog(site_id, "Building FrontEnd...");
         }
+
         if (status === "success") {
           siteBroadcastBuildLog(site_id, "Done");
 
           if (g.site.loading[site_id]) {
-            siteLoaded(site_id, prasi);
+            await siteLoaded(site_id, prasi);
           }
 
           if (site_id === PRASI_CORE_SITE_ID) {
@@ -80,9 +67,21 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
           const site = g.site.loaded[site_id];
           if (site) {
             site.asset?.rescan();
+            const log = site.build_result.log;
+            if (log.typings) {
+              const tsc = await fs.read(
+                `code:${site_id}/site/src/${site.prasi.frontend.typings}`
+              );
+              editor.broadcast(
+                { site_id },
+                {
+                  action: "vsc-update",
+                  tsc: gzipSync(tsc),
+                  vars: site.build_result.vsc_vars,
+                }
+              );
+            }
           }
-
-          broadcastVscUpdate(site_id, "frontend");
         } else {
           siteBroadcastBuildLog(site_id, log || "");
         }
@@ -97,19 +96,40 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
         ? "node_modules/.bin/tsc.exe"
         : "node_modules/.bin/tsc";
 
-    const tsc_arg = `--watch --moduleResolution node --emitDeclarationOnly --isolatedModules false --outFile ./dist/typings-generated.d.ts --declaration --allowSyntheticDefaultImports true --noEmit false`;
+    const tsc_arg = `--watch --moduleResolution node --emitDeclarationOnly --isolatedModules false --outFile ./${prasi.frontend.typings} --declaration --allowSyntheticDefaultImports true --noEmit false`;
+
+    const typings = {
+      done: () => {},
+      promise: null as any,
+    };
+    typings.promise = new Promise<void>((resolve) => {
+      typings.done = resolve;
+    });
 
     loading.build.typings = spawn({
       cmd: `${fs.path(`root:${tsc}`)} ${tsc_arg}`,
-      cwd: fs.path(`code:${site_id}/vsc`),
+      cwd: fs.path(`code:${site_id}/site/src`),
       async onMessage(arg) {
         const site = g.site.loaded[site_id];
-        if (
-          arg.text.includes("Watching for file") &&
-          site?.broadcasted.frontend
-        ) {
+
+        if (site && arg.text.includes("Watching for file")) {
+          typings.done();
           await extractVscIndex(site_id);
-          broadcastVscUpdate(site_id, "tsc");
+          
+          const log = site.build_result.log;
+          if (log.frontend) {
+            const tsc = await fs.read(
+              `code:${site_id}/site/src/${site.prasi.frontend.typings}`
+            );
+            editor.broadcast(
+              { site_id },
+              {
+                action: "vsc-update",
+                tsc: gzipSync(tsc),
+                vars: site.build_result.vsc_vars,
+              }
+            );
+          }
         }
       },
     });
@@ -131,5 +151,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
         stdio: ["ignore", "ignore", "ignore"],
       });
     }
+
+    await typings.promise;
   }
 };

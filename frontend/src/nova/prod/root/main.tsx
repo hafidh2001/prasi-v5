@@ -31,13 +31,11 @@ import { rawProd } from "../react/store";
         import_url = `/prod/${patharr[2]}${internal_url}`;
       }
       let prasi_internal = false as any;
-
       try {
         const import_await = new Function(`return import("${import_url}")`);
         prasi_internal = await import_await();
-      } catch (e) {
-        console.error(e);
-      }
+      } catch (e) {}
+
       if (typeof prasi_internal === "object") {
         if (prasi_internal.Loading) w.ContentLoading = prasi_internal.Loading;
         if (prasi_internal.NotFound)

@@ -36,8 +36,19 @@ export const siteProdPrasi = async ({
       let vars = {};
       let source = "";
       if (site) {
+        if (
+          !fs.exists(`code:${site_id}/site/src/${site.prasi.frontend.typings}`)
+        ) {
+          await waitUntil(
+            () =>
+              fs.exists(
+                `code:${site_id}/site/src/${site.prasi.frontend.typings}`
+              ),
+            { interval: 500 }
+          );
+        }
         source = await fs.read(
-          `code:${site_id}/vsc/dist/typings-generated.d.ts`,
+          `code:${site_id}/site/src/${site.prasi.frontend.typings}`,
           "string"
         );
         vars = site.build_result.vsc_vars;

@@ -7,7 +7,7 @@ import { readFileSync } from "node:fs";
 import { join } from "path";
 import { waitUntil } from "prasi-utils";
 import { addRoute, createRouter, findRoute } from "rou3";
-import type { ServerCtx } from "./server/ctx";
+import type { ServerCtx } from "utils/server/ctx";
 
 await zstd.init();
 export const staticFile = async (

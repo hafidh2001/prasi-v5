@@ -164,8 +164,8 @@ export const EdTopBar = () => {
           <Button
             href={
               location.hostname === "localhost"
-                ? `http://localhost:8443/?folder=/site/${p.site?.id}/vsc`
-                : `https://prasi-vsc.avolut.com/?folder=/site/${p.site?.id}/vsc`
+                ? `http://localhost:8443/?folder=/site/${p.site?.id}/site/src`
+                : `https://prasi-vsc.avolut.com/?folder=/site/${p.site?.id}/site/src`
             }
           >
             <img src="/img/vscode.svg" width={12} />
