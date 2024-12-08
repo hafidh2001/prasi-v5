@@ -1,7 +1,7 @@
-import { dir } from "../utils/dir";
-import { editor } from "../utils/editor";
-import { compressed } from "../utils/server/compressed";
-import type { ServerCtx } from "../utils/server/ctx";
+import { dir } from "utils/files/dir";
+import { editor } from "utils/editor";
+import { compressed } from "utils/server/compressed";
+import type { ServerCtx } from "utils/server/ctx";
 
 export default {
   url: "/_prasi/**",
@@ -10,6 +10,7 @@ export default {
     const path = params._;
     switch (true) {
       case path === "editor-prisma-typings.d.ts": {
+        
         const prasi_prisma = await Bun.file(
           dir.root(`./node_modules/.prisma/client/index.d.ts`)
         ).text();

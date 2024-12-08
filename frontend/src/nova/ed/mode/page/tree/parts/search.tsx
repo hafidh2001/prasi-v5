@@ -1,12 +1,12 @@
 import { NodeModel } from "@minoru/react-dnd-treeview";
+import { active } from "logic/active";
+import { EDGlobal, PG } from "logic/ed-global";
+import { PNode } from "logic/types";
 import { PanelLeftClose } from "lucide-react";
 import { useEffect } from "react";
-import { useGlobal } from "../../../../../../utils/react/use-global";
-import { useLocal } from "../../../../../../utils/react/use-local";
-import { fuzzy } from "../../../../../../utils/ui/fuzzy";
-import { active } from "../../../../logic/active";
-import { EDGlobal, PG } from "../../../../logic/ed-global";
-import { PNode } from "../../../../logic/types";
+import { useGlobal } from "utils/react/use-global";
+import { useLocal } from "utils/react/use-local";
+import { fuzzy } from "utils/ui/fuzzy";
 
 export const EdTreeSearch = () => {
   const p = useGlobal(EDGlobal, "EDITOR");

@@ -2,7 +2,7 @@ import { setupDevPort } from "dev/port";
 import { watch } from "fs";
 import { existsAsync } from "fs-jetpack";
 import { waitUntil } from "prasi-utils";
-import { fs } from "utils/fs";
+import { fs } from "utils/files/fs";
 import { devProxy } from "./dev/proxy";
 import { devWS } from "./dev/ws";
 import { c } from "./utils/color";

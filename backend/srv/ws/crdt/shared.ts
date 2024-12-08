@@ -1,10 +1,10 @@
 import type { ServerWebSocket } from "bun";
 import { dirAsync } from "fs-jetpack";
+import { dir } from "utils/files/dir";
+import BunORM from "utils/files/sqlite";
 import { Awareness } from "y-protocols/awareness.js";
 import { Doc, UndoManager } from "yjs";
-import { dir } from "../../utils/dir";
-import type { WSContext } from "../../utils/server/ctx";
-import BunORM from "../../utils/sqlite";
+import type { WSContext } from "utils/server/ctx";
 
 export const MAX_HISTORY_SIZE = 750;
 
@@ -106,7 +106,7 @@ export const crdt_comps = {} as Record<
     actionHistory: Record<number, string>;
     timeout: any;
     ws: Set<ServerWebSocket<WSContext>>;
-    updated_at: number
+    updated_at: number;
   }
 >;
 

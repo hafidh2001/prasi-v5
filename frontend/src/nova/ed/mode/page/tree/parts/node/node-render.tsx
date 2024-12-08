@@ -1,11 +1,11 @@
 import { NodeRender } from "@minoru/react-dnd-treeview";
+import { activateItem, active } from "logic/active";
+import { EDGlobal } from "logic/ed-global";
+import { PNode } from "logic/types";
 import { useEffect } from "react";
+import { useGlobal } from "utils/react/use-global";
+import { useLocal } from "utils/react/use-local";
 import { Popover } from "utils/ui/popover";
-import { useGlobal } from "../../../../../../../utils/react/use-global";
-import { useLocal } from "../../../../../../../utils/react/use-local";
-import { activateItem, active } from "../../../../../logic/active";
-import { EDGlobal } from "../../../../../logic/ed-global";
-import { PNode } from "../../../../../logic/types";
 import { EdTreeCtxMenu } from "../ctx-menu";
 import { treeItemKeyMap } from "../key-map";
 import { EdTreeAction } from "./node-action";

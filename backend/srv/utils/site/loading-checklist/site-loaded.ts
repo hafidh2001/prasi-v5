@@ -2,10 +2,14 @@ import { removeAsync } from "fs-jetpack";
 import { PRASI_CORE_SITE_ID, waitUntil } from "prasi-utils";
 import sync from "sync-directory";
 import { editor } from "utils/editor";
-import { fs } from "utils/fs";
-import { staticFile } from "utils/static";
+import { fs } from "utils/files/fs";
+import type { PrasiSite } from "utils/global";
+import { staticFile } from "utils/files/static";
 
-export const siteReady = async (site_id: string) => {
+export const siteLoaded = async (
+  site_id: string,
+  prasi: PrasiSite["prasi"]
+) => {
   if (!g.site.loading[site_id]) {
     await waitUntil(() => g.site.loading[site_id]);
   }
@@ -28,7 +32,6 @@ export const siteReady = async (site_id: string) => {
   }
 
   const loading = g.site.loading[site_id];
-
   g.site.loaded[site_id] = {
     build: loading.build,
     data: loading.data!,
@@ -42,6 +45,7 @@ export const siteReady = async (site_id: string) => {
       rsbuild: false,
       tsc: false,
     },
+    prasi,
   };
   delete g.site.loading[site_id];
 

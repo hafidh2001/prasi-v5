@@ -9,7 +9,6 @@ import { applyAwarenessUpdate, Awareness } from "y-protocols/awareness.js";
 import * as syncProtocol from "y-protocols/sync.js";
 import { readSyncMessage } from "y-protocols/sync.js";
 import { applyUpdate, Doc, encodeStateAsUpdate, UndoManager } from "yjs";
-import { dir, isLocalPC } from "../../utils/dir";
 import { editor } from "../../utils/editor";
 import type { WSContext } from "../../utils/server/ctx";
 import {
@@ -18,6 +17,7 @@ import {
   createSiteCrdt,
   MAX_HISTORY_SIZE,
 } from "./shared";
+import { dir, isLocalPC } from "utils/files/dir";
 
 const crdt_loading = new Set<string>();
 

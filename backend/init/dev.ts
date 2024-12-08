@@ -1,5 +1,5 @@
 import { argv } from "bun";
-import { fs } from "utils/fs";
+import { fs } from "utils/files/fs";
 import { spawn } from "utils/spawn";
 import { c } from "../srv/utils/color";
 

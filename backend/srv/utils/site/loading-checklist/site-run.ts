@@ -1,15 +1,14 @@
 import { removeAsync } from "fs-jetpack";
 import { platform } from "os";
 import { PRASI_CORE_SITE_ID, waitUntil } from "prasi-utils";
-import { fs } from "utils/fs";
-import type { PrasiSiteLoading } from "utils/global";
+import { fs } from "utils/files/fs";
+import type { PrasiSite, PrasiSiteLoading } from "utils/global";
 import { asset } from "utils/server/asset";
 import { spawn } from "utils/spawn";
 import { broadcastVscUpdate } from "../utils/broadcast-vsc";
 import { extractVscIndex } from "../utils/extract-vsc";
 import { siteBroadcastBuildLog, siteLoadingMessage } from "./loading-msg";
-import { siteReady } from "./site-ready";
-import { $ } from "bun";
+import { siteLoaded } from "./site-loaded";
 
 export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   await waitUntil(
@@ -49,7 +48,14 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
 
   siteLoadingMessage(site_id, "Starting RSBuild...");
 
-  await removeAsync(fs.path(`code:${site_id}/dist/log`));
+  const prasi: PrasiSite["prasi"] = await fs.read(
+    `code:${site_id}/site/src/prasi.json`,
+    "json"
+  );
+
+  for (const log of Object.values(prasi.log)) {
+    await removeAsync(fs.path(`code:${site_id}/site/src/${log}`));
+  }
 
   if (!loading.build.rsbuild) {
     loading.build.rsbuild = spawn({
@@ -62,7 +68,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
         siteBroadcastBuildLog(site_id, arg.text);
         if (arg.text.includes("ready")) {
           if (g.site.loading[site_id]) {
-            siteReady(site_id);
+            siteLoaded(site_id, prasi);
           } else {
             if (site_id === PRASI_CORE_SITE_ID) {
               asset.psc.rescan();

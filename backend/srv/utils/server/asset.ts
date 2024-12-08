@@ -1,5 +1,5 @@
-import { dir } from "../dir";
-import { staticFile } from "../static";
+import { dir } from "utils/files/dir";
+import { staticFile } from "utils/files/static";
 
 export const asset = {
   prasi: await staticFile(dir.data("/prasi-static"), { index: "index.html" }),

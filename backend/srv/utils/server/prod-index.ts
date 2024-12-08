@@ -1,5 +1,5 @@
-import { dir } from "../dir";
 import { parse } from "node-html-parser";
+import { dir } from "utils/files/dir";
 
 export const prodIndex = async (
   site_id: string,

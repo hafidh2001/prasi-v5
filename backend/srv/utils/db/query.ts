@@ -1,8 +1,7 @@
 import { createPrismaSchemaBuilder, type Property } from "@mrleebo/prisma-ast";
 import { gunzipSync } from "bun";
 import { readAsync } from "fs-jetpack";
-import { Prisma } from "prasi-db/db";
-import { dir } from "../dir";
+import { dir } from "utils/files/dir";
 import { createRelMany } from "./create-rel-many";
 import type { HasManyType, HasOneType } from "./types";
 
@@ -12,6 +11,7 @@ export type DBArg = {
   action: string;
   params: any[];
 };
+
 const decoder = new TextDecoder();
 export const execQuery = async (args: DBArg, prisma: any) => {
   const { table, action, params } = args;

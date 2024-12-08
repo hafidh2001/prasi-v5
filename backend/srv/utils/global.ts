@@ -2,8 +2,8 @@ import type { BunSqliteKeyValue } from "bun-sqlite-key-value";
 import type { PrismaClient } from "prasi-db";
 import type { ESite } from "prasi-frontend/src/nova/ed/logic/types";
 import type { spawn } from "./spawn";
-import type { staticFile } from "./static";
 import type { parseTypeDef } from "./parser/parse-type-def";
+import type { staticFile } from "./files/static";
 
 type SITE_ID = string;
 export type PrasiSite = {
@@ -22,11 +22,21 @@ export type PrasiSite = {
     rsbuild: boolean;
     tsc: boolean;
   };
+  prasi: {
+    frontend: { index: string; internal: string };
+    backend: { index: string };
+
+    log: {
+      frontend: string;
+      backend: string;
+      typings: string;
+      tailwind: string;
+    };
+  };
 };
 export type PrasiSiteLoading = {
   status: string;
   data?: ESite;
-  mode?: "new" | "upgrade" | "run";
   deps_install?: ReturnType<typeof spawn>;
   build: {
     rsbuild?: ReturnType<typeof spawn>;

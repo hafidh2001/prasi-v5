@@ -1,6 +1,6 @@
 import { gzipSync } from "bun";
 import { editor } from "utils/editor";
-import { fs } from "utils/fs";
+import { fs } from "utils/files/fs";
 
 export const broadcastVscUpdate = async (
   site_id: string,

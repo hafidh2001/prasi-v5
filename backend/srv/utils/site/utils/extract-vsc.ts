@@ -1,4 +1,4 @@
-import { fs } from "utils/fs";
+import { fs } from "utils/files/fs";
 import { parseTypeDef } from "utils/parser/parse-type-def";
 
 export const extractVscIndex = async (site_id: string) => {

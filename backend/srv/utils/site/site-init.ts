@@ -1,11 +1,11 @@
 import { editor } from "utils/editor";
-import { siteLoadingData } from "./loading-checklist/load-data";
-import { siteLoadingMode } from "./loading-checklist/load-mode";
-import { siteLoadingMessage } from "./loading-checklist/loading-msg";
-import { siteNew } from "./loading-checklist/site-new";
-import { siteRun } from "./loading-checklist/site-run";
-import { siteUpgrade } from "./loading-checklist/site-upgrade";
 import { validate } from "uuid";
+import { siteLoadingData } from "./loading-checklist/load-data";
+import { siteLoadingMessage } from "./loading-checklist/loading-msg";
+import { fs } from "utils/files/fs";
+import { initPrasiJson } from "./loading-checklist/prasi-json";
+import { siteRun } from "./loading-checklist/site-run";
+import { siteLoaded } from "./loading-checklist/site-loaded";
 
 export const siteInit = async (site_id: string, conn_id?: string) => {
   if (!validate(site_id)) {
@@ -24,13 +24,16 @@ export const siteInit = async (site_id: string, conn_id?: string) => {
       siteLoadingMessage(site_id, "Site Initializing...");
 
       await siteLoadingData(site_id, loading);
-      if (!loading.mode) {
-        await siteLoadingMode(site_id, loading);
 
-        if (loading.mode === "new") await siteNew(site_id, loading);
-        if (loading.mode === "upgrade") await siteUpgrade(site_id, loading);
-        if (loading.mode === "run") await siteRun(site_id, loading);
+      siteLoadingMessage(site_id, "Loading files...");
+      if (!fs.exists(`code:${site_id}/site/src`)) {
+        await fs.copy(`root:backend/template/site`, `code:${site_id}/site/src`);
       }
+
+      if (!fs.exists(`code:${site_id}/site/src/prasi.json`)) {
+        await initPrasiJson(site_id, loading);
+      }
+      await siteRun(site_id, loading);
     } else if (conn_id) {
       editor.send(conn_id, { action: "site-loading", status: loading.status });
       if (loading.build.rsbuild) {
