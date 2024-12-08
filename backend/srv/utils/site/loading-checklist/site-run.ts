@@ -9,6 +9,7 @@ import { broadcastVscUpdate } from "../utils/broadcast-vsc";
 import { extractVscIndex } from "../utils/extract-vsc";
 import { siteBroadcastBuildLog, siteLoadingMessage } from "./loading-msg";
 import { siteLoaded } from "./site-loaded";
+import { bunWatchBuild } from "./bun-build";
 
 export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   await waitUntil(
@@ -57,30 +58,33 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
     await removeAsync(fs.path(`code:${site_id}/site/src/${log}`));
   }
 
-  if (!loading.build.rsbuild) {
-    loading.build.rsbuild = spawn({
-      cmd: `bun dev`,
-      cwd: fs.path(`code:${site_id}/vsc`),
-      log: {
-        max_lines: 300,
-      },
-      async onMessage(arg) {
-        siteBroadcastBuildLog(site_id, arg.text);
-        if (arg.text.includes("ready")) {
+  if (!loading.build.frontend) {
+    loading.build.frontend = bunWatchBuild({
+      outdir: fs.path(`code:${site_id}/site/build/frontend`),
+      entrypoint: fs.path(`code:${site_id}/site/src/${prasi.frontend.index}`),
+      onBuild({ status, log }) {
+        if (status === "building") {
+          siteBroadcastBuildLog(site_id, "Building FrontEnd...");
+        }
+        if (status === "success") {
+          siteBroadcastBuildLog(site_id, "Done");
+
           if (g.site.loading[site_id]) {
             siteLoaded(site_id, prasi);
-          } else {
-            if (site_id === PRASI_CORE_SITE_ID) {
-              asset.psc.rescan();
-            }
-
-            const site = g.site.loaded[site_id];
-            if (site) {
-              site.asset?.rescan();
-            }
-
-            broadcastVscUpdate(site_id, "rsbuild");
           }
+
+          if (site_id === PRASI_CORE_SITE_ID) {
+            asset.psc.rescan();
+          }
+
+          const site = g.site.loaded[site_id];
+          if (site) {
+            site.asset?.rescan();
+          }
+
+          broadcastVscUpdate(site_id, "frontend");
+        } else {
+          siteBroadcastBuildLog(site_id, log || "");
         }
       },
     });
@@ -102,7 +106,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
         const site = g.site.loaded[site_id];
         if (
           arg.text.includes("Watching for file") &&
-          site?.broadcasted.rsbuild
+          site?.broadcasted.frontend
         ) {
           await extractVscIndex(site_id);
           broadcastVscUpdate(site_id, "tsc");

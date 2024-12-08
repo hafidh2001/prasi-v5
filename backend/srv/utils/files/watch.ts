@@ -36,7 +36,7 @@ export const watchFiles = ({
     }
   }
 
-  watch(dir, (type, filename) => {
+  watching[""] = watch(dir, (type, filename) => {
     onChange(type, filename);
     if (filename) {
       const pathname = join(dir, filename);
@@ -54,4 +54,5 @@ export const watchFiles = ({
       }
     }
   });
+  return watching;
 };

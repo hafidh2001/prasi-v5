@@ -42,7 +42,7 @@ export const siteLoaded = async (
       vsc_vars: {},
     },
     broadcasted: {
-      rsbuild: false,
+      frontend: false,
       tsc: false,
     },
     prasi,

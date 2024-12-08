@@ -36,10 +36,10 @@ export const siteInit = async (site_id: string, conn_id?: string) => {
       await siteRun(site_id, loading);
     } else if (conn_id) {
       editor.send(conn_id, { action: "site-loading", status: loading.status });
-      if (loading.build.rsbuild) {
+      if (loading.build.frontend) {
         editor.send(conn_id, {
           action: "site-build-log",
-          log: loading.build.rsbuild.log.text.slice(-2).join("\n"),
+          log: loading.build.frontend.log.text.slice(-2).join("\n"),
         });
       }
     }

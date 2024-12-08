@@ -4,6 +4,7 @@ import type { ESite } from "prasi-frontend/src/nova/ed/logic/types";
 import type { spawn } from "./spawn";
 import type { parseTypeDef } from "./parser/parse-type-def";
 import type { staticFile } from "./files/static";
+import type { bunWatchBuild } from "./site/loading-checklist/bun-build";
 
 type SITE_ID = string;
 export type PrasiSite = {
@@ -19,7 +20,7 @@ export type PrasiSite = {
     vsc_vars: Awaited<ReturnType<typeof parseTypeDef>>;
   };
   broadcasted: {
-    rsbuild: boolean;
+    frontend: boolean;
     tsc: boolean;
   };
   prasi: {
@@ -39,7 +40,7 @@ export type PrasiSiteLoading = {
   data?: ESite;
   deps_install?: ReturnType<typeof spawn>;
   build: {
-    rsbuild?: ReturnType<typeof spawn>;
+    frontend?: ReturnType<typeof bunWatchBuild>;
     typings?: ReturnType<typeof spawn>;
   };
 };

@@ -1,16 +1,79 @@
 import { removeAsync } from "fs-jetpack";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import { dirname } from "path";
+import { watchFiles } from "utils/files/watch";
+import { waitUntil } from "prasi-utils";
 
-export const bunWatchBuild = () => {};
-
-export const bunBuild = async ({
-  outdir,
-  entrypoint,
-}: {
+type BuildArg = {
   entrypoint: string;
   outdir: string;
-}) => {
+  onBuild?: (arg: {
+    ts: number;
+    status: "success" | "failed" | "building";
+    log?: string;
+  }) => void;
+};
+
+export const bunWatchBuild = async ({
+  outdir,
+  entrypoint,
+  onBuild,
+}: BuildArg) => {
+  const internal = {
+    building: false,
+    watching: null as null | ReturnType<typeof watchFiles>,
+    stop: async () => {
+      if (internal.watching) {
+        for (const v of Object.values(internal.watching)) {
+          v.close();
+        }
+      }
+
+      if (internal.building) {
+        await waitUntil(() => internal.building === false);
+      }
+    },
+  };
+
+  internal.watching = watchFiles({
+    dir: dirname(entrypoint),
+    events: async (type, filename) => {
+      if (!internal.building) {
+        internal.building = true;
+        try {
+          if (onBuild) onBuild({ ts: Date.now(), status: "building" });
+          await bunBuild({ outdir, entrypoint });
+          if (onBuild) onBuild({ ts: Date.now(), status: "success" });
+        } catch (e: any) {
+          if (onBuild)
+            onBuild({ ts: Date.now(), status: "failed", log: e?.message });
+        }
+
+        internal.building = false;
+      }
+    },
+    exclude(pathname) {
+      if (pathname.startsWith(".")) return true;
+      if (pathname.startsWith("node_modules")) return true;
+      return false;
+    },
+  });
+
+  internal.building = true;
+  try {
+    if (onBuild) onBuild({ ts: Date.now(), status: "building" });
+    await bunBuild({ outdir, entrypoint });
+    if (onBuild) onBuild({ ts: Date.now(), status: "success" });
+  } catch (e: any) {
+    if (onBuild) onBuild({ ts: Date.now(), status: "failed", log: e?.message });
+  }
+  internal.building = false;
+
+  return internal;
+};
+
+export const bunBuild = async ({ outdir, entrypoint }: BuildArg) => {
   await removeAsync(outdir);
   return await Bun.build({
     entrypoints: [entrypoint],
