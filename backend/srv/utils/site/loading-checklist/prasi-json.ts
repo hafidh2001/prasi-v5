@@ -24,5 +24,14 @@ export const initPrasiJson = async (
     json.backend.index = `server.ts`;
   }
 
+  if (fs.exists(`code:${site_id}/site/src/frontend/index.tsx`)) {
+    json.frontend.index = `frontend/index.tsx`;
+    json.frontend.internal = `frontend/internal.tsx`;
+  }
+
+  if (fs.exists(`code:${site_id}/site/src/backend/server.ts`)) {
+    json.backend.index = `backend/server.ts`;
+  }
+
   await fs.write(`code:${site_id}/site/src/prasi.json`, json);
 };

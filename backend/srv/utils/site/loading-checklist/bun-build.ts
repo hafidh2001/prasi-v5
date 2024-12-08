@@ -23,6 +23,7 @@ export const bunWatchBuild = async ({
   const internal = {
     building: false,
     watching: null as null | ReturnType<typeof watchFiles>,
+    log: "",
     stop: async () => {
       if (internal.watching) {
         for (const v of Object.values(internal.watching)) {
@@ -42,12 +43,16 @@ export const bunWatchBuild = async ({
       if (!internal.building) {
         internal.building = true;
         try {
-          if (onBuild) onBuild({ ts: Date.now(), status: "building" });
+          const ts = Date.now();
+          internal.log += `Building...\n`;
+          if (onBuild) onBuild({ ts, status: "building" });
           await bunBuild({ outdir, entrypoint });
           if (onBuild) onBuild({ ts: Date.now(), status: "success" });
+          internal.log += `Build completed in ${Date.now() - ts}ms\n`;
         } catch (e: any) {
           if (onBuild)
             onBuild({ ts: Date.now(), status: "failed", log: e?.message });
+          internal.log += `Build failed, reason: ${e?.message}\n`;
         }
 
         internal.building = false;
@@ -62,11 +67,15 @@ export const bunWatchBuild = async ({
 
   internal.building = true;
   try {
+    const ts = Date.now();
+    internal.log += `Building...\n`;
     if (onBuild) onBuild({ ts: Date.now(), status: "building" });
     await bunBuild({ outdir, entrypoint });
     if (onBuild) onBuild({ ts: Date.now(), status: "success" });
+    internal.log += `Build completed in ${Date.now() - ts}ms\n`;
   } catch (e: any) {
     if (onBuild) onBuild({ ts: Date.now(), status: "failed", log: e?.message });
+    internal.log += `Build failed, reason: ${e?.message}\n`;
   }
   internal.building = false;
 

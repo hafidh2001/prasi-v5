@@ -59,7 +59,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   }
 
   if (!loading.build.frontend) {
-    loading.build.frontend = bunWatchBuild({
+    loading.build.frontend = await bunWatchBuild({
       outdir: fs.path(`code:${site_id}/site/build/frontend`),
       entrypoint: fs.path(`code:${site_id}/site/src/${prasi.frontend.index}`),
       onBuild({ status, log }) {

@@ -2,11 +2,7 @@
   "name": "[[site_id]]",
   "private": true,
   "version": "1.0.0",
-  "scripts": {
-    "dev": "rsbuild dev -c rsbuild.dev.ts",
-    "build": "rsbuild build -c rsbuild.prod.ts",
-    "preview": "rsbuild preview"
-  },
+  "scripts": {},
   "dependencies": {
     "react": "^18.0.0",
     "react-dom": "^18.0.0"

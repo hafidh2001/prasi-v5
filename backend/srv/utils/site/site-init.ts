@@ -39,7 +39,7 @@ export const siteInit = async (site_id: string, conn_id?: string) => {
       if (loading.build.frontend) {
         editor.send(conn_id, {
           action: "site-build-log",
-          log: loading.build.frontend.log.text.slice(-2).join("\n"),
+          log: loading.build.frontend.log,
         });
       }
     }
