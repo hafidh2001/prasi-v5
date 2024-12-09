@@ -108,9 +108,6 @@ export const EdPopSitePicker = () => {
           }
         }}
       >
-        {local.status === "loading" && (
-          <Loading note="listing-site" backdrop={false} />
-        )}
         <div className={cx("absolute inset-[5%] bg-white flex")}>
           <div className="relative flex flex-1">
             {(local.status === "ready" || local.group.length > 0) && (
@@ -123,9 +120,12 @@ export const EdPopSitePicker = () => {
                 reload={reload}
               />
             )}
+
+            {local.status === "loading" && (
+              <Loading note="listing-site" backdrop={false} />
+            )}
           </div>
         </div>
-
         {p.ui.popup.site_form && (
           <>
             {p.ui.popup.site_form.id === "new" && (
@@ -207,7 +207,7 @@ const SitePicker = ({
 
   const orglen = group.filter((e) => e.parent === "site-root").length;
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col relative">
       <EdSiteHead
         group={result}
         update={update}
@@ -217,11 +217,15 @@ const SitePicker = ({
         local={local}
       />
 
-      {result.length === 0 && local.search.text && (
-        <div className="flex-1 flex items-center justify-center">
-          No search results found.
-        </div>
-      )}
+      {result.length === 0 &&
+        (local.search.text ? (
+          <div className="flex-1 flex items-center justify-center">
+            No search results found.
+          </div>
+        ) : (
+          <Loading backdrop={false} note="Loading Sites..." />
+        ))}
+
       <EdSiteTree
         group={result}
         update={update}

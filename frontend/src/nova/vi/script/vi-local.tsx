@@ -1,5 +1,5 @@
 import { DeepReadonly } from "popup/flow/runtime/types";
-import { useEffect, useRef } from "react";
+import { isValidElement, useEffect, useRef } from "react";
 import { IItem } from "utils/types/item";
 import { ViMergedProps } from "vi/lib/types";
 import { ViLocalAutoRender } from "./vi-local-auto-render";
@@ -22,10 +22,20 @@ export const createViLocal = (
     deps?: any[];
   }) => {
     let children = opt.children || {};
-    children = {
-      ...children,
-      props: { ...(children.props || {}), merged },
-    };
+
+    if (Array.isArray(opt.children)) {
+      children = opt.children.map((e) => {
+        if (isValidElement(e)) {
+          return { ...e, props: { ...(e.props || {}), merged } };
+        }
+        return e;
+      });
+    } else {
+      children = {
+        ...children,
+        props: { ...(children.props || {}), merged },
+      };
+    }
 
     const deps = useRef({ init: false }).current;
 
