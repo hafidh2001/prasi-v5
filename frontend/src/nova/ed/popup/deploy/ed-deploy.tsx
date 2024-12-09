@@ -1,7 +1,7 @@
 import { EDGlobal } from "logic/ed-global";
 import { useGlobal } from "utils/react/use-global";
 import { useLocal } from "utils/react/use-local";
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, Plus, Pencil } from "lucide-react";
 import { Dropdown } from "utils/ui/dropdown";
 import { useEffect } from "react";
 import { DeployTarget } from "../../cprasi/lib/typings";
@@ -83,7 +83,8 @@ export const EdDeployPopup = () => {
       { label: "prasi", value: "prasi" },
       { label: "prisma", value: "prisma" },
     ],
-    popover: false,
+    tempNewName: "",
+    namePopover: false,
   });
 
   useEffect(() => {
@@ -92,13 +93,19 @@ export const EdDeployPopup = () => {
     });
   }, [site.settings.deploy_targets]);
 
-  const saveChanges = () => {
+  useEffect(() => {
+    local.tempNewName = local.target.name;
+  });
+
+  const saveChanges = (name?: string) => {
     const targetIndex = site.settings!.deploy_targets.findIndex(
       (target) => target.name === local.target.name
     );
     if (targetIndex !== -1) {
+      if (!!name) local.target.name = name;
       site.settings!.deploy_targets[targetIndex] = { ...local.target };
     }
+
     local.render();
   };
 
@@ -120,6 +127,22 @@ export const EdDeployPopup = () => {
     local.render();
   };
 
+  const deleteDeployment = () => {
+    if (confirm("Are you sure you want to delete this deployment?")) {
+      const targetIndex = site.settings!.deploy_targets.findIndex(
+        (target) => target.name === local.target.name
+      );
+      if (targetIndex !== -1) {
+        site.settings!.deploy_targets.splice(targetIndex, 1);
+        if (site.settings!.deploy_targets.length === 0) {
+          local.target = site.settings!.deploy_targets[0];
+        }
+      }
+
+      local.render();
+    }
+  };
+
   const formatDate = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleString();
   };
@@ -130,7 +153,7 @@ export const EdDeployPopup = () => {
         {site.settings.deploy_targets.map((target) => (
           <button
             key={target.name}
-            className={`px-2 py-1 mr-1 transition rounded-t ${
+            className={`px-2 py-1 mr-1 transition rounded-t align-middle  flex items-center justify-between ${
               local.target.name === target.name
                 ? "bg-white text-black"
                 : " text-black hover:bg-gray-300"
@@ -140,7 +163,60 @@ export const EdDeployPopup = () => {
               local.render();
             }}
           >
-            {target.name.toUpperCase()}
+            <span>{target.name.toUpperCase()}</span>
+
+            {local.target.name === target.name && (
+              <div>
+                <Popover
+                  open={local.namePopover}
+                  content={
+                    <div className="bg-white border rounded shadow p-2 flex flex-col ">
+                      <div>Deploy Name:</div>
+
+                      <input
+                        type="text"
+                        // autoFocus
+                        className={cx(
+                          "flex-1 border-[1px]  border-slate-300 focus:border-2 focus:border-blue-500 text-black mt-1 px-1"
+                        )}
+                        value={local.tempNewName || ""}
+                        placeholder="example-dev"
+                        onBlur={(e) => {
+                          local.tempNewName = e.currentTarget.value;
+                          local.namePopover = false;
+                          saveChanges(local.tempNewName);
+                        }}
+                        spellCheck={false}
+                        onChange={(e) => {
+                          local.tempNewName = e.currentTarget.value;
+                          local.render();
+                          // saveChanges(e.currentTarget.value);
+                        }}
+                      />
+
+                      <button
+                        className="mt-2 px-1 py-[2px] border text-red-500 border-red-500 hover:bg-red-100"
+                        onClick={() => {
+                          deleteDeployment();
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  }
+                >
+                  <button
+                    className="ml-2"
+                    onClick={() => {
+                      local.namePopover = true;
+                      local.render();
+                    }}
+                  >
+                    <Pencil size={10} className="align-middle" />
+                  </button>
+                </Popover>
+              </div>
+            )}
           </button>
         ))}
 
@@ -284,20 +360,12 @@ export const EdDeployPopup = () => {
                     preload
                     content={
                       <div className="bg-white border rounded shadow">
-                        
-                            <button
-                              className="block w-full text-left p-2 hover:bg-blue-500 border-b hover:text-white"
-                              
-                            >
-                              Re-Deploy
-                            </button>
-                            <button
-                              className="block w-full text-left p-2 hover:bg-blue-500 border-b hover:text-white"
-                              
-                            >
-                              Delete Build
-                            </button>
-                          
+                        <button className="block w-full text-left p-2 hover:bg-blue-500 border-b hover:text-white">
+                          Re-Deploy
+                        </button>
+                        <button className="block w-full text-left p-2 hover:bg-blue-500 border-b hover:text-white">
+                          Delete Build
+                        </button>
                       </div>
                     }
                   >
