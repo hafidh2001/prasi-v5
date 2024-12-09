@@ -48,12 +48,15 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
       where: { id: page_id },
       select: { updated_at: true },
     });
-    if (res) {
-      if (res && res.updated_at && updated_at !== res.updated_at.getTime()) {
-        crdt_pages[page_id].ws.forEach((w) => w.close());
-        delete crdt_pages[page_id];
-        crdt_loading.delete(page_id);
-      }
+    if (
+      crdt_pages[page_id] &&
+      res &&
+      res.updated_at &&
+      updated_at !== res.updated_at.getTime()
+    ) {
+      crdt_pages[page_id].ws.forEach((w) => w.close());
+      delete crdt_pages[page_id];
+      crdt_loading.delete(page_id);
     }
   }
 

@@ -7,6 +7,7 @@ export const oracleConfig = (config: QConnectorParams) => {
   const conn_params = {
     user: url.username,
     password: url.password,
+    schema: "PRASI",
     connectString: `${url.hostname}:${url.port}${url.pathname}`,
   };
 

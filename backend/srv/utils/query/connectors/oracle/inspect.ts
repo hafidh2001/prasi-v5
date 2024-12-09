@@ -1,4 +1,3 @@
-import type OracleDB from "oracledb";
 import type {
   NAME,
   QInspectColumn,
@@ -7,21 +6,20 @@ import type {
   QInspectResult,
   QInspectTable,
 } from "utils/query/types";
-import type { OracleConfig } from "./internal";
+import type { OracleConfig } from "./utils/config";
 import { oracleGetAll } from "./utils/get-all";
-
-const SCHEMA = "PRASI";
 
 export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
   const result = {
     tables: {},
   } as QInspectResult;
 
+  const schema = c.conn_params.schema;
   const tables = await oracleGetAll<{ NAME: string }>(
     c,
     `SELECT table_name AS NAME 
     FROM all_tables 
-    WHERE owner = '${SCHEMA}'`
+    WHERE owner = '${schema}'`
   );
 
   const raw_columns = await oracleGetAll<{
@@ -34,7 +32,7 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
     c,
     `SELECT table_name, column_name, nullable, data_type, data_length
     FROM all_tab_columns
-    WHERE owner = '${SCHEMA}'`
+    WHERE owner = '${schema}'`
   );
 
   const pk_columns = await oracleGetAll<{
@@ -46,7 +44,7 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
     FROM all_constraints cons
     JOIN all_cons_columns cols
     ON cons.constraint_name = cols.constraint_name
-    WHERE cons.constraint_type = 'P' AND cons.owner = '${SCHEMA}'`
+    WHERE cons.constraint_type = 'P' AND cons.owner = '${schema}'`
   );
 
   const fk_columns = await oracleGetAll<{
@@ -61,10 +59,8 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
     JOIN all_constraints c ON a.constraint_name = c.constraint_name
     JOIN all_constraints c_pk ON c.r_constraint_name = c_pk.constraint_name
     JOIN all_cons_columns b ON c_pk.constraint_name = b.constraint_name
-    WHERE c.constraint_type = 'R' AND a.owner = '${SCHEMA}'`
+    WHERE c.constraint_type = 'R' AND a.owner = '${schema}'`
   );
-
-  console.log({ fk_columns });
 
   // Create a Map for quick lookup of PKs
   const pkMap = new Map<string, Set<string>>();
@@ -203,6 +199,5 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
     };
   }
 
-  console.log(JSON.stringify(result, null, 2));
   return result;
 };

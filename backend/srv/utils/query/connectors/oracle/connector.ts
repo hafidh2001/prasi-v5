@@ -1,6 +1,6 @@
 import OracleDB from "oracledb";
 import type { QConnector, QConnectorParams } from "utils/query/types";
-import { oracleConfig } from "./internal";
+import { oracleConfig } from "./utils/config";
 import { inspect } from "./inspect";
 
 export type QOracleConnector = Awaited<ReturnType<typeof connectOracle>>;
@@ -19,12 +19,3 @@ export const connectOracle = async (conn: QConnectorParams) => {
   };
   return result;
 };
-
-const a = await connectOracle({
-  type: "oracle",
-  url: "oracle://SYSTEM:Password123@prasi.avolut.com:1521/XEPDB1",
-});
-console.log("CONNECTION SUCCESS");
-
-await a.inspect();
-console.log("END");
