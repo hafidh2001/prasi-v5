@@ -146,7 +146,6 @@ model site {
   is_deleted     Boolean          @default(false)
   responsive     String           @default("all")
   npm_cache      String           @default(" ") @db.VarChar
-  code_mode      String           @default("old") @db.VarChar(5)
   deploy_name    String           @default("DEV")
   settings       Json?
   component_site component_site[]

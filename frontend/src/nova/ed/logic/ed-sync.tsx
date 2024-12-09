@@ -34,13 +34,21 @@ export const initSync = (p: PG) => {
       async siteLoaded(sync) {
         p.sync = sync;
 
-        if (p.site) prasi.site = p.site;
-        const page = (await p.sync!.page.load(params.page_id)) as EPage;
-        if (!page) {
-          p.status = "page-not-found";
-          p.page.cur = null as any;
+        if (p.site) {
+          prasi.site = p.site;
+          const page = (await p.sync!.page.load(params.page_id)) as EPage;
+          if (!page) {
+            p.status = "page-not-found";
+            p.page.cur = null as any;
+            alert(
+              `Page ${params.page_id} not found. Redirecting to main page.`
+            );
+            location.href = `/ed/${p.site.id}`;
+          } else {
+            p.page.cur = page;
+          }
         } else {
-          p.page.cur = page;
+          alert(`Site ${params.site_id} not found`);
         }
 
         p.render();
