@@ -6,7 +6,7 @@ describe("oracle connector", () => {
   test("buat instance oracleConnector", async () => {
     conn = await connectOracle({
       type: "oracle",
-      url: "oracle://SYSTEM:Password123@prasi.avolut.com:1521/XEPDB1",
+      url: "oracle://SYSTEM:Password123@prasi.avolut.com:1521/XEPDB1?schema=PRASI",
     });
   });
 

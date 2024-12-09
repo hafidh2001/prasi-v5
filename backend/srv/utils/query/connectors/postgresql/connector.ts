@@ -1,12 +1,12 @@
-import { native, Pool as PGPool } from "pg";
+import * as pg from "pg";
 import type { QConnector, QConnectorParams } from "utils/query/types";
 import { pgConfig } from "./utils/config";
 import { inspect } from "./inspect";
 
-export type QPgConnector = ReturnType<typeof connectPg>;
+export type QPgConnector = Awaited<ReturnType<typeof connectPg>>;
 
 export const connectPg = async (conn: QConnectorParams) => {
-  const Pool = native?.Pool || PGPool;
+  const Pool = pg.native?.Pool || pg.Pool;
   const config = pgConfig(conn);
   config.pool = new Pool(config.pool_params);
 

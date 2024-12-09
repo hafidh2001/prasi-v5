@@ -13,7 +13,11 @@ export const pgConfig = (config: QConnectorParams) => {
     password: url.password,
   };
 
-  return { pool_params, pool: null as null | Pool };
+  return {
+    pool_params,
+    schema: url.searchParams.get("schema") || "public",
+    pool: null as null | Pool,
+  };
 };
 
 export type PgConfig = ReturnType<typeof pgConfig>;

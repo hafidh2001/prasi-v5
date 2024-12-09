@@ -14,7 +14,16 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
     tables: {},
   } as QInspectResult;
 
-  const schema = c.conn_params.schema;
+  let schema = c.schema;
+
+  if (!schema) {
+    const query_schema = await oracleGetAll(
+      c,
+      `select sys_context('USERENV', 'CURRENT_SCHEMA') from dual;
+    `
+    );
+  }
+
   const tables = await oracleGetAll<{ NAME: string }>(
     c,
     `SELECT table_name AS NAME 

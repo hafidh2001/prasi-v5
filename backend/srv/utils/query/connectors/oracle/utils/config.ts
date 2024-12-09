@@ -7,11 +7,14 @@ export const oracleConfig = (config: QConnectorParams) => {
   const conn_params = {
     user: url.username,
     password: url.password,
-    schema: "PRASI",
     connectString: `${url.hostname}:${url.port}${url.pathname}`,
   };
 
-  return { conn: null as null | Connection, conn_params };
+  return {
+    conn: null as null | Connection,
+    conn_params,
+    schema: url.searchParams.get("schema") || "",
+  };
 };
 
 export type OracleConfig = ReturnType<typeof oracleConfig>;
