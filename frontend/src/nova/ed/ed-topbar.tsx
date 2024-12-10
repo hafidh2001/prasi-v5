@@ -11,9 +11,11 @@ import {
   PanelRightOpen,
   ScrollText,
   Server,
+  Terminal,
 } from "lucide-react";
 import { EdSave } from "popup/build/ed-save";
 import { EdDeployPopup } from "popup/deploy/ed-deploy";
+import { EdConsolePopup } from "popup/console/ed-console";
 import { closeEditor } from "popup/script/ed-workbench";
 import { PRASI_CORE_SITE_ID } from "prasi-utils";
 import { FC, ReactElement, useEffect } from "react";
@@ -174,13 +176,25 @@ export const EdTopBar = () => {
         <ButtonBox>
           <Button
             popover={{
-              // open: true,
               content: <EdDeployPopup />,
             }}
           >
             <Server size={12} />
           </Button>
         </ButtonBox>
+
+        <div className="flex cursor-pointer items-center ml-1 pointer-events-auto select-none">
+          <Button
+            popover={{
+              content: <EdConsolePopup />,
+            }}
+            className="flex items-center ml-2 align-top"
+          >
+            <Terminal size={12} strokeWidth={1.5} className={"mr-[1px]"} />
+            <div className={cx("text-[9px]")}>OK</div>
+          </Button>
+        </div>
+
         {!p.ui.panel.left && (
           <div
             className="flex items-center ml-3 m-1 cursor-pointer hover:text-blue-600"
