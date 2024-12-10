@@ -148,7 +148,7 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
       const relationType = isFromPk ? "one-to-one" : "one-to-many";
 
       // Add relation to the fromTable
-      relations[fromColumn] = {
+      relations[toTable] = {
         type: relationType,
         from: {
           table: fromTable,
@@ -176,14 +176,9 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
         };
       }
 
-      // Ensure relations is initialized
-      if (!result.tables[toTable].relations) {
-        result.tables[toTable].relations = {};
-      }
-
       // Add the inverse relation
-      if (!result.tables[toTable].relations[toColumn]) {
-        result.tables[toTable].relations[toColumn] = {
+      if (!result.tables[toTable].relations[toTable]) {
+        result.tables[toTable].relations[toTable] = {
           type: inverseType,
           from: {
             table: toTable,
@@ -208,5 +203,6 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
     };
   }
 
+  console.log(JSON.stringify(result, null, 2));
   return result;
 };
