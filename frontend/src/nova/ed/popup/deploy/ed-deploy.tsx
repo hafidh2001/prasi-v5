@@ -37,8 +37,8 @@ export const EdDeployPopup = () => {
       { label: "prasi", value: "prasi" },
       { label: "prisma", value: "prisma" },
     ],
-    tempNewName: "",
-    namePopover: false,
+    temp_name: "",
+    name_popover: false,
   });
 
   const createDeployment = () => {
@@ -70,12 +70,14 @@ export const EdDeployPopup = () => {
       local.options = site.settings!.deploy_targets.map((e) => {
         return { label: e.name, value: e.name };
       });
+    }else{
+      local.target = site.settings!.deploy_targets[0];
     }
   }, [site.settings.deploy_targets]);
 
   useEffect(() => {
     if (local.target) {
-      local.tempNewName = local.target?.name;
+      local.temp_name = local.target?.name;
     }
   }, [local.target]);
 
@@ -127,7 +129,7 @@ export const EdDeployPopup = () => {
   };
 
   return (
-    <div className=" w-auto min-w-6xl max-w-6xl text-sm">
+    <div className=" w-auto min-w-[400px] text-sm">
       <div className="flex bg-gray-200 items-end pl-1 pt-1">
         {site.settings!.deploy_targets.map((target) => (
           <button
@@ -147,7 +149,7 @@ export const EdDeployPopup = () => {
             {local.target?.name === target.name && (
               <div>
                 <Popover
-                  open={local.namePopover}
+                  open={local.name_popover}
                   content={
                     <div className="bg-white border rounded shadow p-2 flex flex-col ">
                       <div>Deploy Name:</div>
@@ -158,16 +160,16 @@ export const EdDeployPopup = () => {
                         className={cx(
                           "flex-1 border-[1px]  border-slate-300 focus:border-2 focus:border-blue-500 text-black mt-1 px-1"
                         )}
-                        value={local.tempNewName || ""}
+                        value={local.temp_name || ""}
                         placeholder="example-dev"
                         onBlur={(e) => {
-                          local.tempNewName = e.currentTarget.value;
-                          local.namePopover = false;
-                          saveChanges(local.tempNewName);
+                          local.temp_name = e.currentTarget.value;
+                          local.name_popover = false;
+                          saveChanges(local.temp_name);
                         }}
                         spellCheck={false}
                         onChange={(e) => {
-                          local.tempNewName = e.currentTarget.value;
+                          local.temp_name = e.currentTarget.value;
                           local.render();
                           // saveChanges(e.currentTarget.value);
                         }}
@@ -187,7 +189,7 @@ export const EdDeployPopup = () => {
                   <button
                     className="ml-2"
                     onClick={() => {
-                      local.namePopover = true;
+                      local.name_popover = true;
                       local.render();
                     }}
                   >
@@ -207,7 +209,7 @@ export const EdDeployPopup = () => {
         </button>
       </div>
       <div className="rounded shadow">
-        <div className="flex justify-between items-center align-middle px-1">
+        <div className="flex justify-between items-center align-middle pl-1">
           <div className="">Server URL:</div>
           <div className="flex flex-col items-end align-middle">
             <span
