@@ -116,7 +116,7 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
         // Check if this column is a PK
         const isPk = pkMap.get(table.NAME)?.has(raw_col.COLUMN_NAME) || false;
         if (isPk) {
-          pk.push(col_name); // Add to PK array
+          pk.push(col_name);
         }
 
         // Populate column details
@@ -163,9 +163,9 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
         relationType === "one-to-one" ? "one-to-one" : "many-to-one";
       if (!result.tables[toTable]) {
         result.tables[toTable] = {
-          name: toTable, // Sudah lowercase
+          name: toTable,
           pk: [],
-          db_name: toTable.toUpperCase(), // Masih menggunakan uppercase untuk db_name
+          db_name: toTable.toUpperCase(),
           fk: {},
           columns: {},
           relations: {},
@@ -214,7 +214,7 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
       db_name: table.NAME,
       fk,
       columns,
-      relations, // Add relations here
+      relations,
     };
   }
 
