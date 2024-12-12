@@ -17,8 +17,8 @@ export type PQuerySelect = {
   where: PQuerySelectWhere[];
 };
 
-type PQuerySelectCol = { col_name: COL_NAME; type: "column"; as?: string };
-type PQuerySelectRel = {
+export type PQuerySelectCol = { col_name: COL_NAME; type: "column"; as?: string };
+export type PQuerySelectRel = {
   rel_name: REL_NAME;
   type: "relation";
   as?: string;
