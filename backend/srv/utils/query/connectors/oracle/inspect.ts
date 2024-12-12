@@ -8,6 +8,7 @@ import type {
 } from "utils/query/types";
 import type { OracleConfig } from "./utils/config";
 import { oracleGetAll } from "./utils/get-all";
+import { relationSuffix } from "./utils/relation-suffix";
 
 export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
   const result = {
@@ -138,57 +139,71 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
 
     // Populate Relations for the table
     for (const fk of tableFks) {
-      const fromTable = table.NAME.toLowerCase();
-      const fromColumn = fk.from;
-      const toTable = fk.to.table;
-      const toColumn = fk.to.column;
+      const fromTable = table_name;
+      const fromColumn = fk.from.toLowerCase();
+      const toTable = fk.to.table.toLowerCase();
+      const toColumn = fk.to.column.toLowerCase();
 
-      // Determine the relationship type
+      // Determine relation type
       const isFromPk = pk.includes(fromColumn);
       const relationType = isFromPk ? "one-to-one" : "one-to-many";
 
-      // Add relation to the fromTable
-      relations[toTable] = {
-        type: relationType,
-        from: {
-          table: fromTable,
-          column: fromColumn,
-        },
-        to: {
-          table: toTable,
-          column: toColumn,
-        },
-      };
+      // Add relation to the current table
+      const relationKey = relationSuffix(toTable, relations);
+      if (!relations[relationKey]) {
+        relations[relationKey] = {
+          type: relationType,
+          from: { table: fromTable, column: fromColumn },
+          to: { table: toTable, column: toColumn },
+        };
+      }
 
-      // Add relation to the toTable (inverse relationship)
+      // Add inverse relation to the target table
       const inverseType =
         relationType === "one-to-one" ? "one-to-one" : "many-to-one";
-
-      // Ensure the toTable exists in result.tables
       if (!result.tables[toTable]) {
         result.tables[toTable] = {
-          name: toTable,
+          name: toTable, // Sudah lowercase
           pk: [],
-          db_name: toTable.toUpperCase(),
+          db_name: toTable.toUpperCase(), // Masih menggunakan uppercase untuk db_name
           fk: {},
           columns: {},
           relations: {},
         };
       }
 
-      // Add the inverse relation
-      if (!result.tables[toTable].relations[toTable]) {
-        result.tables[toTable].relations[toTable] = {
+      const inverseKey = relationSuffix(
+        fromTable,
+        result.tables[toTable].relations
+      );
+      if (!result.tables[toTable].relations[inverseKey]) {
+        result.tables[toTable].relations[inverseKey] = {
           type: inverseType,
-          from: {
-            table: toTable,
-            column: toColumn,
-          },
-          to: {
-            table: fromTable,
-            column: fromColumn,
-          },
+          from: { table: toTable, column: toColumn },
+          to: { table: fromTable, column: fromColumn },
         };
+      }
+    }
+
+    // Handle additional relations where other tables reference the current table
+    for (const [refTable, fks] of fkMap) {
+      for (const fk of fks) {
+        if (fk.to.table.toLowerCase() === table_name) {
+          const refRelationKey = relationSuffix(
+            refTable.toLowerCase(),
+            relations
+          );
+          if (!relations[refRelationKey]) {
+            relations[refRelationKey] = {
+              type: "one-to-many",
+              from: {
+                table: refTable.toLowerCase(),
+                column: fk.from.toLowerCase(),
+              },
+              to: { table: table_name, column: fk.to.column.toLowerCase() },
+            };
+          }
+        }
       }
     }
 
