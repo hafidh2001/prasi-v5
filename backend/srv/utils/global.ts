@@ -40,6 +40,7 @@ export type PrasiSiteLoading = {
   deps_install?: ReturnType<typeof spawn>;
   build: {
     frontend?: Awaited<ReturnType<typeof bunWatchBuild>>;
+    backend?: ReturnType<typeof spawn>;
     typings?: ReturnType<typeof spawn>;
   };
 };

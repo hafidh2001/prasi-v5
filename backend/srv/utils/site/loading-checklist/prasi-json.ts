@@ -6,7 +6,7 @@ export const initPrasiJson = async (site_id: string) => {
     frontend: {
       index: "",
       internal: "internal.tsx",
-      typings: "types/typings-generated.d.ts",
+      typings: "typings/typings-generated.d.ts",
     },
     backend: { index: "" },
 

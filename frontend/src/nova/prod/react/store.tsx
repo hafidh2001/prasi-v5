@@ -64,9 +64,13 @@ export const useProdState = defineStore({
             r.layout = layout;
             r.router = router;
             r.pages = pages;
+
             r.vscode_exports = { ...(await fn()) };
             delete r.vscode_exports.default;
-
+            for (const [k, v] of Object.entries(r.vscode_exports)) {
+              (window as any)[k] = v;
+            }
+            
             if (site.api_url) {
               r.api = apiProxy(site.api_url);
               r.db = dbProxy(site.api_url);

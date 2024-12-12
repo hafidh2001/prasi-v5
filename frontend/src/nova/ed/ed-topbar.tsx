@@ -4,6 +4,7 @@ import { active } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import {
   BookImage,
+  ChevronRight,
   Database,
   ExternalLink,
   House,
@@ -12,6 +13,7 @@ import {
   PanelRightOpen,
   ScrollText,
   Server,
+  SquareTerminal,
   Terminal,
 } from "lucide-react";
 import { EdSave } from "popup/build/ed-save";
@@ -184,14 +186,17 @@ export const EdTopBar = () => {
           </Button>
         </ButtonBox>
 
-        <div className="flex cursor-pointer items-center ml-1 pointer-events-auto select-none">
+        <div className="flex cursor-pointer items-center select-none ml-2">
           <Button
             popover={{
               content: <EdConsolePopup />,
             }}
-            className="flex items-center ml-2 align-top"
+            className={cx(
+              "flex items-center align-top pl-[4px] pr-[7px] space-x-[3px] border py-0 max-h-[20px] rounded-sm",
+              "hover:bg-green-100 border-green-800 text-green-800"
+            )}
           >
-            <Terminal size={12} strokeWidth={1.5} className={"mr-[1px]"} />
+            <ChevronRight size={18} strokeWidth={1} className="-mx-1" />
             <div className={cx("text-[9px]")}>OK</div>
           </Button>
         </div>

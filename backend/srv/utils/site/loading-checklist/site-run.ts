@@ -43,7 +43,8 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   if (!loading.build.frontend) {
     loading.build.frontend = await bunWatchBuild({
       outdir: fs.path(`code:${site_id}/site/build/frontend`),
-      entrypoint: fs.path(`code:${site_id}/site/src/${prasi.frontend.index}`),
+      entrydir: fs.path(`code:${site_id}/site/src`),
+      entrypoint: [prasi.frontend.index, prasi.frontend.internal],
       async onBuild({ status, log }) {
         const site = g.site.loaded[site_id];
         if (site) {
@@ -115,7 +116,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
         if (site && arg.text.includes("Watching for file")) {
           typings.done();
           await extractVscIndex(site_id);
-          
+
           const log = site.build_result.log;
           if (log.frontend) {
             const tsc = await fs.read(
