@@ -40,7 +40,8 @@ export const siteLoaded = async (
     asset: await staticFile(fs.path(`code:${site_id}/site/build/frontend`)),
     build_result: {
       vsc_vars: {},
-      log: { frontend: "", typings: "" },
+      log: { frontend: "", typings: "", backend: "", tailwind: "" },
+      is_ready: { frontend: false, typings: false },
     },
     prasi,
   };

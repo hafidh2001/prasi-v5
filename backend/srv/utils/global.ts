@@ -21,6 +21,12 @@ export type PrasiSite = {
     log: {
       frontend: string;
       typings: string;
+      backend: string;
+      tailwind: string;
+    };
+    is_ready: {
+      frontend: boolean;
+      typings: boolean;
     };
   };
   prasi: {

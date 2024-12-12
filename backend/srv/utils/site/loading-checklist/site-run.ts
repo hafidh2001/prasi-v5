@@ -68,8 +68,10 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
           const site = g.site.loaded[site_id];
           if (site) {
             site.asset?.rescan();
-            const log = site.build_result.log;
-            if (log.typings) {
+
+            const is_ready = site.build_result.is_ready;
+            is_ready.frontend = true;
+            if (is_ready.typings) {
               const tsc = await fs.read(
                 `code:${site_id}/site/src/${site.prasi.frontend.typings}`
               );
@@ -86,6 +88,19 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
         } else {
           siteBroadcastBuildLog(site_id, log || "");
         }
+      },
+    });
+  }
+
+  siteLoadingMessage(site_id, "Starting Backend Build...");
+  if (!loading.build.backend) {
+    loading.build.backend = spawn({
+      cmd: `bun build --target bun --watch ${prasi.backend.index} --outfile ../build/backend.js --no-clear-screen`,
+      cwd: fs.path(`code:${site_id}/site/src`),
+      onMessage(arg) {
+        const site = g.site.loaded[site_id];
+        const log = site.build_result.log;
+        log.backend += arg.text;
       },
     });
   }
@@ -113,24 +128,26 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
       async onMessage(arg) {
         const site = g.site.loaded[site_id];
 
+        const log = site.build_result.log;
+        log.typings += arg.text;
+
         if (site && arg.text.includes("Watching for file")) {
+          site.build_result.is_ready.typings = true;
           typings.done();
           await extractVscIndex(site_id);
 
-          const log = site.build_result.log;
-          if (log.frontend) {
-            const tsc = await fs.read(
-              `code:${site_id}/site/src/${site.prasi.frontend.typings}`
-            );
-            editor.broadcast(
-              { site_id },
-              {
-                action: "vsc-update",
-                tsc: gzipSync(tsc),
-                vars: site.build_result.vsc_vars,
-              }
-            );
-          }
+          const tsc = await fs.read(
+            `code:${site_id}/site/src/${site.prasi.frontend.typings}`
+          );
+
+          editor.broadcast(
+            { site_id },
+            {
+              action: "vsc-update",
+              tsc: gzipSync(tsc),
+              vars: site.build_result.vsc_vars,
+            }
+          );
         }
       },
     });
