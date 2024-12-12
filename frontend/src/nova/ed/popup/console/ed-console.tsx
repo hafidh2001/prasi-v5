@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { DeployTarget } from "../../cprasi/lib/typings";
 import { dropdownProp } from "mode-page/right/style/ui/style";
 import { Popover } from "utils/ui/popover";
+import { Resizable } from "re-resizable";
 
 export type ConsoleBuildLog = {
   source: string;
@@ -206,55 +207,75 @@ export const EdConsolePopup = () => {
   };
 
   return (
-    <div className=" w-[400px] min-w-[400px] text-sm">
-      <div className="flex bg-gray-200 items-end pl-1 pt-1">
-        {p_log.map((target) => (
-          <button
-            key={target.source}
-            className={`px-2 py-1 mr-1 transition rounded-t align-middle  flex items-center justify-between ${
-              local.target?.source === target.source
-                ? "bg-white text-black"
-                : " text-black hover:bg-gray-300"
-            }`}
-            onClick={() => {
-              local.target = target;
-              local.render();
-            }}
-          >
-            <span>{target.source}</span>
-          </button>
-        ))}
-      </div>
-      <div className="rounded shadow">
-        <div className="flex justify-between items-center align-middle pl-1">
-          <div className="">Status:</div>
-          <div className="flex flex-col items-end align-middle">
-            <span
-              className={`px-3 py-1 text-white ${local.target?.status === "OK" ? "bg-green-700" : "bg-red-500"}`}
+    <Resizable
+      defaultSize={{ width: 500, height: 500 }}
+      minHeight={300}
+      minWidth={500}
+    >
+      <div className="flex flex-col h-full w-full">
+        {/* Tabs */}
+        <div className="flex bg-gray-200 items-end pl-1 pt-1">
+          {p_log.map((target) => (
+            <button
+              key={target.source}
+              className={`px-2 py-1 mr-1 transition rounded-t align-middle  flex items-center justify-between ${
+                local.target?.source === target.source
+                  ? "bg-white text-black"
+                  : "text-black hover:bg-gray-300"
+              }`}
+              onClick={() => {
+                local.target = target;
+                local.render();
+              }}
             >
-              {local.target?.status.toLocaleUpperCase()}
-            </span>
+              <span>{target.source}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Status */}
+        <div className="rounded shadow py-1 pl-1 bg-white">
+          <div className="flex justify-between items-center">
+            <span>Status:</span>
+
+            {/* <Space/> */}
+
+            <div>
+              <button className="px-3 py-1 text-black border bg-white hover:bg-blue-200 mr-[4px]">
+                Restart
+              </button>
+              <span
+                className={`px-3 py-2 text-white ${
+                  local.target?.status === "OK" ? "bg-green-700" : "bg-red-500"
+                }`}
+              >
+                {local.target?.status.toLocaleUpperCase()}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="overflow-auto h-[200px] border-t bg-gray-900">
-          <ul className="list-none p-0 m-0 font-mono text-sm leading-6">
-            {local.target?.log.map((entry, index) => (
-              <li
-                key={index}
-                className="flex gap-3 px-2 align-top items-start mb-[4px]"
-              >
-                <span className="text-gray-500 text-right w-[20px] min-w-[20px] inline-block">
-                  {index + 1}
-                </span>
-                <pre className="text-gray-200 m-0 p-0 whitespace-pre-wrap break-words">
-                  {entry}
-                </pre>
-              </li>
-            ))}
-          </ul>
+        {/* Log List */}
+        <div className="flex-1 overflow-hidden bg-gray-900">
+          <div className="h-full overflow-y-auto">
+            <ul className="list-none p-0 m-0 font-mono text-sm leading-6">
+              {local.target?.log.map((entry, index) => (
+                <li
+                  key={index}
+                  className="flex gap-3 px-2 align-top items-start"
+                >
+                  <span className="text-gray-500 text-right w-[20px] min-w-[20px] inline-block text-[10px]">
+                    {index + 1}
+                  </span>
+                  <pre className="text-gray-200 m-0 p-0 whitespace-pre-wrap break-words text-[10px]">
+                    {entry}
+                  </pre>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
-    </div>
+    </Resizable>
   );
 };

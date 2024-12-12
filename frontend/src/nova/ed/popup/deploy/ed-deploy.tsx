@@ -70,10 +70,21 @@ export const EdDeployPopup = () => {
       local.options = site.settings!.deploy_targets.map((e) => {
         return { label: e.name, value: e.name };
       });
-    }else{
+    } else {
       local.target = site.settings!.deploy_targets[0];
     }
   }, [site.settings.deploy_targets]);
+
+  useEffect(() => {
+    if (!site.settings) {
+      return;
+    }
+
+    if ((site.settings.deploy_targets.length ?? 0) > 0) {
+      local.target = site.settings.deploy_targets[0];
+      local.render();
+    }
+  }, []);
 
   useEffect(() => {
     if (local.target) {
@@ -130,6 +141,7 @@ export const EdDeployPopup = () => {
 
   return (
     <div className=" w-auto min-w-[400px] text-sm">
+      {/* Tabs Section */}
       <div className="flex bg-gray-200 items-end pl-1 pt-1">
         {site.settings!.deploy_targets.map((target) => (
           <button
@@ -137,7 +149,7 @@ export const EdDeployPopup = () => {
             className={`px-2 py-1 mr-1 transition rounded-t align-middle  flex items-center justify-between ${
               local.target?.name === target.name
                 ? "bg-white text-black"
-                : " text-black hover:bg-gray-300"
+                : " text-gray-500 hover:bg-gray-300"
             }`}
             onClick={() => {
               local.target = target;
@@ -208,12 +220,18 @@ export const EdDeployPopup = () => {
           <Plus size={14} className="align-middle" />
         </button>
       </div>
+
+      {/* Content Section */}
       <div className="rounded shadow">
         <div className="flex justify-between items-center align-middle pl-1">
           <div className="">Server URL:</div>
-          <div className="flex flex-col items-end align-middle">
+          <div className="flex flex-row items-center align-middle">
+            <button className="px-1 py-[2px] border text-black border-slate-200 hover:bg-blue-100 mr-[4px] ">
+              Restart Server
+            </button>
+
             <span
-              className={`px-3 py-1 text-white ${local.target?.status === "online" ? "bg-green-700" : "bg-gray-400"}`}
+              className={`px-2 py-2 text-white ${local.target?.status === "online" ? "bg-green-700" : "bg-gray-400"}`}
             >
               {local.target?.status.toLocaleUpperCase()}
             </span>
@@ -244,41 +262,55 @@ export const EdDeployPopup = () => {
           />
         </div>
 
-        <div className="flex border-b py-2 px-2 border-slate-300 boxed flex-col items-stretch">
-          <textarea
-            className="text-[13px] border p-2 mb-2"
-            placeholder="postgres://user:password@host:port/database"
-            onChange={(e) => {
-              local.target!.db.url = e.target.value;
-              saveChanges();
-            }}
-            value={`${local.target?.db.url}`}
-          />
+        <div className="flex flex-row">
+          {/* DB Tabs Section */}
 
-          <Dropdown
-            {...dropdownProp}
-            items={[
-              { value: "prasi", label: "prasi" },
-              { value: "prisma", label: "prisma" },
-            ]}
-            value={local.target?.db.orm}
-            onChange={(v) => {
-              local.target!.db.orm = v as DeployTarget["db"]["orm"];
-              saveChanges();
-            }}
-          />
+          <div className="flex w-[34px] align-bottom justify-end flex-col bg-gray-200  pl-1">
+            <div
+              className="flex items-end pl-1 pt-1 h-[30px]"
+              style={{
+                transform: "rotate(-90deg)",
+              }}
+            >
+              {["prasi", "prisma"].map((db_option) => (
+                <button
+                  key={db_option}
+                  className={`px-2 py-1 transition rounded-t align-middle text-center ${
+                    local.target?.db.orm === db_option
+                      ? "bg-white text-black"
+                      : "text-gray-500 hover:bg-gray-300"
+                  }`}
+                  onClick={() => {
+                    if (local.target)
+                      local.target.db.orm = db_option as "prasi" | "prisma";
+                    saveChanges();
+                  }}
+                >
+                  <span className="text-xs">{db_option.toUpperCase()}</span>
+                </button>
+              ))}
+            </div>
+          </div>
 
-          <div className="flex flex-col items-stretch justify-center mt-2">
+          {/* DB Content Section */}
+          <div className="flex flex-grow border-b py-2 px-2 border-slate-300 flex-col items-stretch flex-1 ">
+            <textarea
+              className="text-[13px] border p-2 mb-2 w-full"
+              placeholder="postgres://user:password@host:port/database"
+              onChange={(e) => {
+                local.target!.db.url = e.target.value;
+                saveChanges();
+              }}
+              value={local.target?.db.url || ""}
+            />
             <div className="flex justify-between select-none">
               <button className="px-2 py-1 text-black border bg-white hover:bg-blue-200">
                 DB Pull
               </button>
-              <button className="px-2 py-1 text-black border bg-white hover:bg-blue-200">
-                Restart Server
-              </button>
             </div>
           </div>
         </div>
+
         <div>
           <div className="flex justify-between items-center border-b p-2 border-slate-300 boxed ">
             <div className="">History:</div>
