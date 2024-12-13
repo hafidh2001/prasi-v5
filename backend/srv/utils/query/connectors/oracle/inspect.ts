@@ -8,6 +8,7 @@ import type {
 } from "utils/query/types";
 import type { OracleConfig } from "./utils/config";
 import { oracleGetAll } from "./utils/get-all";
+import { relationSuffix } from "./utils/relation-suffix";
 
 export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
   const result = {
@@ -115,7 +116,7 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
         // Check if this column is a PK
         const isPk = pkMap.get(table.NAME)?.has(raw_col.COLUMN_NAME) || false;
         if (isPk) {
-          pk.push(col_name); // Add to PK array
+          pk.push(col_name);
         }
 
         // Populate column details
@@ -132,39 +133,32 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
 
     // Populate FK for the table
     const tableFks = fkMap.get(table.NAME) || [];
-    for (const fkEntry of tableFks) {
-      fk[fkEntry.from] = fkEntry;
+
+    for (const fks of tableFks) {
+      fk[fks.from] = fks;
     }
 
     // Populate Relations for the table
     for (const fk of tableFks) {
-      const fromTable = table.NAME.toLowerCase();
-      const fromColumn = fk.from;
-      const toTable = fk.to.table;
-      const toColumn = fk.to.column;
+      const fromTable = table_name;
+      const fromColumn = fk.from.toLowerCase();
+      const toTable = fk.to.table.toLowerCase();
+      const toColumn = fk.to.column.toLowerCase();
 
-      // Determine the relationship type
-      const isFromPk = pk.includes(fromColumn);
-      const relationType = isFromPk ? "one-to-one" : "one-to-many";
+      // Determine relation type
+      const relationType: QInspectRelation["type"] =
+        fromTable === toTable ? "one-to-many" : "many-to-one";
 
-      // Add relation to the fromTable
-      relations[fromColumn] = {
-        type: relationType,
-        from: {
-          table: fromTable,
-          column: fromColumn,
-        },
-        to: {
-          table: toTable,
-          column: toColumn,
-        },
-      };
+      // Add relation to the current table
+      const relationKey = relationSuffix(toTable, relations);
+      if (!relations[relationKey]) {
+        relations[relationKey] = {
+          type: relationType,
+          from: { table: fromTable, column: fromColumn },
+          to: { table: toTable, column: toColumn },
+        };
+      }
 
-      // Add relation to the toTable (inverse relationship)
-      const inverseType =
-        relationType === "one-to-one" ? "one-to-one" : "many-to-one";
-
-      // Ensure the toTable exists in result.tables
       if (!result.tables[toTable]) {
         result.tables[toTable] = {
           name: toTable,
@@ -175,25 +169,27 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
           relations: {},
         };
       }
+    }
 
-      // Ensure relations is initialized
-      if (!result.tables[toTable].relations) {
-        result.tables[toTable].relations = {};
-      }
-
-      // Add the inverse relation
-      if (!result.tables[toTable].relations[toColumn]) {
-        result.tables[toTable].relations[toColumn] = {
-          type: inverseType,
-          from: {
-            table: toTable,
-            column: toColumn,
-          },
-          to: {
-            table: fromTable,
-            column: fromColumn,
-          },
-        };
+    // Handle additional relations where other tables reference the current table
+    for (const [refTable, fks] of fkMap) {
+      for (const fk of fks) {
+        if (fk.to.table.toLowerCase() === table_name) {
+          const refRelationKey = relationSuffix(
+            refTable.toLowerCase(),
+            relations
+          );
+          if (!relations[refRelationKey]) {
+            relations[refRelationKey] = {
+              type: "one-to-many",
+              from: {
+                table: refTable.toLowerCase(),
+                column: fk.from.toLowerCase(),
+              },
+              to: { table: table_name, column: fk.to.column.toLowerCase() },
+            };
+          }
+        }
       }
     }
 
@@ -204,7 +200,7 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
       db_name: table.NAME,
       fk,
       columns,
-      relations, // Add relations here
+      relations,
     };
   }
 

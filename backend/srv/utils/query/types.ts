@@ -1,3 +1,4 @@
+import type { PQuerySelect } from "prasi-frontend/src/nova/ed/mode/query/types";
 export type NAME = string;
 export type DB_NAME = string;
 
@@ -7,8 +8,10 @@ export type QConnectorParams = {
 };
 
 export interface QConnector {
+  schema?: QInspectResult;
   inspect(): Promise<QInspectResult>;
   destroy(): Promise<void>;
+  query(inspected_scheme: QInspectResult, pq: PQuerySelect): Promise<any>;
 }
 
 export type QInspectColumn = {
@@ -26,7 +29,7 @@ export type QInspectFK = {
 };
 
 export type QInspectRelation = {
-  type: "one-to-one" | "one-to-many" | "many-to-one" | "many-to-many";
+  type: "one-to-one" | "one-to-many" | "many-to-one";
   from: { table: NAME; column: NAME };
   to: { table: NAME; column: NAME };
 };

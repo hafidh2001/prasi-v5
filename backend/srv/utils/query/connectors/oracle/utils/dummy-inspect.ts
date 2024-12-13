@@ -1,87 +1,382 @@
 import type { QInspectResult } from "utils/query/types";
 
-const exampleQInspectResult: QInspectResult = {
+const inspectResult: QInspectResult = {
   tables: {
-    users: {
-      name: "users",
-      pk: ["id"],
-      db_name: "users_table",
+    user_table: {
+      name: "user_table",
+      pk: ["user_id"],
+      db_name: "USER_TABLE",
       fk: {
-        profile_id: {
-          from: "profile_id",
-          to: { table: "profiles", column: "id" },
+        role_id1: {
+          from: "role_id1",
+          to: {
+            table: "role_table",
+            column: "role_id",
+          },
+        },
+        role_id2: {
+          from: "role_id2",
+          to: {
+            table: "role_table",
+            column: "role_id",
+          },
         },
       },
       columns: {
-        id: {
-          name: "id",
+        user_id: {
+          name: "user_id",
+          db_name: "USER_ID",
+          db_type: "NUMBER",
+          nullable: false,
           type: "number",
-          db_type: "int",
-          db_name: "user_id",
           is_pk: true,
-          nullable: false,
         },
-        name: {
-          name: "name",
-          type: "string",
-          db_type: "varchar",
-          db_name: "user_name",
-          is_pk: false,
+        username: {
+          name: "username",
+          db_name: "USERNAME",
+          db_type: "VARCHAR2",
           nullable: false,
+          type: "string",
+          is_pk: false,
         },
         email: {
           name: "email",
-          type: "string",
-          db_type: "varchar",
-          db_name: "user_email",
-          is_pk: false,
+          db_name: "EMAIL",
+          db_type: "VARCHAR2",
           nullable: false,
-        },
-        profile_id: {
-          name: "profile_id",
-          type: "number",
-          db_type: "int",
-          db_name: "user_profile_id",
+          type: "string",
           is_pk: false,
+        },
+        created_at: {
+          name: "created_at",
+          db_name: "CREATED_AT",
+          db_type: "TIMESTAMP(6)",
           nullable: true,
+          type: "string",
+          is_pk: false,
+        },
+        role_id1: {
+          name: "role_id1",
+          db_name: "ROLE_ID1",
+          db_type: "NUMBER",
+          nullable: true,
+          type: "number",
+          is_pk: false,
+        },
+        role_id2: {
+          name: "role_id2",
+          db_name: "ROLE_ID2",
+          db_type: "NUMBER",
+          nullable: true,
+          type: "number",
+          is_pk: false,
         },
       },
       relations: {
-        profile_relation: {
+        role_table: {
           type: "many-to-one",
-          from: { table: "users", column: "profile_id" },
-          to: { table: "profiles", column: "id" },
+          from: {
+            table: "user_table",
+            column: "role_id1",
+          },
+          to: {
+            table: "role_table",
+            column: "role_id",
+          },
+        },
+        role_table2: {
+          type: "many-to-one",
+          from: {
+            table: "user_table",
+            column: "role_id2",
+          },
+          to: {
+            table: "role_table",
+            column: "role_id",
+          },
+        },
+        photo: {
+          type: "one-to-many",
+          from: {
+            table: "photo",
+            column: "user_id",
+          },
+          to: {
+            table: "user_table",
+            column: "user_id",
+          },
+        },
+        comment_table: {
+          type: "one-to-many",
+          from: {
+            table: "comment_table",
+            column: "user_id",
+          },
+          to: {
+            table: "user_table",
+            column: "user_id",
+          },
+        },
+        role_table3: {
+          type: "one-to-many",
+          from: {
+            table: "role_table",
+            column: "user_id",
+          },
+          to: {
+            table: "user_table",
+            column: "user_id",
+          },
         },
       },
     },
-    profiles: {
-      name: "profiles",
-      pk: ["id"],
-      db_name: "profiles_table",
-      fk: {},
-      columns: {
-        id: {
-          name: "id",
-          type: "number",
-          db_type: "int",
-          db_name: "profile_id",
-          is_pk: true,
-          nullable: false,
+    photo: {
+      name: "photo",
+      pk: ["photo_id"],
+      db_name: "PHOTO",
+      fk: {
+        user_id: {
+          from: "user_id",
+          to: {
+            table: "user_table",
+            column: "user_id",
+          },
         },
-        bio: {
-          name: "bio",
-          type: "string",
-          db_type: "text",
-          db_name: "profile_bio",
+      },
+      columns: {
+        photo_id: {
+          name: "photo_id",
+          db_name: "PHOTO_ID",
+          db_type: "NUMBER",
+          nullable: false,
+          type: "number",
+          is_pk: true,
+        },
+        user_id: {
+          name: "user_id",
+          db_name: "USER_ID",
+          db_type: "NUMBER",
+          nullable: false,
+          type: "number",
           is_pk: false,
+        },
+        photo_url: {
+          name: "photo_url",
+          db_name: "PHOTO_URL",
+          db_type: "VARCHAR2",
+          nullable: false,
+          type: "string",
+          is_pk: false,
+        },
+        description: {
+          name: "description",
+          db_name: "DESCRIPTION",
+          db_type: "VARCHAR2",
           nullable: true,
+          type: "string",
+          is_pk: false,
+        },
+        created_at: {
+          name: "created_at",
+          db_name: "CREATED_AT",
+          db_type: "TIMESTAMP(6)",
+          nullable: true,
+          type: "string",
+          is_pk: false,
         },
       },
       relations: {
-        users_relation: {
+        user_table: {
+          type: "many-to-one",
+          from: {
+            table: "photo",
+            column: "user_id",
+          },
+          to: {
+            table: "user_table",
+            column: "user_id",
+          },
+        },
+        comment_table: {
           type: "one-to-many",
-          from: { table: "profiles", column: "id" },
-          to: { table: "users", column: "profile_id" },
+          from: {
+            table: "comment_table",
+            column: "photo_id",
+          },
+          to: {
+            table: "photo",
+            column: "photo_id",
+          },
+        },
+      },
+    },
+    comment_table: {
+      name: "comment_table",
+      pk: ["comment_id"],
+      db_name: "COMMENT_TABLE",
+      fk: {
+        user_id: {
+          from: "user_id",
+          to: {
+            table: "user_table",
+            column: "user_id",
+          },
+        },
+        photo_id: {
+          from: "photo_id",
+          to: {
+            table: "photo",
+            column: "photo_id",
+          },
+        },
+      },
+      columns: {
+        comment_id: {
+          name: "comment_id",
+          db_name: "COMMENT_ID",
+          db_type: "NUMBER",
+          nullable: false,
+          type: "number",
+          is_pk: true,
+        },
+        photo_id: {
+          name: "photo_id",
+          db_name: "PHOTO_ID",
+          db_type: "NUMBER",
+          nullable: false,
+          type: "number",
+          is_pk: false,
+        },
+        user_id: {
+          name: "user_id",
+          db_name: "USER_ID",
+          db_type: "NUMBER",
+          nullable: false,
+          type: "number",
+          is_pk: false,
+        },
+        comment_text: {
+          name: "comment_text",
+          db_name: "COMMENT_TEXT",
+          db_type: "VARCHAR2",
+          nullable: false,
+          type: "string",
+          is_pk: false,
+        },
+        created_at: {
+          name: "created_at",
+          db_name: "CREATED_AT",
+          db_type: "TIMESTAMP(6)",
+          nullable: true,
+          type: "string",
+          is_pk: false,
+        },
+      },
+      relations: {
+        user_table: {
+          type: "many-to-one",
+          from: {
+            table: "comment_table",
+            column: "user_id",
+          },
+          to: {
+            table: "user_table",
+            column: "user_id",
+          },
+        },
+        photo: {
+          type: "many-to-one",
+          from: {
+            table: "comment_table",
+            column: "photo_id",
+          },
+          to: {
+            table: "photo",
+            column: "photo_id",
+          },
+        },
+      },
+    },
+    role_table: {
+      name: "role_table",
+      pk: ["role_id"],
+      db_name: "ROLE_TABLE",
+      fk: {
+        user_id: {
+          from: "user_id",
+          to: {
+            table: "user_table",
+            column: "user_id",
+          },
+        },
+      },
+      columns: {
+        role_id: {
+          name: "role_id",
+          db_name: "ROLE_ID",
+          db_type: "NUMBER",
+          nullable: false,
+          type: "number",
+          is_pk: true,
+        },
+        user_id: {
+          name: "user_id",
+          db_name: "USER_ID",
+          db_type: "NUMBER",
+          nullable: false,
+          type: "number",
+          is_pk: false,
+        },
+        description: {
+          name: "description",
+          db_name: "DESCRIPTION",
+          db_type: "VARCHAR2",
+          nullable: false,
+          type: "string",
+          is_pk: false,
+        },
+        created_at: {
+          name: "created_at",
+          db_name: "CREATED_AT",
+          db_type: "TIMESTAMP(6)",
+          nullable: true,
+          type: "string",
+          is_pk: false,
+        },
+      },
+      relations: {
+        user_table: {
+          type: "many-to-one",
+          from: {
+            table: "role_table",
+            column: "user_id",
+          },
+          to: {
+            table: "user_table",
+            column: "user_id",
+          },
+        },
+        user_table2: {
+          type: "one-to-many",
+          from: {
+            table: "user_table",
+            column: "role_id1",
+          },
+          to: {
+            table: "role_table",
+            column: "role_id",
+          },
+        },
+        user_table3: {
+          type: "one-to-many",
+          from: {
+            table: "user_table",
+            column: "role_id2",
+          },
+          to: {
+            table: "role_table",
+            column: "role_id",
+          },
         },
       },
     },

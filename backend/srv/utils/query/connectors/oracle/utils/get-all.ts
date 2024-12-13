@@ -1,4 +1,4 @@
-import type { OracleConfig } from "../internal";
+import type { OracleConfig } from "./config";
 
 export const oracleGetAll = async <T>(c: OracleConfig, sql: string) => {
   const data = await c.conn?.execute<string>(sql);
