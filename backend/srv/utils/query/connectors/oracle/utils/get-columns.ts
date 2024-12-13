@@ -9,8 +9,6 @@ export const getColumns = (
   table: string,
   select: (PQuerySelectCol | PQuerySelectRel)[]
 ): string[] => {
-  // output nantinya get column ada select, join, where
-  // {select:string[], join:string[], where: string["ROLE_TABLE.DESCRIPTION = 2", ]}
   const result = [] as string[];
 
   for (const c of select) {
