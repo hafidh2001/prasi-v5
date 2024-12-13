@@ -194,23 +194,42 @@ export const EdConsolePopup = () => {
   ];
   const local = useLocal({
     target: null as ConsoleBuildLog | null,
+    size: { width: 500, height: 500 } as
+      | undefined
+      | { width: number; height: number },
   });
 
   useEffect(() => {
+    const size = localStorage.getItem("ed-console-size");
+    console.log(size, "size");
+    if (size) {
+      try {
+        local.size = JSON.parse(size);
+      } catch (e) {}
+
+      console.log(local.size, "local.size");
+    }
+
+    if (!local.size) local.size = { width: 500, height: 500 };
+
     if (p_log.length === 0) return;
     local.target = p_log[0];
     local.render();
   }, []);
 
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleString();
-  };
-
   return (
     <Resizable
-      defaultSize={{ width: 500, height: 500 }}
-      minHeight={300}
-      minWidth={500}
+      className={cx("flex flex-col bg-white relative min-w-[250px]", css``)}
+      defaultSize={local.size}
+      size={local.size}
+      onResizeStop={(_, __, div) => {
+        local.size = {
+          height: div.clientHeight,
+          width: div.clientWidth,
+        };
+        localStorage.setItem("ed-console-size", JSON.stringify(local.size));
+        local.render();
+      }}
     >
       <div className="flex flex-col h-full w-full">
         {/* Tabs */}
@@ -237,8 +256,6 @@ export const EdConsolePopup = () => {
         <div className="rounded shadow py-1 pl-1 bg-white">
           <div className="flex justify-between items-center">
             <span>Status:</span>
-
-            {/* <Space/> */}
 
             <div>
               <button className="px-3 py-1 text-black border bg-white hover:bg-blue-200 mr-[4px]">
