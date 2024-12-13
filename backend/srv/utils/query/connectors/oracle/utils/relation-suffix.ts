@@ -11,7 +11,6 @@ export const relationSuffix = (
   let suffix = 2;
   let uniqueKey = `${table_name}${suffix}`;
 
-  // Increment suffix until the key is unique
   while (relations[uniqueKey]) {
     suffix++;
     uniqueKey = `${table_name}${suffix}`;
