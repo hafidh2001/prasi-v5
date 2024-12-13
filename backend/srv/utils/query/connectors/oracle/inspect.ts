@@ -204,6 +204,5 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
     };
   }
 
-  // console.log(JSON.stringify(result, null, 2));
   return result;
 };
