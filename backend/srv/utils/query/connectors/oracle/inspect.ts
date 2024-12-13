@@ -133,8 +133,9 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
 
     // Populate FK for the table
     const tableFks = fkMap.get(table.NAME) || [];
-    for (const fkEntry of tableFks) {
-      fk[fkEntry.from] = fkEntry;
+
+    for (const fks of tableFks) {
+      fk[fks.from] = fks;
     }
 
     // Populate Relations for the table
@@ -145,8 +146,8 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
       const toColumn = fk.to.column.toLowerCase();
 
       // Determine relation type
-      const isFromPk = pk.includes(fromColumn);
-      const relationType = isFromPk ? "one-to-one" : "one-to-many";
+      const relationType: QInspectRelation["type"] =
+        fromTable === toTable ? "one-to-many" : "many-to-one";
 
       // Add relation to the current table
       const relationKey = relationSuffix(toTable, relations);
@@ -158,9 +159,6 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
         };
       }
 
-      // Add inverse relation to the target table
-      const inverseType =
-        relationType === "one-to-one" ? "one-to-one" : "many-to-one";
       if (!result.tables[toTable]) {
         result.tables[toTable] = {
           name: toTable,
@@ -169,18 +167,6 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
           fk: {},
           columns: {},
           relations: {},
-        };
-      }
-
-      const inverseKey = relationSuffix(
-        fromTable,
-        result.tables[toTable].relations
-      );
-      if (!result.tables[toTable].relations[inverseKey]) {
-        result.tables[toTable].relations[inverseKey] = {
-          type: inverseType,
-          from: { table: toTable, column: toColumn },
-          to: { table: fromTable, column: fromColumn },
         };
       }
     }
@@ -218,5 +204,6 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
     };
   }
 
+  // console.log(JSON.stringify(result, null, 2));
   return result;
 };
