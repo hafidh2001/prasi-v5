@@ -48,8 +48,8 @@ import { rawProd } from "../react/store";
       if (_href && _href.startsWith("/")) {
         if (isPreview()) {
           if (
-            location.pathname.startsWith("/prod") &&
-            !_href.startsWith("/prod")
+            location.pathname.startsWith("/prod/") &&
+            !_href.startsWith("/prod/")
           ) {
             const patharr = location.pathname.split("/");
             _href = `/prod/${patharr[2]}${_href}`;

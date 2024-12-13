@@ -54,7 +54,6 @@ setTimeout(() => {
 
       if (pathname !== "index.html") {
         if (!site.asset) await waitUntil(() => site.asset);
-
         const res = site.asset!.serve(ctx, { prefix: `/prod/${site_id}` });
         if (res) return res;
       }
@@ -73,6 +72,7 @@ setTimeout(() => {
         headers: { "content-type": "text/html", "content-encoding": "gzip" },
       });
     }
+
     return new Response(content, {
       headers: { "content-type": "text/html" },
     });

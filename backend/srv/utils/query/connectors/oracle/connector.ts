@@ -9,13 +9,16 @@ export const connectOracle = async (conn: QConnectorParams) => {
   const config = oracleConfig(conn);
   config.conn = await OracleDB.getConnection(config.conn_params);
 
-  const result: QConnector = {
+  const connector: QConnector = {
     async inspect() {
       return await inspect(config);
     },
     async destroy() {
-      console.log("destroy");
+      config.conn?.close();
     },
+    async query(i, pq) {},
   };
-  return result;
+  connector.inspected = await connector.inspect();
+
+  return connector;
 };
