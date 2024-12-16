@@ -21,12 +21,14 @@ export const getColumns = (
         if (rel) {
           if (rel.type === "one-to-many") {
             const db_table = rel.from.table;
+            // call recursive function
             const sub_result = getColumns(i, db_table, c.select);
             for (const s of sub_result) {
               result.push(s);
             }
           } else if (rel.type === "many-to-one") {
             const db_table = rel.to.table;
+            // call recursive function
             const sub_result = getColumns(i, db_table, c.select);
             for (const s of sub_result) {
               result.push(s);
