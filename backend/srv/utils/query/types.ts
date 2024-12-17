@@ -8,10 +8,10 @@ export type QConnectorParams = {
 };
 
 export interface QConnector {
-  schema?: QInspectResult;
+  inspected?: QInspectResult;
   inspect(): Promise<QInspectResult>;
   destroy(): Promise<void>;
-  query(inspected_scheme: QInspectResult, pq: PQuerySelect): Promise<any>;
+  query(i: QInspectResult, pq: PQuerySelect): Promise<any>;
 }
 
 export type QInspectColumn = {

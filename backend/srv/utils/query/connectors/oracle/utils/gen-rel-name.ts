@@ -1,6 +1,6 @@
 import type { NAME, QInspectRelation } from "utils/query/types";
 
-export const relationSuffix = (
+export const generateRelationName = (
   table_name: NAME,
   relations: Record<NAME, QInspectRelation>
 ) => {

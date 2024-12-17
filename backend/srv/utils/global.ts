@@ -21,6 +21,12 @@ export type PrasiSite = {
     log: {
       frontend: string;
       typings: string;
+      backend: string;
+      tailwind: string;
+    };
+    is_ready: {
+      frontend: boolean;
+      typings: boolean;
     };
   };
   prasi: {
@@ -40,6 +46,7 @@ export type PrasiSiteLoading = {
   deps_install?: ReturnType<typeof spawn>;
   build: {
     frontend?: Awaited<ReturnType<typeof bunWatchBuild>>;
+    backend?: ReturnType<typeof spawn>;
     typings?: ReturnType<typeof spawn>;
   };
 };

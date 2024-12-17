@@ -24,7 +24,7 @@ import { rawProd } from "../react/store";
 
     //#region prasi site internal (loading ui + not found)
     try {
-      let internal_url = "/_prasi/code/static/internal.js";
+      let internal_url = "/internal.js";
       let import_url = internal_url;
       if (location.pathname.startsWith("/prod")) {
         const patharr = location.pathname.split("/");
@@ -48,8 +48,8 @@ import { rawProd } from "../react/store";
       if (_href && _href.startsWith("/")) {
         if (isPreview()) {
           if (
-            location.pathname.startsWith("/prod") &&
-            !_href.startsWith("/prod")
+            location.pathname.startsWith("/prod/") &&
+            !_href.startsWith("/prod/")
           ) {
             const patharr = location.pathname.split("/");
             _href = `/prod/${patharr[2]}${_href}`;

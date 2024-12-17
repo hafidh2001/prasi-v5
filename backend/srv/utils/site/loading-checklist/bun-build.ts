@@ -1,12 +1,17 @@
 import { removeAsync } from "fs-jetpack";
-import * as React from "react";
-import * as ReactDOM from "react-dom";
-import { dirname } from "path";
-import { watchFiles } from "utils/files/watch";
+import { join } from "path";
 import { waitUntil } from "prasi-utils";
+import * as React from "react";
+import * as ReactJSX from "react/jsx-runtime";
+import * as ReactJSXDev from "react/jsx-dev-runtime";
+import * as ReactDOM from "react-dom";
+import { fs } from "utils/files/fs";
+import { watchFiles } from "utils/files/watch";
+import type { Loader } from "bun";
 
 type BuildArg = {
-  entrypoint: string;
+  entrypoint: string[];
+  entrydir: string;
   outdir: string;
   onBuild?: (arg: {
     ts: number;
@@ -17,13 +22,19 @@ type BuildArg = {
 
 export const bunWatchBuild = async ({
   outdir,
+  entrydir,
   entrypoint,
   onBuild,
 }: BuildArg) => {
   const internal = {
     building: false,
     watching: null as null | ReturnType<typeof watchFiles>,
-    log: "",
+    log: {
+      add(text: string) {
+        console.log(text);
+      },
+      text: "",
+    },
     stop: async () => {
       if (internal.watching) {
         for (const v of Object.values(internal.watching)) {
@@ -37,25 +48,46 @@ export const bunWatchBuild = async ({
     },
   };
 
+  for (const e of entrypoint) {
+    if (!fs.exists(join(entrydir, e))) {
+      await fs.write(join(entrydir, e), "");
+    }
+  }
+
   internal.watching = watchFiles({
-    dir: dirname(entrypoint),
+    dir: entrydir,
     events: async (type, filename) => {
       if (!internal.building) {
         internal.building = true;
-        try {
-          const ts = Date.now();
-          internal.log += `Building...\n`;
-          if (onBuild) onBuild({ ts, status: "building" });
-          await bunBuild({ outdir, entrypoint });
-          if (onBuild) onBuild({ ts: Date.now(), status: "success" });
-          internal.log += `Build completed in ${Date.now() - ts}ms\n`;
-        } catch (e: any) {
-          if (onBuild)
-            onBuild({ ts: Date.now(), status: "failed", log: e?.message });
-          internal.log += `Build failed, reason: ${e?.message}\n`;
-        }
+        if (filename) {
+          if (filename === "FETCH_HEAD") return;
+          try {
+            const ts = Date.now();
+            internal.log.add(`Building... [by: ${filename}]`);
+            if (onBuild) onBuild({ ts, status: "building" });
+            const result = await bunBuild({ outdir, entrypoint, entrydir });
+            if (!result.success) {
+              if (onBuild)
+                onBuild({
+                  ts: Date.now(),
+                  status: "failed",
+                  log: result.logs.join("\n"),
+                });
+              internal.log.add(
+                `Build failed, reason: ${result.logs.join("\n")}`
+              );
+            } else {
+              if (onBuild) onBuild({ ts: Date.now(), status: "success" });
+              internal.log.add(`Build completed in ${Date.now() - ts}ms`);
+            }
+          } catch (e: any) {
+            if (onBuild)
+              onBuild({ ts: Date.now(), status: "failed", log: e?.message });
+            internal.log.add(`Build failed, reason: ${e?.message}`);
+          }
 
-        internal.building = false;
+          internal.building = false;
+        }
       }
     },
     exclude(pathname) {
@@ -68,24 +100,34 @@ export const bunWatchBuild = async ({
   internal.building = true;
   try {
     const ts = Date.now();
-    internal.log += `Building...\n`;
+    internal.log.add(`Building...`);
     if (onBuild) onBuild({ ts: Date.now(), status: "building" });
-    await bunBuild({ outdir, entrypoint });
-    if (onBuild) onBuild({ ts: Date.now(), status: "success" });
-    internal.log += `Build completed in ${Date.now() - ts}ms\n`;
+    const result = await bunBuild({ outdir, entrypoint, entrydir });
+    if (!result.success) {
+      if (onBuild)
+        onBuild({
+          ts: Date.now(),
+          status: "failed",
+          log: result.logs.join("\n"),
+        });
+      internal.log.add(`Build failed, reason: ${result.logs.join("\n")}`);
+    } else {
+      if (onBuild) onBuild({ ts: Date.now(), status: "success" });
+      internal.log.add(`Build completed in ${Date.now() - ts}ms`);
+    }
   } catch (e: any) {
     if (onBuild) onBuild({ ts: Date.now(), status: "failed", log: e?.message });
-    internal.log += `Build failed, reason: ${e?.message}\n`;
+    internal.log.add(`Build failed, reason: ${e?.message}`);
   }
   internal.building = false;
 
   return internal;
 };
 
-export const bunBuild = async ({ outdir, entrypoint }: BuildArg) => {
+export const bunBuild = async ({ outdir, entrypoint, entrydir }: BuildArg) => {
   await removeAsync(outdir);
   return await Bun.build({
-    entrypoints: [entrypoint],
+    entrypoints: entrypoint.map((e) => join(entrydir, e)),
     outdir: outdir,
     naming: {
       entry: "[dir]/[name].[ext]",
@@ -96,54 +138,58 @@ export const bunBuild = async ({ outdir, entrypoint }: BuildArg) => {
     experimentalCss: true,
     splitting: true,
     minify: true,
+
     define: { "process.env.NODE_ENV": '"production"' },
-    sourcemap: "linked",
+    // sourcemap: "linked",
     plugins: [
       {
         name: "react-from-window",
         setup(build) {
-          // Handle imports for 'react', 'react-dom', etc.
-          build.onResolve({ filter: /^(react|react-dom)$/ }, (args) => {
-            return {
-              path: args.path,
-              namespace: "react-window-ns",
-            };
-          });
+          const moduleToGlobal: Record<string, [string, any]> = {
+            react: ["React", React],
+            "react/jsx-dev-runtime": ["JSXDevRuntime", ReactJSXDev],
+            "react/jsx-runtime": ["JSXRuntime", ReactJSX],
+            "react-dom": ["ReactDOM", ReactDOM],
+          };
 
-          // Provide the implementation for resolved modules
+          for (const module_name of Object.keys(moduleToGlobal)) {
+            build.onResolve(
+              { filter: new RegExp(`^${module_name}$`) },
+              (args) => {
+                return {
+                  path: args.path,
+                  namespace: "react-window-ns",
+                };
+              }
+            );
+          }
+
           build.onLoad(
             { filter: /.*/, namespace: "react-window-ns" },
             (args) => {
-              // Map module names to corresponding window global
-              const moduleToGlobal: Record<string, string> = {
-                react: "React",
-                "react-dom": "ReactDOM",
-              };
-
               const globalName = moduleToGlobal[args.path];
 
               if (!globalName) {
                 throw new Error(`No global found for module: ${args.path}`);
               }
 
+              let contents = ``;
+              for (const [k, [name, obj]] of Object.entries(moduleToGlobal)) {
+                if (k === args.path) {
+                  contents = `
+                export default window.${name};
+                ${Object.keys(obj)
+                  .filter((e) => e !== "default")
+                  .map((e) => {
+                    return `export const ${e} = window.${name}.${e};`;
+                  })
+                  .join("\n")}`;
+                }
+              }
+
               return {
-                contents:
-                  args.path === "react"
-                    ? `
-                const moduleExports = window.React;
-                export default moduleExports;
-                export const { ${Object.keys(React).filter(
-                  (e) => e !== "default"
-                )} } = moduleExports;
-              `
-                    : `
-                const moduleExports = window.ReactDOM;
-                export default moduleExports;
-                export const { ${Object.keys(ReactDOM).filter(
-                  (e) => e !== "default"
-                )} } = moduleExports;
-              `,
-                loader: "js",
+                contents,
+                loader: "js" as Loader,
               };
             }
           );

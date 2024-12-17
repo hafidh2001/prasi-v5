@@ -153,15 +153,15 @@ export const wsComp = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
         const updated_at = new Date();
         crdt_comps[comp_id].updated_at = updated_at.getTime();
         
-        await _db.component.update({
-          where: { id: comp_id },
-          data: {
-            name: db_comp.name,
-            content_tree: comp,
-            updated_at,
-          },
-          select: { id: true },
-        });
+        // await _db.component.update({
+        //   where: { id: comp_id },
+        //   data: {
+        //     name: db_comp.name,
+        //     content_tree: comp,
+        //     updated_at,
+        //   },
+        //   select: { id: true },
+        // });
       };
 
       if (undoManager) {

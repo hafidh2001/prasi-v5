@@ -268,16 +268,16 @@ export const wsPage = async (ws: ServerWebSocket<WSContext>, raw: Buffer) => {
           const updated_at = new Date();
           crdt_pages[page_id].updated_at = updated_at.getTime();
 
-          _db.page
-            .update({
-              where: { id: page_id },
-              data: {
-                content_tree: doc.getMap("data").toJSON(),
-                updated_at,
-              },
-              select: { id: true },
-            })
-            .then((res) => {});
+          // _db.page
+          //   .update({
+          //     where: { id: page_id },
+          //     data: {
+          //       content_tree: doc.getMap("data").toJSON(),
+          //       updated_at,
+          //     },
+          //     select: { id: true },
+          //   })
+          //   .then((res) => {});
         }
       });
     }

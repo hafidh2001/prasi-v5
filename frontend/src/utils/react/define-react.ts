@@ -10,5 +10,7 @@ export const defineReact = () => {
   w.ReactDOM = ReactDOM;
   w.JSXRuntime = JSXRuntime;
   w.JSXDevRuntime = JSXDevRuntime;
+  w.JSXDevRuntime.jsxDEV = JSXRuntime.jsx;
+
   w.Fragment = React.Fragment;
 };

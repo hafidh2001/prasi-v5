@@ -4,6 +4,7 @@ import { active } from "logic/active";
 import { EDGlobal, PG } from "logic/ed-global";
 import {
   BookImage,
+  ChevronRight,
   Database,
   ExternalLink,
   House,
@@ -12,9 +13,12 @@ import {
   PanelRightOpen,
   ScrollText,
   Server,
+  SquareTerminal,
+  Terminal,
 } from "lucide-react";
 import { EdSave } from "popup/build/ed-save";
 import { EdDeployPopup } from "popup/deploy/ed-deploy";
+import { EdConsolePopup } from "popup/console/ed-console";
 import { closeEditor } from "popup/script/ed-workbench";
 import { PRASI_CORE_SITE_ID } from "prasi-utils";
 import { FC, ReactElement, useEffect } from "react";
@@ -175,13 +179,28 @@ export const EdTopBar = () => {
         <ButtonBox>
           <Button
             popover={{
-              // open: true,
               content: <EdDeployPopup />,
             }}
           >
             <Server size={12} />
           </Button>
         </ButtonBox>
+
+        <div className="flex cursor-pointer items-center select-none ml-2">
+          <Button
+            popover={{
+              content: <EdConsolePopup />,
+            }}
+            className={cx(
+              "flex items-center align-top pl-[4px] pr-[7px] space-x-[3px] border py-0 max-h-[20px] rounded-sm",
+              "hover:bg-green-100 border-green-800 text-green-800"
+            )}
+          >
+            <ChevronRight size={18} strokeWidth={1} className="-mx-1" />
+            <div className={cx("text-[9px]")}>OK</div>
+          </Button>
+        </div>
+
         {!p.ui.panel.left && (
           <div
             className="flex items-center ml-3 m-1 cursor-pointer hover:text-blue-600"

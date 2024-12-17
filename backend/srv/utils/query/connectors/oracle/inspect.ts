@@ -8,7 +8,7 @@ import type {
 } from "utils/query/types";
 import type { OracleConfig } from "./utils/config";
 import { oracleGetAll } from "./utils/get-all";
-import { relationSuffix } from "./utils/relation-suffix";
+import { generateRelationName } from "./utils/gen-rel-name";
 
 export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
   const result = {
@@ -150,7 +150,7 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
         fromTable === toTable ? "one-to-many" : "many-to-one";
 
       // Add relation to the current table
-      const relationKey = relationSuffix(toTable, relations);
+      const relationKey = generateRelationName(toTable, relations);
       if (!relations[relationKey]) {
         relations[relationKey] = {
           type: relationType,
@@ -175,7 +175,7 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
     for (const [refTable, fks] of fkMap) {
       for (const fk of fks) {
         if (fk.to.table.toLowerCase() === table_name) {
-          const refRelationKey = relationSuffix(
+          const refRelationKey = generateRelationName(
             refTable.toLowerCase(),
             relations
           );
