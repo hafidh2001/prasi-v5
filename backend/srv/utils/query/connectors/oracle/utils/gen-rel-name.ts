@@ -1,20 +1,11 @@
-import type { NAME, QInspectRelation } from "utils/query/types";
+import type { NAME } from "utils/query/types";
 
 export const generateRelationName = (
   table_name: NAME,
-  relations: Record<NAME, QInspectRelation>
+  fk_from_col: NAME,
+  fk_target_col: NAME
 ) => {
-  if (!relations[table_name]) {
-    return table_name;
-  }
+  const mix_col_name = fk_from_col.replace(fk_target_col, "");
 
-  let suffix = 2;
-  let uniqueKey = `${table_name}${suffix}`;
-
-  while (relations[uniqueKey]) {
-    suffix++;
-    uniqueKey = `${table_name}${suffix}`;
-  }
-
-  return uniqueKey;
+  return `${table_name}${mix_col_name}`;
 };
