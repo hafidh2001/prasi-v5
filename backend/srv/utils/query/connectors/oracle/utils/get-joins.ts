@@ -2,11 +2,11 @@ import type {
   PQuerySelectCol,
   PQuerySelectRel,
 } from "prasi-frontend/src/nova/ed/mode/query/types";
-import type { QInspectRelation, QInspectResult } from "utils/query/types";
+import type { NAME, QInspectRelation, QInspectResult } from "utils/query/types";
 
 export const getJoins = (
   i: QInspectResult,
-  table: string,
+  table: NAME,
   select: (PQuerySelectCol | PQuerySelectRel)[]
 ): string[] => {
   const result = [] as string[];
