@@ -150,7 +150,7 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
         fromTable === toTable ? "one-to-many" : "many-to-one";
 
       // Add relation to the current table
-      const relationKey = generateRelationName(toTable, relations);
+      const relationKey = generateRelationName(toTable, fromColumn, toColumn);
       if (!relations[relationKey]) {
         relations[relationKey] = {
           type: relationType,
@@ -177,7 +177,8 @@ export const inspect = async (c: OracleConfig): Promise<QInspectResult> => {
         if (fk.to.table.toLowerCase() === table_name) {
           const refRelationKey = generateRelationName(
             refTable.toLowerCase(),
-            relations
+            fk.from.toLowerCase(),
+            fk.to.column.toLowerCase()
           );
           if (!relations[refRelationKey]) {
             relations[refRelationKey] = {
