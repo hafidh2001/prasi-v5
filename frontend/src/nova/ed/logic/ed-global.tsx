@@ -242,6 +242,9 @@ export const EDGlobal = {
         wb_render: () => {},
         ref: null as any,
         side_open: false,
+        ignore_update_from_server: {
+          because_of_migration: false,
+        },
       },
       comp_group: {
         mouse_event: null as null | React.MouseEvent<HTMLElement, MouseEvent>,

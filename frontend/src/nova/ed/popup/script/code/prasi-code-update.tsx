@@ -66,8 +66,6 @@ export const reloadPrasiModels = async (p: PG, from: string) => {
   const editor_typings = await prasiTypings(p);
   const tree = getActiveTree(p);
 
-  await tree.reloadScriptModels();
-
   return [
     ...editor_typings,
     ...Object.values(tree.script_models),
@@ -210,6 +208,7 @@ const setActiveModel = async (arg: {
   onMount?: (m?: Partial<ScriptModel>) => void;
 }) => {
   const { m, defaultCode, monaco, editor, p, onMount } = arg;
+
   if (!m.model) return;
   if (!m.model.getValue()) {
     m.source = (await defaultCode()).trim();

@@ -47,6 +47,13 @@ export const activateComp = async (p: PG, comp_id: string) => {
 export const loadCompTree = (opt: {
   p: {
     comp: { loaded: Record<string, EComp>; pending: Set<string> };
+    ui: {
+      popup: {
+        script: {
+          ignore_update_from_server: { because_of_migration: boolean };
+        };
+      };
+    };
     render: () => void;
     viref: ViRef;
     sync: undefined | null | ReturnType<typeof createClient>;

@@ -57,6 +57,7 @@ export const MonacoItemJS: FC<{
     };
     window.addEventListener("keydown", preventCtrlP, true);
     return () => {
+      p.ui.popup.script.ignore_update_from_server.because_of_migration = false;
       p.script.do_edit = (() => {}) as any;
       window.removeEventListener("keydown", preventCtrlP, true);
     };
@@ -107,6 +108,7 @@ export const MonacoItemJS: FC<{
         width={local.width}
         height={local.height}
         language={"typescript"}
+        defaultValue=""
         options={{
           minimap: { enabled: false },
           wordWrap: "wordWrapColumn",
@@ -126,6 +128,7 @@ export const MonacoItemJS: FC<{
           },
         }}
         onMount={async (editor, monaco) => {
+          editor.getModel()?.dispose();
           const models = await reloadPrasiModels(p, "monaco-item-js");
           p.script.monaco = monaco;
           p.script.editor = editor;
@@ -136,6 +139,8 @@ export const MonacoItemJS: FC<{
           local.editor = editor;
           p.script.do_edit = defineScriptEdit(editor, monaco);
 
+          await registerReact(monaco);
+
           remountPrasiModels({
             p,
             models,
@@ -144,7 +149,6 @@ export const MonacoItemJS: FC<{
             monaco,
             onChange,
             onMount: async (m) => {
-              await registerReact(monaco);
               registerPrettier(monaco);
 
               if (!m) {
