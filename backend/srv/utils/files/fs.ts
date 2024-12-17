@@ -1,6 +1,7 @@
 import { mkdirSync, statSync } from "fs";
 import { dirname } from "path";
 import { dir } from "./dir";
+import { copyAsync } from "fs-jetpack";
 const internal = Symbol("internal");
 
 export const fs = {
@@ -33,6 +34,7 @@ export const fs = {
         mkdirSync(to_dir, { recursive: true });
       }
     }
+    await copyAsync(from_dir, to_path, { overwrite: true });
   },
 
   async modify(arg: {

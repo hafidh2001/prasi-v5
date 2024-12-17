@@ -1,11 +1,10 @@
 import { editor } from "utils/editor";
+import { fs } from "utils/files/fs";
 import { validate } from "uuid";
 import { siteLoadingData } from "./init/load-data";
 import { siteLoadingMessage } from "./init/loading-msg";
-import { fs } from "utils/files/fs";
 import { initPrasiJson } from "./init/prasi-json";
 import { siteRun } from "./init/site-run";
-import { siteLoaded } from "./init/site-loaded";
 
 export const siteInit = async (site_id: string, conn_id?: string) => {
   if (!validate(site_id)) {
