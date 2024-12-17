@@ -1,8 +1,10 @@
 import OracleDB from "oracledb";
-import type { QConnector, QConnectorParams } from "utils/query/types";
-import { oracleConfig } from "./utils/config";
-import { inspect } from "./inspect";
 
+import { inspect } from "./inspect";
+import { query } from "./query";
+import { oracleConfig } from "./utils/config";
+
+import type { QConnector, QConnectorParams } from "utils/query/types";
 export type QOracleConnector = Awaited<ReturnType<typeof connectOracle>>;
 
 export const connectOracle = async (conn: QConnectorParams) => {
@@ -16,7 +18,9 @@ export const connectOracle = async (conn: QConnectorParams) => {
     async destroy() {
       config.conn?.close();
     },
-    async query(i, pq) {},
+    async query(i, pq) {
+      return await query(i, pq);
+    },
   };
   connector.inspected = await connector.inspect();
 
