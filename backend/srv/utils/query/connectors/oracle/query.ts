@@ -6,11 +6,16 @@ import { getJoins } from "./utils/get-joins";
 export const query = async (
   inspected_scheme: QInspectResult,
   pq: PQuerySelect
-): Promise<any> => {
+): Promise<{
+  columns_arr: string[];
+  joins_arr: string[];
+}> => {
   const { select, table } = pq;
-  const x = getColumns(inspected_scheme, table, select);
-  console.log({ x });
+  const columns_arr = getColumns(inspected_scheme, table, select);
+  const joins_arr = getJoins(inspected_scheme, table, select);
 
-  const y = getJoins(inspected_scheme, table, select);
-  console.log({ y });
+  return {
+    columns_arr,
+    joins_arr,
+  };
 };
