@@ -81,6 +81,7 @@ export const Loading: FC<{
     <>
       {backdrop !== false && (
         <div
+          key={1}
           className={cx(
             "flex items-center z-40 bg-white pointer-events-none",
             "w-full h-full fixed transition-all duration-1000",
@@ -97,6 +98,7 @@ export const Loading: FC<{
       )}
       {children ? (
         <div
+          key={2}
           onContextMenuCapture={(e) => {
             e.preventDefault();
           }}
@@ -116,6 +118,7 @@ export const Loading: FC<{
         </div>
       ) : (
         <div
+          key={2}
           className={cx(
             "flex flex-1 items-center justify-center z-40  transition-all",
             pointer !== true && "pointer-events-none",
@@ -141,11 +144,17 @@ export const Loading: FC<{
                 `
               )}
             >
-              <div className="text-[10px] text-slate-400 whitespace-nowrap">
+              <div
+                key={1}
+                className="text-[10px] text-slate-400 whitespace-nowrap"
+              >
                 {note}
               </div>
 
-              <div className="pr-outer w-full h-[3px] flex items-stretch rounded-sm overflow-hidden">
+              <div
+                key={2}
+                className="pr-outer w-full h-[3px] flex items-stretch rounded-sm overflow-hidden"
+              >
                 <div
                   className={cx(
                     "bg-blue-800 transition-all duration-200 rounded-sm w-full",

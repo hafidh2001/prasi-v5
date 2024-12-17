@@ -55,6 +55,7 @@ export const clientStartSync = (arg: {
           if (msg.action.length > 2) {
             p.ui.site.build_log.shift();
           }
+          console.log(msg);
           p.ui.site.build_log.push(msg.log);
           p.render();
         } else if (msg.action === "site-ready") {

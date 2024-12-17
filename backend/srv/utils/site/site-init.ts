@@ -39,14 +39,16 @@ export const siteInit = async (site_id: string, conn_id?: string) => {
       if (loading.build.frontend) {
         editor.send(conn_id, {
           action: "site-build-log",
-          log: loading.build.frontend.log,
+          log: loading.build.frontend.log?.text || "",
         });
       }
     }
   } else if (conn_id) {
+    const site = g.site.loaded[site_id];
+
     editor.send(conn_id, {
       action: "site-ready",
-      site: g.site.loaded[site_id].data,
+      site: site.data,
     });
   }
 };

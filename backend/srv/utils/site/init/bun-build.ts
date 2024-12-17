@@ -31,7 +31,7 @@ export const bunWatchBuild = async ({
     watching: null as null | ReturnType<typeof watchFiles>,
     log: {
       add(text: string) {
-        console.log(text);
+        this.text += text + "\n";
       },
       text: "",
     },
@@ -74,7 +74,7 @@ export const bunWatchBuild = async ({
                   log: result.logs.join("\n"),
                 });
               internal.log.add(
-                `Build failed, reason: ${result.logs.join("\n")}`
+                `Build failed, reason: \n${result.logs.join("\n")}`
               );
             } else {
               if (onBuild) onBuild({ ts: Date.now(), status: "success" });
@@ -83,7 +83,7 @@ export const bunWatchBuild = async ({
           } catch (e: any) {
             if (onBuild)
               onBuild({ ts: Date.now(), status: "failed", log: e?.message });
-            internal.log.add(`Build failed, reason: ${e?.message}`);
+            internal.log.add(`Build failed, reason: \n${e?.message}`);
           }
 
           internal.building = false;
@@ -110,14 +110,14 @@ export const bunWatchBuild = async ({
           status: "failed",
           log: result.logs.join("\n"),
         });
-      internal.log.add(`Build failed, reason: ${result.logs.join("\n")}`);
+      internal.log.add(`Build failed, reason: \n${result.logs.join("\n")}`);
     } else {
       if (onBuild) onBuild({ ts: Date.now(), status: "success" });
       internal.log.add(`Build completed in ${Date.now() - ts}ms`);
     }
   } catch (e: any) {
     if (onBuild) onBuild({ ts: Date.now(), status: "failed", log: e?.message });
-    internal.log.add(`Build failed, reason: ${e?.message}`);
+    internal.log.add(`Build failed, reason: \n${e?.message}`);
   }
   internal.building = false;
 
