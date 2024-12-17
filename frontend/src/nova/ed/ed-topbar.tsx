@@ -404,7 +404,7 @@ const TriangleIcon = () => {
   );
 };
 
-const ButtonBox: FC<{ children: any }> = ({ children }) => {
+export const ButtonBox: FC<{ children: any }> = ({ children }) => {
   return (
     <div className="flex cursor-pointer items-center ml-1 pointer-events-auto select-none">
       {children}
@@ -412,7 +412,7 @@ const ButtonBox: FC<{ children: any }> = ({ children }) => {
   );
 };
 
-const Button: FC<{
+export const Button: FC<{
   children: any;
   className?: string;
   href?: string;

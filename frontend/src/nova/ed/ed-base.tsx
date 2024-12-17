@@ -24,6 +24,7 @@ import { EdPopCompGroup } from "./popup/comp/comp-group";
 import { EdPopCompPicker } from "./popup/comp/comp-picker";
 import { iconVSCode } from "./ui/icons";
 import { EdLeft } from "mode-page/ed-left";
+import { WizardQuerySelect } from "mode-query/wizard-query-select";
 
 export const EdBase = () => {
   const p = useGlobal(EDGlobal, "EDITOR");
@@ -201,7 +202,7 @@ export const EdBase = () => {
             hidden={!p.ui.panel.left}
             className={cx(p.ui.panel.left && "flex min-w-[240px]")}
           >
-            {/* <WizardQuerySelect /> */}
+            <WizardQuerySelect />
           </Panel>
         </PanelGroup>
       )}
