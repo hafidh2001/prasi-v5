@@ -10,15 +10,16 @@ import {
   unregisterCompConnection,
 } from "./editor-comp-util";
 import { editorPageLoad } from "./editor-page-load";
+import { dirAsync } from "fs-jetpack";
 
 type USER_ID = string;
 type SITE_ID = string;
 type CONN_ID = string;
 
 export const editor = {
-  cache: null as unknown as ReturnType<typeof initCacheDb>,
-  init() {
-    this.cache = initCacheDb();
+  cache: null as unknown as Awaited<ReturnType<typeof initCacheDb>>,
+  async init() {
+    this.cache = await initCacheDb();
   },
   comp: {
     comp_ids: {} as Record<string, Set<CONN_ID>>,
@@ -121,8 +122,9 @@ export const editor = {
 };
 
 //#region init-cache-db
-const initCacheDb = () => {
-  return new BunORM(dir.data("editor-cache.db"), {
+const initCacheDb = async () => {
+  await dirAsync(dir.data("sqlite"));
+  return new BunORM(dir.data("sqlite/editor-cache.db"), {
     tables: {
       comp: {
         columns: {

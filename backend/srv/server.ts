@@ -12,6 +12,7 @@ import { api } from "./utils/server/api";
 import { asset } from "./utils/server/asset";
 import { serverContext } from "./utils/server/ctx";
 import { initWS } from "./ws/init";
+import { site_srv } from "utils/site/srv/site-srv";
 
 if (!(global as any).g) {
   (global as any).g = global;
@@ -19,6 +20,8 @@ if (!(global as any).g) {
 
 editor.init();
 api.init();
+site_srv.init();
+
 if (g.mode === "dev") {
   setupDevPort();
   const path = fs.path(`data:site-static`);

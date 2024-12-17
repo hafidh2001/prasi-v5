@@ -4,7 +4,7 @@ import type { ESite } from "prasi-frontend/src/nova/ed/logic/types";
 import type { spawn } from "./spawn";
 import type { parseTypeDef } from "./parser/parse-type-def";
 import type { staticFile } from "./files/static";
-import type { bunWatchBuild } from "./site/loading-checklist/bun-build";
+import type { bunWatchBuild } from "./site/init/bun-build";
 
 type SITE_ID = string;
 export type PrasiSite = {
