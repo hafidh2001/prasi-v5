@@ -6,21 +6,21 @@ describe("oracle connector", () => {
   let conn = null as null | QOracleConnector;
   let inspect = undefined as undefined | QInspectResult;
 
-  test("buat instance oracleConnector", async () => {
+  test("create instance oracleConnector", async () => {
     conn = await connectOracle({
       type: "oracle",
       url: "oracle://SYSTEM:Password123@prasi.avolut.com:1521/XEPDB1?schema=PRASI",
     });
   });
 
-  test("coba inspect + pastikan hasil inspect cocok", async () => {
+  test("inspect db", async () => {
     inspect = await conn?.inspect();
     if (inspect) {
       console.log(inspect);
     }
   });
 
-  test("coba query + output sesuai (2 relasi setingkat)", async () => {
+  test("query with 2 level relationships", async () => {
     if (inspect) {
       const output = await conn?.query(inspect, {
         action: "select",
@@ -31,26 +31,18 @@ describe("oracle connector", () => {
             type: "column",
           },
           {
-            rel_name: "role_table",
             type: "relation",
+            rel_name: "role_table1",
             select: [
               {
                 col_name: "description",
                 type: "column",
-                as: "role_name",
-              },
-            ],
-            where: [
-              {
-                column: "description",
-                operator: "=",
-                value: "admin",
               },
             ],
           },
           {
-            rel_name: "comment_table",
             type: "relation",
+            rel_name: "comment_table",
             select: [
               {
                 col_name: "comment_text",
@@ -70,18 +62,18 @@ describe("oracle connector", () => {
       expect(output).toEqual({
         columns_arr: [
           "USER_TABLE.USERNAME",
-          "ROLE_TABLE.DESCRIPTION",
+          "ROLE_TABLE1.DESCRIPTION",
           "COMMENT_TABLE.COMMENT_TEXT",
         ],
         joins_arr: [
-          "JOIN ROLE_TABLE ON USER_TABLE.ROLE_ID1 = ROLE_TABLE.ROLE_ID",
-          "JOIN COMMENT_TABLE ON USER_TABLE.USER_ID = COMMENT_TABLE.USER_ID",
+          "JOIN ROLE_TABLE ROLE_TABLE1 ON USER_TABLE.ROLE_ID1 = ROLE_TABLE1.ROLE_ID",
+          "JOIN COMMENT_TABLE COMMENT_TABLE ON USER_TABLE.USER_ID = COMMENT_TABLE.USER_ID",
         ],
       });
     }
   });
 
-  test("coba recursive query + output sesuai (2 relasi + 1 recursive relasi)", async () => {
+  test("query with 2 relation & 1 recursive relation", async () => {
     if (inspect) {
       const output = await conn?.query(inspect, {
         action: "select",
@@ -92,37 +84,33 @@ describe("oracle connector", () => {
             type: "column",
           },
           {
-            rel_name: "role_table",
             type: "relation",
+            rel_name: "role_table1",
             select: [
               {
                 col_name: "description",
                 type: "column",
-                as: "role_name",
-              },
-            ],
-            where: [
-              {
-                column: "description",
-                operator: "=",
-                value: "admin",
               },
             ],
           },
           {
-            rel_name: "comment_table",
             type: "relation",
+            rel_name: "comment_table",
             select: [
               {
                 col_name: "comment_text",
                 type: "column",
               },
               {
-                rel_name: "photo",
                 type: "relation",
+                rel_name: "photo",
                 select: [
                   {
                     col_name: "photo_url",
+                    type: "column",
+                  },
+                  {
+                    col_name: "description",
                     type: "column",
                   },
                 ],
@@ -141,14 +129,68 @@ describe("oracle connector", () => {
       expect(output).toEqual({
         columns_arr: [
           "USER_TABLE.USERNAME",
-          "ROLE_TABLE.DESCRIPTION",
+          "ROLE_TABLE1.DESCRIPTION",
           "COMMENT_TABLE.COMMENT_TEXT",
           "PHOTO.PHOTO_URL",
+          "PHOTO.DESCRIPTION",
         ],
         joins_arr: [
-          "JOIN ROLE_TABLE ON USER_TABLE.ROLE_ID1 = ROLE_TABLE.ROLE_ID",
-          "JOIN COMMENT_TABLE ON USER_TABLE.USER_ID = COMMENT_TABLE.USER_ID",
-          "JOIN PHOTO ON COMMENT_TABLE.PHOTO_ID = PHOTO.PHOTO_ID",
+          "JOIN ROLE_TABLE ROLE_TABLE1 ON USER_TABLE.ROLE_ID1 = ROLE_TABLE1.ROLE_ID",
+          "JOIN COMMENT_TABLE COMMENT_TABLE ON USER_TABLE.USER_ID = COMMENT_TABLE.USER_ID",
+          "JOIN PHOTO PHOTO ON COMMENT_TABLE.PHOTO_ID = PHOTO.PHOTO_ID",
+        ],
+      });
+    }
+  });
+
+  test("queries on tables that have more than 1FK on the same destination table", async () => {
+    if (inspect) {
+      const output = await conn?.query(inspect, {
+        action: "select",
+        table: "user_table",
+        select: [
+          {
+            col_name: "email",
+            type: "column",
+          },
+          {
+            type: "relation",
+            rel_name: "role_table1",
+            select: [
+              {
+                col_name: "description",
+                type: "column",
+              },
+            ],
+          },
+          {
+            type: "relation",
+            rel_name: "role_table2",
+            select: [
+              {
+                col_name: "description",
+                type: "column",
+              },
+            ],
+          },
+        ],
+        where: [
+          {
+            column: "status",
+            operator: "=",
+            value: "active",
+          },
+        ],
+      });
+      expect(output).toEqual({
+        columns_arr: [
+          "USER_TABLE.EMAIL",
+          "ROLE_TABLE1.DESCRIPTION",
+          "ROLE_TABLE2.DESCRIPTION",
+        ],
+        joins_arr: [
+          "JOIN ROLE_TABLE ROLE_TABLE1 ON USER_TABLE.ROLE_ID1 = ROLE_TABLE1.ROLE_ID",
+          "JOIN ROLE_TABLE ROLE_TABLE2 ON USER_TABLE.ROLE_ID2 = ROLE_TABLE2.ROLE_ID",
         ],
       });
     }
