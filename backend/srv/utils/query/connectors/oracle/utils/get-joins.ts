@@ -16,7 +16,7 @@ export const getJoins = (
       if (c.select) {
         const rel = i.tables[table]?.relations[c.rel_name];
         if (rel) {
-          const join = joinName(rel);
+          const join = joinName(rel, c.rel_name);
           if (join) result.push(join);
 
           // Recursive call to process nested relations
@@ -33,15 +33,19 @@ export const getJoins = (
   return result;
 };
 
-const joinName = (rel: QInspectRelation) => {
+const joinName = (
+  rel: QInspectRelation,
+  rel_name: PQuerySelectRel["rel_name"]
+) => {
   const fk_table = rel.from.table.toUpperCase();
   const fk_col = rel.from.column.toUpperCase();
   const p_table = rel.to.table.toUpperCase();
   const p_col = rel.to.column.toUpperCase();
+  const alias = rel_name.toUpperCase();
 
   if (rel.type === "one-to-many") {
-    return `JOIN ${fk_table} ON ${p_table}.${p_col} = ${fk_table}.${fk_col}`;
+    return `JOIN ${fk_table} ${alias} ON ${p_table}.${p_col} = ${alias}.${fk_col}`;
   } else if (rel.type === "many-to-one") {
-    return `JOIN ${p_table} ON ${fk_table}.${fk_col} = ${p_table}.${p_col}`;
+    return `JOIN ${p_table} ${alias} ON ${fk_table}.${fk_col} = ${alias}.${p_col}`;
   }
 };
