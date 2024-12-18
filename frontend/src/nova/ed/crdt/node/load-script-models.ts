@@ -25,6 +25,13 @@ export const loadScriptModels = async (arg: {
   p: {
     comp: { loaded: Record<string, EComp>; pending: Set<string> };
     viref: ViRef;
+    ui: {
+      popup: {
+        script: {
+          ignore_update_from_server: { because_of_migration: boolean };
+        };
+      };
+    };
   };
   var_items: TreeVarItems;
   script_models: Record<string, ScriptModel>;
@@ -212,6 +219,8 @@ export const loadScriptModels = async (arg: {
     if (model.source && !model.ready) {
       try {
         if (!model.already_migrated && !model.prop_name) {
+          p.ui.popup.script.ignore_update_from_server.because_of_migration =
+            true;
           const migrated = migrateCode(model, script_models, comp_id);
           model.source = await jscript.prettier.format?.(migrated);
         } else {
@@ -233,8 +242,7 @@ ${main_code}`);
         }
       } catch (e) {
         console.warn(
-          `[ERROR] When Formatting Code\n${model.title} ~> ${model.id}\n\n`,
-          e
+          `[ERROR] When Formatting Code\n${model.title} ~> ${model.id}\n\n`
         );
       }
     }
@@ -247,6 +255,7 @@ ${main_code}`);
       exports: Record<string, SingleExportVar & { item_id: string }>;
     }
   >;
+
   const jsx_exports_changed = {} as Record<
     string,
     {
@@ -254,6 +263,7 @@ ${main_code}`);
       exports: Record<string, SingleExportVar & { item_id: string }>;
     }
   >;
+
   for (const [name, prop] of Object.entries(jsx_pass)) {
     for (const [from_id, vars] of Object.entries(prop)) {
       const from = script_models[from_id];

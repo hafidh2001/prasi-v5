@@ -1,11 +1,10 @@
 import { editor } from "utils/editor";
-import { validate } from "uuid";
-import { siteLoadingData } from "./loading-checklist/load-data";
-import { siteLoadingMessage } from "./loading-checklist/loading-msg";
 import { fs } from "utils/files/fs";
-import { initPrasiJson } from "./loading-checklist/prasi-json";
-import { siteRun } from "./loading-checklist/site-run";
-import { siteLoaded } from "./loading-checklist/site-loaded";
+import { validate } from "uuid";
+import { siteLoadingData } from "./init/load-data";
+import { siteLoadingMessage } from "./init/loading-msg";
+import { initPrasiJson } from "./init/prasi-json";
+import { siteRun } from "./init/site-run";
 
 export const siteInit = async (site_id: string, conn_id?: string) => {
   if (!validate(site_id)) {
@@ -39,14 +38,16 @@ export const siteInit = async (site_id: string, conn_id?: string) => {
       if (loading.build.frontend) {
         editor.send(conn_id, {
           action: "site-build-log",
-          log: loading.build.frontend.log,
+          log: loading.build.frontend.log?.text || "",
         });
       }
     }
   } else if (conn_id) {
+    const site = g.site.loaded[site_id];
+
     editor.send(conn_id, {
       action: "site-ready",
-      site: g.site.loaded[site_id].data,
+      site: site.data,
     });
   }
 };

@@ -69,22 +69,22 @@ export default {
                     }
                     if (text) {
                       if (page_id) {
-                        const existing = codeHistory
-                          .site(body.site_id)
-                          .tables.page_code.find({
-                            where: {
-                              item_id: sel.item_id,
-                              page_id: page_id,
-                              prop_name: sel.prop_name || "",
-                              type: sel.type,
-                            },
-                            limit: 1,
-                            sort: { ts: "desc" },
-                            select: ["id", "ts", "text"],
-                          });
+                        const history = await codeHistory.site(body.site_id);
+                        const existing = history.tables.page_code.find({
+                          where: {
+                            item_id: sel.item_id,
+                            page_id: page_id,
+                            prop_name: sel.prop_name || "",
+                            type: sel.type,
+                          },
+                          limit: 1,
+                          sort: { ts: "desc" },
+                          select: ["id", "ts", "text"],
+                        });
 
                         if (existing?.[0]?.text !== text) {
-                          codeHistory.site(body.site_id).tables.page_code.save({
+                          const history = await codeHistory.site(body.site_id);
+                          history.tables.page_code.save({
                             item_id: sel.item_id,
                             page_id: page_id,
                             prop_name: sel.prop_name || "",
@@ -143,7 +143,8 @@ export default {
         }
 
         if (page_id) {
-          list = codeHistory.site(body.site_id).tables.page_code.find({
+          const history = await codeHistory.site(body.site_id);
+          list = history.tables.page_code.find({
             where,
             select: ["ts", "id"],
             sort: { ts: "desc" },
@@ -169,8 +170,9 @@ export default {
               select: ["text"],
             })[0]?.text || "";
         } else if (body.site_id) {
+          const history = await codeHistory.site(body.site_id);
           text =
-            codeHistory.site(body.site_id).tables.page_code.find({
+            history.tables.page_code.find({
               where: {
                 id: body.id,
               },

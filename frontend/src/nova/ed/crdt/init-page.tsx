@@ -61,7 +61,6 @@ export const initPage = (p: PG) => ({
       JSON.stringify([...comp_ids]) !==
       JSON.stringify(content_tree.component_ids);
 
-
     if (
       should_update_usage ||
       Object.keys(pending_update_prop).length > 0 ||
@@ -97,7 +96,10 @@ export const initPage = (p: PG) => ({
       p.mode = content_tree.responsive;
     }
 
-    if (p.ui.popup.script.open) {
+    if (
+      p.ui.popup.script.open &&
+      !p.ui.popup.script.ignore_update_from_server.because_of_migration
+    ) {
       updateActiveCodeFromServer(p);
     }
   },

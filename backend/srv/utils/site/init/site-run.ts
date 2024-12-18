@@ -97,8 +97,11 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
     loading.build.backend = spawn({
       cmd: `bun build --target bun --watch ${prasi.backend.index} --outfile ../build/backend.js --no-clear-screen`,
       cwd: fs.path(`code:${site_id}/site/src`),
-      onMessage(arg) {
+      async onMessage(arg) {
         const site = g.site.loaded[site_id];
+        if (!site) {
+          await waitUntil(() => g.site.loaded[site_id]);
+        }
         const log = site.build_result.log;
         log.backend += arg.text;
       },
@@ -128,6 +131,9 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
       async onMessage(arg) {
         const site = g.site.loaded[site_id];
 
+        if (!site) {
+          await waitUntil(() => site);
+        }
         const log = site.build_result.log;
         log.typings += arg.text;
 

@@ -53,7 +53,6 @@ export const migrateCode = (
   models: Record<string, ScriptModel>,
   comp_id?: string
 ) => {
-  const code = model.source;
   const { local, loop } = model;
 
   let inject = "";
@@ -63,6 +62,7 @@ export const migrateCode = (
 
 export const ${local.name} = defineLocal({
   name: local_name,
+  render_mode: "manual",
   value: ${local.value}
 });
 `;

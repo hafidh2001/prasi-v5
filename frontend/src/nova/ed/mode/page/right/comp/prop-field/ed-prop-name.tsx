@@ -12,6 +12,7 @@ export const EdPropName = ({
   const label = field.label || name;
   return (
     <div
+      key={123}
       onClick={onClick}
       className={cx(
         "flex items-center pl-2 select-none  overflow-hidden",

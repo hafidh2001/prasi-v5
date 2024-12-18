@@ -2,7 +2,7 @@ import { defineConfig } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
 
 export default defineConfig({
-  plugins: [pluginReact()],
+  plugins: [pluginReact({ swcReactOptions: { development: false } })],
   html: {
     template: "./public/index.html",
   },

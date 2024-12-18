@@ -201,13 +201,10 @@ export const EdConsolePopup = () => {
 
   useEffect(() => {
     const size = localStorage.getItem("ed-console-size");
-    console.log(size, "size");
     if (size) {
       try {
         local.size = JSON.parse(size);
       } catch (e) {}
-
-      console.log(local.size, "local.size");
     }
 
     if (!local.size) local.size = { width: 500, height: 500 };

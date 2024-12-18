@@ -98,8 +98,6 @@ export const EdTreeNodeName: FC<{
                   p.ui.tree.rename_id = "";
                   p.render();
 
-                  // await tree.reloadScriptModels();
-
                   setTimeout(scrollTreeActiveItem);
                 }
               );

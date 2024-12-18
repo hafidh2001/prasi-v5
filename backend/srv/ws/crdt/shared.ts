@@ -8,8 +8,9 @@ import type { WSContext } from "utils/server/ctx";
 
 export const MAX_HISTORY_SIZE = 750;
 
-const createPageDb = (site_id: string) => {
-  return new BunORM(dir.data(`/crdt/site/${site_id}/page.db`), {
+const createPageDb = async (site_id: string) => {
+  await dirAsync(dir.data(`/sqlite/crdt/site/${site_id}`));
+  return new BunORM(dir.data(`/sqlite/crdt/site/${site_id}/page.db`), {
     tables: {
       page_updates: {
         columns: {
@@ -25,9 +26,9 @@ const createPageDb = (site_id: string) => {
 };
 
 export const codeHistory = {
-  site(id: string) {
+  async site(id: string) {
     if (!this._sites[id]) {
-      this._sites[id] = createSiteCodeHistoryDb(id);
+      this._sites[id] = await createSiteCodeHistoryDb(id);
     }
     return this._sites[id];
   },
@@ -43,7 +44,7 @@ export const codeHistory = {
 };
 
 const createCompCodeHistoryDb = () => {
-  return new BunORM(dir.data(`/crdt/comp-code-history.db`), {
+  return new BunORM(dir.data(`/sqlite/crdt/comp-code-history.db`), {
     tables: {
       comp_code: {
         columns: {
@@ -58,8 +59,9 @@ const createCompCodeHistoryDb = () => {
     },
   });
 };
-const createSiteCodeHistoryDb = (site_id: string) => {
-  return new BunORM(dir.data(`/crdt/site/${site_id}/code-history.db`), {
+const createSiteCodeHistoryDb = async (site_id: string) => {
+  await dirAsync(dir.data(`/sqlite/crdt/site/${site_id}`));
+  return new BunORM(dir.data(`/sqlite/crdt/site/${site_id}/code-history.db`), {
     tables: {
       page_code: {
         columns: {
@@ -79,7 +81,7 @@ export const createSiteCrdt = async (site_id: string) => {
   await dirAsync(dir.data(`/crdt/site/${site_id}`));
 
   return {
-    page: createPageDb(site_id),
+    page: await createPageDb(site_id),
   };
 };
 

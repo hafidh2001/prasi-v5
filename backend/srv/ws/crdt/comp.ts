@@ -17,9 +17,9 @@ import type { WSContext } from "../../utils/server/ctx";
 import { crdt_comps, MAX_HISTORY_SIZE } from "./shared";
 
 const crdt_loading = new Set<string>();
-await dirAsync(dir.data(`/crdt`));
+await dirAsync(dir.data(`/sqlite/crdt`));
 const internal = {
-  db: new BunORM(dir.data(`/crdt/comp.db`), {
+  db: new BunORM(dir.data(`/sqlite/crdt/comp.db`), {
     tables: {
       comp_updates: {
         columns: {

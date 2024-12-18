@@ -6,7 +6,6 @@ import { w } from "./utils/types/general";
 
 import "@fontsource/source-sans-3";
 import { Root } from "base/root";
-import { StrictMode } from "react";
 import "./index.css";
 import { defineReact } from "./utils/react/define-react";
 import { defineWindow } from "./utils/react/define-window";

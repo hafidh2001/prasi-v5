@@ -30,6 +30,11 @@ export const loadPageTree = (
     ui: {
       page: { saved: boolean; saving: any };
       topbar: { render: () => void };
+      popup: {
+        script: {
+          ignore_update_from_server: { because_of_migration: boolean };
+        };
+      };
     };
     viref: ViRef;
     render: () => void;

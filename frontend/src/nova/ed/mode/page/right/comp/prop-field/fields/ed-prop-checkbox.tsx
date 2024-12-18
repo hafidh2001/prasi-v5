@@ -1,6 +1,12 @@
 import { active } from "logic/active";
 import { EDGlobal } from "logic/ed-global";
-import { ChevronDown, Scaling, Search } from "lucide-react";
+import {
+  ChevronDown,
+  Scaling,
+  Search,
+  SquareCheck,
+  SquareCheckBig,
+} from "lucide-react";
 import { extractRegion } from "popup/script/code/js/migrate-code";
 import { codeUpdate } from "popup/script/code/prasi-code-update";
 import { useEffect } from "react";
@@ -394,36 +400,6 @@ const SingleCheckbox = ({
   );
 };
 
-const checked = (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    fill="none"
-    stroke="currentColor"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth="2"
-    className="lucide lucide-square-check-big"
-    viewBox="0 0 24 24"
-  >
-    <path d="M9 11l3 3L22 4"></path>
-    <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
-  </svg>
-);
-const unchecked = (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    fill="none"
-    stroke="currentColor"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth="2"
-    className="lucide lucide-square"
-    viewBox="0 0 24 24"
-  >
-    <rect width="18" height="18" x="3" y="3" rx="2"></rect>
-  </svg>
-);
+const checked = <SquareCheckBig />;
+
+const unchecked = <SquareCheck />;
