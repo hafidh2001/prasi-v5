@@ -68,8 +68,15 @@ export const EDGlobal = {
     },
     topbar: {
       render: () => {},
-      mode: "page" as "page" | "query",
       reconnected: false,
+      get mode() {
+        return (localStorage.getItem("prasi-ui-topbar-mode") || "page") as
+          | "page"
+          | "query";
+      },
+      set mode(value) {
+        localStorage.setItem("prasi-ui-topbar-mode", value);
+      },
     },
     page: {
       ids: new Set<string>(),

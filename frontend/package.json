@@ -6,6 +6,7 @@
     "preview": "rsbuild preview"
   },
   "dependencies": {
+    "prasi-srv": "workspace:*",
     "@floating-ui/react": "^0.26.23",
     "@fontsource/source-sans-3": "^5.0.22",
     "@leeoniya/ufuzzy": "^1.0.14",

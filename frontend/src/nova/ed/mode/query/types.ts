@@ -1,4 +1,4 @@
-type TABLE_NAME = string;
+export type TABLE_NAME = string;
 type QUERY_NAME = string;
 type COL_NAME = string;
 type REL_NAME = string;
@@ -45,6 +45,24 @@ const a: PQuerySelect = {
           col_name: "role_name",
           type: "column",
         },
+        {
+          rel_name: "role_relation",
+          type: "relation",
+          select: [{
+            col_name: "role_name",
+            type: "column",
+          },
+          {
+            rel_name: "m_client_relation",
+            type: "relation",
+            select: [{
+              col_name: "client_name",
+              type: "column"
+            }]
+          }
+          ],
+          where: [{ column: 'name', operator: "=", value: "admin" }]
+        }
       ],
       where: [{ column: "name", operator: "=", value: "admin" }],
     },
