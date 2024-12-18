@@ -3,6 +3,7 @@ type QUERY_NAME = string;
 type COL_NAME = string;
 type REL_NAME = string;
 type WHERE_OPERATOR = string;
+export type ORDER_BY = "asc" | "desc";
 
 type PQuery = {
   name: QUERY_NAME;
@@ -15,15 +16,22 @@ export type PQuerySelect = {
   table: TABLE_NAME;
   select: (PQuerySelectCol | PQuerySelectRel)[];
   where: PQuerySelectWhere[];
+  order_by?: Record<COL_NAME, ORDER_BY>;
 };
 
-export type PQuerySelectCol = { col_name: COL_NAME; type: "column"; as?: string };
+export type PQuerySelectCol = {
+  col_name: COL_NAME;
+  type: "column";
+  as?: string;
+};
+
 export type PQuerySelectRel = {
   rel_name: REL_NAME;
   type: "relation";
   as?: string;
 } & Partial<Omit<PQuerySelect, "table" | "action">>;
-type PQuerySelectWhere = {
+
+export type PQuerySelectWhere = {
   column: COL_NAME;
   operator: WHERE_OPERATOR;
   value?: any;
