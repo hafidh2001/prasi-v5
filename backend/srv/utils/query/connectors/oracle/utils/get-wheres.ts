@@ -33,26 +33,30 @@ export const getWheres = (
 const whereName = (table: NAME, where: PQuerySelectWhere) => {
   const db_table = table.toUpperCase();
   const w_col = where.column.toUpperCase();
-  const w_opt = where.operator;
+  const w_opt = where.operator.toUpperCase();
   const w_val = where.value;
 
   let name: string = "";
-  switch (typeof w_val) {
-    case "string":
-      switch (w_opt) {
-        case "LIKE":
-        case "ILIKE":
-          name = `${db_table}.${w_col} ${w_opt} '%${w_val}%'`;
-          break;
-        default:
-          name = `${db_table}.${w_col} ${w_opt} '${w_val}'`;
-          break;
-      }
+  switch (w_opt) {
+    case "LIKE":
+    case "ILIKE":
+      name = `${db_table}.${w_col} ${w_opt} '%${w_val}%'`;
       break;
-    case "number":
-      name = `${db_table}.${w_col} ${w_opt} ${w_val}`;
+    case "IN":
+      name = `${db_table}.${w_col} ${w_opt} (${w_val.map((item: string | number) => isNumber(item)).join(", ")})`;
+      break;
+    default:
+      name = `${db_table}.${w_col} ${w_opt} ${isNumber(w_val)}`;
       break;
   }
-
   return name;
+};
+
+const isNumber = (val: string | number): string | number => {
+  switch (typeof val) {
+    case "string":
+      return `'${val}'`;
+    case "number":
+      return val;
+  }
 };
