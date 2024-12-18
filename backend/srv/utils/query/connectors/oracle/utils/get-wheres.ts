@@ -43,16 +43,16 @@ const whereName = (table: NAME, where: PQuerySelectWhere) => {
       name = `${db_table}.${w_col} ${w_opt} '%${w_val}%'`;
       break;
     case "IN":
-      name = `${db_table}.${w_col} ${w_opt} (${w_val.map((item: string | number) => isNumber(item)).join(", ")})`;
+      name = `${db_table}.${w_col} ${w_opt} (${w_val.map((item: string | number) => quoteValue(item)).join(", ")})`;
       break;
     default:
-      name = `${db_table}.${w_col} ${w_opt} ${isNumber(w_val)}`;
+      name = `${db_table}.${w_col} ${w_opt} ${quoteValue(w_val)}`;
       break;
   }
   return name;
 };
 
-const isNumber = (val: string | number): string | number => {
+const quoteValue = (val: string | number): string | number => {
   switch (typeof val) {
     case "string":
       return `'${val}'`;
