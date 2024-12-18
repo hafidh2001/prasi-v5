@@ -117,7 +117,7 @@ describe("oracle connector", () => {
                 where: [
                   {
                     column: "photo_url",
-                    operator: "=",
+                    operator: "ILIKE",
                     value: "picture.jpg",
                   },
                 ],
@@ -126,7 +126,7 @@ describe("oracle connector", () => {
             where: [
               {
                 column: "comment_text",
-                operator: "=",
+                operator: "LIKE",
                 value: "good",
               },
             ],
@@ -136,6 +136,11 @@ describe("oracle connector", () => {
           },
         ],
         where: [
+          {
+            column: "user_id",
+            operator: "=",
+            value: 10,
+          },
           {
             column: "username",
             operator: "=",
@@ -160,9 +165,10 @@ describe("oracle connector", () => {
           "JOIN PHOTO PHOTO ON COMMENT_TABLE.PHOTO_ID = PHOTO.PHOTO_ID",
         ],
         wheres_arr: [
+          "USER_TABLE.USER_ID = 10",
           "USER_TABLE.USERNAME = 'haped'",
-          "COMMENT_TABLE.COMMENT_TEXT = 'good'",
-          "PHOTO.PHOTO_URL = 'picture.jpg'",
+          "COMMENT_TABLE.COMMENT_TEXT LIKE '%good%'",
+          "PHOTO.PHOTO_URL ILIKE '%picture.jpg%'",
         ],
         orders_by_arr: [
           "USER_TABLE.USER_ID ASC",
