@@ -15,7 +15,7 @@ export type PQuerySelect = {
   action: "select";
   table: TABLE_NAME;
   select: (PQuerySelectCol | PQuerySelectRel)[];
-  where: PQuerySelectWhere[];
+  where: PQuerySelectWhere;
   order_by?: Record<COL_NAME, ORDER_BY>;
 };
 
@@ -31,7 +31,14 @@ export type PQuerySelectRel = {
   as?: string;
 } & Partial<Omit<PQuerySelect, "table" | "action">>;
 
-export type PQuerySelectWhere = {
+export type PQuerySelectWhere = (
+  | PQuerySelectWhereSingle
+  | "and"
+  | "or"
+  // | PQuerySelectWhere // g perlu rekursi dulu
+)[];
+
+export type PQuerySelectWhereSingle = {
   column: COL_NAME;
   operator: WHERE_OPERATOR;
   value?: any;
@@ -56,21 +63,24 @@ const a: PQuerySelect = {
         {
           rel_name: "role_relation",
           type: "relation",
-          select: [{
-            col_name: "role_name",
-            type: "column",
-          },
-          {
-            rel_name: "m_client_relation",
-            type: "relation",
-            select: [{
-              col_name: "client_name",
-              type: "column"
-            }]
-          }
+          select: [
+            {
+              col_name: "role_name",
+              type: "column",
+            },
+            {
+              rel_name: "m_client_relation",
+              type: "relation",
+              select: [
+                {
+                  col_name: "client_name",
+                  type: "column",
+                },
+              ],
+            },
           ],
-          where: [{ column: 'name', operator: "=", value: "admin" }]
-        }
+          where: [{ column: "name", operator: "=", value: "admin" }],
+        },
       ],
       where: [{ column: "name", operator: "=", value: "admin" }],
     },

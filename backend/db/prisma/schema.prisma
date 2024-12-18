@@ -148,6 +148,7 @@ model site {
   npm_cache      String           @default(" ") @db.VarChar
   deploy_name    String           @default("DEV")
   settings       Json?
+  git_repo       String           @default("")
   component_site component_site[]
   deploy_target  deploy_target[]
   npm_site       npm_site[]

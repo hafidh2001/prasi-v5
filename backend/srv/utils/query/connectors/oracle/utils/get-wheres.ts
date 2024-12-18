@@ -2,7 +2,7 @@ import type {
   PQuerySelect,
   PQuerySelectCol,
   PQuerySelectRel,
-  PQuerySelectWhere,
+  PQuerySelectWhereSingle,
 } from "prasi-frontend/src/nova/ed/mode/query/types";
 import type { NAME } from "utils/query/types";
 
@@ -30,7 +30,7 @@ export const getWheres = (
   return result;
 };
 
-const whereName = (table: NAME, where: PQuerySelectWhere) => {
+const whereName = (table: NAME, where: PQuerySelectWhereSingle) => {
   const db_table = table.toUpperCase();
   const w_col = where.column.toUpperCase();
   const w_opt = where.operator.toUpperCase();
