@@ -114,17 +114,37 @@ describe("oracle connector", () => {
                     type: "column",
                   },
                 ],
+                where: [
+                  {
+                    column: "photo_url",
+                    operator: "=",
+                    value: "picture.jpg",
+                  },
+                ],
               },
             ],
+            where: [
+              {
+                column: "comment_text",
+                operator: "=",
+                value: "good",
+              },
+            ],
+            order_by: {
+              comment_id: "asc",
+            },
           },
         ],
         where: [
           {
-            column: "status",
+            column: "username",
             operator: "=",
-            value: "active",
+            value: "haped",
           },
         ],
+        order_by: {
+          user_id: "asc",
+        },
       });
       expect(output).toEqual({
         columns_arr: [
@@ -138,6 +158,15 @@ describe("oracle connector", () => {
           "JOIN ROLE_TABLE ROLE_TABLE1 ON USER_TABLE.ROLE_ID1 = ROLE_TABLE1.ROLE_ID",
           "JOIN COMMENT_TABLE COMMENT_TABLE ON USER_TABLE.USER_ID = COMMENT_TABLE.USER_ID",
           "JOIN PHOTO PHOTO ON COMMENT_TABLE.PHOTO_ID = PHOTO.PHOTO_ID",
+        ],
+        wheres_arr: [
+          "USER_TABLE.USERNAME = 'haped'",
+          "COMMENT_TABLE.COMMENT_TEXT = 'good'",
+          "PHOTO.PHOTO_URL = 'picture.jpg'",
+        ],
+        orders_by_arr: [
+          "USER_TABLE.USER_ID ASC",
+          "COMMENT_TABLE.COMMENT_ID ASC",
         ],
       });
     }
