@@ -51,11 +51,11 @@ export const siteProdPrasi = async ({
           `code:${site_id}/site/src/${site.prasi.frontend.typings}`,
           "string"
         );
-        vars = site.build_result.vsc_vars;
+        vars = site.process.vsc_vars;
 
         if (source && Object.keys(vars).length === 0) {
           await extractVscIndex(site_id);
-          vars = site.build_result.vsc_vars;
+          vars = site.process.vsc_vars;
         }
       }
       return compressed(

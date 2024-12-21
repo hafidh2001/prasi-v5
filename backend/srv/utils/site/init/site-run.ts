@@ -36,19 +36,19 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
     "json"
   );
 
-  for (const log of Object.values(prasi.log)) {
+  for (const log of Object.values(prasi.log_path)) {
     await removeAsync(fs.path(`code:${site_id}/site/src/${log}`));
   }
 
-  if (!loading.build.frontend) {
-    loading.build.frontend = await bunWatchBuild({
+  if (!loading.process.build_frontend) {
+    loading.process.build_frontend = await bunWatchBuild({
       outdir: fs.path(`code:${site_id}/site/build/frontend`),
       entrydir: fs.path(`code:${site_id}/site/src`),
       entrypoint: [prasi.frontend.index, prasi.frontend.internal],
       async onBuild({ status, log }) {
         const site = g.site.loaded[site_id];
         if (site) {
-          site.build_result.log.frontend += log;
+          site.process.log.build_frontend += log;
         }
         if (status === "building") {
           siteBroadcastBuildLog(site_id, "Building FrontEnd...");
@@ -67,7 +67,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
 
           const site = g.site.loaded[site_id];
           if (site) {
-            const is_ready = site.build_result.is_ready;
+            const is_ready = site.process.is_ready;
             is_ready.frontend = true;
             if (is_ready.typings) {
               const tsc = await fs.read(
@@ -78,7 +78,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
                 {
                   action: "vsc-update",
                   tsc: gzipSync(tsc),
-                  vars: site.build_result.vsc_vars,
+                  vars: site.process.vsc_vars,
                 }
               );
             }
@@ -91,8 +91,8 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   }
 
   siteLoadingMessage(site_id, "Starting Backend Build...");
-  if (!loading.build.backend) {
-    loading.build.backend = spawn({
+  if (!loading.process.build_backend) {
+    loading.process.build_backend = spawn({
       cmd: `bun build --target bun --watch ${prasi.backend.index} --outfile ../build/backend.js --no-clear-screen`,
       cwd: fs.path(`code:${site_id}/site/src`),
       async onMessage(arg) {
@@ -100,15 +100,15 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
         if (!site) {
           await waitUntil(() => g.site.loaded[site_id]);
         }
-        const log = site.build_result.log;
-        log.backend += arg.text;
+        const log = site.process.log;
+        log.build_backend += arg.text;
       },
     });
   }
 
   siteLoadingMessage(site_id, "Starting Backend Server...");
-  if (!loading.build.server) {
-    loading.build.server = {
+  if (!loading.process.run_backend) {
+    loading.process.run_backend = {
       send() {},
       spawn: spawn({
         cmd: `bun ipc`,
@@ -118,7 +118,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
           msg: { type: "init" } | { type: "ready"; port: number },
           subprocess
         ) {
-          if (loading.build.server) {
+          if (loading.process.run_backend) {
             if (msg.type === "init") {
               subprocess.send({
                 type: "start",
@@ -127,7 +127,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
                 },
               });
             } else {
-              loading.build.server.port = msg.port;
+              loading.process.run_backend.port = msg.port;
             }
           }
         },
@@ -136,8 +136,8 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
           if (!site) {
             await waitUntil(() => site);
           }
-          const log = site.build_result.log;
-          log.server += arg.text;
+          const log = site.process.log;
+          log.run_server += arg.text;
 
           process.stdout.write(">>>");
           process.stdout.write(arg.raw);
@@ -148,7 +148,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   }
 
   siteLoadingMessage(site_id, "Starting Typings Builder...");
-  if (!loading.build.typings) {
+  if (!loading.process.build_typings) {
     const tsc =
       platform() === "win32"
         ? "node_modules/.bin/tsc.exe"
@@ -164,7 +164,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
       typings.done = resolve;
     });
 
-    loading.build.typings = spawn({
+    loading.process.build_typings = spawn({
       cmd: `${fs.path(`root:${tsc}`)} ${tsc_arg}`,
       cwd: fs.path(`code:${site_id}/site/src`),
       async onMessage(arg) {
@@ -173,11 +173,11 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
         if (!site) {
           await waitUntil(() => site);
         }
-        const log = site.build_result.log;
-        log.typings += arg.text;
+        const log = site.process.log;
+        log.build_typings += arg.text;
 
         if (site && arg.text.includes("Watching for file")) {
-          site.build_result.is_ready.typings = true;
+          site.process.is_ready.typings = true;
           typings.done();
           await extractVscIndex(site_id);
 
@@ -190,7 +190,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
             {
               action: "vsc-update",
               tsc: gzipSync(tsc),
-              vars: site.build_result.vsc_vars,
+              vars: site.process.vsc_vars,
             }
           );
         }

@@ -33,13 +33,13 @@ export const siteLoaded = async (
 
   const loading = g.site.loading[site_id];
   g.site.loaded[site_id] = {
-    build: loading.build,
+    build: loading.process,
     data: loading.data!,
     config: {},
     id: site_id,
-    build_result: {
+    process: {
       vsc_vars: {},
-      log: { frontend: "", typings: "", backend: "", tailwind: "", server: "" },
+      log: { build_frontend: "", build_typings: "", build_backend: "", build_tailwind: "", run_server: "" },
       is_ready: { frontend: false, typings: false },
     },
     prasi,

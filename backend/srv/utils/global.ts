@@ -14,15 +14,15 @@ export type PrasiSite = {
     api_url?: string;
   };
   data: ESite;
-  build: PrasiSiteLoading["build"];
-  build_result: {
+  build: PrasiSiteLoading["process"];
+  process: {
     vsc_vars: Awaited<ReturnType<typeof parseTypeDef>>;
     log: {
-      frontend: string;
-      typings: string;
-      backend: string;
-      tailwind: string;
-      server: string;
+      build_frontend: string;
+      build_typings: string;
+      build_backend: string;
+      build_tailwind: string;
+      run_server: string;
     };
     is_ready: {
       frontend: boolean;
@@ -32,7 +32,7 @@ export type PrasiSite = {
   prasi: {
     frontend: { index: string; internal: string; typings: string };
     backend: { index: string };
-    log: {
+    log_path: {
       frontend: string;
       backend: string;
       typings: string;
@@ -44,15 +44,15 @@ export type PrasiSiteLoading = {
   status: string;
   data?: ESite;
   deps_install?: ReturnType<typeof spawn>;
-  build: {
-    frontend?: Awaited<ReturnType<typeof bunWatchBuild>>;
-    backend?: ReturnType<typeof spawn>;
-    server?: {
+  process: {
+    build_frontend?: Awaited<ReturnType<typeof bunWatchBuild>>;
+    build_backend?: ReturnType<typeof spawn>;
+    run_backend?: {
       spawn: ReturnType<typeof spawn>;
       port: number;
       send: (arg: { type: "rescan" }) => void;
     };
-    typings?: ReturnType<typeof spawn>;
+    build_typings?: ReturnType<typeof spawn>;
   };
 };
 export interface PrasiGlobal {

@@ -47,7 +47,7 @@ setTimeout(() => {
       );
     }
 
-    const server = site.build.server;
+    const server = site.build.run_backend;
     if (server && server.port) {
       const url = `http://127.0.0.1:${server.port}/${pathname}`;
       return await fetch(url, {

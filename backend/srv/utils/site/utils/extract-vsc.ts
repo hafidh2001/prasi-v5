@@ -11,6 +11,6 @@ export const extractVscIndex = async (site_id: string) => {
     const result = await parseTypeDef(
       fs.path(`code:${site_id}/site/src/types/typings-generated.d.ts`)
     );
-    site.build_result.vsc_vars = result;
+    site.process.vsc_vars = result;
   }
 };

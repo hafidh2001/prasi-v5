@@ -17,7 +17,7 @@ export const siteInit = async (site_id: string, conn_id?: string) => {
     if (!loading) {
       g.site.loading[site_id] = {
         status: "",
-        build: {},
+        process: {},
       };
       loading = g.site.loading[site_id];
       siteLoadingMessage(site_id, "Site Initializing...");
@@ -36,10 +36,10 @@ export const siteInit = async (site_id: string, conn_id?: string) => {
       await siteRun(site_id, loading);
     } else if (conn_id) {
       editor.send(conn_id, { action: "site-loading", status: loading.status });
-      if (loading.build.frontend) {
+      if (loading.process.build_frontend) {
         editor.send(conn_id, {
           action: "site-build-log",
-          log: loading.build.frontend.log?.text || "",
+          log: loading.process.build_frontend.log?.text || "",
         });
       }
     }

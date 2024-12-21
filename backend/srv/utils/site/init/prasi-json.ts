@@ -10,7 +10,7 @@ export const initPrasiJson = async (site_id: string) => {
     },
     backend: { index: "" },
 
-    log: {
+    log_path: {
       frontend: "log/frontend.log",
       backend: "log/backend.log",
       typings: "log/typings.log",
