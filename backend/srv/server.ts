@@ -13,6 +13,7 @@ import { asset } from "./utils/server/asset";
 import { serverContext } from "./utils/server/ctx";
 import { initWS } from "./ws/init";
 import { site_srv } from "utils/site/srv/site-srv";
+import { waitPort } from "utils/server/check-port";
 
 if (!(global as any).g) {
   (global as any).g = global;
@@ -30,8 +31,14 @@ if (g.mode === "dev") {
   }
   watch(path, (e, c) => {
     asset.nova.rescan();
-  });
+  }); 
 }
+
+await waitPort(4550, {
+  onPortUsed() {
+    console.log(`Waiting for port 4550 to be available...`);
+  },
+});
 
 const server = Bun.serve({
   port: 4550,

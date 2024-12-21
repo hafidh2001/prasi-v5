@@ -67,8 +67,6 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
 
           const site = g.site.loaded[site_id];
           if (site) {
-            site.asset?.rescan();
-
             const is_ready = site.build_result.is_ready;
             is_ready.frontend = true;
             if (is_ready.typings) {
@@ -106,6 +104,47 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
         log.backend += arg.text;
       },
     });
+  }
+
+  siteLoadingMessage(site_id, "Starting Backend Server...");
+  if (!loading.build.server) {
+    loading.build.server = {
+      send() {},
+      spawn: spawn({
+        cmd: `bun ipc`,
+        cwd: fs.path(`data:site-srv`),
+        restart_on_exit: true,
+        ipc(
+          msg: { type: "init" } | { type: "ready"; port: number },
+          subprocess
+        ) {
+          if (loading.build.server) {
+            if (msg.type === "init") {
+              subprocess.send({
+                type: "start",
+                path: {
+                  asset: fs.path(`code:${site_id}/site/build/frontend`),
+                },
+              });
+            } else {
+              loading.build.server.port = msg.port;
+            }
+          }
+        },
+        async onMessage(arg) {
+          const site = g.site.loaded[site_id];
+          if (!site) {
+            await waitUntil(() => site);
+          }
+          const log = site.build_result.log;
+          log.server += arg.text;
+
+          process.stdout.write(">>>");
+          process.stdout.write(arg.raw);
+        },
+      }),
+      port: 0,
+    };
   }
 
   siteLoadingMessage(site_id, "Starting Typings Builder...");

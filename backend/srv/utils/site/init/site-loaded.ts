@@ -37,10 +37,9 @@ export const siteLoaded = async (
     data: loading.data!,
     config: {},
     id: site_id,
-    asset: await staticFile(fs.path(`code:${site_id}/site/build/frontend`)),
     build_result: {
       vsc_vars: {},
-      log: { frontend: "", typings: "", backend: "", tailwind: "" },
+      log: { frontend: "", typings: "", backend: "", tailwind: "", server: "" },
       is_ready: { frontend: false, typings: false },
     },
     prasi,

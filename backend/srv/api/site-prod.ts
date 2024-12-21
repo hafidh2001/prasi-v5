@@ -12,7 +12,7 @@ const encoder = new TextEncoder();
 export default {
   url: "/prod/:site_id/**",
   async api(ctx: ServerCtx) {
-    const { params } = ctx;
+    const { params, req } = ctx;
     const site_id = params.site_id as string;
     const pathname = params._ as string;
 
@@ -47,34 +47,16 @@ setTimeout(() => {
       );
     }
 
-    if (site && pathname) {
-      if (pathname.startsWith("_prasi")) {
-        return await siteProdPrasi({ pathname, site_id, ctx });
-      }
-
-      if (pathname !== "index.html") {
-        if (!site.asset) await waitUntil(() => site.asset);
-        const res = site.asset!.serve(ctx, { prefix: `/prod/${site_id}` });
-        if (res) return res;
-      }
-    }
-
-    const accept = ctx.req.headers.get("accept-encoding") || "";
-    const content = (await prodIndex(site_id, {})).render();
-    if (accept.includes("zstd")) {
-      const compressed = zstd.compress(encoder.encode(content) as any, 10);
-      return new Response(compressed, {
-        headers: { "content-type": "text/html", "content-encoding": "zstd" },
-      });
-    } else if (accept.includes("gz")) {
-      const compressed = gzipSync(content);
-      return new Response(compressed, {
-        headers: { "content-type": "text/html", "content-encoding": "gzip" },
+    const server = site.build.server;
+    if (server && server.port) {
+      const url = `http://127.0.0.1:${server.port}/${pathname}`;
+      return await fetch(url, {
+        method: req.method,
+        headers: req.headers,
+        body: req.body,
       });
     }
 
-    return new Response(content, {
-      headers: { "content-type": "text/html" },
-    });
+    return new Response("Site not ready", { status: 503 });
   },
 };

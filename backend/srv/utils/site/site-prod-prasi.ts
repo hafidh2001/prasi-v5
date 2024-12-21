@@ -108,29 +108,29 @@ export const siteProdPrasi = async ({
       }
       return new Response("");
     }
-    case "code": {
-      if (!site.asset) {
-        await waitUntil(() => site.asset);
-      }
+    // case "code": {
+    //   if (!site.asset) {
+    //     await waitUntil(() => site.asset);
+    //   }
 
-      const res = site.asset!.serve(ctx, {
-        prefix: `/prod/${site_id}/_prasi/code`,
-      });
+    //   const res = site.asset!.serve(ctx, {
+    //     prefix: `/prod/${site_id}/_prasi/code`,
+    //   });
 
-      if (!res) {
-        if (
-          !site.asset!.exists(ctx.url.pathname, {
-            prefix: `/prod/${site_id}/_prasi/code`,
-          })
-        ) {
-          return new Response(`NOT FOUND`, {
-            status: 404,
-          });
-        }
-      }
+    //   if (!res) {
+    //     if (
+    //       !site.asset!.exists(ctx.url.pathname, {
+    //         prefix: `/prod/${site_id}/_prasi/code`,
+    //       })
+    //     ) {
+    //       return new Response(`NOT FOUND`, {
+    //         status: 404,
+    //       });
+    //     }
+    //   }
 
-      return res;
-    }
+    //   return res;
+    // }
     case "compress":
       return new Response("OK");
     case "route": {

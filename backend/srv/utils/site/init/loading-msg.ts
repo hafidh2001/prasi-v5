@@ -1,7 +1,11 @@
+import { waitUntil } from "prasi-utils";
 import { editor } from "../../editor";
 
-export const siteLoadingMessage = (site_id: string, status: string) => {
-  const loading = g.site.loading[site_id];
+export const siteLoadingMessage = async (site_id: string, status: string) => {
+  let loading = g.site.loading[site_id];
+  if (!loading) {
+    await waitUntil(() => g.site.loading[site_id]);
+  }
   loading.status = status;
   editor.broadcast(
     { site_id },

@@ -15,7 +15,6 @@ export type PrasiSite = {
   };
   data: ESite;
   build: PrasiSiteLoading["build"];
-  asset?: Awaited<ReturnType<typeof staticFile>>;
   build_result: {
     vsc_vars: Awaited<ReturnType<typeof parseTypeDef>>;
     log: {
@@ -23,6 +22,7 @@ export type PrasiSite = {
       typings: string;
       backend: string;
       tailwind: string;
+      server: string;
     };
     is_ready: {
       frontend: boolean;
@@ -47,6 +47,11 @@ export type PrasiSiteLoading = {
   build: {
     frontend?: Awaited<ReturnType<typeof bunWatchBuild>>;
     backend?: ReturnType<typeof spawn>;
+    server?: {
+      spawn: ReturnType<typeof spawn>;
+      port: number;
+      send: (arg: { type: "rescan" }) => void;
+    };
     typings?: ReturnType<typeof spawn>;
   };
 };

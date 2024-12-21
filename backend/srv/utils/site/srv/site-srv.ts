@@ -6,13 +6,13 @@ export const site_srv = {
     const cwd = fs.path("data:site-srv");
 
     if (!fs.exists("data:site-srv")) {
-      await $`git clone https://github.com/rizrmd/prasi-api site-srv --depth=1`
+      await $`git clone https://github.com/rizrmd/prasi-srv site-srv --depth=1`
         .cwd(fs.path("data:/"))
         .quiet()
         .nothrow();
     } else {
-      await $`git reset --hard`.cwd(cwd).quiet().nothrow();
-      await $`git pull`.cwd(cwd).quiet().nothrow();
+      // await $`git reset --hard`.cwd(cwd).quiet().nothrow();
+      // await $`git pull`.cwd(cwd).quiet().nothrow();
     }
 
     if (!fs.exists("data:site-srv")) {

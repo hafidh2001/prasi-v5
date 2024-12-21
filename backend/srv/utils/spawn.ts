@@ -6,6 +6,7 @@ export const spawn = (
     cmd: string;
     cwd?: string;
     log?: false | { max_lines: number };
+    restart_on_exit?: boolean;
     ipc?(message: any, subprocess: Subprocess): void;
   } & (
     | {
@@ -56,27 +57,42 @@ export const spawn = (
   }
 
   const is_piped = arg.mode === "pipe" || !arg.mode;
+  const createProc = () => {
+    const proc = bunSpawn({
+      cmd: arg.cmd.split(" "),
+      cwd: arg.cwd,
+      env: { ...process.env, FORCE_COLOR: "1" },
+      ...(is_piped
+        ? { stderr: "pipe", stdout: "pipe" }
+        : { stderr: "inherit", stdout: "inherit" }),
+      ...(arg.ipc ? { ipc: arg.ipc } : undefined),
+    });
 
-  const proc = bunSpawn({
-    cmd: arg.cmd.split(" "),
-    cwd: arg.cwd,
-    env: { ...process.env, FORCE_COLOR: "1" },
-    ...(is_piped
-      ? { stderr: "pipe", stdout: "pipe" }
-      : { stderr: "inherit", stdout: "inherit" }),
-    ...(arg.ipc ? { ipc: arg.ipc } : undefined),
-  });
+    if (is_piped) {
+      const stdout = Readable.fromWeb(proc.stdout as any);
+      const stderr = Readable.fromWeb(proc.stderr as any);
+      processStream(stdout, "stdout");
+      processStream(stderr, "stderr");
+    }
+    return proc;
+  };
+  const proc = createProc();
 
-  if (is_piped) {
-    const stdout = Readable.fromWeb(proc.stdout as any);
-    const stderr = Readable.fromWeb(proc.stderr as any);
-    processStream(stdout, "stdout");
-    processStream(stderr, "stderr");
-  }
-
-  return {
+  const result = {
     process: proc,
     exited: proc.exited,
     log,
   };
-};
+
+  if (arg.restart_on_exit) {
+    proc.exited.then(() => {
+      result.process = createProc();
+      result.exited = result.process.exited;
+      result.log.lines = 0;
+      result.log.text = [];
+    });
+  }
+    
+  return result;
+}; 
+ 
