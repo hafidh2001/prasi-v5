@@ -9,7 +9,6 @@ export const initPrasiJson = async (site_id: string) => {
       typings: "typings/typings-generated.d.ts",
     },
     backend: { index: "" },
-
     log_path: {
       frontend: "log/frontend.log",
       backend: "log/backend.log",

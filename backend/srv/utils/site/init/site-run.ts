@@ -100,6 +100,10 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
         if (!site) {
           await waitUntil(() => g.site.loaded[site_id]);
         }
+        site.build.run_backend?.send({
+          type: "server-built",
+          path: fs.path(`code:${site_id}/site/src`),
+        });
         const log = site.process.log;
         log.build_backend += arg.text;
       },
@@ -109,7 +113,15 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   siteLoadingMessage(site_id, "Starting Backend Server...");
   if (!loading.process.run_backend) {
     loading.process.run_backend = {
-      send() {},
+      async send(msg) {
+        if (!this.spawn.process?.send) {
+          await waitUntil(() => this.spawn.process?.send!);
+        }
+
+        if (this.spawn.process) {
+          this.spawn.process.send(msg);
+        }
+      },
       spawn: spawn({
         cmd: `bun ipc`,
         cwd: fs.path(`data:site-srv`),
@@ -139,7 +151,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
           const log = site.process.log;
           log.run_server += arg.text;
 
-          process.stdout.write(">>>");
+          process.stdout.write(">>> ");
           process.stdout.write(arg.raw);
         },
       }),
