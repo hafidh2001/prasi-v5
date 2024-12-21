@@ -50,7 +50,9 @@ export type PrasiSiteLoading = {
     run_backend?: {
       spawn: ReturnType<typeof spawn>;
       port: number;
-      send: (arg: { type: "server-built"; path: string }) => void;
+      send: (
+        arg: { type: "reload-backend" } | { type: "reload-frontend" }
+      ) => void;
     };
     build_typings?: ReturnType<typeof spawn>;
   };

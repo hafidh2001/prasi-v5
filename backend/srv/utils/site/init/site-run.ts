@@ -69,10 +69,16 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
           if (site) {
             const is_ready = site.process.is_ready;
             is_ready.frontend = true;
+
+            site.build.run_backend?.send({
+              type: "reload-frontend",
+            });
+
             if (is_ready.typings) {
               const tsc = await fs.read(
                 `code:${site_id}/site/src/${site.prasi.frontend.typings}`
               );
+
               editor.broadcast(
                 { site_id },
                 {
@@ -93,7 +99,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   siteLoadingMessage(site_id, "Starting Backend Build...");
   if (!loading.process.build_backend) {
     loading.process.build_backend = spawn({
-      cmd: `bun build --target bun --watch ${prasi.backend.index} --outfile ../build/backend.js --no-clear-screen`,
+      cmd: `bun build --target bun --watch ${prasi.backend.index} --outfile ../build/backend/server.js --no-clear-screen`,
       cwd: fs.path(`code:${site_id}/site/src`),
       async onMessage(arg) {
         const site = g.site.loaded[site_id];
@@ -101,8 +107,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
           await waitUntil(() => g.site.loaded[site_id]);
         }
         site.build.run_backend?.send({
-          type: "server-built",
-          path: fs.path(`code:${site_id}/site/src`),
+          type: "reload-backend",
         });
         const log = site.process.log;
         log.build_backend += arg.text;
@@ -126,20 +131,31 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
         cmd: `bun ipc`,
         cwd: fs.path(`data:site-srv`),
         restart_on_exit: true,
-        ipc(
+        async onRestart({ exit_code, new_process }) {
+          const site = g.site.loaded[site_id];
+          if (!site) {
+            await waitUntil(() => site);
+          }
+        },
+        async ipc(
           msg: { type: "init" } | { type: "ready"; port: number },
           subprocess
         ) {
-          if (loading.process.run_backend) {
+          const site = g.site.loaded[site_id];
+          if (!site) {
+            await waitUntil(() => site);
+          }
+          if (site.build.run_backend) {
             if (msg.type === "init") {
               subprocess.send({
                 type: "start",
                 path: {
-                  asset: fs.path(`code:${site_id}/site/build/frontend`),
+                  frontend: fs.path(`code:${site_id}/site/build/frontend`),
+                  backend: fs.path(`code:${site_id}/site/build/backend`),
                 },
               });
             } else {
-              loading.process.run_backend.port = msg.port;
+              site.build.run_backend.port = msg.port;
             }
           }
         },

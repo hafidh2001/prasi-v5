@@ -7,6 +7,10 @@ export const spawn = (
     cwd?: string;
     log?: false | { max_lines: number };
     restart_on_exit?: boolean;
+    onRestart?: (arg: {
+      exit_code?: number;
+      new_process: Subprocess;
+    }) => void | Promise<void>;
     ipc?(message: any, subprocess: Subprocess): void;
   } & (
     | {
@@ -85,14 +89,14 @@ export const spawn = (
   };
 
   if (arg.restart_on_exit) {
-    proc.exited.then(() => {
-      result.process = createProc();
-      result.exited = result.process.exited;
-      result.log.lines = 0;
-      result.log.text = [];
+    proc.exited.then(async (exit_code) => {
+      const new_spawn = spawn(arg);
+
+      if (arg.onRestart) {
+        await arg.onRestart({ exit_code, new_process: new_spawn.process });
+      }
     });
   }
-    
+
   return result;
-}; 
- 
+};

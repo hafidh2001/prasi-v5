@@ -55,8 +55,8 @@ setTimeout(() => {
         headers: req.headers,
         body: req.body,
       });
-    }
-
+    } 
+ 
     return new Response("Site not ready", { status: 503 });
   },
-};
+}; 
