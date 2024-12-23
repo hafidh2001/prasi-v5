@@ -29,7 +29,7 @@ export type PQuerySelectCol = {
 export type PQuerySelectRel = {
   rel_name: REL_NAME;
   type: "relation";
-  mode?: JOIN_MODE;
+  mode?: JOIN_MODE; // default: "lazy"
   as?: string;
 } & Partial<Omit<PQuerySelect, "table" | "action">>;
 
