@@ -35,6 +35,7 @@ export type PQuerySelectWhere = (
   | PQuerySelectWhereSingle
   | "and"
   | "or"
+  | "not"
   // | PQuerySelectWhere // g perlu rekursi dulu
 )[];
 
