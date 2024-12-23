@@ -11,7 +11,7 @@ export interface QConnector {
   inspected?: QInspectResult;
   inspect(): Promise<QInspectResult>;
   destroy(): Promise<void>;
-  query(i: QInspectResult, pq: PQuerySelect): Promise<any>;
+  buildSql(i: QInspectResult, pq: PQuerySelect): Promise<any>;
 }
 
 export type QInspectColumn = {

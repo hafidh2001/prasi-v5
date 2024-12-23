@@ -5,7 +5,7 @@ import { getJoins } from "./utils/get-joins";
 import { getWheres } from "./utils/get-wheres";
 import { getOrdersBy } from "./utils/get-orders-by";
 
-export const query = async (
+export const buildSql = async (
   inspected_scheme: QInspectResult,
   pq: PQuerySelect
 ): Promise<{
