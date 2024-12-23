@@ -45,6 +45,10 @@ const whereName = (table: NAME, where: PQuerySelectWhereSingle) => {
     case "IN":
       name = `${db_table}.${w_col} ${w_opt} (${w_val.map((item: string | number) => quoteValue(item)).join(", ")})`;
       break;
+    case "BETWEEN":
+      // DO NOT KNOW DISPLAY & OUTPUT FROM FRONT (HANDLE IF FRONT READY)
+      name = ``;
+      break;
     default:
       name = `${db_table}.${w_col} ${w_opt} ${quoteValue(w_val)}`;
       break;
