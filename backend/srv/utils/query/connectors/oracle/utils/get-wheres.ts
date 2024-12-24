@@ -15,14 +15,15 @@ export const getWheres = (
 
   let where_name = "" as string;
   if (where && where.length) {
-    for (const w of where) {
+    for (let i = 0; i < where.length; i++) {
+      const w = where[i];
       if (typeof w === "object") {
-        where_name += " " + whereName(table, w);
+        where_name += (i === 0 ? "" : " ") + whereName(table, w);
       } else if (typeof w === "string") {
-        where_name += " " + w.toUpperCase();
+        where_name += (i === 0 ? "" : " ") + w.toUpperCase();
       }
     }
-    result.push(where_name);
+    result.push(`(${where_name})`);
   }
 
   for (const c of select) {
