@@ -1,6 +1,9 @@
+import { gzipSync } from "bun";
 import { removeAsync } from "fs-jetpack";
 import { platform } from "os";
 import { PRASI_CORE_SITE_ID, waitUntil } from "prasi-utils";
+import { c } from "utils/color";
+import { editor } from "utils/editor";
 import { fs } from "utils/files/fs";
 import type { PrasiSite, PrasiSiteLoading } from "utils/global";
 import { asset } from "utils/server/asset";
@@ -9,8 +12,8 @@ import { extractVscIndex } from "../utils/extract-vsc";
 import { bunWatchBuild } from "./bun-build";
 import { siteBroadcastBuildLog, siteLoadingMessage } from "./loading-msg";
 import { siteLoaded } from "./site-loaded";
-import { editor } from "utils/editor";
-import { gzipSync } from "bun";
+import { Script } from "vm";
+import { debounce } from "utils/server/debounce";
 
 export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   await waitUntil(() => fs.exists(`code:${site_id}/site/src`), {
@@ -70,10 +73,6 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
             const is_ready = site.process.is_ready;
             is_ready.frontend = true;
 
-            site.build.run_backend?.send({
-              type: "reload-frontend",
-            });
-
             if (is_ready.typings) {
               const tsc = await fs.read(
                 `code:${site_id}/site/src/${site.prasi.frontend.typings}`
@@ -106,73 +105,58 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
         if (!site) {
           await waitUntil(() => g.site.loaded[site_id]);
         }
-        site.build.run_backend?.send({
-          type: "reload-backend",
-        });
+
+        if (!site.vm.reload) {
+          site.vm.reload = debounce(async () => {
+            try {
+              let is_reload = false;
+
+              if (site.vm.script) {
+                is_reload = true;
+              }
+              site.vm.script = new Script(
+                await fs.read(
+                  `data:site-srv/main/internal/init-compiled.js`,
+                  "string"
+                )
+              );
+
+              const cjs = site.vm.script.runInContext(site.vm.ctx);
+              cjs(site.vm.ctx.module.exports, require, site.vm.ctx.module);
+              site.vm.init = site.vm.ctx.module.exports.init;
+
+              if (site.vm.init) {
+                console.log(
+                  `${c.magenta}[SITE]${c.esc} ${site_id} ${is_reload ? "Reloading" : "Initializing"}...`
+                );
+
+                await site.vm.init({
+                  root_dir: fs.path(`data:site-srv/sites/${site_id}`),
+                  script_path: fs.path(
+                    `code:${site_id}/site/build/backend/server.js`
+                  ),
+                  server: () => g.server,
+                  mode: "vm",
+                });
+              } else {
+                console.log(
+                  `${c.magenta}[SITE]${c.esc} ${site_id} Failed to initialize...`
+                );
+              }
+            } catch (e) {
+              console.log(
+                `${c.magenta}[SITE]${c.esc} ${site_id} Failed to initialize...`
+              );
+              console.error(e);
+            }
+          }, 100);
+        }
+        site.vm.reload();
+
         const log = site.process.log;
         log.build_backend += arg.text;
       },
     });
-  }
-
-  siteLoadingMessage(site_id, "Starting Backend Server...");
-  if (!loading.process.run_backend) {
-    loading.process.run_backend = {
-      async send(msg) {
-        if (!this.spawn.process?.send) {
-          await waitUntil(() => this.spawn.process?.send!);
-        }
-
-        if (this.spawn.process) {
-          this.spawn.process.send(msg);
-        }
-      },
-      spawn: spawn({
-        cmd: `bun ipc`,
-        cwd: fs.path(`data:site-srv`),
-        restart_on_exit: true,
-        async onRestart({ exit_code, new_process }) {
-          const site = g.site.loaded[site_id];
-          if (!site) {
-            await waitUntil(() => site);
-          }
-        },
-        async ipc(
-          msg: { type: "init" } | { type: "ready"; port: number },
-          subprocess
-        ) {
-          const site = g.site.loaded[site_id];
-          if (!site) {
-            await waitUntil(() => site);
-          }
-          if (site.build.run_backend) {
-            if (msg.type === "init") {
-              subprocess.send({
-                type: "start",
-                path: {
-                  frontend: fs.path(`code:${site_id}/site/build/frontend`),
-                  backend: fs.path(`code:${site_id}/site/build/backend`),
-                },
-              });
-            } else {
-              site.build.run_backend.port = msg.port;
-            }
-          }
-        },
-        async onMessage(arg) {
-          const site = g.site.loaded[site_id];
-          if (!site) {
-            await waitUntil(() => site);
-          }
-          const log = site.process.log;
-          log.run_server += arg.text;
-
-          process.stdout.write(">>> ");
-          process.stdout.write(arg.raw);
-        },
-      }),
-      port: 0,
-    };
   }
 
   siteLoadingMessage(site_id, "Starting Typings Builder...");

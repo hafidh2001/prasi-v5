@@ -1,11 +1,7 @@
-import { waitUntil } from "prasi-utils";
-import type { ServerCtx } from "../utils/server/ctx";
-import { prodIndex } from "../utils/server/prod-index";
-import { siteInit } from "../utils/site/site-init";
-import { siteProdPrasi } from "../utils/site/site-prod-prasi";
-import { asset } from "utils/server/asset";
 import * as zstd from "@bokuweb/zstd-wasm";
-import { gzipSync } from "bun";
+import { asset } from "utils/server/asset";
+import type { ServerCtx } from "../utils/server/ctx";
+import { siteInit } from "../utils/site/site-init";
 
 await zstd.init();
 const encoder = new TextEncoder();
@@ -47,16 +43,10 @@ setTimeout(() => {
       );
     }
 
-    const server = site.build.run_backend;
-    if (server && server.port) {
-      const url = `http://127.0.0.1:${server.port}/${pathname}`;
-      return await fetch(url, {
-        method: req.method,
-        headers: req.headers,
-        body: req.body,
-      });
-    } 
- 
+    if (site.vm.init) {
+      return await site.vm.ctx.prasi.handler.http(req);
+    }
+
     return new Response("Site not ready", { status: 503 });
   },
-}; 
+};

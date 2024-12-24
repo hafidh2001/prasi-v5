@@ -62,6 +62,8 @@ const server = Bun.serve({
   },
 });
 
+g.server = server;
+
 console.log(
   `${c.green}[${g.mode.toUpperCase()}]${c.esc} Prasi Server ${
     c.blue

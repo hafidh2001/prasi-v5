@@ -5,6 +5,7 @@ import { editor } from "utils/editor";
 import { fs } from "utils/files/fs";
 import type { PrasiSite } from "utils/global";
 import { staticFile } from "utils/files/static";
+import { createContext, Script } from "node:vm";
 
 export const siteLoaded = async (
   site_id: string,
@@ -32,14 +33,25 @@ export const siteLoaded = async (
   }
 
   const loading = g.site.loading[site_id];
+
   g.site.loaded[site_id] = {
     build: loading.process,
     data: loading.data!,
     config: {},
     id: site_id,
+    vm: {
+      ctx: newContext(),
+      script: null as any,
+    },
     process: {
       vsc_vars: {},
-      log: { build_frontend: "", build_typings: "", build_backend: "", build_tailwind: "", run_server: "" },
+      log: {
+        build_frontend: "",
+        build_typings: "",
+        build_backend: "",
+        build_tailwind: "",
+        run_server: "",
+      },
       is_ready: { frontend: false, typings: false },
     },
     prasi,
@@ -50,4 +62,69 @@ export const siteLoaded = async (
     { site_id },
     { action: "site-ready", site: g.site.loaded[site_id].data }
   );
+};
+
+const newContext = () => {
+  const exports = {};
+  return createContext({
+    module: { exports },
+    exports,
+    AbortController,
+    AbortSignal,
+    alert,
+    Blob,
+    Buffer,
+    Bun,
+    ByteLengthQueuingStrategy,
+    confirm,
+    atob,
+    btoa,
+    BuildMessage,
+    clearImmediate,
+    clearInterval,
+    clearTimeout,
+    console,
+    CountQueuingStrategy,
+    Crypto,
+    crypto,
+    CryptoKey,
+    CustomEvent,
+    Event,
+    EventTarget,
+    fetch,
+    FormData,
+    Headers,
+    HTMLRewriter,
+    JSON,
+    MessageEvent,
+    performance,
+    process,
+    prompt,
+    queueMicrotask,
+    ReadableByteStreamController,
+    ReadableStream,
+    ReadableStreamDefaultController,
+    ReadableStreamDefaultReader,
+    reportError,
+    require,
+    ResolveMessage,
+    Response,
+    Request,
+    setImmediate,
+    setInterval,
+    setTimeout,
+    ShadowRealm,
+    SubtleCrypto,
+    DOMException,
+    TextDecoder,
+    TextEncoder,
+    TransformStream,
+    TransformStreamDefaultController,
+    URL,
+    URLSearchParams,
+    WebAssembly,
+    WritableStream,
+    WritableStreamDefaultController,
+    WritableStreamDefaultWriter,
+  });
 };
