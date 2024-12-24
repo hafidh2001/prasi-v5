@@ -13,8 +13,15 @@ export const getWheres = (
 ): string[] => {
   const result = [] as string[];
 
-  for (const w of where) {
-    const where_name = whereName(table, w);
+  let where_name = "" as string;
+  if (where && where.length) {
+    for (const w of where) {
+      if (typeof w === "object") {
+        where_name += " " + whereName(table, w);
+      } else if (typeof w === "string") {
+        where_name += " " + w.toUpperCase();
+      }
+    }
     result.push(where_name);
   }
 
