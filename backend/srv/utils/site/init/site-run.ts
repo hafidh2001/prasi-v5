@@ -2,7 +2,6 @@ import { gzipSync } from "bun";
 import { removeAsync } from "fs-jetpack";
 import { platform } from "os";
 import { PRASI_CORE_SITE_ID, waitUntil } from "prasi-utils";
-import { c } from "utils/color";
 import { editor } from "utils/editor";
 import { fs } from "utils/files/fs";
 import type { PrasiSite, PrasiSiteLoading } from "utils/global";
@@ -12,8 +11,6 @@ import { extractVscIndex } from "../utils/extract-vsc";
 import { bunWatchBuild } from "./bun-build";
 import { siteBroadcastBuildLog, siteLoadingMessage } from "./loading-msg";
 import { siteLoaded } from "./site-loaded";
-import { Script } from "vm";
-import { debounce } from "utils/server/debounce";
 
 export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   await waitUntil(() => fs.exists(`code:${site_id}/site/src`), {
@@ -48,6 +45,10 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
       outdir: fs.path(`code:${site_id}/site/build/frontend`),
       entrydir: fs.path(`code:${site_id}/site/src`),
       entrypoint: [prasi.frontend.index, prasi.frontend.internal],
+      ignore: (path) => {
+        if (path === prasi.backend.index) return true;
+        return false;
+      },
       async onBuild({ status, log }) {
         const site = g.site.loaded[site_id];
         if (site) {
@@ -56,28 +57,22 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
         if (status === "building") {
           siteBroadcastBuildLog(site_id, "Building FrontEnd...");
         }
-
         if (status === "success") {
           siteBroadcastBuildLog(site_id, "Done");
-
           if (g.site.loading[site_id]) {
             await siteLoaded(site_id, prasi);
           }
-
           if (site_id === PRASI_CORE_SITE_ID) {
             asset.psc.rescan();
           }
-
           const site = g.site.loaded[site_id];
           if (site) {
             const is_ready = site.process.is_ready;
             is_ready.frontend = true;
-
             if (is_ready.typings) {
               const tsc = await fs.read(
                 `code:${site_id}/site/src/${site.prasi.frontend.typings}`
               );
-
               editor.broadcast(
                 { site_id },
                 {
@@ -98,59 +93,15 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   siteLoadingMessage(site_id, "Starting Backend Build...");
   if (!loading.process.build_backend) {
     loading.process.build_backend = spawn({
-      cmd: `bun build --target bun --watch ${prasi.backend.index} --outfile ../build/backend/server.js --no-clear-screen`,
+      cmd: `bun build --watch --no-clear-screen --target bun ${prasi.backend.index}  --outfile ../build/backend/server.js`,
       cwd: fs.path(`code:${site_id}/site/src`),
       async onMessage(arg) {
+        process.stdout.write(arg.raw);
         const site = g.site.loaded[site_id];
         if (!site) {
           await waitUntil(() => g.site.loaded[site_id]);
         }
 
-        if (!site.vm.reload) {
-          site.vm.reload = debounce(async () => {
-            try {
-              let is_reload = false;
-
-              if (site.vm.script) {
-                is_reload = true;
-              }
-              site.vm.script = new Script(
-                await fs.read(
-                  `data:site-srv/main/internal/init-compiled.js`,
-                  "string"
-                )
-              );
-
-              const cjs = site.vm.script.runInContext(site.vm.ctx);
-              cjs(site.vm.ctx.module.exports, require, site.vm.ctx.module);
-              site.vm.init = site.vm.ctx.module.exports.init;
-
-              if (site.vm.init) {
-                console.log(
-                  `${c.magenta}[SITE]${c.esc} ${site_id} ${is_reload ? "Reloading" : "Initializing"}...`
-                );
-
-                await site.vm.init({
-                  root_dir: fs.path(`data:site-srv/sites/${site_id}`),
-                  script_path: fs.path(
-                    `code:${site_id}/site/build/backend/server.js`
-                  ),
-                  server: () => g.server,
-                  mode: "vm",
-                });
-              } else {
-                console.log(
-                  `${c.magenta}[SITE]${c.esc} ${site_id} Failed to initialize...`
-                );
-              }
-            } catch (e) {
-              console.log(
-                `${c.magenta}[SITE]${c.esc} ${site_id} Failed to initialize...`
-              );
-              console.error(e);
-            }
-          }, 100);
-        }
         site.vm.reload();
 
         const log = site.process.log;
@@ -185,6 +136,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
         if (!site) {
           await waitUntil(() => site);
         }
+
         const log = site.process.log;
         log.build_typings += arg.text;
 

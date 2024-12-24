@@ -11,6 +11,7 @@ import type { Loader } from "bun";
 
 type BuildArg = {
   entrypoint: string[];
+  ignore?: (file: string) => boolean;
   entrydir: string;
   outdir: string;
   onBuild?: (arg: {
@@ -25,6 +26,7 @@ export const bunWatchBuild = async ({
   entrydir,
   entrypoint,
   onBuild,
+  ignore,
 }: BuildArg) => {
   const internal = {
     building: false,
@@ -66,6 +68,8 @@ export const bunWatchBuild = async ({
             internal.log.add(`Building... [by: ${filename}]`);
             if (onBuild) onBuild({ ts, status: "building" });
             const result = await bunBuild({ outdir, entrypoint, entrydir });
+            console.log("finished bun build");
+
             if (!result.success) {
               if (onBuild)
                 onBuild({
@@ -81,6 +85,8 @@ export const bunWatchBuild = async ({
               internal.log.add(`Build completed in ${Date.now() - ts}ms`);
             }
           } catch (e: any) {
+            console.log("bun build catching");
+
             if (onBuild)
               onBuild({ ts: Date.now(), status: "failed", log: e?.message });
             internal.log.add(`Build failed, reason: \n${e?.message}`);
@@ -93,6 +99,8 @@ export const bunWatchBuild = async ({
     exclude(pathname) {
       if (pathname.startsWith(".")) return true;
       if (pathname.startsWith("node_modules")) return true;
+      if (ignore?.(pathname)) return true;
+
       return false;
     },
   });
@@ -103,6 +111,8 @@ export const bunWatchBuild = async ({
     internal.log.add(`Building...`);
     if (onBuild) onBuild({ ts: Date.now(), status: "building" });
     const result = await bunBuild({ outdir, entrypoint, entrydir });
+    console.log("finished bun build");
+
     if (!result.success) {
       if (onBuild)
         onBuild({
@@ -126,6 +136,8 @@ export const bunWatchBuild = async ({
 
 export const bunBuild = async ({ outdir, entrypoint, entrydir }: BuildArg) => {
   await removeAsync(outdir);
+  console.log("finished clearing outdir");
+
   return await Bun.build({
     entrypoints: entrypoint.map((e) => join(entrydir, e)),
     outdir: outdir,

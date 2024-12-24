@@ -31,7 +31,7 @@ export type PrasiSite = {
     };
   };
   vm: {
-    script: Script;
+    script?: Script;
     ctx: Context;
     init?: (arg: {
       root_dir: string;
@@ -39,7 +39,7 @@ export type PrasiSite = {
       server: () => Server;
       mode: "vm" | "server";
     }) => Promise<void>; // defined in site-run.ts
-    reload?: () => Promise<void>; // defined in site-run.ts
+    reload: () => Promise<void>;
   };
   prasi: {
     frontend: { index: string; internal: string; typings: string };

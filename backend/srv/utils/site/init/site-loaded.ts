@@ -1,11 +1,12 @@
 import { removeAsync } from "fs-jetpack";
+import { createContext, Script } from "node:vm";
 import { PRASI_CORE_SITE_ID, waitUntil } from "prasi-utils";
 import sync from "sync-directory";
+import { c } from "utils/color";
 import { editor } from "utils/editor";
 import { fs } from "utils/files/fs";
 import type { PrasiSite } from "utils/global";
-import { staticFile } from "utils/files/static";
-import { createContext, Script } from "node:vm";
+import { debounce } from "utils/server/debounce";
 
 export const siteLoaded = async (
   site_id: string,
@@ -42,6 +43,52 @@ export const siteLoaded = async (
     vm: {
       ctx: newContext(),
       script: null as any,
+      reload: debounce(async () => {
+        try {
+          const site = g.site.loaded[site_id];
+          let is_reload = false;
+
+          if (site.vm.script) {
+            delete site.vm.script ;
+            is_reload = true;
+          }
+
+          site.vm.script = new Script(
+            await fs.read(
+              `data:site-srv/main/internal/init-compiled.js`,
+              "string"
+            )
+          );
+
+          const cjs = site.vm.script.runInContext(site.vm.ctx);
+          cjs(site.vm.ctx.module.exports, require, site.vm.ctx.module);
+          site.vm.init = site.vm.ctx.module.exports.init;
+
+          if (site.vm.init) {
+            console.log(
+              `${c.magenta}[SITE]${c.esc} ${site_id} ${is_reload ? "Reloading" : "Initializing"}...`
+            );
+
+            await site.vm.init({
+              root_dir: fs.path(`data:site-srv/sites/${site_id}`),
+              script_path: fs.path(
+                `code:${site_id}/site/build/${prasi.backend.index.replace(".ts", ".js")}`
+              ),
+              server: () => g.server,
+              mode: "vm",
+            });
+          } else {
+            console.log(
+              `${c.magenta}[SITE]${c.esc} ${site_id} Failed to initialize...`
+            );
+          }
+        } catch (e) {
+          console.log(
+            `${c.magenta}[SITE]${c.esc} ${site_id} Failed to initialize...`
+          );
+          console.error(e);
+        }
+      }, 100),
     },
     process: {
       vsc_vars: {},
