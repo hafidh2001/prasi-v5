@@ -66,10 +66,11 @@ export const siteLoaded = async (
 
           if (site.vm.init) {
             console.log(
-              `${c.magenta}[SITE]${c.esc} ${site_id} ${is_reload ? "Reloading" : "Initializing"}...`
+              `${c.magenta}[SITE]${c.esc} ${site_id} ${is_reload ? "Reloading" : "Initializing"}.`
             );
 
             await site.vm.init({
+              site_id,
               script_dir: fs.path(`code:${site_id}/site/build`),
               server: () => g.server,
               mode: "vm",
@@ -77,12 +78,12 @@ export const siteLoaded = async (
             });
           } else {
             console.log(
-              `${c.magenta}[SITE]${c.esc} ${site_id} Failed to initialize...`
+              `${c.magenta}[SITE]${c.esc} ${site_id} Failed to initialize.`
             );
           }
         } catch (e) {
           console.log(
-            `${c.magenta}[SITE]${c.esc} ${site_id} Failed to initialize...`
+            `${c.magenta}[SITE]${c.esc} ${site_id} Initialization Error.`
           );
           console.error(e);
         }

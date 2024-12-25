@@ -1,5 +1,4 @@
 import { gzipSync } from "bun";
-import { removeAsync } from "fs-jetpack";
 import { platform } from "os";
 import { PRASI_CORE_SITE_ID, waitUntil } from "prasi-utils";
 import { editor } from "utils/editor";
@@ -10,6 +9,8 @@ import { spawn } from "utils/spawn";
 import { extractVscIndex } from "../utils/extract-vsc";
 import { bunWatchBuild } from "./bun-build";
 import { siteBroadcastBuildLog, siteLoadingMessage } from "./loading-msg";
+import { prasi_path_v4 } from "./prasi-path-v4";
+import { prasi_path_v5 } from "./prasi-path-v5";
 import { siteLoaded } from "./site-loaded";
 
 export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
@@ -36,17 +37,16 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
     "json"
   );
 
-  for (const log of Object.values(prasi.log_path)) {
-    await removeAsync(fs.path(`code:${site_id}/site/src/${log}`));
-  }
+  const prasi_path =
+    prasi.version === 5 ? prasi_path_v5(site_id) : prasi_path_v4(site_id);
 
   if (!loading.process.build_frontend) {
     loading.process.build_frontend = await bunWatchBuild({
       outdir: fs.path(`code:${site_id}/site/build/frontend`),
       entrydir: fs.path(`code:${site_id}/site/src`),
-      entrypoint: [prasi.frontend.index, prasi.frontend.internal],
+      entrypoint: [prasi_path.index, prasi_path.internal],
       ignore: (path) => {
-        if (path === prasi.backend.index) return true;
+        if (path === prasi_path.index) return true;
         return false;
       },
       async onBuild({ status, log }) {
@@ -71,7 +71,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
             is_ready.frontend = true;
             if (is_ready.typings) {
               const tsc = await fs.read(
-                `code:${site_id}/site/src/${site.prasi.frontend.typings}`
+                `code:${site_id}/site/src/${prasi_path.typings}`
               );
               editor.broadcast(
                 { site_id },
@@ -93,7 +93,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   siteLoadingMessage(site_id, "Starting Backend Build...");
   if (!loading.process.build_backend) {
     loading.process.build_backend = spawn({
-      cmd: `bun build --watch --no-clear-screen --target bun ${prasi.backend.index}  --outfile ../build/backend/server.js`,
+      cmd: `bun build --watch --no-clear-screen --target bun ${prasi_path.server}  --outfile ../build/backend/server.js`,
       cwd: fs.path(`code:${site_id}/site/src`),
       async onMessage(arg) {
         const site = g.site.loaded[site_id];
@@ -116,7 +116,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
         ? "node_modules/.bin/tsc.exe"
         : "node_modules/.bin/tsc";
 
-    const tsc_arg = `--watch --moduleResolution node --emitDeclarationOnly --isolatedModules false --outFile ./${prasi.frontend.typings} --declaration --allowSyntheticDefaultImports true --noEmit false`;
+    const tsc_arg = `--watch --moduleResolution node --emitDeclarationOnly --isolatedModules false --outFile ./${prasi_path.typings} --declaration --allowSyntheticDefaultImports true --noEmit false`;
 
     const typings = {
       done: () => {},
@@ -145,7 +145,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
           await extractVscIndex(site_id);
 
           const tsc = await fs.read(
-            `code:${site_id}/site/src/${site.prasi.frontend.typings}`
+            `code:${site_id}/site/src/${prasi_path.typings}`
           );
 
           editor.broadcast(

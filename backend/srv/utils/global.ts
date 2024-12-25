@@ -5,6 +5,7 @@ import type { PrismaClient } from "prasi-db";
 import type { ESite } from "prasi-frontend/src/nova/ed/logic/types";
 import type { parseTypeDef } from "./parser/parse-type-def";
 import type { bunWatchBuild } from "./site/init/bun-build";
+import type { prasi_path_v5 } from "./site/init/prasi-path-v5";
 import type { spawn } from "./spawn";
 
 type SITE_ID = string;
@@ -34,6 +35,7 @@ export type PrasiSite = {
     script?: Script;
     ctx: Context;
     init?: (arg: {
+      site_id: string;
       script_dir: string;
       prasi: PrasiSite["prasi"];
       server: () => Server;
@@ -42,14 +44,8 @@ export type PrasiSite = {
     reload: () => Promise<void>;
   };
   prasi: {
-    frontend: { index: string; internal: string; typings: string };
-    backend: { index: string };
-    log_path: {
-      frontend: string;
-      backend: string;
-      typings: string;
-      tailwind: string;
-    };
+    version: number;
+    paths: ReturnType<typeof prasi_path_v5>;
   };
 };
 export type PrasiSiteLoading = {
