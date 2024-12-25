@@ -34,8 +34,8 @@ export type PrasiSite = {
     script?: Script;
     ctx: Context;
     init?: (arg: {
-      root_dir: string;
-      script_path: string;
+      script_dir: string;
+      prasi: PrasiSite["prasi"];
       server: () => Server;
       mode: "vm" | "server";
     }) => Promise<void>; // defined in site-run.ts

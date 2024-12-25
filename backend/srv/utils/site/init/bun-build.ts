@@ -68,7 +68,6 @@ export const bunWatchBuild = async ({
             internal.log.add(`Building... [by: ${filename}]`);
             if (onBuild) onBuild({ ts, status: "building" });
             const result = await bunBuild({ outdir, entrypoint, entrydir });
-            console.log("finished bun build");
 
             if (!result.success) {
               if (onBuild)
@@ -111,7 +110,6 @@ export const bunWatchBuild = async ({
     internal.log.add(`Building...`);
     if (onBuild) onBuild({ ts: Date.now(), status: "building" });
     const result = await bunBuild({ outdir, entrypoint, entrydir });
-    console.log("finished bun build");
 
     if (!result.success) {
       if (onBuild)
@@ -136,7 +134,6 @@ export const bunWatchBuild = async ({
 
 export const bunBuild = async ({ outdir, entrypoint, entrydir }: BuildArg) => {
   await removeAsync(outdir);
-  console.log("finished clearing outdir");
 
   return await Bun.build({
     entrypoints: entrypoint.map((e) => join(entrydir, e)),

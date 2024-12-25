@@ -43,8 +43,11 @@ setTimeout(() => {
       );
     }
 
-    if (site.vm.init) {
-      return await site.vm.ctx.prasi.handler.http(req);
+    if (
+      site.vm.init &&
+      typeof site.vm.ctx?.prasi?.handler?.http === "function"
+    ) {
+      return await site.vm.ctx.prasi.handler?.http(req);
     }
 
     return new Response("Site not ready", { status: 503 });

@@ -49,7 +49,7 @@ export const siteLoaded = async (
           let is_reload = false;
 
           if (site.vm.script) {
-            delete site.vm.script ;
+            delete site.vm.script;
             is_reload = true;
           }
 
@@ -70,12 +70,10 @@ export const siteLoaded = async (
             );
 
             await site.vm.init({
-              root_dir: fs.path(`data:site-srv/sites/${site_id}`),
-              script_path: fs.path(
-                `code:${site_id}/site/build/${prasi.backend.index.replace(".ts", ".js")}`
-              ),
+              script_dir: fs.path(`code:${site_id}/site/build`),
               server: () => g.server,
               mode: "vm",
+              prasi,
             });
           } else {
             console.log(
