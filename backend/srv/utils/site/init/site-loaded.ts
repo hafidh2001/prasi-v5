@@ -50,14 +50,13 @@ export const siteLoaded = async (
     id: site_id,
     vm: {
       ctx: newContext(),
-      script: null as any,
       reload: debounce(async () => {
         try {
           const site = g.site.loaded[site_id];
           let is_reload = false;
 
-          if (site.vm.script) {
-            delete site.vm.script;
+          if (site.vm.init) {
+            delete site.vm.init;
             is_reload = true;
           }
 
@@ -88,7 +87,7 @@ export const siteLoaded = async (
 
           if (site.vm.init) {
             console.log(
-              `${c.magenta}[SITE]${c.esc} ${site_id} ${is_reload ? "Reloading" : "Initializing"}.`
+              `${c.magenta}[SITE]${c.esc} ${site_id} ${is_reload ? "Reloading" : "Starting"}.`
             );
 
             await site.vm.init({
@@ -96,10 +95,11 @@ export const siteLoaded = async (
               server: () => g.server,
               mode: "vm",
               prasi,
+              action: is_reload ? "reload" : "start",
             });
           } else {
             console.log(
-              `${c.magenta}[SITE]${c.esc} ${site_id} Failed to initialize.`
+              `${c.magenta}[SITE]${c.esc} ${site_id} Failed to start.`
             );
           }
         } catch (e) {

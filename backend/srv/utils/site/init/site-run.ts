@@ -93,7 +93,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   siteLoadingMessage(site_id, "Starting Backend Build...");
   if (!loading.process.build_backend) {
     loading.process.build_backend = spawn({
-      cmd: `bun build --watch --no-clear-screen --target bun ${prasi_path.server}  --outfile ../build/backend/server.js`,
+      cmd: `bun build --watch --no-clear-screen --format cjs --target bun ${prasi_path.server}  --outdir ../build/backend`,
       cwd: fs.path(`code:${site_id}/site/src`),
       async onMessage(arg) {
         const site = g.site.loaded[site_id];

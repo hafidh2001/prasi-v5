@@ -32,13 +32,13 @@ export type PrasiSite = {
     };
   };
   vm: {
-    script?: Script;
     ctx: Context;
     init?: (arg: {
       site_id: string;
       prasi: PrasiSite["prasi"];
       server: () => Server;
       mode: "vm" | "server";
+      action?: "start" | "reload";
     }) => Promise<void>; // defined in site-run.ts
     reload: () => Promise<void>;
   };
