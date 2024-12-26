@@ -23,13 +23,24 @@ export default {
     }
 
     const site = g.site.loaded[site_id];
+    let site_ready = false;
+    if (
+      site &&
+      site.vm.init &&
+      typeof site.vm.ctx?.prasi?.handler?.http === "function"
+    ) {
+      site_ready = true;
+    }
 
     if (!site) {
       siteInit(site_id);
+    }
+
+    if (!site_ready) {
       return new Response(
         `\
 <pre>
-${g.site.loading[site_id].status}
+${g.site.loading[site_id]?.status || "Preparing Site..."}
 ------------------------------------
 ${site_id}
 </pre>
@@ -43,13 +54,6 @@ setTimeout(() => {
       );
     }
 
-    if (
-      site.vm.init &&
-      typeof site.vm.ctx?.prasi?.handler?.http === "function"
-    ) {
-      return await site.vm.ctx.prasi.handler?.http(req);
-    }
-
-    return new Response("Site not ready", { status: 503 });
+    return await site.vm.ctx.prasi.handler?.http(req);
   },
 };

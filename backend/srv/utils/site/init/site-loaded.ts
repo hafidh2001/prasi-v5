@@ -68,9 +68,9 @@ export const siteLoaded = async (
           if (existsSync(target_path)) {
             const dirs = readdirSync(fs.path(`data:site-srv/main/internal/vm`));
             for (const file of dirs) {
-              if (file === "vm.ts") {
-                continue;
-              }
+              // if (file === "vm.ts") {
+              //   continue;
+              // }
 
               if (existsSync(join(target_path, file)))
                 unlinkSync(join(target_path, file));
