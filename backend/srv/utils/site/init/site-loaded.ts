@@ -7,6 +7,14 @@ import { editor } from "utils/editor";
 import { fs } from "utils/files/fs";
 import type { PrasiSite } from "utils/global";
 import { debounce } from "utils/server/debounce";
+import { dirname, join } from "path";
+import {
+  copyFileSync,
+  existsSync,
+  readdirSync,
+  statSync,
+  unlinkSync,
+} from "node:fs";
 
 export const siteLoaded = async (
   site_id: string,
@@ -53,16 +61,29 @@ export const siteLoaded = async (
             is_reload = true;
           }
 
-          site.vm.script = new Script(
-            await fs.read(
-              `data:site-srv/main/internal/init-compiled.js`,
-              "string"
-            )
+          let target_path = fs.path(
+            join(`code:${site_id}/site/build`, dirname(prasi.paths.server))
           );
 
-          const cjs = site.vm.script.runInContext(site.vm.ctx);
-          cjs(site.vm.ctx.module.exports, require, site.vm.ctx.module);
-          site.vm.init = site.vm.ctx.module.exports.init;
+          if (existsSync(target_path)) {
+            const dirs = readdirSync(fs.path(`data:site-srv/main/internal/vm`));
+            for (const file of dirs) {
+              if (file === "vm.ts") {
+                continue;
+              }
+
+              if (existsSync(join(target_path, file)))
+                unlinkSync(join(target_path, file));
+
+              copyFileSync(
+                fs.path(`data:site-srv/main/internal/vm/${file}`),
+                join(target_path, file)
+              );
+            }
+          }
+
+          const vm = require(join(target_path, "vm.ts")).vm;
+          site.vm.init = await vm(site.vm.ctx);
 
           if (site.vm.init) {
             console.log(
@@ -71,7 +92,6 @@ export const siteLoaded = async (
 
             await site.vm.init({
               site_id,
-              script_dir: fs.path(`code:${site_id}/site/build`),
               server: () => g.server,
               mode: "vm",
               prasi,
@@ -112,7 +132,7 @@ export const siteLoaded = async (
 
 const newContext = () => {
   const exports = {};
-  return createContext({
+  const ctx = {
     module: { exports },
     exports,
     AbortController,
@@ -172,5 +192,8 @@ const newContext = () => {
     WritableStream,
     WritableStreamDefaultController,
     WritableStreamDefaultWriter,
-  });
+  } as any;
+  ctx.global = ctx;
+  ctx.globalThis = ctx;
+  return createContext(ctx);
 };

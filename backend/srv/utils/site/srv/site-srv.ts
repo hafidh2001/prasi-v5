@@ -26,7 +26,7 @@ export const site_srv = {
       await $`bun i`.cwd(cwd).quiet().nothrow();
     }
 
-    watch(fs.path("data:site-srv/main/internal/init-compiled.js"), (e) => {
+    watch(fs.path("data:site-srv/main/internal/vm/init.js"), (e) => {
       for (const [k, site] of Object.entries(g.site.loaded)) {
         site.vm.reload?.();
       }

@@ -1,7 +1,8 @@
-import { mkdirSync, statSync } from "fs";
-import { dirname } from "path";
+import { mkdirSync, readdirSync, statSync, unlinkSync } from "fs";
+import { dirname, join } from "path";
 import { dir } from "./dir";
 import { copyAsync } from "fs-jetpack";
+import type { CopyOptions } from "fs-jetpack/types";
 const internal = Symbol("internal");
 
 export const fs = {
@@ -22,19 +23,22 @@ export const fs = {
     }
     return path;
   },
-  async copy(from: string, to: string) {
+  async copy(from: string, to: string, opt?: CopyOptions) {
     const from_dir = this.path(from);
     const to_path = this.path(to);
     const is_dir = statSync(from_dir).isDirectory();
-    if (is_dir && !this.exists(to)) {
-      mkdirSync(to_path, { recursive: true });
+    if (is_dir) {
+      if (!this.exists(to)) {
+        mkdirSync(to_path, { recursive: true });
+      } else {
+      }
     } else {
       const to_dir = dirname(to_path);
       if (!fs.exists(to_dir)) {
         mkdirSync(to_dir, { recursive: true });
       }
     }
-    await copyAsync(from_dir, to_path, { overwrite: true });
+    await copyAsync(from_dir, to_path, opt || { overwrite: true });
   },
 
   async modify(arg: {

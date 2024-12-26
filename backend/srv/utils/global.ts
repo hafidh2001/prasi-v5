@@ -36,7 +36,6 @@ export type PrasiSite = {
     ctx: Context;
     init?: (arg: {
       site_id: string;
-      script_dir: string;
       prasi: PrasiSite["prasi"];
       server: () => Server;
       mode: "vm" | "server";
