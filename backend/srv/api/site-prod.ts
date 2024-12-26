@@ -4,7 +4,6 @@ import type { ServerCtx } from "../utils/server/ctx";
 import { siteInit } from "../utils/site/site-init";
 
 await zstd.init();
-const encoder = new TextEncoder();
 export default {
   url: "/prod/:site_id/**",
   async api(ctx: ServerCtx) {
