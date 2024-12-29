@@ -25,7 +25,7 @@ site_srv.init();
 
 if (g.mode === "dev") {
   setupDevPort();
-  const path = fs.path(`data:site-static`);
+  const path = fs.path(`data:nova-static`);
   if (!(await existsAsync(path))) {
     await waitUntil(() => existsAsync(path));
   }

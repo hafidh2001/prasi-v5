@@ -95,6 +95,7 @@ export const siteLoaded = async (
               server: () => g.server,
               mode: "vm",
               prasi,
+              dev: g.mode === 'dev',
               action: is_reload ? "reload" : "start",
             });
           } else {

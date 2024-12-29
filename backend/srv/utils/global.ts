@@ -39,6 +39,7 @@ export type PrasiSite = {
       server: () => Server;
       mode: "vm" | "server";
       action?: "start" | "reload";
+      dev?: boolean;
     }) => Promise<void>; // defined in site-run.ts
     reload: () => Promise<void>;
   };
