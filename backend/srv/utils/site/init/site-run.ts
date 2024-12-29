@@ -96,9 +96,10 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
       cmd: `bun build --watch --no-clear-screen --format cjs --target bun ${prasi_path.server}  --outdir ../build/backend`,
       cwd: fs.path(`code:${site_id}/site/src`),
       async onMessage(arg) {
-        const site = g.site.loaded[site_id];
+        let site = g.site.loaded[site_id];
         if (!site) {
           await waitUntil(() => g.site.loaded[site_id]);
+          site = g.site.loaded[site_id];
         }
 
         site.vm.reload();

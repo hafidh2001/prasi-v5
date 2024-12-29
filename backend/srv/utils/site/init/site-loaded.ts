@@ -15,6 +15,7 @@ import {
   statSync,
   unlinkSync,
 } from "node:fs";
+import { addRoute, createRouter, findRoute } from "rou3";
 
 export const siteLoaded = async (
   site_id: string,
@@ -43,11 +44,24 @@ export const siteLoaded = async (
 
   const loading = g.site.loading[site_id];
 
+  const pages = await _db.page.findMany({
+    where: { is_deleted: false, id_site: site_id },
+    select: { id: true, url: true },
+  });
+  const router = createRouter<{ page_id: string }>();
+  for (const page of pages) {
+    addRoute(router, undefined, page.url, { page_id: page.id });
+  }
   g.site.loaded[site_id] = {
     build: loading.process,
     data: loading.data!,
     config: {},
     id: site_id,
+    router_raw: {
+      urls: pages,
+      layout: { id: "", root: undefined },
+    },
+    router,
     vm: {
       ctx: newContext(),
       reload: debounce(async () => {
@@ -95,8 +109,37 @@ export const siteLoaded = async (
               server: () => g.server,
               mode: "vm",
               prasi,
-              dev: g.mode === 'dev',
+              dev: g.mode === "dev",
               action: is_reload ? "reload" : "start",
+              content: {
+                route(pathname: string) {
+                  const found = findRoute(
+                    site.router,
+                    undefined,
+                    pathname || ""
+                  );
+                  if (found) {
+                    return {
+                      params: found.params || {},
+                      data: { page_id: found.data.page_id },
+                    };
+                  }
+                  return undefined;
+                },
+                async pages(ids) {
+                  return {};
+                }, 
+                async all_routes() {
+                  return {
+                    site: {
+                      id: site_id,
+                      api_url: site.data.config.api_url || "",
+                    },
+                    urls: site.router_raw.urls,
+                    layout: site.router_raw.layout,
+                  };
+                },
+              },
             });
           } else {
             console.log(

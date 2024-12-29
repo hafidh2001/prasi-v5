@@ -7,8 +7,22 @@ import type { parseTypeDef } from "./parser/parse-type-def";
 import type { bunWatchBuild } from "./site/init/bun-build";
 import type { prasi_path_v5 } from "./site/init/prasi-path-v5";
 import type { spawn } from "./spawn";
+import type { RouterContext } from "rou3";
 
 type SITE_ID = string;
+
+export type PrasiContent = {
+  pages: (ids: string[]) => Promise<Record<string, any>>;
+  route: (
+    pathname: string
+  ) => void | { params: Record<string, any>; data: { page_id: string } };
+  all_routes: () => Promise<{
+    site: { id: string; api_url: string };
+    urls: { id: string; url: string }[];
+    layout: { id: string; root: any };
+  }>;
+};
+
 export type PrasiSite = {
   id: SITE_ID;
   config: {
@@ -17,6 +31,11 @@ export type PrasiSite = {
   };
   data: ESite;
   build: PrasiSiteLoading["process"];
+  router: RouterContext<{ page_id: string }>;
+  router_raw: {
+    urls: { id: string; url: string }[];
+    layout: { id: string; root: any };
+  };
   process: {
     vsc_vars: Awaited<ReturnType<typeof parseTypeDef>>;
     log: {
@@ -40,6 +59,7 @@ export type PrasiSite = {
       mode: "vm" | "server";
       action?: "start" | "reload";
       dev?: boolean;
+      content: PrasiContent;
     }) => Promise<void>; // defined in site-run.ts
     reload: () => Promise<void>;
   };
