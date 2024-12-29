@@ -6,6 +6,7 @@ export const prasi_path_v4 = (site_id: string) => ({
   server: "server.ts",
   typings: "typings/generated.d.ts",
   dir: {
+    nova: fs.path(`data:nova-static`),
     site: fs.path(`code:${site_id}/site`),
     build: fs.path(`code:${site_id}/site/build/`),
     upload: fs.path(`code:${site_id}/site/upload`),
