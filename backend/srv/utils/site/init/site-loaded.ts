@@ -16,6 +16,7 @@ import {
   unlinkSync,
 } from "node:fs";
 import { addRoute, createRouter, findRoute } from "rou3";
+import { crdt_comps, crdt_pages } from "../../../ws/crdt/shared";
 
 export const siteLoaded = async (
   site_id: string,
@@ -126,9 +127,67 @@ export const siteLoaded = async (
                   }
                   return undefined;
                 },
-                async pages(ids) {
-                  return {};
-                }, 
+                async comps(ids) {
+                  const result = [] as any[];
+                  const pending_ids = [] as string[];
+                  for (const id of ids) {
+                    const existing = crdt_comps[id];
+                    if (existing) {
+                      result.push(existing.doc.getMap("data").toJSON());
+                    } else {
+                      pending_ids.push(id);
+                    }
+                  }
+                  if (pending_ids.length > 0) {
+                    (
+                      await _db.component.findMany({
+                        where: { id: { in: pending_ids } },
+                        select: {
+                          id: true,
+                          content_tree: true,
+                        },
+                      })
+                    ).map((e) => {
+                      result.push(e.content_tree);
+                    });
+                  }
+                  return result;
+                },
+                async pages(ids: string[]) {
+                  const result = [] as { id: string; root: any; url: string }[];
+                  const pending_ids = [] as string[];
+                  for (const id of ids) {
+                    const existing = crdt_pages[id];
+                    if (existing) {
+                      result.push({
+                        id,
+                        root: existing.doc.getMap("data").toJSON(),
+                        url: existing.url,
+                      });
+                    } else {
+                      pending_ids.push(id);
+                    }
+                  }
+                  if (pending_ids.length > 0) {
+                    (
+                      await _db.page.findMany({
+                        where: { id: { in: pending_ids } },
+                        select: {
+                          id: true,
+                          content_tree: true,
+                          url: true,
+                        },
+                      })
+                    ).map((e) => {
+                      result.push({
+                        id: e.id,
+                        root: e.content_tree,
+                        url: e.url,
+                      });
+                    });
+                  }
+                  return result;
+                },
                 async all_routes() {
                   return {
                     site: {

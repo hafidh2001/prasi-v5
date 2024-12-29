@@ -13,6 +13,7 @@ type SITE_ID = string;
 
 export type PrasiContent = {
   pages: (ids: string[]) => Promise<Record<string, any>>;
+  comps: (ids: string[]) => Promise<Record<string, any>>;
   route: (
     pathname: string
   ) => void | { params: Record<string, any>; data: { page_id: string } };
