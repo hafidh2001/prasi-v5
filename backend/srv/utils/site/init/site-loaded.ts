@@ -45,22 +45,42 @@ export const siteLoaded = async (
 
   const loading = g.site.loading[site_id];
 
-  const pages = await _db.page.findMany({
+  const raw_pages = await _db.page.findMany({
     where: { is_deleted: false, id_site: site_id },
-    select: { id: true, url: true },
+    select: { id: true, url: true, name: true },
   });
+  const pages = [] as typeof raw_pages;
+  const layout = { id: "", root: undefined as any };
+  for (const page of raw_pages) {
+    if (page.name.startsWith("layout:")) {
+      if (!layout.id) {
+        layout.id = page.id;
+        const found = await _db.page.findFirst({
+          where: { id: page.id },
+          select: { content_tree: true },
+        });
+        if (found) {
+          layout.root = found.content_tree;
+        }
+      }
+    } else {
+      pages.push(page);
+    }
+  }
+
   const router = createRouter<{ page_id: string }>();
   for (const page of pages) {
     addRoute(router, undefined, page.url, { page_id: page.id });
   }
+
   g.site.loaded[site_id] = {
     build: loading.process,
     data: loading.data!,
     config: {},
     id: site_id,
-    router_raw: {
+    router_base: {
       urls: pages,
-      layout: { id: "", root: undefined },
+      layout,
     },
     router,
     vm: {
@@ -128,12 +148,12 @@ export const siteLoaded = async (
                   return undefined;
                 },
                 async comps(ids) {
-                  const result = [] as any[];
+                  const result = {} as Record<string, any>;
                   const pending_ids = [] as string[];
                   for (const id of ids) {
                     const existing = crdt_comps[id];
                     if (existing) {
-                      result.push(existing.doc.getMap("data").toJSON());
+                      result[id] = existing.doc.getMap("data").toJSON();
                     } else {
                       pending_ids.push(id);
                     }
@@ -148,7 +168,7 @@ export const siteLoaded = async (
                         },
                       })
                     ).map((e) => {
-                      result.push(e.content_tree);
+                      result[e.id] = e.content_tree;
                     });
                   }
                   return result;
@@ -194,8 +214,8 @@ export const siteLoaded = async (
                       id: site_id,
                       api_url: site.data.config.api_url || "",
                     },
-                    urls: site.router_raw.urls,
-                    layout: site.router_raw.layout,
+                    urls: site.router_base.urls,
+                    layout: site.router_base.layout,
                   };
                 },
               },

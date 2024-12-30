@@ -33,7 +33,7 @@ export type PrasiSite = {
   data: ESite;
   build: PrasiSiteLoading["process"];
   router: RouterContext<{ page_id: string }>;
-  router_raw: {
+  router_base: {
     urls: { id: string; url: string }[];
     layout: { id: string; root: any };
   };

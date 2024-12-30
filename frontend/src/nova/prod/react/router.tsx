@@ -39,7 +39,7 @@ export const ProdRouter = memo(() => {
   const found = router
     ? findRoute(router, undefined, base.pathname)
     : undefined;
-    
+
   const found_page = router
     ? pages?.find((e) => e.id === found?.data.id)
     : undefined;
