@@ -1,21 +1,20 @@
 import { removeAsync } from "fs-jetpack";
-import { createContext, Script } from "node:vm";
+import {
+  copyFileSync,
+  existsSync,
+  readdirSync,
+  unlinkSync
+} from "node:fs";
+import { createContext } from "node:vm";
+import { dirname, join } from "path";
 import { PRASI_CORE_SITE_ID, waitUntil } from "prasi-utils";
+import { addRoute, createRouter, findRoute } from "rou3";
 import sync from "sync-directory";
 import { c } from "utils/color";
 import { editor } from "utils/editor";
 import { fs } from "utils/files/fs";
 import type { PrasiSite } from "utils/global";
 import { debounce } from "utils/server/debounce";
-import { dirname, join } from "path";
-import {
-  copyFileSync,
-  existsSync,
-  readdirSync,
-  statSync,
-  unlinkSync,
-} from "node:fs";
-import { addRoute, createRouter, findRoute } from "rou3";
 import { crdt_comps, crdt_pages } from "../../../ws/crdt/shared";
 
 export const siteLoaded = async (
@@ -86,6 +85,9 @@ export const siteLoaded = async (
     vm: {
       ctx: newContext(),
       reload: debounce(async () => {
+        await g.site.loaded[site_id].vm.reload_immediately();
+      }, 100),
+      async reload_immediately() {
         try {
           const site = g.site.loaded[site_id];
           let is_reload = false;
@@ -102,7 +104,7 @@ export const siteLoaded = async (
           if (existsSync(target_path)) {
             const dirs = readdirSync(fs.path(`data:site-srv/main/internal/vm`));
             for (const file of dirs) {
-              if (file === "vm.ts") {
+              if (file === "vm.ts" && existsSync(join(target_path, file))) {
                 continue;
               }
 
@@ -231,7 +233,7 @@ export const siteLoaded = async (
           );
           console.error(e);
         }
-      }, 100),
+      },
     },
     process: {
       vsc_vars: {},

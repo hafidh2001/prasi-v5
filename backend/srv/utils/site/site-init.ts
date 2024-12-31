@@ -5,6 +5,8 @@ import { siteLoadingData } from "./init/load-data";
 import { siteLoadingMessage } from "./init/loading-msg";
 import { initPrasiJson } from "./init/prasi-json";
 import { siteRun } from "./init/site-run";
+import { dirAsync } from "fs-jetpack";
+import { $ } from "bun";
 
 export const siteInit = async (site_id: string, conn_id?: string) => {
   if (!validate(site_id)) {
@@ -19,14 +21,29 @@ export const siteInit = async (site_id: string, conn_id?: string) => {
         status: "",
         process: {},
       };
+
       loading = g.site.loading[site_id];
       siteLoadingMessage(site_id, "Site Initializing...");
 
       await siteLoadingData(site_id, loading);
 
-      siteLoadingMessage(site_id, "Loading files...");
-      if (!fs.exists(`code:${site_id}/site/src`)) {
-        await fs.copy(`root:backend/template/site`, `code:${site_id}/site/src`);
+      if (loading.data?.git_repo) {
+        siteLoadingMessage(site_id, "Pulling Git: " + loading.data.git_repo);
+
+        if (!fs.exists(`code:${site_id}/site/src`)) {
+          const cwd = fs.path(`code:${site_id}/site/src`);
+          await dirAsync(cwd);
+          await $`git clone ${loading.data.git_repo} .`.cwd(cwd).quiet();
+          await $`git submodule update --init --recursive`.cwd(cwd).quiet();
+        }
+      } else {
+        siteLoadingMessage(site_id, "Loading files...");
+        if (!fs.exists(`code:${site_id}/site/src`)) {
+          await fs.copy(
+            `root:backend/template/site`,
+            `code:${site_id}/site/src`
+          );
+        }
       }
 
       if (!fs.exists(`code:${site_id}/site/src/prasi.json`)) {

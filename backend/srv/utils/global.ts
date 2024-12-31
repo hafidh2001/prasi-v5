@@ -1,13 +1,13 @@
 import type { Server } from "bun";
 import type { BunSqliteKeyValue } from "bun-sqlite-key-value";
-import { Script, type Context } from "node:vm";
+import { type Context } from "node:vm";
 import type { PrismaClient } from "prasi-db";
 import type { ESite } from "prasi-frontend/src/nova/ed/logic/types";
+import type { RouterContext } from "rou3";
 import type { parseTypeDef } from "./parser/parse-type-def";
-import type { bunWatchBuild } from "./site/init/bun-build";
+import type { prasiBuildFrontEnd } from "./site/init/build-frontend";
 import type { prasi_path_v5 } from "./site/init/prasi-path-v5";
 import type { spawn } from "./spawn";
-import type { RouterContext } from "rou3";
 
 type SITE_ID = string;
 
@@ -63,6 +63,7 @@ export type PrasiSite = {
       content: PrasiContent;
     }) => Promise<void>; // defined in site-run.ts
     reload: () => Promise<void>;
+    reload_immediately: () => Promise<void>;
   };
   prasi: {
     version: number;
@@ -74,8 +75,11 @@ export type PrasiSiteLoading = {
   data?: ESite;
   deps_install?: ReturnType<typeof spawn>;
   process: {
-    build_frontend?: Awaited<ReturnType<typeof bunWatchBuild>>;
-    build_backend?: ReturnType<typeof spawn>;
+    build_frontend?: Awaited<ReturnType<typeof prasiBuildFrontEnd>>;
+    build_backend?: {
+      entries: Set<string>;
+      rebuild: () => Promise<void>;
+    };
     build_typings?: ReturnType<typeof spawn>;
   };
 };
