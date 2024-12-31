@@ -11,8 +11,8 @@ import { extractVscIndex } from "../utils/extract-vsc";
 import { prasiBuildFrontEnd } from "./build-frontend";
 import { findImports } from "./find-imports";
 import { siteBroadcastBuildLog, siteLoadingMessage } from "./loading-msg";
-import { prasi_path_v4 } from "./prasi-path-v4";
-import { prasi_path_v5 } from "./prasi-path-v5";
+import { prasiPathV4 } from "./prasi-path-v4";
+import { prasiPathV5 } from "./prasi-path-v5";
 import { siteLoaded } from "./site-loaded";
 
 export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
@@ -40,7 +40,7 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   );
 
   const prasi_path =
-    prasi.version === 5 ? prasi_path_v5(site_id) : prasi_path_v4(site_id);
+    prasi.version === 5 ? prasiPathV5(site_id) : prasiPathV4(site_id);
 
   if (!loading.process.build_frontend) {
     loading.process.build_frontend = await prasiBuildFrontEnd({

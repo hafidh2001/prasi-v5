@@ -6,7 +6,7 @@ import type { ESite } from "prasi-frontend/src/nova/ed/logic/types";
 import type { RouterContext } from "rou3";
 import type { parseTypeDef } from "./parser/parse-type-def";
 import type { prasiBuildFrontEnd } from "./site/init/build-frontend";
-import type { prasi_path_v5 } from "./site/init/prasi-path-v5";
+import type { prasiPathV5 } from "./site/init/prasi-path-v5";
 import type { spawn } from "./spawn";
 
 type SITE_ID = string;
@@ -67,7 +67,7 @@ export type PrasiSite = {
   };
   prasi: {
     version: number;
-    paths: ReturnType<typeof prasi_path_v5>;
+    paths: ReturnType<typeof prasiPathV5>;
   };
 };
 export type PrasiSiteLoading = {

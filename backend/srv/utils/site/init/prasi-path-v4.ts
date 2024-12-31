@@ -1,6 +1,6 @@
 import { fs } from "utils/files/fs";
 
-export const prasi_path_v4 = (site_id: string) => ({
+export const prasiPathV4 = (site_id: string) => ({
   index: "index.tsx",
   internal: "internal.tsx",
   server: "server.ts",
