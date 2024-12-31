@@ -1,5 +1,6 @@
 import { $, gzipSync } from "bun";
 import { platform } from "os";
+import { dirname, join } from "path";
 import { PRASI_CORE_SITE_ID, waitUntil } from "prasi-utils";
 import { editor } from "utils/editor";
 import { fs } from "utils/files/fs";
@@ -8,13 +9,11 @@ import { asset } from "utils/server/asset";
 import { spawn } from "utils/spawn";
 import { extractVscIndex } from "../utils/extract-vsc";
 import { prasiBuildFrontEnd } from "./build-frontend";
+import { findImports } from "./find-imports";
 import { siteBroadcastBuildLog, siteLoadingMessage } from "./loading-msg";
 import { prasi_path_v4 } from "./prasi-path-v4";
 import { prasi_path_v5 } from "./prasi-path-v5";
 import { siteLoaded } from "./site-loaded";
-import { dirname, join } from "path";
-import { findImports } from "./find-imports";
-import { removeAsync } from "fs-jetpack";
 
 export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
   await waitUntil(() => fs.exists(`code:${site_id}/site/src`), {
@@ -178,6 +177,10 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
           target: "bun",
           format: "cjs",
           external,
+          outdir: join(
+            fs.path(`code:${site_id}/site/build/`),
+            dirname(prasi_path.server)
+          ),
         });
 
         let site = g.site.loaded[site_id];
