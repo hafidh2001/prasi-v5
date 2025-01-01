@@ -3,7 +3,7 @@ import type { PrasiSite } from "utils/global";
 import { prasiPathV5 } from "./prasi-path-v5";
 import { prasiPathV4 } from "./prasi-path-v4";
 
-export const initPrasiJson = async (site_id: string) => {
+export const detectPrasi = async (site_id: string) => {
   const json: PrasiSite["prasi"] = {
     version: 5,
     paths: prasiPathV5(site_id),
@@ -14,5 +14,5 @@ export const initPrasiJson = async (site_id: string) => {
     json.paths = prasiPathV4(site_id);
   }
 
-  await fs.write(`code:${site_id}/site/src/prasi.json`, json);
+  return json;
 };

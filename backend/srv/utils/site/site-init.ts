@@ -3,7 +3,7 @@ import { fs } from "utils/files/fs";
 import { validate } from "uuid";
 import { siteLoadingData } from "./init/load-data";
 import { siteLoadingMessage } from "./init/loading-msg";
-import { initPrasiJson } from "./init/prasi-json";
+import { detectPrasi } from "./init/prasi-detect";
 import { siteRun } from "./init/site-run";
 import { dirAsync } from "fs-jetpack";
 import { $ } from "bun";
@@ -46,9 +46,7 @@ export const siteInit = async (site_id: string, conn_id?: string) => {
         }
       }
 
-      if (!fs.exists(`code:${site_id}/site/src/prasi.json`)) {
-        await initPrasiJson(site_id);
-      }
+      await detectPrasi(site_id);
 
       await siteRun(site_id, loading);
     } else if (conn_id) {

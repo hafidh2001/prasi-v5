@@ -4,15 +4,14 @@ import { dirname, join } from "path";
 import { PRASI_CORE_SITE_ID, waitUntil } from "prasi-utils";
 import { editor } from "utils/editor";
 import { fs } from "utils/files/fs";
-import type { PrasiSite, PrasiSiteLoading } from "utils/global";
+import type { PrasiSiteLoading } from "utils/global";
 import { asset } from "utils/server/asset";
 import { spawn } from "utils/spawn";
 import { extractVscIndex } from "../utils/extract-vsc";
 import { prasiBuildFrontEnd } from "./build-frontend";
 import { findImports } from "./find-imports";
 import { siteBroadcastBuildLog, siteLoadingMessage } from "./loading-msg";
-import { prasiPathV4 } from "./prasi-path-v4";
-import { prasiPathV5 } from "./prasi-path-v5";
+import { detectPrasi } from "./prasi-detect";
 import { siteLoaded } from "./site-loaded";
 
 export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
@@ -34,13 +33,8 @@ export const siteRun = async (site_id: string, loading: PrasiSiteLoading) => {
 
   siteLoadingMessage(site_id, "Starting Frontend Build...");
 
-  const prasi: PrasiSite["prasi"] = await fs.read(
-    `code:${site_id}/site/src/prasi.json`,
-    "json"
-  );
-
-  const prasi_path =
-    prasi.version === 5 ? prasiPathV5(site_id) : prasiPathV4(site_id);
+  const prasi = await detectPrasi(site_id);
+  const prasi_path = prasi.paths;
 
   if (!loading.process.build_frontend) {
     loading.process.build_frontend = await prasiBuildFrontEnd({
