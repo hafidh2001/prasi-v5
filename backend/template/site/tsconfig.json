@@ -25,5 +25,5 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["frontend", "backend", "lib", "typings"]
+  "include": ["frontend", "backend", "system/lib", "system/typings"]
 }

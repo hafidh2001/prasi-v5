@@ -1,14 +1,9 @@
-import { waitUntil } from "prasi-utils";
-import type { ServerCtx } from "../utils/server/ctx";
-import { prodIndex } from "../utils/server/prod-index";
-import { siteInit } from "../utils/site/site-init";
-import { siteProdPrasi } from "../utils/site/site-prod-prasi";
-import { asset } from "utils/server/asset";
 import * as zstd from "@bokuweb/zstd-wasm";
-import { gzipSync } from "bun";
+import { asset } from "utils/server/asset";
+import type { ServerCtx } from "../utils/server/ctx";
+import { siteInit } from "../utils/site/site-init";
 
 await zstd.init();
-const encoder = new TextEncoder();
 export default {
   url: "/prod/:site_id/**",
   async api(ctx: ServerCtx) {
@@ -27,13 +22,24 @@ export default {
     }
 
     const site = g.site.loaded[site_id];
+    let site_ready = false;
+    if (
+      site &&
+      site.vm.init &&
+      typeof site.vm.ctx?.prasi?.handler?.http === "function"
+    ) {
+      site_ready = true;
+    }
 
     if (!site) {
       siteInit(site_id);
+    }
+
+    if (!site_ready) {
       return new Response(
         `\
 <pre>
-${g.site.loading[site_id].status}
+${g.site.loading[site_id]?.status || "Preparing Site..."}
 ------------------------------------
 ${site_id}
 </pre>
@@ -47,16 +53,6 @@ setTimeout(() => {
       );
     }
 
-    const server = site.build.run_backend;
-    if (server && server.port) {
-      const url = `http://127.0.0.1:${server.port}/${pathname}`;
-      return await fetch(url, {
-        method: req.method,
-        headers: req.headers,
-        body: req.body,
-      });
-    } 
- 
-    return new Response("Site not ready", { status: 503 });
+    return await site.vm.ctx.prasi.handler?.http(req);
   },
-}; 
+};

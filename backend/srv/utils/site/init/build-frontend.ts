@@ -11,6 +11,7 @@ import type { Loader } from "bun";
 
 type BuildArg = {
   entrypoint: string[];
+  ignore?: (file: string) => boolean;
   entrydir: string;
   outdir: string;
   onBuild?: (arg: {
@@ -18,13 +19,16 @@ type BuildArg = {
     status: "success" | "failed" | "building";
     log?: string;
   }) => void;
+  onFileChanged?: (event: string, path: string) => void;
 };
 
-export const bunWatchBuild = async ({
+export const prasiBuildFrontEnd = async ({
   outdir,
   entrydir,
   entrypoint,
   onBuild,
+  ignore,
+  onFileChanged,
 }: BuildArg) => {
   const internal = {
     building: false,
@@ -57,6 +61,10 @@ export const bunWatchBuild = async ({
   internal.watching = watchFiles({
     dir: entrydir,
     events: async (type, filename) => {
+      if (onFileChanged && filename) {
+        onFileChanged(type, filename);
+      }
+
       if (!internal.building) {
         internal.building = true;
         if (filename) {
@@ -66,6 +74,7 @@ export const bunWatchBuild = async ({
             internal.log.add(`Building... [by: ${filename}]`);
             if (onBuild) onBuild({ ts, status: "building" });
             const result = await bunBuild({ outdir, entrypoint, entrydir });
+
             if (!result.success) {
               if (onBuild)
                 onBuild({
@@ -81,6 +90,8 @@ export const bunWatchBuild = async ({
               internal.log.add(`Build completed in ${Date.now() - ts}ms`);
             }
           } catch (e: any) {
+            console.log("bun build catching");
+
             if (onBuild)
               onBuild({ ts: Date.now(), status: "failed", log: e?.message });
             internal.log.add(`Build failed, reason: \n${e?.message}`);
@@ -93,6 +104,8 @@ export const bunWatchBuild = async ({
     exclude(pathname) {
       if (pathname.startsWith(".")) return true;
       if (pathname.startsWith("node_modules")) return true;
+      if (ignore?.(pathname)) return true;
+
       return false;
     },
   });
@@ -103,6 +116,7 @@ export const bunWatchBuild = async ({
     internal.log.add(`Building...`);
     if (onBuild) onBuild({ ts: Date.now(), status: "building" });
     const result = await bunBuild({ outdir, entrypoint, entrydir });
+
     if (!result.success) {
       if (onBuild)
         onBuild({
@@ -124,8 +138,9 @@ export const bunWatchBuild = async ({
   return internal;
 };
 
-export const bunBuild = async ({ outdir, entrypoint, entrydir }: BuildArg) => {
+const bunBuild = async ({ outdir, entrypoint, entrydir }: BuildArg) => {
   await removeAsync(outdir);
+
   return await Bun.build({
     entrypoints: entrypoint.map((e) => join(entrydir, e)),
     outdir: outdir,

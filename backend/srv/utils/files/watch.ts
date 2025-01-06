@@ -12,11 +12,15 @@ export const watchFiles = ({
 }) => {
   const watching = {} as Record<string, ReturnType<typeof watch>>;
 
-  const onChange: WatchListener<string> = (type, filename) => {
-    if (filename && !shouldExclude(filename)) {
-      events(type, filename);
-    }
-  };
+  const createOnChange = (base_dir: string) =>
+    ((type, filename) => {
+      if (filename) {
+        const pathname = base_dir ? join(base_dir, filename) : filename;
+        if (!shouldExclude(pathname)) {
+          events(type, pathname);
+        }
+      }
+    }) as WatchListener<string>;
 
   const shouldExclude = (pathname: string) => {
     if (pathname && exclude) {
@@ -31,10 +35,16 @@ export const watchFiles = ({
 
     if (s && s.isDirectory()) {
       if (!watching[filename]) {
-        watching[filename] = watch(pathname, { recursive: true }, onChange);
+        watching[filename] = watch(
+          pathname,
+          { recursive: true },
+          createOnChange(filename)
+        );
       }
     }
   }
+
+  const onChange = createOnChange("");
 
   watching[""] = watch(dir, (type, filename) => {
     onChange(type, filename);
@@ -44,7 +54,7 @@ export const watchFiles = ({
 
       if (s) {
         if (s.isDirectory() && !watching[filename]) {
-          watching[filename] = watch(pathname, { recursive: true }, onChange);
+          watching[filename] = watch(pathname, { recursive: false }, onChange);
         }
       } else {
         if (watching[filename]) {

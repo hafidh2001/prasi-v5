@@ -33,7 +33,10 @@ export const codeHistory = {
     return this._sites[id];
   },
   timeout: {} as Record<string, any>,
-  _sites: {} as Record<string, ReturnType<typeof createSiteCodeHistoryDb>>,
+  _sites: {} as Record<
+    string,
+    Awaited<ReturnType<typeof createSiteCodeHistoryDb>>
+  >,
   _comp: null as null | ReturnType<typeof createCompCodeHistoryDb>,
   comp(id: string) {
     if (!this._comp) {
