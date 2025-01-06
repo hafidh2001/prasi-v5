@@ -5,6 +5,7 @@ import { buildSql } from "./build-sql";
 import { oracleConfig } from "./utils/config";
 
 import type { QConnector, QConnectorParams } from "utils/query/types";
+import { queryEager } from "./query-eager";
 export type QOracleConnector = Awaited<ReturnType<typeof connectOracle>>;
 
 export const connectOracle = async (conn: QConnectorParams) => {
@@ -21,6 +22,9 @@ export const connectOracle = async (conn: QConnectorParams) => {
     async buildSql(i, pq) {
       return await buildSql(i, pq);
     },
+    async queryEager(sql) {
+      return await queryEager(config, sql)
+    }
   };
   connector.inspected = await connector.inspect();
 
