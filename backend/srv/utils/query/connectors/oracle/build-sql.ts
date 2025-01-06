@@ -20,7 +20,7 @@ export const buildSql = async (
     ${action.toUpperCase()} 
     ${columns_arr.map((col) => col).join(", ")}
     FROM ${table.toUpperCase()}
-    ${joins_arr.map((join) => join).join(", ")}
+    ${joins_arr.map((join) => join).join(" ")}
     WHERE ${wheres_arr.map((where) => where).join(" AND ")}
     ORDER BY ${orders_by_arr.map((order) => order).join(", ")}
   `;
